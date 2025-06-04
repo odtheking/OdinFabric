@@ -2,6 +2,10 @@
 
 package me.odinmod.odin.utils
 
+import me.odinmod.odin.OdinMod
+import net.minecraft.text.ClickEvent
+import net.minecraft.text.HoverEvent
+import net.minecraft.text.Text
 import java.util.*
 
 val FORMATTING_CODE_PATTERN = Regex("§[0-9a-fk-or]", RegexOption.IGNORE_CASE)
@@ -46,3 +50,13 @@ fun String.startsWithOneOf(vararg options: String, ignoreCase: Boolean = false):
  */
 fun Any?.equalsOneOf(vararg options: Any?): Boolean =
     options.any { this == it }
+
+fun logError(throwable: Throwable, context: Any) {
+    val message = "${OdinMod.version} Caught an ${throwable::class.simpleName ?: "error"} at ${context::class.simpleName}."
+    OdinMod.logger.error(message, throwable)
+
+    modMessage(Text.literal("$message §cPlease click this message to copy and send it in the Odin discord!").styled { it
+        .withClickEvent(ClickEvent.RunCommand("od copy $message \\n``` ${throwable.message} \\n${throwable.stackTraceToString().lineSequence().take(10).joinToString("\n")}```"))
+        .withHoverEvent(HoverEvent.ShowText(Text.literal("§6Click to copy the error to your clipboard.")))
+    })
+}

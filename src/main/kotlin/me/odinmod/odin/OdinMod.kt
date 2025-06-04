@@ -2,15 +2,18 @@ package me.odinmod.odin
 
 import me.odinmod.odin.events.EventDispatcher
 import me.odinmod.odin.events.PacketEvent
-import me.odinmod.odin.events.TickEvent
-import me.odinmod.odin.utils.handlers.TickTask
 import me.odinmod.odin.utils.handlers.TickTasks
-import me.odinmod.odin.utils.modMessage
 import me.odinmod.odin.utils.skyblock.LocationUtils
+import me.odinmod.odin.utils.skyblock.SkyblockPlayer
 import meteordevelopment.orbit.EventBus
 import meteordevelopment.orbit.EventHandler
 import net.fabricmc.api.ModInitializer
+import net.fabricmc.loader.api.FabricLoader
+import net.fabricmc.loader.api.Version
+import net.fabricmc.loader.api.metadata.ModMetadata
 import net.minecraft.client.MinecraftClient
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import java.lang.invoke.MethodHandles
 
 class OdinMod : ModInitializer {
@@ -23,7 +26,7 @@ class OdinMod : ModInitializer {
         EventDispatcher
 
         listOf(
-            this, LocationUtils, TickTasks
+            this, LocationUtils, TickTasks, SkyblockPlayer
         ).forEach { EVENT_BUS.subscribe(it) }
     }
 
@@ -32,27 +35,6 @@ class OdinMod : ModInitializer {
 //        modMessage(event.packet.toString())
     }
 
-    @EventHandler
-    fun onTick(event: TickEvent.Start) {
-//        modMessage(getBlockAtPos(mc.player?.blockPos?.add(Vec3i(0, -1, 0))))
-    }
-
-//    init {
-//        var ticks = 0
-//        var serverTicks = 0
-//        var firstServer = true
-//
-//        TickTask(0, serverTick = true) {
-//            if (firstServer) {
-//                firstServer = false
-//                TickTask(0) { ticks++ }
-//            }
-//
-//            serverTicks++
-//
-//            modMessage("$ticks $serverTicks")
-//        }
-//    }
 
     companion object {
         @JvmField
@@ -60,5 +42,12 @@ class OdinMod : ModInitializer {
 
         @JvmField
         val EVENT_BUS = EventBus()
+
+        private const val MOD_ID = "odining"
+        private val metadata: ModMetadata by lazy {
+            FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow().metadata
+        }
+        val version: Version by lazy { metadata.version }
+        val logger: Logger = LogManager.getLogger("Odin")
     }
 }

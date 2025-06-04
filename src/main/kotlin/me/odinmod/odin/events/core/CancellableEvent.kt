@@ -1,6 +1,7 @@
 package me.odinmod.odin.events.core
 
 import me.odinmod.odin.OdinMod
+import me.odinmod.odin.utils.logError
 import meteordevelopment.orbit.ICancellable
 
 abstract class CancellableEvent: ICancellable {
@@ -17,8 +18,8 @@ abstract class CancellableEvent: ICancellable {
     fun postAndCatch(): Boolean {
         runCatching {
             OdinMod.EVENT_BUS.post(this)
-        }.onFailure { throwable ->
-            throwable.printStackTrace()
+        }.onFailure {
+            logError(it, this)
         }
         return isCancelled
     }
