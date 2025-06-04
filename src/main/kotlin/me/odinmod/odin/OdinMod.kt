@@ -3,6 +3,7 @@ package me.odinmod.odin
 import me.odinmod.odin.events.EventDispatcher
 import me.odinmod.odin.events.PacketEvent
 import me.odinmod.odin.utils.skyblock.LocationUtils
+import me.odinmod.odin.utils.skyblock.SkyblockPlayer
 import meteordevelopment.orbit.EventBus
 import meteordevelopment.orbit.EventHandler
 import net.fabricmc.api.ModInitializer
@@ -19,7 +20,7 @@ class OdinMod : ModInitializer {
         EventDispatcher
 
         listOf(
-            this, LocationUtils
+            this, LocationUtils, SkyblockPlayer
         ).forEach { EVENT_BUS.subscribe(it) }
     }
 
