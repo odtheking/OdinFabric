@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "odin",
+  "version": "${version}",
+
+  "name": "Odin",
+  "description": "no way",
+  "authors": [
+    "Odtheking"
+  ],
+
+  "license": "CC0-1.0",
+  "icon": "assets/odin/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      {
+        "adapter": "kotlin",
+        "value": "me.odinmod.odin.OdinMod"
+      }
+    ]
+  },
+  "mixins": [
+    "odin.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "~${minecraft_version}",
+    "java": ">=21",
+    "fabric-language-kotlin": ">=${fabric_kotlin_version}"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
