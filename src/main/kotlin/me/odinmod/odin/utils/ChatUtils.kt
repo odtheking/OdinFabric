@@ -8,9 +8,9 @@ fun sendChatMessage(message: Any) {
 }
 
 fun modMessage(message: Any?, prefix: String = "§3Odin §8»§r ") {
-    modMessage(Text.literal("$prefix$message"))
+    mc.inGameHud?.chatHud?.addMessage(Text.literal("$prefix$message"))
 }
 
 fun modMessage(message: Text, prefix: String = "§3Odin §8»§r ") {
-    mc.inGameHud.chatHud.addMessage(Text.literal(prefix).append(message))
+    mc.inGameHud?.chatHud?.addMessage(Text.literal(prefix).append(message))
 }
