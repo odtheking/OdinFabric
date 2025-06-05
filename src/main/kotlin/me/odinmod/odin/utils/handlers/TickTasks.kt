@@ -2,13 +2,15 @@ package me.odinmod.odin.utils.handlers
 
 import me.odinmod.odin.events.PacketEvent
 import me.odinmod.odin.events.TickEvent
+import me.odinmod.odin.utils.logError
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.network.packet.s2c.common.CommonPingS2CPacket
+import java.util.concurrent.CopyOnWriteArrayList
 
-class TickTask(
+open class TickTask(
     private val ticksPerCycle: Int,
-    private val serverTick: Boolean = false,
-    private val task: () -> Unit = {}
+    serverTick: Boolean = false,
+    private val task: () -> Unit
 ) {
     init {
         if (serverTick) TickTasks.registerServerTask(this)
@@ -17,16 +19,32 @@ class TickTask(
 
     private var ticks = 0
 
-    fun run() {
+    open fun run() {
         if (++ticks < ticksPerCycle) return
-        task()
+        runCatching(task).onFailure { logError(it, this) }
         ticks = 0
     }
 }
 
+class LimitedTickTask(
+    ticksPerCycle: Int,
+    private val maxCycles: Int,
+    serverTick: Boolean = false,
+    task: () -> Unit
+) : TickTask(ticksPerCycle, serverTick, task) {
+
+    private var cycleCount = 0
+
+    override fun run() {
+        if (cycleCount++ >= maxCycles) return
+        super.run()
+        if (cycleCount >= maxCycles) TickTasks.unregister(this)
+    }
+}
+
 object TickTasks {
-    private val clientTickTasks = ArrayList<TickTask>()
-    private val serverTickTasks = ArrayList<TickTask>()
+    private val clientTickTasks = CopyOnWriteArrayList<TickTask>()
+    private val serverTickTasks = CopyOnWriteArrayList<TickTask>()
 
     fun registerClientTask(task: TickTask) {
         clientTickTasks.add(task)
@@ -36,14 +54,19 @@ object TickTasks {
         serverTickTasks.add(task)
     }
 
+    fun unregister(task: TickTask) {
+        clientTickTasks.remove(task)
+        serverTickTasks.remove(task)
+    }
+
     @EventHandler
     fun onTick(event: TickEvent.Start) {
-        clientTickTasks.forEach { it.run() }
+        for (task in clientTickTasks) task.run()
     }
 
     @EventHandler
     fun onServerTick(event: PacketEvent.Receive) {
-        if (event.packet !is CommonPingS2CPacket) return
-        serverTickTasks.forEach { it.run() }
+        if (event.packet is CommonPingS2CPacket)
+            for (task in serverTickTasks) task.run()
     }
 }
