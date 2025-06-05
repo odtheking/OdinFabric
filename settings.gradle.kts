@@ -1,9 +1,9 @@
 rootProject.name = "Odin"
 pluginManagement {
     repositories {
-        maven("https://maven.fabricmc.net/") {
-            name = "Fabric"
-        }
+        maven("https://maven.fabricmc.net/") { name = "Fabric" }
+        maven { url = uri("https://jitpack.io") }
+
         mavenCentral()
         gradlePluginPortal()
     }

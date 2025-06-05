@@ -10,11 +10,11 @@ object EventDispatcher {
 
     init {
         ClientPlayConnectionEvents.JOIN.register { handler, _, _ ->
-            OdinMod.EVENT_BUS.post(handler.serverInfo?.address?.let { ServerEvent.Connect(it) })
+            handler.serverInfo?.address?.let { OdinMod.EVENT_BUS.post(ServerEvent.Connect(it)) }
         }
 
         ClientPlayConnectionEvents.DISCONNECT.register { handler, _ ->
-            OdinMod.EVENT_BUS.post(handler.serverInfo?.address?.let { ServerEvent.Disconnect(it) })
+            handler.serverInfo?.address?.let { OdinMod.EVENT_BUS.post(ServerEvent.Connect(it)) }
         }
 
         ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register { _, _ ->

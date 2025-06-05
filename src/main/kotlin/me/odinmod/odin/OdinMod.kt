@@ -1,5 +1,6 @@
 package me.odinmod.odin
 
+import me.odinmod.odin.commands.mainCommand
 import me.odinmod.odin.events.EventDispatcher
 import me.odinmod.odin.utils.handlers.MobCaches
 import me.odinmod.odin.utils.handlers.TickTask
@@ -8,6 +9,7 @@ import me.odinmod.odin.utils.skyblock.LocationUtils
 import me.odinmod.odin.utils.skyblock.SkyblockPlayer
 import meteordevelopment.orbit.EventBus
 import net.fabricmc.api.ModInitializer
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.loader.api.FabricLoader
 import net.fabricmc.loader.api.Version
 import net.fabricmc.loader.api.metadata.ModMetadata
@@ -21,6 +23,11 @@ class OdinMod : ModInitializer {
     override fun onInitialize() {
         EVENT_BUS.registerLambdaFactory("me.odinmod") { lookupInMethod, klass ->
             lookupInMethod.invoke(null, klass, MethodHandles.lookup()) as MethodHandles.Lookup
+        }
+        ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
+            arrayOf(mainCommand).forEach { commodore ->
+                commodore.register(dispatcher)
+            }
         }
 
         EventDispatcher

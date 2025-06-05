@@ -18,7 +18,6 @@ object LocationUtils {
     var currentArea: Island = Island.Unknown
         private set
 
-
     @EventHandler
     fun onDisconnect(event: ServerEvent.Disconnect) {
         currentArea = Island.Unknown

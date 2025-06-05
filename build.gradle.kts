@@ -21,6 +21,7 @@ repositories {
         name = "meteor-maven"
         url = URI("https://maven.meteordev.org/releases")
     }
+    maven { url = uri("https://jitpack.io") }
 }
 
 dependencies {
@@ -32,11 +33,12 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}")
     implementation("meteordevelopment:orbit:0.2.3")
     include("meteordevelopment:orbit:0.2.3")
+
+    implementation("com.github.Stivais:Commodore:1.0.0")
+    include("com.github.Stivais:Commodore:1.0.0")
 }
 
-
 tasks {
-
     processResources {
         inputs.property("version", project.version)
         filesMatching("fabric.mod.json") {
@@ -49,25 +51,6 @@ tasks {
         from("LICENSE")
     }
 
-    publishing {
-        publications {
-            create<MavenPublication>("mavenJava") {
-                artifact(remapJar) {
-                    builtBy(remapJar)
-                }
-                artifact(kotlinSourcesJar) {
-                    builtBy(remapSourcesJar)
-                }
-            }
-        }
-
-        // select the repositories you want to publish to
-        repositories {
-            // uncomment to publish to the local maven
-            // mavenLocal()
-        }
-    }
-
     compileKotlin {
         compilerOptions {
             jvmTarget = JvmTarget.JVM_21
@@ -77,12 +60,5 @@ tasks {
 }
 
 java {
-    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-    // if it is present.
-    // If you remove this line, sources will not be generated.
     withSourcesJar()
 }
-
-
-
-// configure the maven publication
