@@ -1,12 +1,11 @@
 package me.odinmod.odin
 
 import me.odinmod.odin.events.EventDispatcher
-import me.odinmod.odin.events.PacketEvent
+import me.odinmod.odin.utils.handlers.MobCaches
 import me.odinmod.odin.utils.handlers.TickTasks
 import me.odinmod.odin.utils.skyblock.LocationUtils
 import me.odinmod.odin.utils.skyblock.SkyblockPlayer
 import meteordevelopment.orbit.EventBus
-import meteordevelopment.orbit.EventHandler
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.loader.api.FabricLoader
 import net.fabricmc.loader.api.Version
@@ -26,15 +25,24 @@ class OdinMod : ModInitializer {
         EventDispatcher
 
         listOf(
-            this, LocationUtils, TickTasks, SkyblockPlayer
+            this, LocationUtils, TickTasks, SkyblockPlayer, MobCaches
         ).forEach { EVENT_BUS.subscribe(it) }
     }
 
-    @EventHandler
-    fun onPacket(event: PacketEvent.Receive) {
-//        modMessage(event.packet.toString())
+    init {
+//        val zombieCache = MobCache {
+//            it is ZombieEntity
+//        }
+//
+//        TickTask(20) {
+//            zombieCache.forEach {
+//                it.customName = Text.of("marked entity")
+//                it.isCustomNameVisible = true
+//            }
+//
+//            System.out.println(zombieCache.size)
+//        }
     }
-
 
     companion object {
         @JvmField
