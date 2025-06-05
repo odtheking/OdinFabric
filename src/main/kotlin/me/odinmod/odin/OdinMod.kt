@@ -1,5 +1,6 @@
 package me.odinmod.odin
 
+import com.mojang.brigadier.CommandDispatcher
 import me.odinmod.odin.commands.mainCommand
 import me.odinmod.odin.events.EventDispatcher
 import me.odinmod.odin.utils.handlers.MobCaches
@@ -10,6 +11,7 @@ import me.odinmod.odin.utils.skyblock.SkyblockPlayer
 import meteordevelopment.orbit.EventBus
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.fabricmc.loader.api.FabricLoader
 import net.fabricmc.loader.api.Version
 import net.fabricmc.loader.api.metadata.ModMetadata
@@ -18,23 +20,41 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import java.lang.invoke.MethodHandles
 
-class OdinMod : ModInitializer {
+object OdinMod : ModInitializer {
+
+    @JvmField
+    val mc: MinecraftClient = MinecraftClient.getInstance()
+
+    @JvmField
+    val EVENT_BUS = EventBus()
+
+    private const val MOD_ID = "odining"
+    private val metadata: ModMetadata by lazy {
+        FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow().metadata
+    }
+    val version: Version by lazy { metadata.version }
+    val logger: Logger = LogManager.getLogger("Odin")
 
     override fun onInitialize() {
         EVENT_BUS.registerLambdaFactory("me.odinmod") { lookupInMethod, klass ->
             lookupInMethod.invoke(null, klass, MethodHandles.lookup()) as MethodHandles.Lookup
         }
         ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
-            arrayOf(mainCommand).forEach { commodore ->
-                commodore.register(dispatcher)
-            }
+            registerCommands(dispatcher)
         }
+
 
         EventDispatcher
 
         listOf(
             this, LocationUtils, TickTasks, SkyblockPlayer, MobCaches
         ).forEach { EVENT_BUS.subscribe(it) }
+    }
+
+    private fun registerCommands(dispatcher: CommandDispatcher<FabricClientCommandSource>) {
+        arrayOf(mainCommand).forEach { commodore ->
+            commodore.register(dispatcher)
+        }
     }
 
     init {
@@ -68,21 +88,5 @@ class OdinMod : ModInitializer {
 //            modMessage(getLoreText(item).joinToString("\n"))
 //            modMessage(getCustomData(item))
         }
-    }
-
-
-    companion object {
-        @JvmField
-        val mc: MinecraftClient = MinecraftClient.getInstance()
-
-        @JvmField
-        val EVENT_BUS = EventBus()
-
-        private const val MOD_ID = "odining"
-        private val metadata: ModMetadata by lazy {
-            FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow().metadata
-        }
-        val version: Version by lazy { metadata.version }
-        val logger: Logger = LogManager.getLogger("Odin")
     }
 }

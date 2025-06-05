@@ -9,7 +9,7 @@
     "Odtheking"
   ],
 
-  "license": "CC0-1.0",
+  "license": "BSD 3-Clause",
   "icon": "assets/odin/icon.png",
 
   "environment": "*",

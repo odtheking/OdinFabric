@@ -1,6 +1,6 @@
 package me.odinmod.odin.utils.handlers
 
-import me.odinmod.odin.OdinMod.Companion.mc
+import me.odinmod.odin.OdinMod.mc
 import me.odinmod.odin.events.PacketEvent
 import me.odinmod.odin.events.WorldLoadEvent
 import meteordevelopment.orbit.EventHandler

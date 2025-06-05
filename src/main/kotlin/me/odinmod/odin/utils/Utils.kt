@@ -3,6 +3,7 @@
 package me.odinmod.odin.utils
 
 import me.odinmod.odin.OdinMod
+import me.odinmod.odin.OdinMod.mc
 import net.minecraft.text.ClickEvent
 import net.minecraft.text.HoverEvent
 import net.minecraft.text.Text
@@ -56,7 +57,15 @@ fun logError(throwable: Throwable, context: Any) {
     OdinMod.logger.error(message, throwable)
 
     modMessage(Text.literal("$message §cPlease click this message to copy and send it in the Odin discord!").styled { it
-        .withClickEvent(ClickEvent.RunCommand("od copy $message \\n``` ${throwable.message} \\n${throwable.stackTraceToString().lineSequence().take(10).joinToString("\n")}```"))
+        .withClickEvent(ClickEvent.RunCommand("odin copy $message \\n``` ${throwable.message} \\n${throwable.stackTraceToString().lineSequence().take(10).joinToString("\n")}```"))
         .withHoverEvent(HoverEvent.ShowText(Text.literal("§6Click to copy the error to your clipboard.")))
     })
+}
+
+fun setClipboardContent(string: String) {
+    try {
+        mc.keyboard?.clipboard = string.ifEmpty { " " }
+    } catch (e: Exception) {
+        OdinMod.logger.error("Failed to set Clipboard Content", e)
+    }
 }

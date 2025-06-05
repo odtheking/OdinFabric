@@ -1,6 +1,6 @@
 package me.odinmod.odin.utils
 
-import me.odinmod.odin.OdinMod.Companion.mc
+import me.odinmod.odin.OdinMod.mc
 import net.minecraft.client.sound.PositionedSoundInstance
 import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvent

@@ -1,6 +1,6 @@
 package me.odinmod.odin.utils
 
-import me.odinmod.odin.OdinMod.Companion.mc
+import me.odinmod.odin.OdinMod.mc
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import kotlin.math.cos

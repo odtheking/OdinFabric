@@ -1,7 +1,7 @@
 package me.odinmod.odin.events
 
 import me.odinmod.odin.OdinMod
-import me.odinmod.odin.OdinMod.Companion.mc
+import me.odinmod.odin.OdinMod.mc
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents

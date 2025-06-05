@@ -54,6 +54,7 @@ tasks {
     compileKotlin {
         compilerOptions {
             jvmTarget = JvmTarget.JVM_21
+            freeCompilerArgs.add("-Xlambdas=class")
         }
     }
 

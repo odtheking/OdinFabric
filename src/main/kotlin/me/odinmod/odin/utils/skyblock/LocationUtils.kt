@@ -1,6 +1,6 @@
 package me.odinmod.odin.utils.skyblock
 
-import me.odinmod.odin.OdinMod.Companion.mc
+import me.odinmod.odin.OdinMod.mc
 import me.odinmod.odin.events.PacketEvent
 import me.odinmod.odin.events.ServerEvent
 import me.odinmod.odin.events.WorldLoadEvent
