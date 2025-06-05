@@ -2,6 +2,7 @@ package me.odinmod.odin
 
 import me.odinmod.odin.events.EventDispatcher
 import me.odinmod.odin.utils.handlers.MobCaches
+import me.odinmod.odin.utils.handlers.TickTask
 import me.odinmod.odin.utils.handlers.TickTasks
 import me.odinmod.odin.utils.skyblock.LocationUtils
 import me.odinmod.odin.utils.skyblock.SkyblockPlayer
@@ -43,6 +44,25 @@ class OdinMod : ModInitializer {
 //            System.out.println(zombieCache.size)
 //        }
     }
+
+    init {
+        TickTask(50) {
+         /*   val player = mc.player ?: return@TickTask
+            getEtherPos(player.yaw, player.pitch, 60.0, true).also { etherPos ->
+                if (etherPos.succeeded) {
+                    modMessage("Ether position: ${etherPos.vec}")
+                } else {
+                    modMessage("Ether position not found")
+                }
+            }*/
+//            val item = mc.player?.mainHandStack ?: return@TickTask
+//            modMessage(getItemId(item))
+//            modMessage(getItemUUID(item))
+//            modMessage(getLoreText(item).joinToString("\n"))
+//            modMessage(getCustomData(item))
+        }
+    }
+
 
     companion object {
         @JvmField
