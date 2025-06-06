@@ -5,6 +5,7 @@ import me.odinmod.odin.OdinMod.mc
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
 
 object EventDispatcher {
 
@@ -27,6 +28,10 @@ object EventDispatcher {
 
         ClientTickEvents.END_CLIENT_TICK.register { _ ->
             mc.world?.let { OdinMod.EVENT_BUS.post(TickEvent.End()) }
+        }
+
+        WorldRenderEvents.AFTER_ENTITIES.register { context ->
+            mc.world?.let { OdinMod.EVENT_BUS.post(RenderEvent.Last(context)) }
         }
     }
 }
