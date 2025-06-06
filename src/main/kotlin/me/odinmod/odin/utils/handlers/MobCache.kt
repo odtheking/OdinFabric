@@ -6,7 +6,7 @@ import me.odinmod.odin.events.WorldLoadEvent
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.entity.Entity
 import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket
-import net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket
+import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket
 import java.util.concurrent.CopyOnWriteArrayList
 
 class MobCache(
@@ -33,6 +33,24 @@ class MobCache(
 
 object MobCaches {
     private val mobCaches = CopyOnWriteArrayList<MobCache>()
+    private val mobProcessQueue = CopyOnWriteArrayList<Int>()
+
+    init {
+        TickTask(20) {
+            val toRemove = mutableListOf<Int>()
+
+            mobProcessQueue.filter { mc.world?.getEntityById(it) != null }
+                .forEach {
+                    val entity = mc.world?.getEntityById(it) ?: return@forEach
+
+                    toRemove.add(it)
+
+                    mobCaches.forEach { cache ->
+                        if (cache.predicate(entity)) cache.addEntityToCache(it)
+                    }
+                }
+        }
+    }
 
     fun registerMobCache(mobCache: MobCache) {
         mobCaches.add(mobCache)
@@ -40,13 +58,8 @@ object MobCaches {
 
     @EventHandler
     fun onMobMetadata(event: PacketEvent.Receive) {
-        if (event.packet !is EntityTrackerUpdateS2CPacket) return
-
-        val entity = mc.world?.getEntityById(event.packet.id) ?: return
-
-        mobCaches.forEach { cache ->
-            if (cache.predicate(entity)) cache.addEntityToCache(event.packet.id)
-        }
+        if (event.packet is EntitySpawnS2CPacket)
+            mobProcessQueue.add(event.packet.entityId)
     }
 
     @EventHandler
@@ -54,6 +67,8 @@ object MobCaches {
         if (event.packet !is EntitiesDestroyS2CPacket) return
 
         event.packet.entityIds.forEach { id ->
+            mobProcessQueue.removeIf { it == id}
+
             mobCaches.forEach { cache ->
                 cache.removeIf { it.id == id }
             }
@@ -62,6 +77,8 @@ object MobCaches {
 
     @EventHandler
     fun onWorldLoad(event: WorldLoadEvent) {
+        mobProcessQueue.clear()
+
         mobCaches.forEach { it.clear() }
     }
 }
