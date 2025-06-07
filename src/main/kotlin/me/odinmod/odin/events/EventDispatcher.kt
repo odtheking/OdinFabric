@@ -30,7 +30,7 @@ object EventDispatcher {
             mc.world?.let { OdinMod.EVENT_BUS.post(TickEvent.End()) }
         }
 
-        WorldRenderEvents.AFTER_ENTITIES.register { context ->
+        WorldRenderEvents.AFTER_TRANSLUCENT.register { context ->
             mc.world?.let { OdinMod.EVENT_BUS.post(RenderEvent.Last(context)) }
         }
     }
