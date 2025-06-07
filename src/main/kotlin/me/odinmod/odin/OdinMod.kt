@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher
 import me.odinmod.odin.commands.mainCommand
 import me.odinmod.odin.events.EventDispatcher
 import me.odinmod.odin.features.Box
+import me.odinmod.odin.features.foraging.TreeHud
 import me.odinmod.odin.utils.handlers.MobCaches
 import me.odinmod.odin.utils.handlers.TickTask
 import me.odinmod.odin.utils.handlers.TickTasks
@@ -49,7 +50,7 @@ object OdinMod : ModInitializer {
         Box
 
         listOf(
-            this, LocationUtils, TickTasks, SkyblockPlayer, MobCaches, Box
+            this, LocationUtils, TickTasks, SkyblockPlayer, MobCaches, Box, TreeHud
         ).forEach { EVENT_BUS.subscribe(it) }
     }
 

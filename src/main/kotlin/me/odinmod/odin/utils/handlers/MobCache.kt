@@ -14,6 +14,9 @@ class MobCache(
     private val entityOffset: Int = 0,
     val predicate: (Entity) -> Boolean = { true }
 ) : CopyOnWriteArrayList<Entity>() {
+    init {
+        MobCaches.registerMobCache(this)
+    }
 
     fun addEntityToCache(entityID: Int) {
         val entity = mc.world?.getEntityById(entityID + entityOffset) ?: return
@@ -26,8 +29,21 @@ class MobCache(
         }
     }
 
-    init {
-        MobCaches.registerMobCache(this)
+    fun getClosestEntity(): Entity? {
+        var closestDistance = Float.MAX_VALUE
+        var closestEntity: Entity? = null
+
+        for (entity in this) {
+            val player = mc.player ?: continue
+            val distance = player.distanceTo(entity)
+
+            if (distance < closestDistance) {
+                closestEntity = entity
+                closestDistance = distance
+            }
+        }
+
+        return closestEntity
     }
 }
 
