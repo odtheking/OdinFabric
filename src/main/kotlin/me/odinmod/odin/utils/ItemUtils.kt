@@ -1,6 +1,5 @@
 package me.odinmod.odin.utils
 
-import net.minecraft.component.ComponentHolder
 import net.minecraft.component.DataComponentTypes
 import net.minecraft.component.type.LoreComponent
 import net.minecraft.component.type.NbtComponent
@@ -9,26 +8,23 @@ import net.minecraft.nbt.NbtCompound
 import net.minecraft.text.Text
 import net.minecraft.util.Formatting
 
-
 private const val ID = "id"
 private const val UUID = "uuid"
 
-fun getCustomData(stack: ComponentHolder): NbtCompound =
-    stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT).copyNbt()
+fun ItemStack.getCustomData(): NbtCompound =
+    getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT).copyNbt()
 
+fun ItemStack.getItemId(): String =
+    getCustomData().getString(ID, "")
 
-fun getItemId(stack: ComponentHolder): String =
-    getCustomData(stack).getString(ID, "")
+fun ItemStack.getItemUUID(): String =
+    getCustomData().getString(UUID, "")
 
+fun ItemStack.getLore(): List<Text> =
+    getOrDefault(DataComponentTypes.LORE, LoreComponent.DEFAULT).styledLines()
 
-fun getItemUUID(stack: ComponentHolder): String =
-    getCustomData(stack).getString(UUID, "")
-
-fun getLore(stack: ItemStack): List<Text> =
-    stack.getOrDefault(DataComponentTypes.LORE, LoreComponent.DEFAULT).styledLines()
-
-fun getLoreText(stack: ItemStack): List<String> =
-    getLore(stack).map { it.string }
+fun ItemStack.getLoreText(): List<String> =
+    getLore().map { it.string }
 
 enum class ItemRarity(
     val loreName: String,
@@ -48,7 +44,8 @@ enum class ItemRarity(
 
 private val rarityRegex = Regex("(${ItemRarity.entries.joinToString("|") { it.loreName }}) ?([A-Z ]+)?")
 
-fun getRarity(lore: List<String>): ItemRarity? {
+fun ItemStack.getRarity(): ItemRarity? {
+    val lore = getLoreText()
     for (i in lore.indices.reversed()) {
         val rarity = rarityRegex.find(lore[i])?.groups?.get(1)?.value ?: continue
         return ItemRarity.entries.find { it.loreName == rarity }

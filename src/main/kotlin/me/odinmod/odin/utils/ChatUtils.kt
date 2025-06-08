@@ -7,6 +7,10 @@ fun sendChatMessage(message: Any) {
     mc.player?.networkHandler?.sendChatMessage(message.toString())
 }
 
+fun sendCommand(command: String) {
+    mc.player?.networkHandler?.sendCommand(command)
+}
+
 fun modMessage(message: Any?, prefix: String = "§3Odin §8»§r ") {
     mc.inGameHud?.chatHud?.addMessage(Text.literal("$prefix$message"))
 }

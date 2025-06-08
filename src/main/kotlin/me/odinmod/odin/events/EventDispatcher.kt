@@ -1,6 +1,5 @@
 package me.odinmod.odin.events
 
-import me.odinmod.odin.OdinMod
 import me.odinmod.odin.OdinMod.mc
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents
@@ -11,27 +10,27 @@ object EventDispatcher {
 
     init {
         ClientPlayConnectionEvents.JOIN.register { handler, _, _ ->
-            handler.serverInfo?.address?.let { OdinMod.EVENT_BUS.post(ServerEvent.Connect(it)) }
+            ServerEvent.Connect(handler.serverInfo?.address ?: "SinglePlayer").postAndCatch()
         }
 
         ClientPlayConnectionEvents.DISCONNECT.register { handler, _ ->
-            handler.serverInfo?.address?.let { OdinMod.EVENT_BUS.post(ServerEvent.Connect(it)) }
+            ServerEvent.Disconnect(handler.serverInfo?.address ?: "SinglePlayer").postAndCatch()
         }
 
         ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register { _, _ ->
-            OdinMod.EVENT_BUS.post(WorldLoadEvent())
+            WorldLoadEvent().postAndCatch()
         }
 
         ClientTickEvents.START_CLIENT_TICK.register { _ ->
-            mc.world?.let { OdinMod.EVENT_BUS.post(TickEvent.Start()) }
+            mc.world?.let { TickEvent.Start().postAndCatch() }
         }
 
         ClientTickEvents.END_CLIENT_TICK.register { _ ->
-            mc.world?.let { OdinMod.EVENT_BUS.post(TickEvent.End()) }
+            mc.world?.let { TickEvent.End().postAndCatch() }
         }
 
         WorldRenderEvents.AFTER_TRANSLUCENT.register { context ->
-            mc.world?.let { OdinMod.EVENT_BUS.post(RenderEvent.Last(context)) }
+            mc.world?.let { RenderEvent.Last(context).postAndCatch() }
         }
     }
 }

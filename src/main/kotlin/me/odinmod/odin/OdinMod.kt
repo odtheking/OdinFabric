@@ -1,10 +1,10 @@
 package me.odinmod.odin
 
-import com.mojang.brigadier.CommandDispatcher
 import me.odinmod.odin.commands.mainCommand
 import me.odinmod.odin.events.EventDispatcher
 import me.odinmod.odin.features.Box
 import me.odinmod.odin.features.foraging.TreeHud
+import me.odinmod.odin.features.render.EtherWarp
 import me.odinmod.odin.utils.handlers.MobCaches
 import me.odinmod.odin.utils.handlers.TickTask
 import me.odinmod.odin.utils.handlers.TickTasks
@@ -13,7 +13,6 @@ import me.odinmod.odin.utils.skyblock.SkyblockPlayer
 import meteordevelopment.orbit.EventBus
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.fabricmc.loader.api.FabricLoader
 import net.fabricmc.loader.api.Version
 import net.fabricmc.loader.api.metadata.ModMetadata
@@ -31,9 +30,7 @@ object OdinMod : ModInitializer {
     val EVENT_BUS = EventBus()
 
     private const val MOD_ID = "odining"
-    private val metadata: ModMetadata by lazy {
-        FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow().metadata
-    }
+    private val metadata: ModMetadata by lazy { FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow().metadata }
     val version: Version by lazy { metadata.version }
     val logger: Logger = LogManager.getLogger("Odin")
 
@@ -42,37 +39,17 @@ object OdinMod : ModInitializer {
             lookupInMethod.invoke(null, klass, MethodHandles.lookup()) as MethodHandles.Lookup
         }
         ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
-            registerCommands(dispatcher)
+            arrayOf(mainCommand).forEach { commodore ->
+                commodore.register(dispatcher)
+            }
         }
-
 
         EventDispatcher
         Box
 
         listOf(
-            this, LocationUtils, TickTasks, SkyblockPlayer, MobCaches, Box, TreeHud
+            this, LocationUtils, TickTasks, SkyblockPlayer, MobCaches, Box, TreeHud, EtherWarp
         ).forEach { EVENT_BUS.subscribe(it) }
-    }
-
-    private fun registerCommands(dispatcher: CommandDispatcher<FabricClientCommandSource>) {
-        arrayOf(mainCommand).forEach { commodore ->
-            commodore.register(dispatcher)
-        }
-    }
-
-    init {
-//        val zombieCache = MobCache {
-//            it is ZombieEntity
-//        }
-//
-//        TickTask(20) {
-//            zombieCache.forEach {
-//                it.customName = Text.of("marked entity")
-//                it.isCustomNameVisible = true
-//            }
-//
-//            System.out.println(zombieCache.size)
-//        }
     }
 
     init {

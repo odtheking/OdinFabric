@@ -1,45 +1,96 @@
-package me.odinmod.odin.utils
+package me.odinmod.odin.features.render
 
 import me.odinmod.odin.OdinMod.mc
+import me.odinmod.odin.events.PacketEvent
+import me.odinmod.odin.events.RenderEvent
+import me.odinmod.odin.features.Box.GREEN
+import me.odinmod.odin.features.Box.RED
+import me.odinmod.odin.utils.*
+import me.odinmod.odin.utils.handlers.TickTask
+import me.odinmod.odin.utils.skyblock.Island
+import me.odinmod.odin.utils.skyblock.LocationUtils
+import meteordevelopment.orbit.EventHandler
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.Blocks
+import net.minecraft.client.util.InputUtil
+import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket
 import net.minecraft.util.math.BlockPos
+import net.minecraft.util.math.Box
 import net.minecraft.util.math.ChunkSectionPos
 import net.minecraft.util.math.Vec3d
+import org.lwjgl.glfw.GLFW
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.sign
 
-object EtherWarpHelper {
+object EtherWarp {
+
+    private var etherPos: EtherPos? = null
+
+    init {
+        TickTask(0) {
+            if (!InputUtil.isKeyPressed(mc.window.handle, GLFW.GLFW_KEY_LEFT_SHIFT) || mc.currentScreen != null) return@TickTask
+        }
+    }
+
+    @EventHandler
+    fun onRenderLast(event: RenderEvent.Last) {
+        if (!InputUtil.isKeyPressed(mc.window.handle, GLFW.GLFW_KEY_LEFT_SHIFT) || mc.currentScreen != null) return
+        val mainHand = mc.player?.mainHandStack ?: return
+
+        val customData = mainHand.getCustomData().takeIf { it.getInt("ethermerge", 0) == 1 || mainHand.getItemId() == "ETHERWARP_CONDUIT" } ?: return
+        etherPos = getEtherPos(56.0 + customData.getInt("tuned_transmission", 0)).apply {
+            pos?.let { drawFilledBox(Box(it), event.context, if (etherPos?.succeeded == true) GREEN else RED) }
+        }
+    }
+
+    @EventHandler
+    fun onPacketReceived(event: PacketEvent.Send) {
+        val packet = event.packet
+        if (packet !is PlayerInteractItemC2SPacket || !LocationUtils.currentArea.isArea(Island.SinglePlayer) || !InputUtil.isKeyPressed(mc.window.handle, GLFW.GLFW_KEY_LEFT_SHIFT) || mc.currentScreen != null) return
+        mc.player?.mainHandStack?.let { stack -> stack.getCustomData().takeIf { it.getInt("ethermerge", 0) == 1 || stack.getItemId() == "ETHERWARP_CONDUIT" } ?: return }
+        etherPos?.pos?.let {
+            if (etherPos?.succeeded == false) return@let
+            mc.executeSync {
+                mc.player?.networkHandler?.sendPacket(
+                    PlayerMoveC2SPacket.Full(
+                        it.x + 0.5, it.y + 1.05, it.z + 0.5,
+                        mc.player?.yaw ?: 0f, mc.player?.pitch ?: 0f, mc.player?.isOnGround ?: false,
+                        false
+                    )
+                )
+                mc.player?.setPosition(it.x + 0.5, it.y + 1.05, it.z + 0.5)
+                mc.player?.setVelocity(0.0, 0.0, 0.0)
+            }
+        }
+    }
+
     data class EtherPos(val succeeded: Boolean, val pos: BlockPos?, val state: BlockState?) {
-        inline val vec: Vec3d? get() = pos?.let { Vec3d(it) }
+        val vec: Vec3d? by lazy { pos?.let { Vec3d(it) } }
         companion object {
             val NONE = EtherPos(false, null, null)
         }
     }
-    var etherPos: EtherPos = EtherPos.NONE
 
     /**
      * Gets the position of an entity in the "ether" based on the player's view direction.
      *
-     * @param pos The initial position of the entity.
      * @param yaw The yaw angle representing the player's horizontal viewing direction.
      * @param pitch The pitch angle representing the player's vertical viewing direction.
      * @return An `EtherPos` representing the calculated position in the "ether" or `EtherPos.NONE` if the player is not present.
      */
-    fun getEtherPos(yaw: Float, pitch: Float, distance: Double = 60.0, returnEnd: Boolean = false): EtherPos {
-        val player = mc.player ?: return EtherPos.NONE
-        val startPos = player.eyePos
-        val endPos = getLook(yaw = yaw, pitch = pitch).normalize().multiply(distance).add(startPos)
+    fun getEtherPos(yaw: Float, pitch: Float, distance: Double, returnEnd: Boolean = false): EtherPos {
+        val startPos = mc.player?.eyePos ?: return EtherPos.NONE
+        val endPos = getLook(yaw, pitch).normalize().multiply(distance).add(startPos)
         return traverseVoxels(startPos, endPos).takeUnless { it == EtherPos.NONE && returnEnd } ?: EtherPos(true, endPos.toBlockPos(), null)
     }
 
-    fun getEtherPos(distance: Double =  56.0 /*+ mc.thePlayer.heldItem.getTunerBonus*/): EtherPos {
-        val player = mc.player ?: return EtherPos.NONE
-        return getEtherPos(player.yaw, player.pitch, distance)
-    }
+    fun getEtherPos(distance: Double): EtherPos =
+        mc.player?.let { getEtherPos(it.yaw, it.pitch, distance) } ?: EtherPos.NONE
+
 
     /**
      * Traverses voxels from start to end and returns the first non-air block it hits.
@@ -73,23 +124,21 @@ object EtherWarpHelper {
         var tMaxZ = abs((z + max(stepZ, 0) - z0) * invDirZ)
 
         repeat(1000) {
-            val xInt = x.toInt()
-            val yInt = y.toInt()
-            val zInt = z.toInt()
-            val chunk = mc.world?.getChunk(ChunkSectionPos.getSectionCoord(xInt), ChunkSectionPos.getSectionCoord(zInt)) ?: return EtherPos.NONE
-            val currentBlock = chunk.getBlockState(BlockPos(xInt, yInt, zInt))
+            val blockPos = BlockPos(x.toInt(), y.toInt(), z.toInt())
+            val chunk = mc.world?.getChunk(ChunkSectionPos.getSectionCoord(blockPos.x), ChunkSectionPos.getSectionCoord(blockPos.z)) ?: return EtherPos.NONE
+            val currentBlock = chunk.getBlockState(blockPos).takeIf { it.block is Block } ?: return EtherPos.NONE
             val currentBlockId = Block.getRawIdFromState(currentBlock)
 
             if (currentBlockId != 0) {
-                if (validEtherwarpFeetIds.get(currentBlockId)) return EtherPos(false, BlockPos(xInt, yInt, zInt), currentBlock)
+                if (validEtherwarpFeetIds.get(currentBlockId)) return EtherPos(false, blockPos, currentBlock)
 
-                val footBlockId = Block.getRawIdFromState(chunk.getBlockState(BlockPos(xInt, yInt + 1, zInt)))
-                if (!validEtherwarpFeetIds.get(footBlockId)) return EtherPos(false, BlockPos(xInt, yInt, zInt), currentBlock)
+                val footBlockId = Block.getRawIdFromState(chunk.getBlockState(BlockPos(blockPos.x, blockPos.y + 1, blockPos.z)))
+                if (!validEtherwarpFeetIds.get(footBlockId)) return EtherPos(false, blockPos, currentBlock)
 
-                val headBlockId = Block.getRawIdFromState(chunk.getBlockState(BlockPos(xInt, yInt + 2, zInt)))
-                if (!validEtherwarpFeetIds.get(headBlockId)) return EtherPos(false, BlockPos(xInt, yInt, zInt), currentBlock)
+                val headBlockId = Block.getRawIdFromState(chunk.getBlockState(BlockPos(blockPos.x, blockPos.y + 2, blockPos.z)))
+                if (!validEtherwarpFeetIds.get(headBlockId)) return EtherPos(false, blockPos, currentBlock)
 
-                return EtherPos(true, BlockPos(xInt, yInt, zInt), currentBlock)
+                return EtherPos(true, blockPos, currentBlock)
             }
 
             if (x == endX && y == endY && z == endZ) return EtherPos.NONE
