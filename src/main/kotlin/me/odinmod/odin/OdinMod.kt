@@ -4,7 +4,10 @@ import me.odinmod.odin.commands.mainCommand
 import me.odinmod.odin.events.EventDispatcher
 import me.odinmod.odin.features.Box
 import me.odinmod.odin.features.foraging.TreeHud
-import me.odinmod.odin.features.render.EtherWarp
+import me.odinmod.odin.features.render.Etherwarp
+import me.odinmod.odin.features.skyblock.ChatCommands
+import me.odinmod.odin.features.skyblock.NoCursorReset
+import me.odinmod.odin.features.skyblock.WardrobeKeybinds
 import me.odinmod.odin.utils.handlers.MobCaches
 import me.odinmod.odin.utils.handlers.TickTask
 import me.odinmod.odin.utils.handlers.TickTasks
@@ -48,7 +51,7 @@ object OdinMod : ModInitializer {
         Box
 
         listOf(
-            this, LocationUtils, TickTasks, SkyblockPlayer, MobCaches, Box, TreeHud, EtherWarp
+            this, LocationUtils, TickTasks, SkyblockPlayer, MobCaches, Box, TreeHud, Etherwarp, ChatCommands, WardrobeKeybinds, NoCursorReset
         ).forEach { EVENT_BUS.subscribe(it) }
     }
 

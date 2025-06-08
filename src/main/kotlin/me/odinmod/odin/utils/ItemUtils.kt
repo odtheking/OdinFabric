@@ -44,7 +44,7 @@ enum class ItemRarity(
 
 private val rarityRegex = Regex("(${ItemRarity.entries.joinToString("|") { it.loreName }}) ?([A-Z ]+)?")
 
-fun ItemStack.getRarity(): ItemRarity? {
+fun ItemStack.getSkyblockRarity(): ItemRarity? {
     val lore = getLoreText()
     for (i in lore.indices.reversed()) {
         val rarity = rarityRegex.find(lore[i])?.groups?.get(1)?.value ?: continue

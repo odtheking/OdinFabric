@@ -1,6 +1,5 @@
 package me.odinmod.odin.utils
 
-import com.mojang.blaze3d.vertex.VertexFormat
 import me.odinmod.odin.OdinMod.mc
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.client.font.TextRenderer
@@ -10,7 +9,6 @@ import net.minecraft.client.util.BufferAllocator
 import net.minecraft.text.OrderedText
 import net.minecraft.util.math.Box
 import net.minecraft.util.math.Vec3d
-import org.joml.Matrix4f
 import java.util.*
 import kotlin.math.cos
 import kotlin.math.sin
@@ -107,11 +105,10 @@ fun drawSphere(
             val z1 = center.z + radius * sinTheta * sin(phi1)
 
             val x2 = center.x + radius * sinTheta * cos(phi2)
-            val y2 = y1
             val z2 = center.z + radius * sinTheta * sin(phi2)
 
             buffer.vertex(matrix, x1.toFloat(), y1.toFloat(), z1.toFloat()).color(r, g, b, a).normal(1f, 1f, 1f)
-            buffer.vertex(matrix, x2.toFloat(), y2.toFloat(), z2.toFloat()).color(r, g, b, a).normal(1f, 1f, 1f)
+            buffer.vertex(matrix, x2.toFloat(), y1.toFloat(), z2.toFloat()).color(r, g, b, a).normal(1f, 1f, 1f)
         }
     }
 
@@ -146,11 +143,11 @@ val CUSTOM_LINE_LAYER: RenderLayer = RenderLayer.of(
         .lineWidth(RenderPhase.LineWidth(OptionalDouble.of(1.0)))
         .layering(RenderPhase.VIEW_OFFSET_Z_LAYERING)
         .texture(RenderPhase.NO_TEXTURE)
-        .build(false));
+        .build(false))
 
 val FILLED_BOX_LAYER: RenderLayer = RenderLayer.of(
     "filled_box", RenderLayer.DEFAULT_BUFFER_SIZE, false, false, RenderPipelines.DEBUG_FILLED_BOX,
     RenderLayer.MultiPhaseParameters.builder()
         .layering(RenderPhase.VIEW_OFFSET_Z_LAYERING)
-        .build(false));
+        .build(false))
 

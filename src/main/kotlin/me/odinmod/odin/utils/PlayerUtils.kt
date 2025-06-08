@@ -10,3 +10,9 @@ import net.minecraft.util.math.random.LocalRandom
 fun playSoundAtPlayer(event: SoundEvent) =
     PositionedSoundInstance(event, SoundCategory.MASTER, 1f, 1f, LocalRandom(0L), mc.player?.blockPos ?: BlockPos(0, 0, 0))
         .also { mc.soundManager?.play(it) }
+
+fun getPositionString(): String {
+    with (mc.player?.blockPos ?: BlockPos(0, 0, 0)) {
+        return "x: $x, y: $y, z: $z"
+    }
+}

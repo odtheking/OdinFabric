@@ -6,7 +6,6 @@ import me.odinmod.odin.events.RenderEvent
 import me.odinmod.odin.features.Box.GREEN
 import me.odinmod.odin.features.Box.RED
 import me.odinmod.odin.utils.*
-import me.odinmod.odin.utils.handlers.TickTask
 import me.odinmod.odin.utils.skyblock.Island
 import me.odinmod.odin.utils.skyblock.LocationUtils
 import meteordevelopment.orbit.EventHandler
@@ -26,15 +25,9 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.sign
 
-object EtherWarp {
+object Etherwarp {
 
     private var etherPos: EtherPos? = null
-
-    init {
-        TickTask(0) {
-            if (!InputUtil.isKeyPressed(mc.window.handle, GLFW.GLFW_KEY_LEFT_SHIFT) || mc.currentScreen != null) return@TickTask
-        }
-    }
 
     @EventHandler
     fun onRenderLast(event: RenderEvent.Last) {

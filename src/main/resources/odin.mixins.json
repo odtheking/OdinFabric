@@ -4,10 +4,12 @@
   "package": "mixins",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "ClientConnectionMixin"
+    "ClientConnectionMixin",
+    "YggdrasilSignatureIgnoreMixin"
   ],
   "client": [
-    "ClientCommonNetworkHandlerMixin"
+    "ClientCommonNetworkHandlerMixin",
+    "MouseMixin"
   ],
   "injectors": {
     "defaultRequire": 1
