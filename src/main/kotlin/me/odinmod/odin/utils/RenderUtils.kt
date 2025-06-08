@@ -7,6 +7,7 @@ import net.minecraft.client.gl.RenderPipelines
 import net.minecraft.client.render.*
 import net.minecraft.client.util.BufferAllocator
 import net.minecraft.text.OrderedText
+import net.minecraft.util.Formatting
 import net.minecraft.util.math.Box
 import net.minecraft.util.math.Vec3d
 import java.util.*
@@ -138,7 +139,7 @@ fun drawSphere(
 }
 
 val CUSTOM_LINE_LAYER: RenderLayer = RenderLayer.of(
-    "lines", RenderLayer.DEFAULT_BUFFER_SIZE, false, false, RenderPipelines.LINES,
+    "lines", RenderLayer.DEFAULT_BUFFER_SIZE, false, true, RenderPipelines.LINES,
     RenderLayer.MultiPhaseParameters.builder()
         .lineWidth(RenderPhase.LineWidth(OptionalDouble.of(1.0)))
         .layering(RenderPhase.VIEW_OFFSET_Z_LAYERING)
@@ -146,8 +147,25 @@ val CUSTOM_LINE_LAYER: RenderLayer = RenderLayer.of(
         .build(false))
 
 val FILLED_BOX_LAYER: RenderLayer = RenderLayer.of(
-    "filled_box", RenderLayer.DEFAULT_BUFFER_SIZE, false, false, RenderPipelines.DEBUG_FILLED_BOX,
+    "filled_box", RenderLayer.DEFAULT_BUFFER_SIZE, false, true, RenderPipelines.DEBUG_FILLED_BOX,
     RenderLayer.MultiPhaseParameters.builder()
         .layering(RenderPhase.VIEW_OFFSET_Z_LAYERING)
         .build(false))
 
+fun Int.floatValues(): List<Float> {
+    return listOf(
+        (this shr 16 and 0xFF) / 255f,
+        (this shr 8 and 0xFF) / 255f,
+        (this and 0xFF) / 255f,
+        1f
+    )
+}
+
+fun Formatting.floatValues(): List<Float> {
+    return this.colorValue?.floatValues() ?: listOf(1f, 1f, 1f, 1f)
+}
+
+fun List<Float>.withAlpha(alpha: Float): List<Float> {
+    return if (this.size == 4) this.toMutableList().apply { this[3] = alpha }
+    else this + alpha
+}
