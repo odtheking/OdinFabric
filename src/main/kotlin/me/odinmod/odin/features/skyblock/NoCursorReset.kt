@@ -1,6 +1,7 @@
 package me.odinmod.odin.features.skyblock
 
 import me.odinmod.odin.OdinMod.mc
+import me.odinmod.odin.config.categories.SkyblockConfig
 import me.odinmod.odin.events.TickEvent
 import meteordevelopment.orbit.EventHandler
 
@@ -21,5 +22,5 @@ object NoCursorReset {
 
     @JvmStatic
     fun shouldHookMouse(): Boolean =
-        System.currentTimeMillis() - clock < 150
+        System.currentTimeMillis() - clock < 150 && SkyblockConfig.noCursorReset
 }

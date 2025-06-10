@@ -1,6 +1,7 @@
 package me.odinmod.odin.features.skyblock
 
 import me.odinmod.odin.OdinMod.mc
+import me.odinmod.odin.config.categories.SkyblockConfig
 import me.odinmod.odin.events.GuiEvent
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.client.gui.screen.ingame.HandledScreen
@@ -23,6 +24,7 @@ object WardrobeKeybinds {
     }
 
     private fun onClick(screen: HandledScreen<*>, keyCode: Int): Boolean {
+        if (!SkyblockConfig.wardrobeKeybinds) return false
         val title = screen.title?.string ?: return false
         val (current, total) = wardrobeRegex.find(title)?.destructured?.let { it.component1().toIntOrNull() to it.component2().toIntOrNull() } ?: return false
         if (current == null || total == null) return false
@@ -30,13 +32,13 @@ object WardrobeKeybinds {
         val equippedIndex = screen.screenHandler.slots.find { equippedRegex.matches(it.stack.itemName.string) }?.index
 
         val index = when (keyCode) {
-            GLFW.GLFW_KEY_F -> if (current < total) 53 else return false
-            GLFW.GLFW_KEY_V -> if (current > total) 53 else return false
-            GLFW.GLFW_KEY_A -> equippedIndex ?: return false
+            SkyblockConfig.nextPageKeybind -> if (current < total) 53 else return false
+            SkyblockConfig.previousPageKeybind -> if (current > total) 53 else return false
+            SkyblockConfig.unequipKeybind -> equippedIndex ?: return false
             else -> {
-                val keyIndex = arrayOf(GLFW.GLFW_KEY_1, GLFW.GLFW_KEY_2, GLFW.GLFW_KEY_3, GLFW.GLFW_KEY_4, GLFW.GLFW_KEY_5, GLFW.GLFW_KEY_6, GLFW.GLFW_KEY_7, GLFW.GLFW_KEY_8, GLFW.GLFW_KEY_9)
+                val keyIndex = with (SkyblockConfig) { arrayOf(wardrobe1, wardrobe2, wardrobe3, wardrobe4, wardrobe5, wardrobe6, wardrobe7, wardrobe8, wardrobe9) }
                     .indexOfFirst { it == keyCode }.takeIf { it != -1 } ?: return false
-                /*if (equippedIndex == keyIndex + 36 disalloweRequeipping) return false*/
+                if (equippedIndex == keyIndex + 36 && SkyblockConfig.disallowUnequipKeybind) return false
                 keyIndex + 36
             }
         }

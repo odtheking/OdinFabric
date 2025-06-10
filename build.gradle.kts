@@ -17,11 +17,9 @@ repositories {
     // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
     // See https://docs.gradle.org/current/userguide/declaring_repositories.html
     // for more information about repositories.
-    maven {
-        name = "meteor-maven"
-        url = URI("https://maven.meteordev.org/releases")
-    }
+    maven { url = URI("https://maven.meteordev.org/releases") }
     maven { url = uri("https://jitpack.io") }
+    maven { url = uri("https://nexus.resourcefulbees.com/repository/maven-public/") }
 }
 
 dependencies {
@@ -36,6 +34,11 @@ dependencies {
 
     implementation("com.github.Stivais:Commodore:1.0.0")
     include("com.github.Stivais:Commodore:1.0.0")
+
+    modImplementation("com.teamresourceful.resourcefulconfig:resourcefulconfig-fabric-1.21.5:3.5.4")
+    modImplementation("com.teamresourceful.resourcefulconfigkt:resourcefulconfigkt-fabric-1.21.5:3.5.6")
+    include("com.teamresourceful.resourcefulconfig:resourcefulconfig-fabric-1.21.5:3.5.4")
+    include("com.teamresourceful.resourcefulconfigkt:resourcefulconfigkt-fabric-1.21.5:3.5.6")
 }
 
 tasks {

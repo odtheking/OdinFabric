@@ -1,10 +1,9 @@
 package me.odinmod.odin.features.render
 
 import me.odinmod.odin.OdinMod.mc
+import me.odinmod.odin.config.categories.RenderConfig
 import me.odinmod.odin.events.PacketEvent
 import me.odinmod.odin.events.RenderEvent
-import me.odinmod.odin.features.Box.GREEN
-import me.odinmod.odin.features.Box.RED
 import me.odinmod.odin.utils.*
 import me.odinmod.odin.utils.skyblock.Island
 import me.odinmod.odin.utils.skyblock.LocationUtils
@@ -31,19 +30,33 @@ object Etherwarp {
 
     @EventHandler
     fun onRenderLast(event: RenderEvent.Last) {
-        if (!InputUtil.isKeyPressed(mc.window.handle, GLFW.GLFW_KEY_LEFT_SHIFT) || mc.currentScreen != null) return
+        if (!RenderConfig.etherwarpHelper || !InputUtil.isKeyPressed(mc.window.handle, GLFW.GLFW_KEY_LEFT_SHIFT) || mc.currentScreen != null) return
         val mainHand = mc.player?.mainHandStack ?: return
 
         val customData = mainHand.getCustomData().takeIf { it.getInt("ethermerge", 0) == 1 || mainHand.getItemId() == "ETHERWARP_CONDUIT" } ?: return
         etherPos = getEtherPos(56.0 + customData.getInt("tuned_transmission", 0)).apply {
-            pos?.let { drawFilledBox(Box(it), event.context, if (etherPos?.succeeded == true) GREEN else RED) }
+            if (etherPos?.succeeded == true || RenderConfig.showFailed) {
+                val color = if (etherPos?.succeeded == true) RenderConfig.etherwarpHelperColor.floatValues() else RenderConfig.showFailedColor.floatValues()
+                pos?.let {
+                    when (RenderConfig.renderStyle) {
+                        RenderStyle.OULINE -> drawBox(Box(it), event.context, color)
+
+                        RenderStyle.FILLED -> drawFilledBox(Box(it), event.context, color)
+
+                        RenderStyle.FILLED_OUTLINE -> {
+                            drawFilledBox(Box(it), event.context, color.withAlpha(0.5f))
+                            drawBox(Box(it), event.context, color)
+                        }
+                    }
+                }
+            }
         }
     }
 
     @EventHandler
     fun onPacketReceived(event: PacketEvent.Send) {
         val packet = event.packet
-        if (packet !is PlayerInteractItemC2SPacket || !LocationUtils.currentArea.isArea(Island.SinglePlayer) || !InputUtil.isKeyPressed(mc.window.handle, GLFW.GLFW_KEY_LEFT_SHIFT) || mc.currentScreen != null) return
+        if (!RenderConfig.etherwarpHelper || packet !is PlayerInteractItemC2SPacket || !LocationUtils.currentArea.isArea(Island.SinglePlayer) || !InputUtil.isKeyPressed(mc.window.handle, GLFW.GLFW_KEY_LEFT_SHIFT) || mc.currentScreen != null) return
         mc.player?.mainHandStack?.let { stack -> stack.getCustomData().takeIf { it.getInt("ethermerge", 0) == 1 || stack.getItemId() == "ETHERWARP_CONDUIT" } ?: return }
         etherPos?.pos?.let {
             if (etherPos?.succeeded == false) return@let
@@ -168,7 +181,7 @@ object Etherwarp {
             // All 16 carpets
             Blocks.WHITE_CARPET, Blocks.ORANGE_CARPET, Blocks.MAGENTA_CARPET, Blocks.LIGHT_BLUE_CARPET, Blocks.YELLOW_CARPET,
             Blocks.LIME_CARPET, Blocks.PINK_CARPET, Blocks.GRAY_CARPET, Blocks.LIGHT_GRAY_CARPET, Blocks.CYAN_CARPET, Blocks.PURPLE_CARPET,
-            Blocks.BLUE_CARPET, Blocks.BROWN_CARPET, Blocks.GREEN_CARPET, Blocks.RED_CARPET, Blocks.BLACK_CARPET
+            Blocks.BLUE_CARPET, Blocks.BROWN_CARPET, Blocks.GREEN_CARPET, Blocks.RED_CARPET, Blocks.BLACK_CARPET, Blocks.MOSS_CARPET
         ).forEach { set(Block.getRawIdFromState(it.defaultState)) }
     }
 }

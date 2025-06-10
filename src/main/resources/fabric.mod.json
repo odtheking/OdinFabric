@@ -24,12 +24,12 @@
   "mixins": [
     "odin.mixins.json"
   ],
-
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric-api": "*",
     "minecraft": "~${minecraft_version}",
     "java": ">=21",
-    "fabric-language-kotlin": ">=${fabric_kotlin_version}"
+    "fabric-language-kotlin": ">=${fabric_kotlin_version}",
+    "resourcefulconfigkt": "*"
   }
 }

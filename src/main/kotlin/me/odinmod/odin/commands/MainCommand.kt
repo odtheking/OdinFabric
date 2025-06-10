@@ -2,11 +2,13 @@ package me.odinmod.odin.commands
 
 import com.github.stivais.commodore.Commodore
 import com.github.stivais.commodore.utils.GreedyString
+import com.teamresourceful.resourcefulconfig.api.client.ResourcefulConfigScreen
 import me.odinmod.odin.OdinMod
 import me.odinmod.odin.OdinMod.mc
 import me.odinmod.odin.events.PacketEvent
 import me.odinmod.odin.features.foraging.TreeHud
 import me.odinmod.odin.utils.getCustomData
+import me.odinmod.odin.utils.handlers.LimitedTickTask
 import me.odinmod.odin.utils.modMessage
 import me.odinmod.odin.utils.sendCommand
 import me.odinmod.odin.utils.setClipboardContent
@@ -17,7 +19,9 @@ import net.minecraft.text.Text
 
 val mainCommand = Commodore("odin") {
     runs {
-        modMessage("Odin Mod v${OdinMod.version}")
+        LimitedTickTask(0, 1) {
+            mc.setScreen(ResourcefulConfigScreen.get(null, OdinMod.config))
+        }
     }
 
     literal("copy").runs { greedyString: GreedyString ->

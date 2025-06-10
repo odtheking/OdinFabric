@@ -1,6 +1,8 @@
 package me.odinmod.odin
 
+import com.teamresourceful.resourcefulconfig.api.loader.Configurator
 import me.odinmod.odin.commands.mainCommand
+import me.odinmod.odin.config.Config
 import me.odinmod.odin.events.EventDispatcher
 import me.odinmod.odin.features.Box
 import me.odinmod.odin.features.foraging.TreeHud
@@ -36,11 +38,14 @@ object OdinMod : ModInitializer {
     private val metadata: ModMetadata by lazy { FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow().metadata }
     val version: Version by lazy { metadata.version }
     val logger: Logger = LogManager.getLogger("Odin")
+    private val configurator = Configurator("odining")
+    val config = Config.register(configurator)
 
     override fun onInitialize() {
         EVENT_BUS.registerLambdaFactory("me.odinmod") { lookupInMethod, klass ->
             lookupInMethod.invoke(null, klass, MethodHandles.lookup()) as MethodHandles.Lookup
         }
+
         ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
             arrayOf(mainCommand).forEach { commodore ->
                 commodore.register(dispatcher)

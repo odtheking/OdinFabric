@@ -169,3 +169,9 @@ fun List<Float>.withAlpha(alpha: Float): List<Float> {
     return if (this.size == 4) this.toMutableList().apply { this[3] = alpha }
     else this + alpha
 }
+
+enum class RenderStyle {
+    FILLED,
+    OULINE,
+    FILLED_OUTLINE,
+}
