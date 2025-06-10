@@ -43,4 +43,15 @@ object RenderConfig: CategoryKt("Render") {
         description = TranslatableValue("Choose the style of rendering for visual effects.")
         condition = { etherwarpHelper }
     }
+
+    init {
+        separator {
+            this.title = "Camera"
+        }
+    }
+
+    val disableFrontCam by boolean(false) {
+        name = TranslatableValue("Disable Front Camera")
+        description = TranslatableValue("Disable the front camera in the game.")
+    }
 }
