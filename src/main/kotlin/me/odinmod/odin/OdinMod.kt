@@ -4,7 +4,7 @@ import com.teamresourceful.resourcefulconfig.api.loader.Configurator
 import me.odinmod.odin.commands.mainCommand
 import me.odinmod.odin.config.Config
 import me.odinmod.odin.events.EventDispatcher
-import me.odinmod.odin.features.Box
+import me.odinmod.odin.features.RenderTest
 import me.odinmod.odin.features.foraging.TreeHud
 import me.odinmod.odin.features.render.Camera
 import me.odinmod.odin.features.render.Etherwarp
@@ -51,12 +51,9 @@ object OdinMod : ModInitializer {
             }
         }
 
-        EventDispatcher
-        Box
-
         listOf(
-            this, LocationUtils, TickTasks, SkyblockPlayer, MobCaches, Box, TreeHud, Etherwarp, ChatCommands, WardrobeKeybinds, NoCursorReset, Camera,
-            SpringBoots, RagnarockAxe
+            this, LocationUtils, TickTasks, SkyblockPlayer, MobCaches, RenderTest, TreeHud, Etherwarp, ChatCommands, WardrobeKeybinds, NoCursorReset, Camera,
+            SpringBoots, RagnarockAxe, EventDispatcher
         ).forEach { EVENT_BUS.subscribe(it) }
     }
 

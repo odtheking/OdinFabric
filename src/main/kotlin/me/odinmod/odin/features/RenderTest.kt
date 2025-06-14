@@ -11,7 +11,7 @@ import net.minecraft.util.math.Box
 import net.minecraft.util.math.Vec3d
 
 
-object Box {
+object RenderTest {
     val debugBox = Box(0.0, 100.0, 0.0, 1.0, 101.0, 1.0)
     val RED = Formatting.RED.floatValues()
     val WHITE_TRANSPARENT = Formatting.WHITE.floatValues().withAlpha(.5f)

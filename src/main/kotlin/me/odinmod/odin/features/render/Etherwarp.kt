@@ -89,14 +89,13 @@ object Etherwarp {
      * @return An `EtherPos` representing the calculated position in the "ether" or `EtherPos.NONE` if the player is not present.
      */
     fun getEtherPos(yaw: Float, pitch: Float, distance: Double, returnEnd: Boolean = false): EtherPos {
-        val startPos = mc.player?.eyePos ?: return EtherPos.NONE
+        val startPos = mc.player?.pos?.add(0.0, 1.62, 0.0) ?: return EtherPos.NONE
         val endPos = getLook(yaw, pitch).normalize().multiply(distance).add(startPos)
         return traverseVoxels(startPos, endPos).takeUnless { it == EtherPos.NONE && returnEnd } ?: EtherPos(true, endPos.toBlockPos(), null)
     }
 
     fun getEtherPos(distance: Double): EtherPos =
         mc.player?.let { getEtherPos(it.yaw, it.pitch, distance) } ?: EtherPos.NONE
-
 
     /**
      * Traverses voxels from start to end and returns the first non-air block it hits.
