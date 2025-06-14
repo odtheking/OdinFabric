@@ -212,4 +212,31 @@ object SkyblockConfig: CategoryKt("Skyblock") {
         description = TranslatableValue("Key to equip the ninth slot in the wardrobe.")
         condition = { wardrobeKeybinds }
     }
+
+    init {
+        separator {
+            this.title = "Ragnarock Axe"
+        }
+    }
+
+    val ragnarockAlert by boolean(false) {
+        name = TranslatableValue("Ragnarock Axe Alert")
+        description = TranslatableValue("Enable an alert when the Ragnarock Axe is activated.")
+    }
+
+    val ragnarockCancelAlert by boolean(false) {
+        name = TranslatableValue("Ragnarock Axe Cancel Alert")
+        description = TranslatableValue("Enable an alert when the Ragnarock Axe is canceled.")
+    }
+
+    init {
+        separator {
+            this.title = "Spring Boots"
+        }
+    }
+
+    val springBoots by boolean(false) {
+        name = TranslatableValue("Spring Boots")
+        description = TranslatableValue("Enable Spring Boots goal estimation rendering.")
+    }
 }
