@@ -38,6 +38,10 @@ dependencies {
     implementation("org.lwjgl:lwjgl-nanovg:3.3.3")
     runtimeOnly("org.lwjgl:lwjgl:3.3.3:natives-windows")
     runtimeOnly("org.lwjgl:lwjgl-nanovg:3.3.3:natives-windows")
+    runtimeOnly("org.lwjgl:lwjgl:3.3.3:natives-linux")
+    runtimeOnly("org.lwjgl:lwjgl-nanovg:3.3.3:natives-linux")
+    runtimeOnly("org.lwjgl:lwjgl:3.3.3:natives-macos")
+    runtimeOnly("org.lwjgl:lwjgl-nanovg:3.3.3:natives-macos")
     include("org.lwjgl:lwjgl-nanovg:3.3.3")
 
     implementation("com.github.stivais:AuroraUI:9b71d51d5f0e19631d9b8dd2efae232207827ea7")
