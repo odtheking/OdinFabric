@@ -71,7 +71,7 @@ class StringSetting(
         return textInputHandler.keyTyped(typedChar)
     }
 
-    override fun getHeight(): Float = Panel.HEIGHT + 20f
+    override fun getHeight(): Float = Panel.HEIGHT + 28f
 
     override fun write(): JsonElement {
         return JsonPrimitive(value)

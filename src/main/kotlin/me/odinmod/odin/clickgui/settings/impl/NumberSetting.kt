@@ -133,6 +133,8 @@ class NumberSetting<E>(
     override val isHovered: Boolean
         get() = isAreaHovered(lastX, lastY + Panel.HEIGHT / 2, width, Panel.HEIGHT / 2)
 
+    override fun getHeight(): Float = Panel.HEIGHT + 8f
+
     override fun write(): JsonElement = JsonPrimitive(value)
 
     override fun read(element: JsonElement?) {
