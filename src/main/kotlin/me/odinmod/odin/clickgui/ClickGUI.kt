@@ -30,8 +30,7 @@ object ClickGUI : Screen(Text.literal("Click GUI")) {
     private val panels: ArrayList<Panel> = arrayListOf()
 
     private var desc = Description("", 0f, 0f, HoverHandler(100))
-    private var anim = EaseInOutAnimation(400)
-    private var open = false
+    private var openAnim = EaseInOutAnimation(400)
 
     val gray38 = Color(38, 38, 38)
     val gray26 = Color(26, 26, 26)
@@ -43,9 +42,9 @@ object ClickGUI : Screen(Text.literal("Click GUI")) {
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, deltaTicks: Float) {
         NVGRenderer.beginFrame(1920f, 1080f)
-        if (anim.isAnimating()) {
-            NVGRenderer.translate(0f, floor(anim.get(-10f, 0f, !open)))
-            NVGRenderer.globalAlpha(anim.get(0f, 1f, !open))
+        if (openAnim.isAnimating()) {
+            NVGRenderer.translate(0f, floor(openAnim.get(-10f, 0f)))
+            NVGRenderer.globalAlpha(openAnim.get(0f, 1f))
         }
 
         for (i in 0 until panels.size) { panels[i].draw(mc.mouse.x, mc.mouse.y) }
@@ -99,7 +98,7 @@ object ClickGUI : Screen(Text.literal("Click GUI")) {
         for (i in panels.size - 1 downTo 0) {
             if (panels[i].keyPressed(keyCode, scanCode, modifiers)) return true
         }
-        if (keyCode == ClickGUIModule.settings.last().value && !anim.isAnimating()) {
+        if (keyCode == ClickGUIModule.settings.last().value && !openAnim.isAnimating()) {
             mc.setScreen(null)
             if (mc.currentScreen == null) mc.onWindowFocusChanged(true)
         }
@@ -107,8 +106,7 @@ object ClickGUI : Screen(Text.literal("Click GUI")) {
     }
 
     override fun init() {
-        open = true
-        anim.start()
+        openAnim.start()
 
         for (panel in panels) {
             panel.x = ClickGUIModule.panelX[panel.category]!!.value
@@ -129,8 +127,6 @@ object ClickGUI : Screen(Text.literal("Click GUI")) {
         }
         Config.save()
 
-        open = false
-        anim.start()
         super.close()
     }
 

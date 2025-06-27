@@ -7,7 +7,6 @@ import me.odinmod.odin.utils.Color.Companion.alpha
 import me.odinmod.odin.utils.Color.Companion.blue
 import me.odinmod.odin.utils.Color.Companion.green
 import me.odinmod.odin.utils.Color.Companion.red
-import me.odinmod.odin.utils.Colors
 import net.minecraft.client.gl.GlBackend
 import net.minecraft.client.texture.GlTexture
 import org.lwjgl.nanovg.NVGColor
@@ -19,10 +18,10 @@ import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL30
 import org.lwjgl.stb.STBImage.stbi_load_from_memory
 import org.lwjgl.system.MemoryUtil.memAlloc
+import org.lwjgl.system.MemoryUtil.memFree
 import java.nio.ByteBuffer
 import kotlin.math.max
 import kotlin.math.min
-
 
 object NVGRenderer {
 
@@ -190,13 +189,11 @@ object NVGRenderer {
     }
 
     fun text(text: String, x: Float, y: Float, size: Float, color: Int, font: Font) {
-        nvgBeginPath(vg)
         nvgFontSize(vg, size)
         nvgFontFaceId(vg, getFontID(font))
         color(color)
         nvgFillColor(vg, nvgColor)
         nvgText(vg, x, y + .5f, text)
-        nvgClosePath(vg)
     }
 
     fun textWidth(text: String, size: Float, font: Font): Float {
@@ -253,8 +250,6 @@ object NVGRenderer {
         nvgImagePattern(vg, x, y, w, h, 0f, getImage(image), 1f, nvgPaint)
         nvgBeginPath(vg)
         nvgRoundedRectVarying(vg, x, y, w, h, tl, tr, br, bl)
-        color(Colors.MINECRAFT_RED.rgba)
-        nvgFillColor(vg, nvgColor)
         nvgFillPaint(vg, nvgPaint)
         nvgFill(vg)
     }
@@ -308,14 +303,22 @@ object NVGRenderer {
         val vec = image.stream.use { it.bufferedReader().readText() }
         val svg = nsvgParse(vec, "px", 96f) ?: throw IllegalStateException("Failed to parse ${image.identifier}")
 
-        val memAlloc = memAlloc((svg.width() * svg.height() * 4).toInt())
-        val rasterizer = nsvgCreateRasterizer()
-        nsvgRasterize(rasterizer, svg, 0f, 0f, 1f, memAlloc, svg.width().toInt(), svg.height().toInt(), svg.width().toInt() * 4)
-        val nvgImage = nvgCreateImageRGBA(vg, svg.width().toInt(), svg.height().toInt(), 0, memAlloc)
-        nsvgDeleteRasterizer(rasterizer)
-        nsvgDelete(svg)
-        return nvgImage
+        val width = svg.width().toInt()
+        val height = svg.height().toInt()
+        val buffer = memAlloc(width * height * 4)
+
+        try {
+            val rasterizer = nsvgCreateRasterizer()
+            nsvgRasterize(rasterizer, svg, 0f, 0f, 1f, buffer, width, height, width * 4)
+            val nvgImage = nvgCreateImageRGBA(vg, width, height, 0, buffer)
+            nsvgDeleteRasterizer(rasterizer)
+            return nvgImage
+        } finally {
+            nsvgDelete(svg)
+            memFree(buffer)
+        }
     }
+
 
     private fun color(color: Int) {
         nvgRGBA(color.red.toByte(), color.green.toByte(), color.blue.toByte(), color.alpha.toByte(), nvgColor)

@@ -120,7 +120,7 @@ class ColorSetting(
                     mainSliderPrevBright = mainSliderAnim.get(mainSliderPrevBright, value.brightness, false)
                     mainSliderAnim.start()
                     value.saturation = newSaturation.coerceIn(0f, 1f)
-                    value.brightness = newBrightness
+                    value.brightness = newBrightness.coerceIn(0f, 1f)
                 }
             }
             1 -> {

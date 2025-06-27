@@ -20,6 +20,8 @@ import kotlin.math.floor
  * Renders all the modules.
  *
  * @author Stivais, Aton
+ *
+ * see [RenderableSetting]
  */
 class ModuleButton(val module: Module, val panel: Panel) {
 

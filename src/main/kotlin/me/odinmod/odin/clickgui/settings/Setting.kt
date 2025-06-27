@@ -28,7 +28,7 @@ abstract class Setting<T> (
     abstract var value: T
 
     /**
-     * Dependency for if it should be shown in the [click gui][me.odinmod.odin.features.clickgui.Module].
+     * Dependency for if it should be shown in the [click gui][Module].
      */
     protected var visibilityDependency: (() -> Boolean)? = null
 
@@ -44,13 +44,12 @@ abstract class Setting<T> (
             return (visibilityDependency?.invoke() ?: true) && !hidden
         }
 
-    override operator fun provideDelegate(thisRef: Module, property: KProperty<*>): ReadWriteProperty<Module, T> {
-        return thisRef.register(this)
-    }
+    override operator fun provideDelegate(thisRef: Module, property: KProperty<*>): ReadWriteProperty<Module, T> =
+        thisRef.register(this)
 
-    override operator fun getValue(thisRef: Module, property: KProperty<*>): T {
-        return value
-    }
+
+    override operator fun getValue(thisRef: Module, property: KProperty<*>): T =
+        value
 
     override operator fun setValue(thisRef: Module, property: KProperty<*>, value: T) {
         this.value = value
