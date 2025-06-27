@@ -1,6 +1,6 @@
 package me.odinmod.odin.utils.ui.rendering
 
-import com.github.stivais.aurora.utils.setupConnection
+import me.odinmod.odin.utils.setupConnection
 import org.lwjgl.system.MemoryUtil
 import java.io.File
 import java.io.FileNotFoundException
@@ -42,9 +42,8 @@ class Image(
 
         private fun getStream(path: String): InputStream {
             val trimmedPath = path.trim()
-            return if (trimmedPath.startsWith("http")) {
-                setupConnection(trimmedPath)
-            } else {
+            return if (trimmedPath.startsWith("http")) setupConnection(trimmedPath)
+            else {
                 val file = File(trimmedPath)
                 if (file.exists() && file.isFile) Files.newInputStream(file.toPath())
                 else this::class.java.getResourceAsStream(trimmedPath) ?: throw FileNotFoundException(trimmedPath)

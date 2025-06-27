@@ -1,10 +1,10 @@
 package me.odinmod.odin.utils.ui
 
-import com.github.stivais.aurora.utils.dropAt
-import com.github.stivais.aurora.utils.removeRangeSafe
-import com.github.stivais.aurora.utils.substringSafe
 import me.odinmod.odin.OdinMod.mc
 import me.odinmod.odin.utils.Colors
+import me.odinmod.odin.utils.dropAt
+import me.odinmod.odin.utils.removeRangeSafe
+import me.odinmod.odin.utils.substringSafe
 import me.odinmod.odin.utils.ui.MouseUtils.isAreaHovered
 import me.odinmod.odin.utils.ui.rendering.NVGRenderer
 import net.minecraft.client.gui.screen.Screen

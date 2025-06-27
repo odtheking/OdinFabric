@@ -8,6 +8,8 @@ import net.minecraft.text.ClickEvent
 import net.minecraft.text.HoverEvent
 import net.minecraft.text.Text
 import java.util.*
+import kotlin.math.max
+import kotlin.math.min
 
 val FORMATTING_CODE_PATTERN = Regex("§[0-9a-fk-or]", RegexOption.IGNORE_CASE)
 
@@ -68,4 +70,21 @@ fun setClipboardContent(string: String) {
     } catch (e: Exception) {
         OdinMod.logger.error("Failed to set Clipboard Content", e)
     }
+}
+
+fun String.substringSafe(from: Int, to: Int): String {
+    val f = min(from, to).coerceAtLeast(0)
+    val t = max(to, from)
+    if (t > length) return substring(f)
+    return substring(f, t)
+}
+
+fun String.removeRangeSafe(from: Int, to: Int): String {
+    val f = min(from, to)
+    val t = max(to, from)
+    return removeRange(f, t)
+}
+
+fun String.dropAt(at: Int, amount: Int): String {
+    return removeRangeSafe(at, at + amount)
 }

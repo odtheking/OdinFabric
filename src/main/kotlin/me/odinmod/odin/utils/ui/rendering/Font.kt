@@ -1,6 +1,5 @@
 package me.odinmod.odin.utils.ui.rendering
 
-import com.github.stivais.aurora.renderer.data.Font
 import java.io.FileNotFoundException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
