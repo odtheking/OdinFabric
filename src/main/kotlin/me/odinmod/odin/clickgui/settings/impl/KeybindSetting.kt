@@ -24,24 +24,21 @@ class KeybindSetting(
     constructor(name: String, defaultKeyCode: Int, desc: String = "", hidden: Boolean = false) : this(name, InputUtil.Type.KEYSYM.createFromCode(defaultKeyCode), desc, hidden)
 
     override var value: InputUtil.Key = default
-    private var keyName = ""
-    private var keyNameWidth = -1f
     var onPress: (() -> Unit)? = null
+    private var keyNameWidth = -1f
 
     private var key: InputUtil.Key
         get() = value
         set(newKey) {
             if (newKey == value) return
             value = newKey
-            keyName = newKey.localizedText.string
-            keyNameWidth = NVGRenderer.textWidth(keyName, 16f, NVGRenderer.defaultFont)
+            keyNameWidth = NVGRenderer.textWidth(value.localizedText.string, 16f, NVGRenderer.defaultFont)
         }
 
     override fun render(x: Float, y: Float, mouseX: Double, mouseY: Double): Float {
         super.render(x, y, mouseX, mouseY)
 
-        if (keyName.isEmpty()) keyName = value.localizedText.string
-        if (keyNameWidth < 0) keyNameWidth = NVGRenderer.textWidth(keyName, 16f, NVGRenderer.defaultFont)
+        if (keyNameWidth < 0) keyNameWidth = NVGRenderer.textWidth(value.localizedText.string, 16f, NVGRenderer.defaultFont)
 
         val rectX = x + width - 20 - keyNameWidth
         val rectY = y + Panel.HEIGHT / 2f - 10f
@@ -53,7 +50,7 @@ class KeybindSetting(
         NVGRenderer.hollowRect(rectX - 1, rectY - 1, rectWidth + 2f, rectHeight + 2f, 1.5f, ClickGUIModule.clickGUIColor.rgba, 4f)
 
         NVGRenderer.text(name, x + 6f, y + Panel.HEIGHT / 2f - 8f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
-        NVGRenderer.text(keyName, rectX + (rectWidth - keyNameWidth) / 2, rectY + rectHeight / 2 - 8f, 16f, if (listening) Colors.MINECRAFT_YELLOW.rgba else Colors.WHITE.rgba, NVGRenderer.defaultFont)
+        NVGRenderer.text(value.localizedText.string, rectX + (rectWidth - keyNameWidth) / 2, rectY + rectHeight / 2 - 8f, 16f, if (listening) Colors.MINECRAFT_YELLOW.rgba else Colors.WHITE.rgba, NVGRenderer.defaultFont)
 
         return Panel.HEIGHT
     }
@@ -75,7 +72,7 @@ class KeybindSetting(
 
         when (keyCode) {
             GLFW.GLFW_KEY_ESCAPE, GLFW.GLFW_KEY_BACKSPACE -> key = InputUtil.UNKNOWN_KEY
-            GLFW.GLFW_KEY_ENTER -> {} // Do nothing, just exit listening
+            GLFW.GLFW_KEY_ENTER -> listening = false
             else -> key = InputUtil.fromKeyCode(keyCode, scanCode)
         }
 
@@ -88,12 +85,11 @@ class KeybindSetting(
         return this
     }
 
-    fun isDown(): Boolean {
-        return value != InputUtil.UNKNOWN_KEY && InputUtil.isKeyPressed(mc.window.handle, value.code)
-    }
+    fun isDown(): Boolean =
+        value != InputUtil.UNKNOWN_KEY && InputUtil.isKeyPressed(mc.window.handle, value.code)
 
-    override val isHovered: Boolean
-        get() = isAreaHovered(lastX + width - 20 - keyNameWidth, lastY + Panel.HEIGHT / 2f - 10f, keyNameWidth + 12f, 22f)
+    override val isHovered: Boolean get() =
+        isAreaHovered(lastX + width - 20 - keyNameWidth, lastY + Panel.HEIGHT / 2f - 10f, keyNameWidth + 12f, 22f)
 
     override fun write(): JsonElement = JsonPrimitive(value.translationKey)
 
