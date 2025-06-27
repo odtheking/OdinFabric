@@ -40,8 +40,7 @@ object ModuleManager {
     fun activateModuleKeyBinds(event: InputEvent) {
         for (module in modules.toList()) {
             for (setting in module.settings.toList()) {
-                if (setting is KeybindSetting && (setting.value == event.key.code || (setting.value < 0 && setting.value + 100 == event.key.code)))
-                    setting.onPress?.invoke()
+                if (setting is KeybindSetting && setting.value.code  == event.key.code) setting.onPress?.invoke()
             }
         }
     }

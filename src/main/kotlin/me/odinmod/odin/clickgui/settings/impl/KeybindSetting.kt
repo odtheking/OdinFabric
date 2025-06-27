@@ -16,30 +16,31 @@ import org.lwjgl.glfw.GLFW
 
 class KeybindSetting(
     name: String,
-    override val default: Int,
+    override val default: InputUtil.Key,
     desc: String,
     hidden: Boolean = false
-) : RenderableSetting<Int>(name, hidden, desc), Saving {
+) : RenderableSetting<InputUtil.Key>(name, hidden, desc), Saving {
 
-    override var value: Int = default
+    constructor(name: String, defaultKeyCode: Int, desc: String = "", hidden: Boolean = false) : this(name, InputUtil.Type.KEYSYM.createFromCode(defaultKeyCode), desc, hidden)
 
+    override var value: InputUtil.Key = default
+    private var keyName = ""
+    private var keyNameWidth = -1f
     var onPress: (() -> Unit)? = null
 
-    private var key: Int
+    private var key: InputUtil.Key
         get() = value
-        set(value) {
-            if (value == this.value) return
-            this.value = value
-            keyName = getKeyName(value)
+        set(newKey) {
+            if (newKey == value) return
+            value = newKey
+            keyName = newKey.localizedText.string
             keyNameWidth = NVGRenderer.textWidth(keyName, 16f, NVGRenderer.defaultFont)
         }
 
-    private var keyName = ""
-    private var keyNameWidth = -1f
-
     override fun render(x: Float, y: Float, mouseX: Double, mouseY: Double): Float {
         super.render(x, y, mouseX, mouseY)
-        if (keyName.isEmpty()) keyName = getKeyName(value)
+
+        if (keyName.isEmpty()) keyName = value.localizedText.string
         if (keyNameWidth < 0) keyNameWidth = NVGRenderer.textWidth(keyName, 16f, NVGRenderer.defaultFont)
 
         val rectX = x + width - 20 - keyNameWidth
@@ -59,35 +60,27 @@ class KeybindSetting(
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, mouseButton: Int): Boolean {
         if (listening) {
-            key = -100 + mouseButton
+            key = InputUtil.Type.MOUSE.createFromCode(mouseButton)
             listening = false
             return true
         } else if (mouseButton == 0 && isHovered) {
-            listening = !listening
+            listening = true
             return true
         }
         return false
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
-        if (listening) {
-            when (keyCode) {
-                GLFW.GLFW_KEY_ESCAPE, GLFW.GLFW_KEY_BACKSPACE -> key = 0
-                GLFW.GLFW_KEY_ENTER -> listening = false
-                else -> key = keyCode
-            }
-            listening = false
-            return true
-        }
-        return false
-    }
+        if (!listening) return false
 
-    private fun getKeyName(key: Int): String {
-        return when {
-            key > 0 -> InputUtil.fromKeyCode(key, 0)?.localizedText?.string
-            key < 0 -> InputUtil.Type.MOUSE.createFromCode(key + 100)?.localizedText?.string
-            else -> "None"
-        } ?: "Error"
+        when (keyCode) {
+            GLFW.GLFW_KEY_ESCAPE, GLFW.GLFW_KEY_BACKSPACE -> key = InputUtil.UNKNOWN_KEY
+            GLFW.GLFW_KEY_ENTER -> {} // Do nothing, just exit listening
+            else -> key = InputUtil.fromKeyCode(keyCode, scanCode)
+        }
+
+        listening = false
+        return true
     }
 
     fun onPress(block: () -> Unit): KeybindSetting {
@@ -96,17 +89,16 @@ class KeybindSetting(
     }
 
     fun isDown(): Boolean {
-        return if (value == 0) false
-        else InputUtil.isKeyPressed(mc.window.handle, value + if (value < 0) 100 else 0)
+        return value != InputUtil.UNKNOWN_KEY && InputUtil.isKeyPressed(mc.window.handle, value.code)
     }
 
-    override val isHovered: Boolean get() =
-        isAreaHovered(lastX + width - 20 - keyNameWidth, lastY + Panel.HEIGHT / 2f - 10f, keyNameWidth + 12f, 22f)
+    override val isHovered: Boolean
+        get() = isAreaHovered(lastX + width - 20 - keyNameWidth, lastY + Panel.HEIGHT / 2f - 10f, keyNameWidth + 12f, 22f)
 
-    override fun write(): JsonElement = JsonPrimitive(value)
+    override fun write(): JsonElement = JsonPrimitive(value.translationKey)
 
     override fun read(element: JsonElement?) {
-        element?.asInt?.let { value = it }
+        element?.asString?.let { value = InputUtil.fromTranslationKey(it) }
     }
 
     override fun reset() {

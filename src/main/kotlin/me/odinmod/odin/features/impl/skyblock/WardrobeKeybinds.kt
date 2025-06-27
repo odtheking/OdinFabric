@@ -53,12 +53,12 @@ object WardrobeKeybinds: Module(
         val equippedIndex = screen.screenHandler.slots.find { equippedRegex.matches(it.stack.itemName.string) }?.index
 
         val index = when (keyCode) {
-            nextPageKeybind -> if (current < total) 53 else return false
-            previousPageKeybind -> if (current > total) 53 else return false
-            unequipKeybind -> equippedIndex ?: return false
+            nextPageKeybind.code -> if (current < total) 53 else return false
+            previousPageKeybind.code -> if (current > total) 53 else return false
+            unequipKeybind.code -> equippedIndex ?: return false
             else -> {
                 val keyIndex = arrayOf(wardrobe1, wardrobe2, wardrobe3, wardrobe4, wardrobe5, wardrobe6, wardrobe7, wardrobe8, wardrobe9)
-                    .indexOfFirst { it == keyCode }.takeIf { it != -1 } ?: return false
+                    .indexOfFirst { it.code == keyCode }.takeIf { it != -1 } ?: return false
                 if (equippedIndex == keyIndex + 36 && disallowUnequippingEquipped) return false
                 keyIndex + 36
             }

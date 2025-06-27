@@ -5,6 +5,7 @@ import me.odinmod.odin.clickgui.settings.AlwaysActive
 import me.odinmod.odin.clickgui.settings.Setting
 import me.odinmod.odin.features.impl.render.ClickGUIModule
 import me.odinmod.odin.utils.modMessage
+import org.lwjgl.glfw.GLFW
 import kotlin.reflect.full.hasAnnotation
 
 /**
@@ -13,7 +14,7 @@ import kotlin.reflect.full.hasAnnotation
  */
 abstract class Module(
     val name: String,
-    val key: Int? = 0,
+    val key: Int? = GLFW.GLFW_KEY_UNKNOWN,
     @Transient var description: String,
     toggled: Boolean = false,
 ) {
