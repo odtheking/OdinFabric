@@ -1,6 +1,6 @@
 package mixins;
 
-import me.odinmod.odin.features.skyblock.NoCursorReset;
+import me.odinmod.odin.features.impl.skyblock.NoCursorReset;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import org.lwjgl.glfw.GLFW;

@@ -35,10 +35,13 @@ dependencies {
     implementation("com.github.Stivais:Commodore:1.0.0")
     include("com.github.Stivais:Commodore:1.0.0")
 
-    modImplementation("com.teamresourceful.resourcefulconfig:resourcefulconfig-fabric-1.21.5:3.5.4")
-    modImplementation("com.teamresourceful.resourcefulconfigkt:resourcefulconfigkt-fabric-1.21.5:3.5.6")
-    include("com.teamresourceful.resourcefulconfig:resourcefulconfig-fabric-1.21.5:3.5.4")
-    include("com.teamresourceful.resourcefulconfigkt:resourcefulconfigkt-fabric-1.21.5:3.5.6")
+    implementation("org.lwjgl:lwjgl-nanovg:3.3.3")
+    runtimeOnly("org.lwjgl:lwjgl:3.3.3:natives-windows")
+    runtimeOnly("org.lwjgl:lwjgl-nanovg:3.3.3:natives-windows")
+    include("org.lwjgl:lwjgl-nanovg:3.3.3")
+
+    implementation("com.github.stivais:AuroraUI:9b71d51d5f0e19631d9b8dd2efae232207827ea7")
+    include("com.github.stivais:AuroraUI:9b71d51d5f0e19631d9b8dd2efae232207827ea7")
 }
 
 tasks {

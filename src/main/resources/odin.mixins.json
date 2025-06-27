@@ -9,6 +9,7 @@
   ],
   "client": [
     "ClientCommonNetworkHandlerMixin",
+    "KeyBindingMixin",
     "MouseMixin"
   ],
   "injectors": {

@@ -1,16 +1,12 @@
 package me.odinmod.odin
 
-import com.teamresourceful.resourcefulconfig.api.loader.Configurator
 import me.odinmod.odin.commands.mainCommand
 import me.odinmod.odin.config.Config
 import me.odinmod.odin.events.EventDispatcher
-import me.odinmod.odin.features.RenderTest
-import me.odinmod.odin.features.foraging.TreeHud
-import me.odinmod.odin.features.render.Camera
-import me.odinmod.odin.features.render.Etherwarp
-import me.odinmod.odin.features.skyblock.*
+import me.odinmod.odin.features.ModuleManager
+import me.odinmod.odin.features.impl.foraging.TreeHud
+import me.odinmod.odin.features.impl.render.RenderTest
 import me.odinmod.odin.utils.handlers.MobCaches
-import me.odinmod.odin.utils.handlers.TickTask
 import me.odinmod.odin.utils.handlers.TickTasks
 import me.odinmod.odin.utils.skyblock.LocationUtils
 import me.odinmod.odin.utils.skyblock.SkyblockPlayer
@@ -37,8 +33,6 @@ object OdinMod : ModInitializer {
     private val metadata: ModMetadata by lazy { FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow().metadata }
     val version: Version by lazy { metadata.version }
     val logger: Logger = LogManager.getLogger("Odin")
-    private val configurator = Configurator("odining")
-    val config = Config.register(configurator)
 
     override fun onInitialize() {
         EVENT_BUS.registerLambdaFactory("me.odinmod") { lookupInMethod, klass ->
@@ -52,26 +46,9 @@ object OdinMod : ModInitializer {
         }
 
         listOf(
-            this, LocationUtils, TickTasks, SkyblockPlayer, MobCaches, RenderTest, TreeHud, Etherwarp, ChatCommands, WardrobeKeybinds, NoCursorReset, Camera,
-            SpringBoots, RagnarockAxe, EventDispatcher
+            this, LocationUtils, TickTasks, SkyblockPlayer, MobCaches, RenderTest, TreeHud, EventDispatcher, ModuleManager
         ).forEach { EVENT_BUS.subscribe(it) }
-    }
 
-    init {
-        TickTask(50) {
-         /*   val player = mc.player ?: return@TickTask
-            getEtherPos(player.yaw, player.pitch, 60.0, true).also { etherPos ->
-                if (etherPos.succeeded) {
-                    modMessage("Ether position: ${etherPos.vec}")
-                } else {
-                    modMessage("Ether position not found")
-                }
-            }*/
-//            val item = mc.player?.mainHandStack ?: return@TickTask
-//            modMessage(getItemId(item))
-//            modMessage(getItemUUID(item))
-//            modMessage(getLoreText(item).joinToString("\n"))
-//            modMessage(getCustomData(item))
-        }
+        Config.load()
     }
 }
