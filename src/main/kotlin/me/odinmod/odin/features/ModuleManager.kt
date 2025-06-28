@@ -4,7 +4,6 @@ import me.odinmod.odin.clickgui.settings.impl.KeybindSetting
 import me.odinmod.odin.events.InputEvent
 import me.odinmod.odin.features.impl.render.Camera
 import me.odinmod.odin.features.impl.render.ClickGUIModule
-import me.odinmod.odin.features.impl.render.ClickGUIModule.onKeybind
 import me.odinmod.odin.features.impl.render.Etherwarp
 import me.odinmod.odin.features.impl.skyblock.*
 import me.odinmod.odin.utils.ui.rendering.NVGRenderer
@@ -31,7 +30,7 @@ object ModuleManager {
     init {
         for (module in modules) {
             module.key?.let {
-                module.register(KeybindSetting("Keybind", it, "Toggles the module").apply { onPress = ::onKeybind })
+                module.register(KeybindSetting("Keybind", it, "Toggles the module").apply { onPress = { module.onKeybind() } })
             }
         }
     }
