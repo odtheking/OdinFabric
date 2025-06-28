@@ -85,8 +85,9 @@ class NumberSetting<E>(
         handler.handle(x, y + Panel.HEIGHT / 2, width, Panel.HEIGHT / 2)
 
         if (listening) {
-            sliderPercentage = ((mouseX.toFloat() - (x + 6f)) / (width - 12f)).coerceIn(0f, 1f)
-            valueDouble = minDouble + sliderPercentage * (maxDouble - minDouble)
+            val newPercentage = ((mouseX.toFloat() - (x + 6f)) / (width - 12f)).coerceIn(0f, 1f)
+            valueDouble = minDouble + newPercentage * (maxDouble - minDouble)
+            sliderPercentage = newPercentage
         }
 
         NVGRenderer.text(name, x + 6f, y + Panel.HEIGHT / 2f - 15f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
