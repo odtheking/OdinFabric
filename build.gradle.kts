@@ -15,6 +15,7 @@ repositories {
     maven { url = uri("https://jitpack.io") }
     maven { url = uri("https://maven.meteordev.org/releases") }
     maven { url = uri("https://nexus.resourcefulbees.com/repository/maven-public/") }
+    maven { url = uri("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1") }
 }
 
 dependencies {
@@ -23,6 +24,7 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:${property("loader_version")}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}")
     modImplementation("net.fabricmc:fabric-language-kotlin:${property("fabric_kotlin_version")}")
+    modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.1")
 
     val lwjglVersion = property("minecraft_lwjgl_version") as String
 
