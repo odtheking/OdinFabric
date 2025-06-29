@@ -9,6 +9,7 @@
   ],
   "client": [
     "ClientCommonNetworkHandlerMixin",
+    "DrawContextMixin",
     "KeyBindingMixin",
     "MixinGameRenderer",
     "MouseMixin"

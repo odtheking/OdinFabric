@@ -1,17 +1,21 @@
 package me.odinmod.odin.utils
 
+import com.mojang.blaze3d.systems.RenderSystem
 import me.odinmod.odin.OdinMod.mc
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gl.RenderPipelines
+import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.render.*
 import net.minecraft.client.util.BufferAllocator
 import net.minecraft.text.OrderedText
 import net.minecraft.util.Formatting
 import net.minecraft.util.math.Box
 import net.minecraft.util.math.Vec3d
+import org.lwjgl.opengl.GL11
 import java.util.*
 import kotlin.math.cos
+import kotlin.math.roundToInt
 import kotlin.math.sin
 
 private val ALLOCATOR = BufferAllocator(1536)
@@ -136,6 +140,23 @@ fun drawSphere(
 
     matrixStack.pop()
     bufferSource.draw(CUSTOM_LINE_LAYER)
+}
+
+fun renderDurabilityBar(ctx: DrawContext, x: Int, y: Int, percentFilled: Double) {
+    val percent = percentFilled.coerceIn(0.0, 1.0).takeIf { it > 0.0 } ?: return
+    val barColorIndex = (percent * 255.0).roundToInt()
+
+    ctx.matrices.push()
+    ctx.matrices.translate(0.0, 0.0, 500.0)
+
+    ctx.fill(x + 2, y + 13, x + 2 + 13, y + 13 + 2, 0xFF000000.toInt())
+
+    ctx.fill(x + 2, y + 13, x + 2 + 12, y + 13 + 1, Color((255 - barColorIndex) / 4, 64, 0).rgba)
+
+    val filledWidth = (percent * 13.0).roundToInt()
+    ctx.fill(x + 2, y + 13, x + 2 + filledWidth, y + 13 + 1, Color(255 - barColorIndex, barColorIndex, 0).rgba)
+
+    ctx.matrices.pop()
 }
 
 val CUSTOM_LINE_LAYER: RenderLayer = RenderLayer.of(
