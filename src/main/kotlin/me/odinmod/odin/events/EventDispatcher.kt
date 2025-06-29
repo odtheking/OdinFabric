@@ -46,6 +46,10 @@ object EventDispatcher {
             ScreenKeyboardEvents.beforeKeyPress(screen).register { _, keyCode, scanCode, modifiers ->
                 GuiEvent.KeyPress(screen, keyCode, scanCode, modifiers).postAndCatch()
             }
+
+            ScreenEvents.afterRender(screen).register { _, drawContext, _, _, _ ->
+                GuiEvent.Render(screen, drawContext).postAndCatch()
+            }
         }
     }
 }

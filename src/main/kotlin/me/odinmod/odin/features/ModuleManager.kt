@@ -33,7 +33,7 @@ object ModuleManager {
         ClickGUIModule, Camera, Etherwarp,
 
         //skyblock
-        ChatCommands, NoCursorReset, RagnarockAxe, SpringBoots, WardrobeKeybinds
+        ChatCommands, NoCursorReset, RagnarockAxe, SpringBoots, WardrobeKeybinds, PetKeybinds,
 
         // kuudra
 
@@ -57,9 +57,13 @@ object ModuleManager {
 
     fun render(context: DrawContext, tickCounter: RenderTickCounter) {
         if (mc.world == null || mc.player == null) return
+        context.matrices.push()
+        val sf = mc.window.scaleFactor.toFloat()
+        context.matrices.scale(1f / sf, 1f / sf, 1f)
         for (hudSettings in hudSettingsCache) {
              if (hudSettings.isEnabled) hudSettings.value.draw(context, false)
         }
+        context.matrices?.pop()
     }
 
     @EventHandler

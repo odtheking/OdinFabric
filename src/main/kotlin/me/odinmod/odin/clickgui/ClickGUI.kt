@@ -1,8 +1,10 @@
 package me.odinmod.odin.clickgui
 
+import me.odinmod.odin.OdinMod
 import me.odinmod.odin.OdinMod.mc
 import me.odinmod.odin.clickgui.settings.impl.ColorSetting
 import me.odinmod.odin.config.Config
+import me.odinmod.odin.events.GuiEvent
 import me.odinmod.odin.features.Category
 import me.odinmod.odin.features.impl.render.ClickGUIModule
 import me.odinmod.odin.utils.Color
@@ -10,7 +12,7 @@ import me.odinmod.odin.utils.Colors
 import me.odinmod.odin.utils.ui.HoverHandler
 import me.odinmod.odin.utils.ui.animations.EaseInOutAnimation
 import me.odinmod.odin.utils.ui.rendering.NVGRenderer
-import net.minecraft.client.gui.DrawContext
+import meteordevelopment.orbit.EventHandler
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.text.Text
 import kotlin.math.floor
@@ -37,9 +39,12 @@ object ClickGUI : Screen(Text.literal("Click GUI")) {
 
     init {
         for (category in Category.entries) panels.add(Panel(category))
+        OdinMod.EVENT_BUS.subscribe(this)
     }
 
-    override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, deltaTicks: Float) {
+    @EventHandler
+    fun render(event: GuiEvent.NVGRender) {
+        if (mc.currentScreen != this) return
         NVGRenderer.beginFrame(1920f, 1080f)
         if (openAnim.isAnimating()) {
             NVGRenderer.translate(0f, floor(openAnim.get(-10f, 0f)))
@@ -53,11 +58,6 @@ object ClickGUI : Screen(Text.literal("Click GUI")) {
         SearchBar.draw(virtualX, virtualY, mc.mouse.x, mc.mouse.y)
         desc.render()
         NVGRenderer.endFrame()
-        super.render(context, mouseX, mouseY, deltaTicks)
-    }
-
-    override fun renderBackground(context: DrawContext?, mouseX: Int, mouseY: Int, deltaTicks: Float) {
-        //super.renderBackground(context, mouseX, mouseY, deltaTicks)
     }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {

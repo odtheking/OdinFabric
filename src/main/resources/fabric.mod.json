@@ -14,6 +14,9 @@
 
   "environment": "*",
   "entrypoints": {
+    "modmenu": [
+      "me.odinmod.odin.clickgui.ModMenuIntegration"
+    ],
     "main": [
       {
         "adapter": "kotlin",
@@ -30,5 +33,19 @@
     "minecraft": "~${minecraft_version}",
     "java": ">=21",
     "fabric-language-kotlin": ">=${fabric_kotlin_version}"
+  },
+
+  "contact": {
+    "homepage": "https://modrinth.com/mod/odin",
+    "sources": "https://github.com/odtheking/OdinFabric"
+  },
+
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.discord": "https://discord.gg/8Fqsg5xBP3"
+      },
+      "update_checker": true
+    }
   }
 }

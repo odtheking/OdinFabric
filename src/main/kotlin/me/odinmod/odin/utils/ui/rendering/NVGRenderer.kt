@@ -15,6 +15,7 @@ import org.lwjgl.nanovg.NanoSVG.*
 import org.lwjgl.nanovg.NanoVG.*
 import org.lwjgl.nanovg.NanoVGGL3.*
 import org.lwjgl.opengl.GL11
+import org.lwjgl.opengl.GL20
 import org.lwjgl.opengl.GL30
 import org.lwjgl.stb.STBImage.stbi_load_from_memory
 import org.lwjgl.system.MemoryUtil.memAlloc
@@ -38,6 +39,7 @@ object NVGRenderer {
 
     private var scissor: Scissor? = null
 
+    private var previousProgram = -1
     private var vg: Long = -1
 
     private var drawing: Boolean = false
@@ -59,6 +61,7 @@ object NVGRenderer {
     fun beginFrame(width: Float, height: Float) {
         if (drawing) throw IllegalStateException("[NVGRenderer] Already drawing, but called beginFrame")
 
+        previousProgram = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM)
         val framebuffer = mc.framebuffer
         val glFramebuffer = (framebuffer.colorAttachment as GlTexture).getOrCreateFramebuffer((RenderSystem.getDevice() as GlBackend).framebufferManager, null)
         GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, glFramebuffer)
@@ -76,7 +79,8 @@ object NVGRenderer {
         GlStateManager._disableDepthTest()
         GlStateManager._enableBlend()
         GlStateManager._blendFuncSeparate(770, 771, 1, 0)
-
+        if (previousProgram != -1) GL20.glUseProgram(previousProgram)
+        else GL20.glUseProgram(0)
         drawing = false
     }
 

@@ -22,14 +22,15 @@ object HudManager : Screen(Text.literal("HUD Manager")) {
             it.y = (mc.mouse.y - startY).toFloat().coerceIn(0f, mc.window.height - (it.height * it.scale).coerceAtLeast(20f))
         }
 
+        context?.matrices?.push()
+        val sf = mc.window.scaleFactor.toFloat()
+        context?.matrices?.scale(1f / sf, 1f / sf, 1f)
+
         for (hud in hudSettingsCache) {
             if (hud.isEnabled) hud.value.draw(context!!, true)
         }
+        context?.matrices?.pop()
         super.render(context, mouseX, mouseY, deltaTicks)
-    }
-
-    override fun renderBackground(context: DrawContext?, mouseX: Int, mouseY: Int, deltaTicks: Float) {
-        //super.renderBackground(context, mouseX, mouseY, deltaTicks)
     }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {

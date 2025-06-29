@@ -16,6 +16,7 @@ repositories {
     maven { url = uri("https://maven.meteordev.org/releases") }
     maven { url = uri("https://nexus.resourcefulbees.com/repository/maven-public/") }
     maven { url = uri("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1") }
+    maven { url = uri("https://maven.terraformersmc.com/") }
 }
 
 dependencies {
@@ -26,7 +27,15 @@ dependencies {
     modImplementation("net.fabricmc:fabric-language-kotlin:${property("fabric_kotlin_version")}")
     modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.1")
 
-    val lwjglVersion = property("minecraft_lwjgl_version") as String
+    implementation("meteordevelopment:orbit:0.2.3")
+    include("meteordevelopment:orbit:0.2.3")
+
+    implementation("com.github.Stivais:Commodore:1.0.0")
+    include("com.github.Stivais:Commodore:1.0.0")
+
+    modCompileOnly("com.terraformersmc:modmenu:${property("modmenu_version")}")
+
+    val lwjglVersion = property("minecraft_lwjgl_version")
 
     modImplementation("org.lwjgl:lwjgl:$lwjglVersion")
     include("org.lwjgl:lwjgl:$lwjglVersion")
@@ -41,12 +50,6 @@ dependencies {
         modImplementation("org.lwjgl:lwjgl-nanovg:$lwjglVersion:natives-$it")
         include("org.lwjgl:lwjgl-nanovg:$lwjglVersion:natives-$it")
     }
-
-    implementation("meteordevelopment:orbit:0.2.3")
-    include("meteordevelopment:orbit:0.2.3")
-
-    implementation("com.github.Stivais:Commodore:1.0.0")
-    include("com.github.Stivais:Commodore:1.0.0")
 }
 
 tasks {
