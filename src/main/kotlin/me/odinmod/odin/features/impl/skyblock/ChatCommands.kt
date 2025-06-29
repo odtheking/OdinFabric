@@ -11,8 +11,6 @@ import me.odinmod.odin.utils.alert
 import me.odinmod.odin.utils.capitalizeFirst
 import me.odinmod.odin.utils.createClickStyle
 import me.odinmod.odin.utils.getPositionString
-import me.odinmod.odin.utils.handlers.TickTask
-import me.odinmod.odin.utils.handlers.TickTasks
 import me.odinmod.odin.utils.modMessage
 import me.odinmod.odin.utils.noControlCodes
 import me.odinmod.odin.utils.sendChatMessage
