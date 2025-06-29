@@ -4,7 +4,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
 import me.odinmod.odin.clickgui.ClickGUI.gray38
 import me.odinmod.odin.clickgui.Panel
-import me.odinmod.odin.clickgui.RenderableSetting
+import me.odinmod.odin.clickgui.settings.RenderableSetting
 import me.odinmod.odin.clickgui.settings.Saving
 import me.odinmod.odin.features.impl.render.ClickGUIModule
 import me.odinmod.odin.utils.Colors
@@ -80,9 +80,13 @@ class NumberSetting<E>(
 
     override fun render(x: Float, y: Float, mouseX: Double, mouseY: Double): Float {
         super.render(x, y, mouseX, mouseY)
-        if (valueWidth < 0) valueWidth = NVGRenderer.textWidth(displayValue, 16f, NVGRenderer.defaultFont)
+        if (valueWidth < 0) {
+            sliderPercentage = ((valueDouble - minDouble) / (maxDouble - minDouble)).toFloat()
+            valueWidth = NVGRenderer.textWidth(displayValue, 16f, NVGRenderer.defaultFont)
+        }
+        val height = getHeight()
 
-        handler.handle(x, y + Panel.HEIGHT / 2, width, Panel.HEIGHT / 2)
+        handler.handle(x, y + height / 2, width, height / 2)
 
         if (listening) {
             val newPercentage = ((mouseX.toFloat() - (x + 6f)) / (width - 12f)).coerceIn(0f, 1f)
@@ -90,8 +94,8 @@ class NumberSetting<E>(
             sliderPercentage = newPercentage
         }
 
-        NVGRenderer.text(name, x + 6f, y + Panel.HEIGHT / 2f - 15f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
-        NVGRenderer.text(displayValue, x + width - valueWidth - 4f, y + Panel.HEIGHT / 2f - 15f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
+        NVGRenderer.text(name, x + 6f, y + height / 2f - 15f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
+        NVGRenderer.text(displayValue, x + width - valueWidth - 4f, y + height / 2f - 15f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
 
         NVGRenderer.rect(x + 6f, y + 24f, width - 12f, 8f, gray38.rgba, 3f)
         NVGRenderer.dropShadow(x + 6f, y + 24f, width - 12f, 8f, 10f, 0.75f, 3f)
@@ -101,7 +105,7 @@ class NumberSetting<E>(
 
         NVGRenderer.circle(x + 6f + sliderAnim.get(prevLocation, sliderPercentage, false) * (width - 12f), y + 28f, handler.anim.get(7f, 9f, !isHovered), Colors.WHITE.rgba)
 
-        return Panel.HEIGHT
+        return height
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, mouseButton: Int): Boolean {
@@ -132,7 +136,7 @@ class NumberSetting<E>(
     }
 
     override val isHovered: Boolean
-        get() = isAreaHovered(lastX, lastY + Panel.HEIGHT / 2, width, Panel.HEIGHT / 2)
+        get() = isAreaHovered(lastX, lastY + getHeight() / 2, width, getHeight() / 2)
 
     override fun getHeight(): Float = Panel.HEIGHT + 8f
 

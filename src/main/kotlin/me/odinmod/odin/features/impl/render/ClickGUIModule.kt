@@ -1,11 +1,14 @@
 package me.odinmod.odin.features.impl.render
 
 import me.odinmod.odin.clickgui.ClickGUI
-import me.odinmod.odin.clickgui.settings.impl.*
+import me.odinmod.odin.clickgui.HudManager
+import me.odinmod.odin.clickgui.settings.impl.ActionSetting
+import me.odinmod.odin.clickgui.settings.impl.BooleanSetting
+import me.odinmod.odin.clickgui.settings.impl.ColorSetting
+import me.odinmod.odin.clickgui.settings.impl.NumberSetting
 import me.odinmod.odin.features.Category
 import me.odinmod.odin.features.Module
 import me.odinmod.odin.utils.Color
-import me.odinmod.odin.utils.modMessage
 import org.lwjgl.glfw.GLFW
 
 object ClickGUIModule : Module(
@@ -15,21 +18,7 @@ object ClickGUIModule : Module(
 ) {
     val enableNotification by BooleanSetting("Chat notifications", true, desc = "Sends a message when you toggle a module with a keybind")
     val clickGUIColor by ColorSetting("Click GUI Color", Color(50, 150, 220), desc = "The color of the Click GUI.")
-    private val action by ActionSetting("Open HUD Editor", desc = "Opens the HUD editor when clicked.") { modMessage("Test action executed!") }
-
-    private val testTextInput by StringSetting(
-        "Test Text Input",
-        default = "Hello, Odin!",
-        desc = "This is a test text input setting."
-    )
-
-    private val testNumberInput by NumberSetting(
-        "Test Number Input",
-        default = 42,
-        min = 0,
-        max = 100,
-        desc = "This is a test number input setting."
-    )
+    private val action by ActionSetting("Open HUD Editor", desc = "Opens the HUD editor when clicked.") { mc.setScreen(HudManager) }
 
     override fun onKeybind() {
         toggle()
@@ -44,6 +33,10 @@ object ClickGUIModule : Module(
     val panelX = mutableMapOf<Category, NumberSetting<Float>>()
     val panelY = mutableMapOf<Category, NumberSetting<Float>>()
     val panelExtended = mutableMapOf<Category, BooleanSetting>()
+
+    init {
+        resetPositions()
+    }
 
     fun resetPositions() {
         Category.entries.forEach {

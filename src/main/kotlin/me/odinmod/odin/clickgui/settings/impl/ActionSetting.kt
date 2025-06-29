@@ -1,8 +1,7 @@
 package me.odinmod.odin.clickgui.settings.impl
 
 import me.odinmod.odin.clickgui.ClickGUI.gray38
-import me.odinmod.odin.clickgui.Panel
-import me.odinmod.odin.clickgui.RenderableSetting
+import me.odinmod.odin.clickgui.settings.RenderableSetting
 import me.odinmod.odin.features.impl.render.ClickGUIModule
 import me.odinmod.odin.utils.Color.Companion.darker
 import me.odinmod.odin.utils.Colors
@@ -28,7 +27,7 @@ class ActionSetting(
         NVGRenderer.rect(x + 4f, y + height / 2f - 13f, width - 8f, 26f, gray38.rgba, 6f)
         NVGRenderer.hollowRect(x + 4f, y + height / 2f - 13f, width - 8f, 26f, 2f, ClickGUIModule.clickGUIColor.rgba, 6f)
         NVGRenderer.text(name, x + width / 2f - textWidth / 2, y + height / 2f - 8f, 16f, if (isHovered) Colors.WHITE.darker().rgba else Colors.WHITE.rgba, NVGRenderer.defaultFont)
-        return Panel.HEIGHT
+        return height
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, mouseButton: Int): Boolean {

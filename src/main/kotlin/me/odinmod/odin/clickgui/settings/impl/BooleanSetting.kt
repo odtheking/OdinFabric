@@ -3,7 +3,7 @@ package me.odinmod.odin.clickgui.settings.impl
 import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
 import me.odinmod.odin.clickgui.ClickGUI.gray38
-import me.odinmod.odin.clickgui.RenderableSetting
+import me.odinmod.odin.clickgui.settings.RenderableSetting
 import me.odinmod.odin.clickgui.settings.Saving
 import me.odinmod.odin.features.impl.render.ClickGUIModule
 import me.odinmod.odin.utils.Colors
@@ -29,14 +29,14 @@ class BooleanSetting(
 
         NVGRenderer.text(name, x + 6f, y + height / 2f - 8f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
 
-        NVGRenderer.dropShadow(x + width - 43f, y + height / 2f - 10f, 34f, 20f, 10f, 0.75f, 9f)
-        NVGRenderer.rect(x + width - 43f, y + height / 2f - 10f, 34f, 20f, gray38.rgba, 9f)
+        NVGRenderer.dropShadow(x + width - 40f, y + height / 2f - 10f, 34f, 20f, 10f, 0.75f, 9f)
+        NVGRenderer.rect(x + width - 40f, y + height / 2f - 10f, 34f, 20f, gray38.rgba, 9f)
 
         if (enabled || toggleAnimation.isAnimating())
-            NVGRenderer.rect(x + width - 43f, y + height / 2f - 10f, toggleAnimation.get(34f, 9f, enabled), 20f, ClickGUIModule.clickGUIColor.rgba, 9f)
+            NVGRenderer.rect(x + width - 40f, y + height / 2f - 10f, toggleAnimation.get(34f, 9f, enabled), 20f, ClickGUIModule.clickGUIColor.rgba, 9f)
 
-        NVGRenderer.hollowRect(x + width - 43f, y + height / 2f - 10f, 34f, 20f, 2f, ClickGUIModule.clickGUIColor.rgba, 9f)
-        NVGRenderer.circle(x + width - toggleAnimation.get(33f, 17f, !enabled), y + height / 2f, 6f, Colors.WHITE.rgba)
+        NVGRenderer.hollowRect(x + width - 40f, y + height / 2f - 10f, 34f, 20f, 2f, ClickGUIModule.clickGUIColor.rgba, 9f)
+        NVGRenderer.circle(x + width - toggleAnimation.get(30f, 14f, !enabled), y + height / 2f, 6f, Colors.WHITE.rgba)
 
         return height
     }

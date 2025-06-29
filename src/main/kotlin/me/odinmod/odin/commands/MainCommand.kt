@@ -4,8 +4,10 @@ import com.github.stivais.commodore.Commodore
 import com.github.stivais.commodore.utils.GreedyString
 import me.odinmod.odin.OdinMod.mc
 import me.odinmod.odin.clickgui.ClickGUI
+import me.odinmod.odin.clickgui.HudManager
 import me.odinmod.odin.events.PacketEvent
 import me.odinmod.odin.features.impl.foraging.TreeHud
+import me.odinmod.odin.features.impl.render.ClickGUIModule
 import me.odinmod.odin.utils.getCustomData
 import me.odinmod.odin.utils.handlers.LimitedTickTask
 import me.odinmod.odin.utils.modMessage
@@ -21,6 +23,17 @@ val mainCommand = Commodore("odin") {
         LimitedTickTask(0, 1) { mc.setScreen(ClickGUI) }
     }
 
+    literal("reset") {
+        literal("clickgui").runs {
+            ClickGUIModule.resetPositions()
+            modMessage("Reset click gui positions.")
+        }
+        literal("hud").runs {
+            HudManager.resetHUDS()
+            modMessage("Reset HUD positions.")
+        }
+    }
+
     literal("copy").runs { greedyString: GreedyString ->
         setClipboardContent(greedyString.string)
     }
@@ -33,8 +46,8 @@ val mainCommand = Commodore("odin") {
         modMessage("Item in hand: ${mc.player?.mainHandStack?.getCustomData()}")
     }
 
-    literal("giveaotv").runs { tuners: String? ->
-        sendCommand("give @p minecraft:diamond_shovel[minecraft:custom_data={\"ethermerge\":1${if (tuners != null) ",\"tuned_transmission\":$tuners" else ""}}]")
+    literal("giveaotv").runs { tuners: Int? ->
+        sendCommand("give @p minecraft:diamond_shovel[minecraft:custom_name={\"text\":\"Aspect Of The Void\",\"color\":\"dark_purple\"},minecraft:custom_data={ethermerge:1,\"tuned_transmission\":${tuners ?: 0}}]")
     }
 
     literal("debug").runs {

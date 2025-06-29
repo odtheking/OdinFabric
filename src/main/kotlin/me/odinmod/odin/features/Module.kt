@@ -3,8 +3,10 @@ package me.odinmod.odin.features
 import me.odinmod.odin.OdinMod
 import me.odinmod.odin.clickgui.settings.AlwaysActive
 import me.odinmod.odin.clickgui.settings.Setting
+import me.odinmod.odin.clickgui.settings.impl.HUDSetting
 import me.odinmod.odin.features.impl.render.ClickGUIModule
 import me.odinmod.odin.utils.modMessage
+import net.minecraft.client.gui.DrawContext
 import org.lwjgl.glfw.GLFW
 import kotlin.reflect.full.hasAnnotation
 
@@ -83,24 +85,23 @@ abstract class Module(
         else onDisable()
     }
 
-    fun <K : Setting<*>> register(setting: K): K {
-        settings.add(setting)
-       // if (setting is HudSetting) {
-       //     setting.value.init(this)
-       // }
-        return setting
-    }
-
-    fun register(vararg setting: Setting<*>) = setting.forEach(::register)
+    fun <K : Setting<*>> register(setting: K): K = setting.also { settings.add(it) }
 
     operator fun <K : Setting<*>> K.unaryPlus(): K = register(this)
 
-    fun getSettingByName(name: String?): Setting<*>? {
-        for (setting in settings) {
-            if (setting.name.equals(name, ignoreCase = true)) return setting
-        }
-        return null
-    }
+    fun getSettingByName(name: String?): Setting<*>? =
+        settings.find { it.name.equals(name, ignoreCase = true) }
+
+    @Suppress("FunctionName")
+    fun HUD(
+        name: String,
+        desc: String,
+        toggleable: Boolean = true,
+        x: Float = 10f,
+        y: Float = 10f,
+        scale: Float = 2f,
+        block: DrawContext.(example: Boolean) -> Pair<Float, Float>
+    ): HUDSetting = HUDSetting(name, x, y, scale, toggleable, desc, this, block)
 
     private companion object {
         private fun getCategory(clazz: Class<out Module>): Category? =

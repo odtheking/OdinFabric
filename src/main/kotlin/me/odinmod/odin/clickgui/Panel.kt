@@ -60,7 +60,8 @@ class Panel(val category: Category) {
         scrollOffset = scrollAnimation.get(scrollOffset, scrollTarget)
         var startY = scrollOffset + HEIGHT
 
-        NVGRenderer.pushScissor(x, y + HEIGHT, WIDTH, 5000f)
+        if (scrollOffset != 0f) NVGRenderer.pushScissor(x, y + HEIGHT, WIDTH, previousHeight - HEIGHT + 10f)
+
         if (extended && moduleButtons.isNotEmpty()) {
             for (button in moduleButtons.filter { it.module.name.contains(SearchBar.currentSearch, true) }) {
                 button.y = startY + y
@@ -71,7 +72,7 @@ class Panel(val category: Category) {
         previousHeight = startY
 
         if (moduleButtons.isNotEmpty()) NVGRenderer.rect(x, y + startY, WIDTH, 10f, moduleButtons.last().color.rgba, 0f, 5f, 5f, 0f)
-        NVGRenderer.popScissor()
+        if (scrollOffset != 0f) NVGRenderer.popScissor()
     }
 
     fun handleScroll(amount: Int): Boolean {

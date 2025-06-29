@@ -3,7 +3,6 @@ package me.odinmod.odin.clickgui.settings
 import me.odinmod.odin.clickgui.ClickGUI
 import me.odinmod.odin.clickgui.ClickGUI.gray26
 import me.odinmod.odin.clickgui.Panel
-import me.odinmod.odin.clickgui.RenderableSetting
 import me.odinmod.odin.features.Module
 import me.odinmod.odin.features.impl.render.ClickGUIModule
 import me.odinmod.odin.utils.Color
@@ -35,9 +34,6 @@ class ModuleButton(val module: Module, val panel: Panel) {
     val color: Color get() =
         colorAnim.get(ClickGUIModule.clickGUIColor, gray26, module.enabled).brighter(1 + hover.percent() / 500f)
 
-    val width = Panel.WIDTH
-    val height = Panel.HEIGHT
-
     var extended = false
 
     private val nameWidth = NVGRenderer.textWidth(module.name, 18f, NVGRenderer.defaultFont)
@@ -46,25 +42,27 @@ class ModuleButton(val module: Module, val panel: Panel) {
     private val hover = HoverHandler(250)
 
     fun draw(mouseX: Double, mouseY: Double): Float {
-        hoverHandler.handle(x, y, width, height - 1)
-        hover.handle(x, y, width, height - 1)
+        hoverHandler.handle(x, y, Panel.WIDTH, Panel.HEIGHT - 1)
+        hover.handle(x, y, Panel.WIDTH, Panel.HEIGHT - 1)
 
-        if (hoverHandler.percent() > 0)
-            ClickGUI.setDescription(module.description, x + width + 10f, y, hoverHandler)
+        if (hoverHandler.percent() > 0 && y >= panel.y + Panel.HEIGHT)
+            ClickGUI.setDescription(module.description, x + Panel.WIDTH + 10f, y, hoverHandler)
 
-        NVGRenderer.rect(x, y, width, height, color.rgba)
-        NVGRenderer.text(module.name, x + width / 2 - nameWidth / 2, y + height / 2 - 9f, 18f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
+        NVGRenderer.rect(x, y, Panel.WIDTH, Panel.HEIGHT, color.rgba)
+        NVGRenderer.text(module.name, x + Panel.WIDTH / 2 - nameWidth / 2, y + Panel.HEIGHT / 2 - 9f, 18f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
 
-        if (!extendAnim.isAnimating() && !extended || module.settings.isEmpty()) return height
+        if (module.settings.isEmpty()) return Panel.HEIGHT
 
-        var drawY = height
-        val totalHeight = height + floor(extendAnim.get(0f, getSettingHeight(), !extended))
+        var drawY = Panel.HEIGHT
+        val totalHeight = Panel.HEIGHT + floor(extendAnim.get(0f, getSettingHeight(), !extended))
 
-        NVGRenderer.pushScissor(x, y, width, totalHeight)
-        for (setting in module.settings) {
-            if (setting is RenderableSetting<*> && setting.shouldBeVisible) drawY += setting.render(x, y + drawY, mouseX, mouseY)
+        if (extendAnim.isAnimating()) NVGRenderer.pushScissor(x, y, Panel.WIDTH, totalHeight)
+        if (extendAnim.isAnimating() || extended) {
+            for (setting in module.settings) {
+                if (setting is RenderableSetting<*> && setting.shouldBeVisible) drawY += setting.render(x, y + drawY, mouseX, mouseY)
+            }
         }
-        NVGRenderer.popScissor()
+        if (extendAnim.isAnimating()) NVGRenderer.popScissor()
 
         return totalHeight
     }
@@ -113,9 +111,9 @@ class ModuleButton(val module: Module, val panel: Panel) {
         return false
     }
 
-    private inline val isButtonHovered: Boolean get() = isAreaHovered(x, y, width, height - 1)
+    private inline val isButtonHovered: Boolean get() = isAreaHovered(x, y, Panel.WIDTH, Panel.HEIGHT - 1)
 
-    private inline val isMouseUnderButton: Boolean get() = extended && isAreaHovered(x, y + height, width)
+    private inline val isMouseUnderButton: Boolean get() = extended && isAreaHovered(x, y + Panel.HEIGHT, Panel.WIDTH)
 
     private fun getSettingHeight(): Float =
         representableSettings.filter { it.shouldBeVisible }.sumOf { it.getHeight().toDouble() }.toFloat()

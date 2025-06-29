@@ -4,7 +4,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
 import me.odinmod.odin.clickgui.ClickGUI.gray38
 import me.odinmod.odin.clickgui.Panel
-import me.odinmod.odin.clickgui.RenderableSetting
+import me.odinmod.odin.clickgui.settings.RenderableSetting
 import me.odinmod.odin.clickgui.settings.Saving
 import me.odinmod.odin.features.impl.render.ClickGUIModule
 import me.odinmod.odin.utils.Colors
@@ -24,11 +24,9 @@ class StringSetting(
             field = if (value.length <= length) value else return
         }
 
-    var text: String by this::value
-
     private val textInputHandler = TextInputHandler(
-        textProvider = { text },
-        textSetter = { text = it }
+        textProvider = { value },
+        textSetter = { value = it }
     )
 
     private var previousMousePos = 0.0 to 0.0

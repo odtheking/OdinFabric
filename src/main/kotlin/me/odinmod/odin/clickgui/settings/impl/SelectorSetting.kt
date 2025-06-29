@@ -4,7 +4,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
 import me.odinmod.odin.clickgui.ClickGUI.gray38
 import me.odinmod.odin.clickgui.Panel
-import me.odinmod.odin.clickgui.RenderableSetting
+import me.odinmod.odin.clickgui.settings.RenderableSetting
 import me.odinmod.odin.clickgui.settings.Saving
 import me.odinmod.odin.features.impl.render.ClickGUIModule
 import me.odinmod.odin.utils.Color
@@ -69,18 +69,18 @@ class SelectorSetting(
         if (!extended && !settingAnim.isAnimating()) return defaultHeight
 
         val displayHeight = getHeight()
-        NVGRenderer.pushScissor(x, y, width, displayHeight)
+        if (settingAnim.isAnimating()) NVGRenderer.pushScissor(x, y, width, displayHeight)
 
         NVGRenderer.dropShadow(x + 6, y + 37f, width - 12f, options.size * 32f, 10f, 0.75f, 5f)
         NVGRenderer.rect(x + 6, y + 37f, width - 12f, options.size * 32f, gray38.rgba, 5f)
 
         for (i in options.indices) {
             val optionY = y + 38 + 32 * i
-            if (i != options.size - 1) NVGRenderer.line(x + 18f, optionY + 32, width - 12f, optionY + 32, 1.5f, Colors.MINECRAFT_DARK_GRAY.rgba)
+            if (i != options.size - 1) NVGRenderer.line(x + 18f, optionY + 32, x + width - 12f, optionY + 32, 1.5f, Colors.MINECRAFT_DARK_GRAY.rgba)
             NVGRenderer.text(options[i], x + width / 2f - elementWidths[i] / 2, optionY + 8f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
             if (isSettingHovered(i)) NVGRenderer.hollowRect(x + 6, optionY, width - 12f, 32f, 1.5f, ClickGUIModule.clickGUIColor.rgba, 4f)
         }
-        NVGRenderer.popScissor()
+        if (settingAnim.isAnimating()) NVGRenderer.popScissor()
 
         return displayHeight
     }
@@ -114,6 +114,8 @@ class SelectorSetting(
 
     private fun optionIndex(string: String): Int =
         options.map { it.lowercase() }.indexOf(string.lowercase()).coerceIn(0, options.size - 1)
+
+    override val isHovered: Boolean get() = isAreaHovered(lastX, lastY, width, defaultHeight)
 
     override fun getHeight(): Float =
         settingAnim.get(defaultHeight, options.size * 32f + 44, !extended)

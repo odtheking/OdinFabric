@@ -1,6 +1,7 @@
-package me.odinmod.odin.clickgui
+package me.odinmod.odin.clickgui.settings
 
-import me.odinmod.odin.clickgui.settings.Setting
+import me.odinmod.odin.clickgui.ClickGUI
+import me.odinmod.odin.clickgui.Panel
 import me.odinmod.odin.utils.ui.HoverHandler
 import me.odinmod.odin.utils.ui.MouseUtils.isAreaHovered
 
@@ -19,12 +20,12 @@ abstract class RenderableSetting<T>(
     open fun render(x: Float, y: Float, mouseX: Double, mouseY: Double): Float {
         lastX = x
         lastY = y
-
-        hoverHandler.handle(x, y, width, getHeight())
+        val height = getHeight()
+        hoverHandler.handle(x, y, width, height)
         if (hoverHandler.percent() > 0)
             ClickGUI.setDescription(description, x + width + 10f, y, hoverHandler)
 
-        return getHeight()
+        return height
     }
 
     open fun mouseClicked(mouseX: Double, mouseY: Double, mouseButton: Int): Boolean = false

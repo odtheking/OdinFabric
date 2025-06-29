@@ -4,7 +4,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
 import me.odinmod.odin.clickgui.ClickGUI.gray38
 import me.odinmod.odin.clickgui.Panel
-import me.odinmod.odin.clickgui.RenderableSetting
+import me.odinmod.odin.clickgui.settings.RenderableSetting
 import me.odinmod.odin.clickgui.settings.Saving
 import me.odinmod.odin.features.impl.render.ClickGUIModule
 import me.odinmod.odin.utils.Color
@@ -65,19 +65,22 @@ class ColorSetting(
 
     override fun render(x: Float, y: Float, mouseX: Double, mouseY: Double): Float {
         super.render(x, y, mouseX, mouseY)
-        if (hexWidth < 0) hexWidth = NVGRenderer.textWidth(hexString, 16f, NVGRenderer.defaultFont)
+        if (hexWidth < 0) {
+            hexString = value.hex(allowAlpha)
+            hexWidth = NVGRenderer.textWidth(hexString, 16f, NVGRenderer.defaultFont)
+        }
 
         if (previousMousePos != mouseX to mouseY) textInputHandler.mouseDragged(mouseX)
         previousMousePos = mouseX to mouseY
 
         NVGRenderer.text(name, x + 6f, y + defaultHeight / 2f - 8f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
-        NVGRenderer.dropShadow(x + width - 40f, y + defaultHeight / 2f - 10f, 32f, 20f, 10f, 0.75f, 5f)
-        NVGRenderer.rect(x + width - 40f, y + defaultHeight / 2f - 10f, 32f, 20f, value.rgba, 5f)
-        NVGRenderer.hollowRect(x + width - 40f, y + defaultHeight / 2f - 10f, 32f, 20f, 1.5f, value.withAlpha(1f).darker().rgba, 5f)
+        NVGRenderer.dropShadow(x + width - 40f, y + defaultHeight / 2f - 10f, 34f, 20f, 10f, 0.75f, 5f)
+        NVGRenderer.rect(x + width - 40f, y + defaultHeight / 2f - 10f, 34f, 20f, value.rgba, 5f)
+        NVGRenderer.hollowRect(x + width - 40f, y + defaultHeight / 2f - 10f, 34f, 20f, 1.5f, value.withAlpha(1f).darker().rgba, 5f)
 
         if (!extended && !expandAnim.isAnimating()) return defaultHeight
 
-        NVGRenderer.pushScissor(x, y + defaultHeight, width, getHeight() - defaultHeight)
+        if (expandAnim.isAnimating()) NVGRenderer.pushScissor(x, y + defaultHeight, width, getHeight() - defaultHeight)
         // SATURATION AND BRIGHTNESS
         NVGRenderer.dropShadow(x + 10f, y + 38f, width - 20f, 170f, 10f, 0.5f, 8f)
         NVGRenderer.gradientRect(x + 10f, y + 38f, width - 20f, 170f, Colors.WHITE.rgba, value.hsbMax().rgba, Gradient.LeftToRight, 5f)
@@ -158,7 +161,7 @@ class ColorSetting(
         textInputHandler.width = width / 2
         textInputHandler.draw()
 
-        NVGRenderer.popScissor()
+        if (expandAnim.isAnimating()) NVGRenderer.popScissor()
         return getHeight()
     }
 
@@ -197,11 +200,10 @@ class ColorSetting(
         else false
     }
 
-    override fun getHeight(): Float {
-        return expandAnim.get(defaultHeight, defaultHeight + if (allowAlpha) 250f else 230f, !extended)
-    }
+    override fun getHeight(): Float =
+        expandAnim.get(defaultHeight, defaultHeight + if (allowAlpha) 250f else 230f, !extended)
 
-    override val isHovered: Boolean get() = isAreaHovered(lastX + width - 40f, lastY + defaultHeight / 2f - 10f, 32f, 20f)
+    override val isHovered: Boolean get() = isAreaHovered(lastX + width - 40f, lastY + defaultHeight / 2f - 10f, 34f, 20f)
 
     override fun write(): JsonElement = JsonPrimitive("#${value.hex()}")
 

@@ -36,7 +36,6 @@ object ClickGUI : Screen(Text.literal("Click GUI")) {
     val gray26 = Color(26, 26, 26)
 
     init {
-        ClickGUIModule.resetPositions()
         for (category in Category.entries) panels.add(Panel(category))
     }
 
@@ -131,7 +130,6 @@ object ClickGUI : Screen(Text.literal("Click GUI")) {
     }
 
     override fun shouldPause(): Boolean = false
-
 
     /** Sets the description without creating a new data class which isn't optimal */
     fun setDescription(text: String, x: Float,  y: Float, hoverHandler: HoverHandler) {

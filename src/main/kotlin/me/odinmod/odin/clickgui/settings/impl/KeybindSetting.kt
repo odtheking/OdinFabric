@@ -4,8 +4,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
 import me.odinmod.odin.OdinMod.mc
 import me.odinmod.odin.clickgui.ClickGUI.gray38
-import me.odinmod.odin.clickgui.Panel
-import me.odinmod.odin.clickgui.RenderableSetting
+import me.odinmod.odin.clickgui.settings.RenderableSetting
 import me.odinmod.odin.clickgui.settings.Saving
 import me.odinmod.odin.features.impl.render.ClickGUIModule
 import me.odinmod.odin.utils.Colors
@@ -37,11 +36,11 @@ class KeybindSetting(
 
     override fun render(x: Float, y: Float, mouseX: Double, mouseY: Double): Float {
         super.render(x, y, mouseX, mouseY)
-
         if (keyNameWidth < 0) keyNameWidth = NVGRenderer.textWidth(value.localizedText.string, 16f, NVGRenderer.defaultFont)
+        val height = getHeight()
 
         val rectX = x + width - 20 - keyNameWidth
-        val rectY = y + Panel.HEIGHT / 2f - 10f
+        val rectY = y + height / 2f - 10f
         val rectWidth = keyNameWidth + 12f
         val rectHeight = 20f
 
@@ -49,10 +48,10 @@ class KeybindSetting(
         NVGRenderer.rect(rectX, rectY, rectWidth, rectHeight, gray38.rgba, 5f)
         NVGRenderer.hollowRect(rectX - 1, rectY - 1, rectWidth + 2f, rectHeight + 2f, 1.5f, ClickGUIModule.clickGUIColor.rgba, 4f)
 
-        NVGRenderer.text(name, x + 6f, y + Panel.HEIGHT / 2f - 8f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
+        NVGRenderer.text(name, x + 6f, y + height / 2f - 8f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
         NVGRenderer.text(value.localizedText.string, rectX + (rectWidth - keyNameWidth) / 2, rectY + rectHeight / 2 - 8f, 16f, if (listening) Colors.MINECRAFT_YELLOW.rgba else Colors.WHITE.rgba, NVGRenderer.defaultFont)
 
-        return Panel.HEIGHT
+        return height
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, mouseButton: Int): Boolean {
@@ -89,7 +88,7 @@ class KeybindSetting(
         value != InputUtil.UNKNOWN_KEY && InputUtil.isKeyPressed(mc.window.handle, value.code)
 
     override val isHovered: Boolean get() =
-        isAreaHovered(lastX + width - 20 - keyNameWidth, lastY + Panel.HEIGHT / 2f - 10f, keyNameWidth + 12f, 22f)
+        isAreaHovered(lastX + width - 20 - keyNameWidth, lastY + getHeight() / 2f - 10f, keyNameWidth + 12f, 22f)
 
     override fun write(): JsonElement = JsonPrimitive(value.translationKey)
 
