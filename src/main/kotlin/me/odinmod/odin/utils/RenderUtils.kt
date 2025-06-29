@@ -1,6 +1,5 @@
 package me.odinmod.odin.utils
 
-import com.mojang.blaze3d.systems.RenderSystem
 import me.odinmod.odin.OdinMod.mc
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.client.font.TextRenderer
@@ -12,7 +11,6 @@ import net.minecraft.text.OrderedText
 import net.minecraft.util.Formatting
 import net.minecraft.util.math.Box
 import net.minecraft.util.math.Vec3d
-import org.lwjgl.opengl.GL11
 import java.util.*
 import kotlin.math.cos
 import kotlin.math.roundToInt

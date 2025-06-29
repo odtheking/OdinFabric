@@ -11,7 +11,6 @@ import me.odinmod.odin.utils.renderDurabilityBar
 import me.odinmod.odin.utils.sendCommand
 import me.odinmod.odin.utils.skyblock.LocationUtils
 import meteordevelopment.orbit.EventHandler
-import net.minecraft.network.packet.s2c.common.CommonPingS2CPacket
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 
 object InvincibilityTimer : Module(
