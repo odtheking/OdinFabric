@@ -9,6 +9,7 @@
   ],
   "client": [
     "ClientCommonNetworkHandlerMixin",
+    "ChatScreenMixin",
     "KeyBindingMixin",
     "MixinGameRenderer",
     "MouseMixin"
