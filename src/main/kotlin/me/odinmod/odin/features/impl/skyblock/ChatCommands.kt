@@ -7,25 +7,22 @@ import me.odinmod.odin.events.MessageSentEvent
 import me.odinmod.odin.events.PacketEvent
 import me.odinmod.odin.events.WorldLoadEvent
 import me.odinmod.odin.features.Module
-import me.odinmod.odin.utils.ServerUtils
 import me.odinmod.odin.utils.alert
 import me.odinmod.odin.utils.capitalizeFirst
 import me.odinmod.odin.utils.createClickStyle
 import me.odinmod.odin.utils.getPositionString
+import me.odinmod.odin.utils.handlers.TickTask
+import me.odinmod.odin.utils.handlers.TickTasks
 import me.odinmod.odin.utils.modMessage
 import me.odinmod.odin.utils.noControlCodes
-import me.odinmod.odin.utils.playSoundAtPlayer
 import me.odinmod.odin.utils.sendChatMessage
 import me.odinmod.odin.utils.sendCommand
 import me.odinmod.odin.utils.skyblock.LocationUtils
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
-import net.minecraft.sound.SoundEvent
-import net.minecraft.sound.SoundEvents
 import net.minecraft.text.ClickEvent
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import kotlin.math.floor
 import kotlin.random.Random
 
 object ChatCommands: Module(
@@ -131,8 +128,8 @@ object ChatCommands: Module(
             "8ball" -> if (eightBall) channelMessage(responses.random(), name, channel)
             "dice" -> if (dice) channelMessage((1..6).random(), name, channel)
             "racism" -> if (racism) channelMessage("$name is ${Random.nextInt(1, 101)}% racist. Racism is not allowed!", name, channel)
-            "ping" -> if (ping) channelMessage("Current Ping: ${floor(ServerUtils.averagePing).toInt()}ms", name, channel)
-            "tps" -> if (tps) channelMessage("Current TPS: ${ServerUtils.averageTps.toInt()}", name, channel)
+            "ping" -> if (ping) channelMessage("Current Ping: 69ms", name, channel)
+            "tps" -> if (tps) channelMessage("Current TPS: 20ms", name, channel)
             "fps" -> if (fps) channelMessage("Current FPS: ${mc.currentFps}", name, channel)
             "time" -> if (time) channelMessage("Current Time: ${ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z"))}", name, channel)
             "location" -> if (location) channelMessage("Current Location: ${LocationUtils.currentArea.displayName}", name, channel)
@@ -186,7 +183,7 @@ object ChatCommands: Module(
                 if (autoConfirm) return sendCommand("p invite $name")
                 modMessage("§aClick on this message to invite $name to your party!", chatStyle = createClickStyle(
                     ClickEvent.Action.RUN_COMMAND, "/party invite $name"))
-                playSoundAtPlayer(SoundEvent.of(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value().id))
+                //playLoudSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING, 100f, 1f)
             }
         }
     }
