@@ -4,13 +4,17 @@ import me.odinmod.odin.OdinMod.mc
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gl.RenderPipelines
+import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.render.*
 import net.minecraft.client.util.BufferAllocator
 import net.minecraft.text.OrderedText
 import net.minecraft.util.Formatting
 import net.minecraft.util.math.Box
+import net.minecraft.util.math.MathHelper
+import net.minecraft.util.math.RotationAxis
 import net.minecraft.util.math.Vec3d
 import java.util.*
+import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -136,6 +140,31 @@ fun drawSphere(
 
     matrixStack.pop()
     bufferSource.draw(CUSTOM_LINE_LAYER)
+}
+
+fun drawLine(
+    context: DrawContext,
+    x1: Int,
+    y1: Int,
+    x2: Int,
+    y2: Int,
+    color: Color,
+    lineWidth: Float = 1f
+) {
+    val matrices = context.matrices
+
+    val dx = x2 - x1
+    val dy = y2 - y1
+    val length = MathHelper.sqrt((dx * dx + dy * dy).toFloat())
+    val angle = atan2(dy.toDouble(), dx.toDouble())
+
+    matrices.push()
+    matrices.translate(x1.toDouble(), y1.toDouble(), 0.0)
+    matrices.multiply(RotationAxis.POSITIVE_Z.rotation(angle.toFloat()))
+
+    context.fill(0, (-lineWidth / 2).toInt(), length.toInt(), (lineWidth / 2).toInt(), color.rgba)
+
+    matrices.pop()
 }
 
 val CUSTOM_LINE_LAYER: RenderLayer = RenderLayer.of(

@@ -7,7 +7,6 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents
-import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents
 
 object EventDispatcher {
 
@@ -39,9 +38,9 @@ object EventDispatcher {
         ScreenEvents.BEFORE_INIT.register { _, screen, _, _ ->
             GuiEvent.Open(screen).postAndCatch()
 
-            ScreenMouseEvents.beforeMouseClick(screen).register { _, mouseX, mouseY, button ->
-                GuiEvent.MouseClick(screen, mouseX.toInt(), mouseY.toInt(), button).postAndCatch()
-            }
+//            ScreenMouseEvents.beforeMouseClick(screen).register { _, mouseX, mouseY, button ->
+//                GuiEvent.MouseClick(screen, mouseX.toInt(), mouseY.toInt(), button).postAndCatch()
+//            }
 
             ScreenKeyboardEvents.beforeKeyPress(screen).register { _, keyCode, scanCode, modifiers ->
                 GuiEvent.KeyPress(screen, keyCode, scanCode, modifiers).postAndCatch()
