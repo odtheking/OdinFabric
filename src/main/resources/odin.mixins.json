@@ -13,6 +13,7 @@
     "HandledScreenAccessor",
     "HandledScreenMixin",
     "MixinGameRenderer",
+    "MixinPlayerEntityRender",
     "MouseMixin"
   ],
   "injectors": {
