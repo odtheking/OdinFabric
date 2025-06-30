@@ -43,7 +43,7 @@ object ClickGUI : Screen(Text.literal("Click GUI")) {
     }
 
     @EventHandler
-    fun render(event: GuiEvent.NVGRender) {
+    fun render(event: GuiEvent.Render) {
         if (mc.currentScreen != this) return
         NVGRenderer.beginFrame(1920f, 1080f)
         if (openAnim.isAnimating()) {
