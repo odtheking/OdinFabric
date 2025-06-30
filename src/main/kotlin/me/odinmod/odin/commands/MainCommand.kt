@@ -66,6 +66,7 @@ val mainCommand = Commodore("odin") {
         PlayerSize.updateCustomProperties()
         modMessage("Updated devs.")
     }
+    
     runs { floor: Floors -> sendCommand("joininstance ${floor.instance()}") }
     runs { tier: KuudraTier -> sendCommand("joininstance ${tier.instance()}") }
 }
