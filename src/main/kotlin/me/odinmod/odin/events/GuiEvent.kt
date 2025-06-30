@@ -8,11 +8,13 @@ abstract class GuiEvent(val screen: Screen): CancellableEvent() {
 
     class Open(screen: Screen) : GuiEvent(screen)
 
-    class MouseClick(screen: Screen, val mouseX: Int, val mouseY: Int, val button: Int) : GuiEvent(screen)
+    class MouseClick(screen: Screen, val slotId: Int, val button: Int) : GuiEvent(screen)
 
     class KeyPress(screen: Screen, val keyCode: Int, val scanCode: Int, val modifiers: Int) : GuiEvent(screen)
 
     class Render(screen: Screen, val drawContext: DrawContext) : GuiEvent(screen)
 
     class NVGRender(screen: Screen) : GuiEvent(screen)
+
+    class RenderScreen(screen: Screen, val drawContext: DrawContext, val mouseX: Int, val mouseY: Int) : GuiEvent(screen)
 }

@@ -39,9 +39,9 @@ object EventDispatcher {
         ScreenEvents.BEFORE_INIT.register { _, screen, _, _ ->
             GuiEvent.Open(screen).postAndCatch()
 
-            ScreenMouseEvents.beforeMouseClick(screen).register { _, mouseX, mouseY, button ->
-                GuiEvent.MouseClick(screen, mouseX.toInt(), mouseY.toInt(), button).postAndCatch()
-            }
+//            ScreenMouseEvents.beforeMouseClick(screen).register { _, mouseX, mouseY, button ->
+//                GuiEvent.MouseClick(screen, mouseX.toInt(), mouseY.toInt(), button).postAndCatch()
+//            }
 
             ScreenKeyboardEvents.beforeKeyPress(screen).register { _, keyCode, scanCode, modifiers ->
                 GuiEvent.KeyPress(screen, keyCode, scanCode, modifiers).postAndCatch()
