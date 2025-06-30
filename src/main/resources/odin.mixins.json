@@ -11,6 +11,7 @@
     "ClientCommonNetworkHandlerMixin",
     "KeyBindingMixin",
     "MixinGameRenderer",
+    "KeyBindingAccessor",
     "MixinPlayerEntityRender",
     "MouseMixin"
   ],
