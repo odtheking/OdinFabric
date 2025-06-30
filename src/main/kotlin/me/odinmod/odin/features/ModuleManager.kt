@@ -1,5 +1,6 @@
 package me.odinmod.odin.features
 
+import me.odinmod.odin.OdinMod
 import me.odinmod.odin.OdinMod.mc
 import me.odinmod.odin.clickgui.settings.impl.HUDSetting
 import me.odinmod.odin.clickgui.settings.impl.KeybindSetting
@@ -25,7 +26,7 @@ import net.minecraft.util.Identifier
  */
 object ModuleManager {
 
-    private val HUD_LAYER: Identifier = Identifier.of("odining", "example_layer")
+    private val HUD_LAYER: Identifier = Identifier.of(OdinMod.MOD_ID, "odin_hud")
     private val keybindSettingsCache = mutableListOf<KeybindSetting>()
     val hudSettingsCache = mutableListOf<HUDSetting>()
 
