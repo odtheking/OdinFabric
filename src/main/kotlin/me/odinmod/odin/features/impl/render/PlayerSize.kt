@@ -21,7 +21,7 @@ object PlayerSize: Module(
     private val devSizeY by NumberSetting("Size Y", 1f, -1f, 3f, 0.1, desc = "Y scale of the dev size.").withDependency { isRandom && devSize }
     private val devSizeZ by NumberSetting("Size Z", 1f, -1f, 3f, 0.1, desc = "Z scale of the dev size.").withDependency { isRandom && devSize }
     private val devWings by BooleanSetting("Wings", false, desc = "Toggles client side dev wings.").withDependency { isRandom }
-    private val devWingsColor by ColorSetting("Wings Color", Colors.WHITE, desc = "Color of the dev wings.").withDependency { isRandom }
+    private val devWingsColor by ColorSetting("Wings Color", Colors.WHITE, desc = "Color of the dev wings.").withDependency { isRandom && devWings }
     private var showHidden by DropdownSetting("Show Hidden", false).withDependency { isRandom }
     private val passcode by StringSetting("Passcode", "odin", desc = "Passcode for dev features.").withDependency { isRandom && showHidden }
 
