@@ -31,7 +31,7 @@ object OdinMod : ModInitializer {
     @JvmField
     val EVENT_BUS = EventBus()
 
-    private const val MOD_ID = "odining"
+    const val MOD_ID = "odining"
     private val metadata: ModMetadata by lazy { FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow().metadata }
     val version: Version by lazy { metadata.version }
     val logger: Logger = LogManager.getLogger("Odin")
