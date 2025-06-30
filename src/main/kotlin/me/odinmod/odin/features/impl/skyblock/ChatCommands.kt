@@ -151,7 +151,7 @@ object ChatCommands: Module(
                 if (channel == ChatChannel.PARTY && partyDemote) sendCommand("party demote $name")
 
             "kick", "k" ->
-                if (channel == ChatChannel.PARTY && kick) sendCommand("party kick $name")
+                if (channel == ChatChannel.PARTY && kick) words.getOrNull(1)?.let { sendCommand("p kick $it") }
 
             "f1", "f2", "f3", "f4", "f5", "f6", "f7", "m1", "m2", "m3", "m4", "m5", "m6", "m7", "t1", "t2", "t3", "t4", "t5" -> {
                 if (!queInstance || channel != ChatChannel.PARTY) return
