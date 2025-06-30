@@ -37,7 +37,7 @@ class HUDSetting(
         val height = getHeight()
         NVGRenderer.text(name, x + 6f, y + height / 2f - 8f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
 
-        NVGRenderer.renderImage("/assets/odin/MovementIcon.svg", x + width - 30f, y + height / 2f - 12f, 24f, 24f)
+        NVGRenderer.image("/assets/odin/MovementIcon.svg", x + width - 30f, y + height / 2f - 12f, 24f, 24f, 0f)
 
         if (toggleable) {
             NVGRenderer.dropShadow(x + width - 70f, y + height / 2f - 10f, 34f, 20f, 10f, 0.75f, 9f)
