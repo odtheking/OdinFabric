@@ -43,7 +43,8 @@ object NVGRenderer {
     private var previousProgram = -1
     private var previousTexture = -1
     private var textureBinding = -1
-    private var vg: Long = -1
+    private var prevVao = -1
+    private var vg = -1L
 
     private var drawing: Boolean = false
 
@@ -58,6 +59,7 @@ object NVGRenderer {
         previousProgram = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM)
         previousTexture = GL11.glGetInteger(GL13.GL_ACTIVE_TEXTURE)
         textureBinding = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D)
+        prevVao = GL11.glGetInteger(GL30.GL_VERTEX_ARRAY_BINDING)
 
         val framebuffer = mc.framebuffer
         val glFramebuffer = (framebuffer.colorAttachment as GlTexture).getOrCreateFramebuffer((RenderSystem.getDevice() as GlBackend).framebufferManager, null)
@@ -72,18 +74,21 @@ object NVGRenderer {
     fun endFrame() {
         if (!drawing) throw IllegalStateException("[NVGRenderer] Not drawing, but called endFrame")
         nvgEndFrame(vg)
-        GlStateManager._disableCull()
+        GlStateManager._disableCull() // default states that mc expects
         GlStateManager._disableDepthTest()
         GlStateManager._enableBlend()
         GlStateManager._blendFuncSeparate(770, 771, 1, 0)
 
-        if (previousProgram != -1) GL20.glUseProgram(previousProgram)
+        if (previousProgram != -1) GL20.glUseProgram(previousProgram) // fixes invalid program errors when using NVG
         else GL20.glUseProgram(0)
 
-        if (previousTexture != -1) {
+        if (previousTexture != -1) { // prevents issues with gui background rendering
             GlStateManager._activeTexture(previousTexture)
             if (textureBinding != -1) GlStateManager._bindTexture(textureBinding)
         }
+
+        if (prevVao != -1) GL30.glBindVertexArray(prevVao) // fixes glitches when updating font atlas
+        else GL30.glBindVertexArray(0)
 
         drawing = false
     }
