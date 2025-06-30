@@ -45,19 +45,3 @@ fun windowClick(slotId: Int, button: Int, mode: SlotActionType) {
         //mc.netHandler?.networkManager?.sendPacket(C0EPacketClickWindow(it.windowId, slotId, button, mode, it.inventory[slotId], it.getNextTransactionID(mc.thePlayer?.inventory)))
     }
 }
-
-fun windowClick(slotId: Int, clickType: ClickType) {
-    when (clickType) {
-        is ClickType.Left -> windowClick(slotId, 0, SlotActionType.PICKUP)
-        is ClickType.Right -> windowClick(slotId, 1, SlotActionType.PICKUP)
-        is ClickType.Middle -> windowClick(slotId, 2, SlotActionType.CLONE)
-        is ClickType.Shift -> windowClick(slotId, 0, SlotActionType.QUICK_MOVE)
-    }
-}
-
-sealed class ClickType {
-    data object Left   : ClickType()
-    data object Right  : ClickType()
-    data object Middle : ClickType()
-    data object Shift  : ClickType()
-}
