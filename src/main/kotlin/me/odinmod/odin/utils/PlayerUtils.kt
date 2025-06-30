@@ -18,9 +18,9 @@ fun setTitle(title: String) {
     mc.inGameHud.setTitle(Text.literal(title))
 }
 
-fun alert(title: String) {
+fun alert(title: String, playSound: Boolean = true) {
     setTitle(title)
-    playSoundAtPlayer(SoundEvent.of(SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH.id))
+    if (playSound) playSoundAtPlayer(SoundEvent.of(SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH.id))
 }
 
 fun getPositionString(): String {
