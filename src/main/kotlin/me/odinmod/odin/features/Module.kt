@@ -2,6 +2,7 @@ package me.odinmod.odin.features
 
 import me.odinmod.odin.OdinMod
 import me.odinmod.odin.clickgui.settings.AlwaysActive
+import me.odinmod.odin.clickgui.settings.DevModule
 import me.odinmod.odin.clickgui.settings.Setting
 import me.odinmod.odin.clickgui.settings.impl.HUDSetting
 import me.odinmod.odin.features.impl.render.ClickGUIModule
@@ -52,6 +53,9 @@ abstract class Module(
      */
     @Transient
     val alwaysActive = this::class.hasAnnotation<AlwaysActive>()
+
+    @Transient
+    val isDevModule = this::class.hasAnnotation<DevModule>()
 
     init {
         if (alwaysActive) {

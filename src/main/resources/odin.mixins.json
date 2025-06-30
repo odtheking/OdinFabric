@@ -12,6 +12,7 @@
     "DrawContextMixin",
     "KeyBindingMixin",
     "MixinGameRenderer",
+    "MixinPlayerEntityRender",
     "MouseMixin"
   ],
   "injectors": {
