@@ -30,11 +30,7 @@ fun getPositionString(): String {
     }
 }
 
-private var lastClickSent = 0L
-
 fun windowClick(slotId: Int, button: Int, mode: SlotActionType) {
-    // DEV MESSAGE
-    if (lastClickSent + 45 > System.currentTimeMillis()) return sendChatMessage("§cIgnoring click on slot §9$slotId.")
     mc.player?.currentScreenHandler?.let {
         if (slotId !in 0 until it.slots.size) return
 //        if (mc.currentScreen is TermSimGUI) {
