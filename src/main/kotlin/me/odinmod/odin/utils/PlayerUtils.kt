@@ -29,15 +29,3 @@ fun getPositionString(): String {
         return "x: $x, y: $y, z: $z"
     }
 }
-
-fun windowClick(slotId: Int, button: Int, mode: SlotActionType) {
-    mc.player?.currentScreenHandler?.let {
-        if (slotId !in 0 until it.slots.size) return
-//        if (mc.currentScreen is TermSimGUI) {
-//            PacketEvent.Send(C0EPacketClickWindow(-2, slotId, button, mode, it.inventorySlots[slotId].stack, 0)).postAndCatch()
-//            return
-//        }
-        mc.interactionManager?.clickSlot(it.syncId, slotId, button, mode, mc.player)
-        //mc.netHandler?.networkManager?.sendPacket(C0EPacketClickWindow(it.windowId, slotId, button, mode, it.inventory[slotId], it.getNextTransactionID(mc.thePlayer?.inventory)))
-    }
-}

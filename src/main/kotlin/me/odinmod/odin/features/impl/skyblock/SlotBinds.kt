@@ -1,5 +1,6 @@
 package me.odinmod.odin.features.impl.skyblock
 
+import me.odinmod.odin.OdinMod
 import me.odinmod.odin.clickgui.settings.impl.ColorSetting
 import me.odinmod.odin.clickgui.settings.impl.KeybindSetting
 import me.odinmod.odin.clickgui.settings.impl.MapSetting
@@ -9,7 +10,6 @@ import me.odinmod.odin.features.Module
 import me.odinmod.odin.utils.Colors
 import me.odinmod.odin.utils.drawLine
 import me.odinmod.odin.utils.modMessage
-import me.odinmod.odin.utils.windowClick
 import meteordevelopment.orbit.EventHandler
 import meteordevelopment.orbit.EventPriority
 import mixins.HandledScreenAccessor
@@ -52,9 +52,9 @@ object SlotBinds: Module(
             else -> return
         }
 
-        val fromSlot = screen.screenHandler.slots.indexOfFirst { it.inventory == mc.player?.inventory && it.index == from }.takeIf { it >= 0 } ?: return
+        val fromSlot = screen.screenHandler.slots.indexOfFirst { it.index == from }.takeIf { it >= 0 } ?: return
 
-        windowClick(fromSlot, to, SlotActionType.SWAP)
+        mc.interactionManager?.clickSlot(screen.screenHandler.syncId, fromSlot, to, SlotActionType.SWAP, mc.player)
         event.cancel()
     }
 
