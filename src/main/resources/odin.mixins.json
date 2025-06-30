@@ -12,6 +12,7 @@
     "ChatScreenMixin",
     "KeyBindingMixin",
     "MixinGameRenderer",
+    "MixinPlayerEntityRender",
     "MouseMixin"
   ],
   "injectors": {

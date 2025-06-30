@@ -32,7 +32,7 @@ class DropdownSetting(
         NVGRenderer.translate(x + width - 18f, y + height / 2f - 4f)
         NVGRenderer.rotate(toggleAnimation.get(0f, Math.PI.toFloat() / 2f, enabled))
         NVGRenderer.translate(-12f, -12f)
-        NVGRenderer.renderImage("/assets/odin/chevron.svg", 0f, 0f, 24f, 24f)
+        NVGRenderer.image("/assets/odin/chevron.svg", 0f, 0f, 24f, 24f, 0f)
         NVGRenderer.pop()
 
         return height

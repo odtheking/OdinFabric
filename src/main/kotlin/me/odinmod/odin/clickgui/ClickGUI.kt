@@ -42,9 +42,15 @@ object ClickGUI : Screen(Text.literal("Click GUI")) {
         OdinMod.EVENT_BUS.subscribe(this)
     }
 
+    private var lastResetTime = System.nanoTime()
+    private var maxFrameTimeMs = 0.0
+    private var displayedMaxFrameTimeMs = 0.0
+
     @EventHandler
     fun render(event: GuiEvent.NVGRender) {
         if (mc.currentScreen != this) return
+        val startTime = System.nanoTime()
+
         NVGRenderer.beginFrame(1920f, 1080f)
         if (openAnim.isAnimating()) {
             NVGRenderer.translate(0f, floor(openAnim.get(-10f, 0f)))
@@ -52,12 +58,30 @@ object ClickGUI : Screen(Text.literal("Click GUI")) {
         }
 
         for (i in 0 until panels.size) { panels[i].draw(mc.mouse.x, mc.mouse.y) }
-        val virtualX = 1920f / 2f - 175f
-        val virtualY = 1080f - 110f
-
-        SearchBar.draw(virtualX, virtualY, mc.mouse.x, mc.mouse.y)
+        SearchBar.draw(1920f / 2f - 175f, 1080f - 110f, mc.mouse.x, mc.mouse.y)
         desc.render()
+
         NVGRenderer.endFrame()
+
+        val frameTimeMs = (System.nanoTime() - startTime) / 1_000_000.0
+        val now = System.nanoTime()
+
+        if (frameTimeMs > maxFrameTimeMs) maxFrameTimeMs = frameTimeMs
+
+        if ((now - lastResetTime) > 500_000_000L) {
+            lastResetTime = now
+            displayedMaxFrameTimeMs = maxFrameTimeMs
+            maxFrameTimeMs = 0.0
+        }
+
+        NVGRenderer.text(
+            text = "Max frame time: %.2f ms".format(displayedMaxFrameTimeMs),
+            x = 1920f - 280f - 10f,
+            y = 1080f - 28f,
+            size = 18f,
+            color = 0xFFFFFFFF.toInt(),
+            font = NVGRenderer.defaultFont
+        )
     }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {
@@ -106,12 +130,6 @@ object ClickGUI : Screen(Text.literal("Click GUI")) {
 
     override fun init() {
         openAnim.start()
-
-        for (panel in panels) {
-            panel.x = ClickGUIModule.panelX[panel.category]!!.value
-            panel.y = ClickGUIModule.panelY[panel.category]!!.value
-            panel.extended = ClickGUIModule.panelExtended[panel.category]!!.enabled
-        }
         super.init()
     }
 

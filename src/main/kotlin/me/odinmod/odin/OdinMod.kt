@@ -1,5 +1,7 @@
 package me.odinmod.odin
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import me.odinmod.odin.commands.mainCommand
 import me.odinmod.odin.config.Config
 import me.odinmod.odin.events.EventDispatcher
@@ -20,6 +22,7 @@ import net.minecraft.client.MinecraftClient
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import java.lang.invoke.MethodHandles
+import kotlin.coroutines.EmptyCoroutineContext
 
 object OdinMod : ModInitializer {
 
@@ -33,6 +36,8 @@ object OdinMod : ModInitializer {
     private val metadata: ModMetadata by lazy { FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow().metadata }
     val version: Version by lazy { metadata.version }
     val logger: Logger = LogManager.getLogger("Odin")
+
+    val scope = CoroutineScope(SupervisorJob() + EmptyCoroutineContext)
 
     override fun onInitialize() {
         EVENT_BUS.registerLambdaFactory("me.odinmod") { lookupInMethod, klass ->

@@ -7,6 +7,7 @@ import me.odinmod.odin.events.InputEvent
 import me.odinmod.odin.features.impl.render.Camera
 import me.odinmod.odin.features.impl.render.ClickGUIModule
 import me.odinmod.odin.features.impl.render.Etherwarp
+import me.odinmod.odin.features.impl.render.PlayerSize
 import me.odinmod.odin.features.impl.skyblock.*
 import me.odinmod.odin.utils.ui.rendering.NVGRenderer
 import meteordevelopment.orbit.EventHandler
@@ -30,7 +31,7 @@ object ModuleManager {
 
     val modules: ArrayList<Module> = arrayListOf(
         // render
-        ClickGUIModule, Camera, Etherwarp,
+        ClickGUIModule, Camera, Etherwarp, PlayerSize,
 
         //skyblock
         ChatCommands, NoCursorReset, RagnarockAxe, SpringBoots, WardrobeKeybinds, PetKeybinds,
