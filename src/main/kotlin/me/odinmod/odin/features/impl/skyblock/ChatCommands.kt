@@ -14,11 +14,13 @@ import me.odinmod.odin.utils.createClickStyle
 import me.odinmod.odin.utils.getPositionString
 import me.odinmod.odin.utils.modMessage
 import me.odinmod.odin.utils.noControlCodes
+import me.odinmod.odin.utils.playSoundAtPlayer
 import me.odinmod.odin.utils.sendChatMessage
 import me.odinmod.odin.utils.sendCommand
 import me.odinmod.odin.utils.skyblock.LocationUtils
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
+import net.minecraft.sound.SoundEvents
 import net.minecraft.text.ClickEvent
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -183,7 +185,7 @@ object ChatCommands: Module(
                 if (autoConfirm) return sendCommand("p invite $name")
                 modMessage("§aClick on this message to invite $name to your party!", chatStyle = createClickStyle(
                     ClickEvent.Action.RUN_COMMAND, "/party invite $name"))
-                //playLoudSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING, 100f, 1f)
+                playSoundAtPlayer(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value())
             }
         }
     }
