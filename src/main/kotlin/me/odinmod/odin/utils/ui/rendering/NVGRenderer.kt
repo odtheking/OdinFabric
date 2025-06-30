@@ -15,6 +15,7 @@ import org.lwjgl.nanovg.NanoSVG.*
 import org.lwjgl.nanovg.NanoVG.*
 import org.lwjgl.nanovg.NanoVGGL3.*
 import org.lwjgl.opengl.GL11
+import org.lwjgl.opengl.GL13
 import org.lwjgl.opengl.GL20
 import org.lwjgl.opengl.GL30
 import org.lwjgl.stb.STBImage.stbi_load_from_memory
@@ -40,6 +41,8 @@ object NVGRenderer {
     private var scissor: Scissor? = null
 
     private var previousProgram = -1
+    private var previousTexture = -1
+    private var textureBinding = -1
     private var vg: Long = -1
 
     private var drawing: Boolean = false
@@ -47,21 +50,15 @@ object NVGRenderer {
     init {
         vg = nvgCreate(NVG_ANTIALIAS or NVG_DEBUG)
         require(vg != -1L) { "Failed to initialize NanoVG" }
-
-        // preload default font
-        push()
-        nvgFontSize(vg, 16f)
-        nvgFontFaceId(vg, getFontID(defaultFont))
-        nvgBeginPath(vg)
-        nvgText(vg, -1000f, -1000f, (' '..'~').joinToString(""))
-        nvgClosePath(vg)
-        pop()
     }
 
     fun beginFrame(width: Float, height: Float) {
         if (drawing) throw IllegalStateException("[NVGRenderer] Already drawing, but called beginFrame")
 
         previousProgram = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM)
+        previousTexture = GL11.glGetInteger(GL13.GL_ACTIVE_TEXTURE)
+        textureBinding = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D)
+
         val framebuffer = mc.framebuffer
         val glFramebuffer = (framebuffer.colorAttachment as GlTexture).getOrCreateFramebuffer((RenderSystem.getDevice() as GlBackend).framebufferManager, null)
         GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, glFramebuffer)
@@ -79,8 +76,15 @@ object NVGRenderer {
         GlStateManager._disableDepthTest()
         GlStateManager._enableBlend()
         GlStateManager._blendFuncSeparate(770, 771, 1, 0)
+
         if (previousProgram != -1) GL20.glUseProgram(previousProgram)
         else GL20.glUseProgram(0)
+
+        if (previousTexture != -1) {
+            GlStateManager._activeTexture(previousTexture)
+            if (textureBinding != -1) GlStateManager._bindTexture(textureBinding)
+        }
+
         drawing = false
     }
 
@@ -117,16 +121,39 @@ object NVGRenderer {
         nvgStroke(vg)
     }
 
-    fun rect(x: Float, y: Float, w: Float, h: Float, color: Int, tl: Float, bl: Float, br: Float, tr: Float) {
+    fun drawHalfRoundedRect(x: Float, y: Float, w: Float, h: Float, color: Int, radius: Float, roundTop: Boolean) {
         nvgBeginPath(vg)
-        nvgRoundedRectVarying(vg, x, y, w, h + .5f, tl, tr, br, bl)
+
+        if (roundTop) {
+            nvgMoveTo(vg, x, y + h)
+            nvgLineTo(vg, x + w, y + h)
+            nvgLineTo(vg, x + w, y + radius)
+            nvgArcTo(vg, x + w, y, x + w - radius, y, radius)
+            nvgLineTo(vg, x + radius, y)
+            nvgArcTo(vg, x, y, x, y + radius, radius)
+            nvgLineTo(vg, x, y + h)
+        } else {
+            nvgMoveTo(vg, x, y)
+            nvgLineTo(vg, x + w, y)
+            nvgLineTo(vg, x + w, y + h - radius)
+            nvgArcTo(vg, x + w, y + h, x + w - radius, y + h, radius)
+            nvgLineTo(vg, x + radius, y + h)
+            nvgArcTo(vg, x, y + h, x, y + h - radius, radius)
+            nvgLineTo(vg, x, y)
+        }
+
+        nvgClosePath(vg)
         color(color)
         nvgFillColor(vg, nvgColor)
         nvgFill(vg)
     }
 
     fun rect(x: Float, y: Float, w: Float, h: Float, color: Int, radius: Float) {
-        rect(x, y, w, h, color, radius, radius, radius, radius)
+        nvgBeginPath(vg)
+        nvgRoundedRect(vg, x, y, w, h + .5f, radius)
+        color(color)
+        nvgFillColor(vg, nvgColor)
+        nvgFill(vg)
     }
 
     fun rect(x: Float, y: Float, w: Float, h: Float, color: Int) {
@@ -137,9 +164,9 @@ object NVGRenderer {
         nvgFill(vg)
     }
 
-    fun hollowRect(x: Float, y: Float, w: Float, h: Float, thickness: Float, color: Int, tl: Float, bl: Float, br: Float, tr: Float) {
+    fun hollowRect(x: Float, y: Float, w: Float, h: Float, thickness: Float, color: Int, radius: Float) {
         nvgBeginPath(vg)
-        nvgRoundedRectVarying(vg, x, y, w, h, tl, tr, br, bl)
+        nvgRoundedRect(vg, x, y, w, h, radius)
         nvgStrokeWidth(vg, thickness)
         nvgPathWinding(vg, NVG_HOLE)
         color(color)
@@ -147,20 +174,12 @@ object NVGRenderer {
         nvgStroke(vg)
     }
 
-    fun hollowRect(x: Float, y: Float, w: Float, h: Float, thickness: Float, color: Int, radius: Float) {
-        hollowRect(x, y, w, h, thickness, color, radius, radius, radius, radius)
-    }
-
-    fun gradientRect(x: Float, y: Float, w: Float, h: Float, color1: Int, color2: Int, gradient: Gradient, tl: Float, bl: Float, br: Float, tr: Float) {
+    fun gradientRect(x: Float, y: Float, w: Float, h: Float, color1: Int, color2: Int, gradient: Gradient, radius: Float) {
         nvgBeginPath(vg)
-        nvgRoundedRectVarying(vg, x, y, w, h, tl, tr, br, bl)
+        nvgRoundedRect(vg, x, y, w, h, radius)
         gradient(color1, color2, x, y, w, h, gradient)
         nvgFillPaint(vg, nvgPaint)
         nvgFill(vg)
-    }
-
-    fun gradientRect(x: Float, y: Float, w: Float, h: Float, color1: Int, color2: Int, gradient: Gradient, radius: Float) {
-        gradientRect(x, y, w, h, color1, color2, gradient, radius, radius, radius, radius)
     }
 
     fun dropShadow(
@@ -218,7 +237,6 @@ object NVGRenderer {
     ) {
         nvgFontSize(vg, size)
         nvgFontFaceId(vg, getFontID(font))
-        nvgTextAlign(vg, NVG_ALIGN_LEFT or NVG_ALIGN_TOP)
         nvgTextLineHeight(vg, lineHeight)
         color(color)
         nvgFillColor(vg, nvgColor)
@@ -245,34 +263,43 @@ object NVGRenderer {
         x: Float,
         y: Float,
         w: Float,
-        h: Float,
-        tl: Float,
-        bl: Float,
-        br: Float,
-        tr: Float
+        h: Float
     ) {
         nvgImagePattern(vg, x, y, w, h, 0f, getImage(image), 1f, nvgPaint)
         nvgBeginPath(vg)
-        nvgRoundedRectVarying(vg, x, y, w, h, tl, tr, br, bl)
+        nvgRect(vg, x, y, w, h + .5f)
         nvgFillPaint(vg, nvgPaint)
         nvgFill(vg)
     }
 
-    fun renderImage(
+    fun image(
+        image: Image,
+        x: Float,
+        y: Float,
+        w: Float,
+        h: Float,
+        radius: Float
+    ) {
+        nvgImagePattern(vg, x, y, w, h, 0f, getImage(image), 1f, nvgPaint)
+        nvgBeginPath(vg)
+        nvgRoundedRect(vg, x, y, w, h + .5f, radius)
+        nvgFillPaint(vg, nvgPaint)
+        nvgFill(vg)
+    }
+
+    fun image(
         resourcePath: String,
         x: Float,
         y: Float,
         w: Float,
         h: Float,
-        tl: Float = 0f,
-        bl: Float = 0f,
-        br: Float = 0f,
-        tr: Float = 0f
+        radius: Float
     ) {
-        val image = Image(resourcePath)
+        val image = images.keys.find { it.identifier == resourcePath } ?: Image(resourcePath)
         if (image.isSVG) images.getOrPut(image) { NVGImage(0, loadSVG(image)) }.count++
         else images.getOrPut(image) { NVGImage(0, loadImage(image)) }.count++
-        image(image, x, y, w, h, tl, bl, br, tr)
+        if (radius == 0f) image(image, x, y, w, h)
+        else image(image, x, y, w, h, radius)
     }
 
     // lowers reference count by 1, if it reaches 0 it gets deleted from mem

@@ -1,10 +1,12 @@
 package me.odinmod.odin.clickgui
 
 import me.odinmod.odin.clickgui.ClickGUI.gray26
+import me.odinmod.odin.clickgui.ClickGUI.gray38
 import me.odinmod.odin.clickgui.settings.ModuleButton
 import me.odinmod.odin.features.Category
 import me.odinmod.odin.features.ModuleManager
 import me.odinmod.odin.features.impl.render.ClickGUIModule
+import me.odinmod.odin.features.impl.render.PlayerSize
 import me.odinmod.odin.utils.Colors
 import me.odinmod.odin.utils.ui.MouseUtils.isAreaHovered
 import me.odinmod.odin.utils.ui.animations.LinearAnimation
@@ -20,9 +22,16 @@ import kotlin.math.floor
  * @author Stivais, Aton
  * @see [ModuleButton]
  */
-class Panel(val category: Category) {
+class Panel(private val category: Category) {
 
-    val moduleButtons: ArrayList<ModuleButton> = ArrayList()
+    val moduleButtons: ArrayList<ModuleButton> = ArrayList<ModuleButton>().apply {
+        ModuleManager.modules
+            .filter { it.category == category && (!it.isDevModule || PlayerSize.isRandom) }
+            .sortedByDescending { NVGRenderer.textWidth(it.name, 16f, NVGRenderer.defaultFont) }
+            .forEach { add(ModuleButton(it, this@Panel)) }
+    }
+    private val lastModuleButton: ModuleButton? = moduleButtons.lastOrNull()
+    private val isModuleButtonEmpty: Boolean = moduleButtons.isEmpty()
 
     var extended: Boolean = ClickGUIModule.panelExtended[category]!!.enabled
     var x = ClickGUIModule.panelX[category]!!.value
@@ -40,12 +49,6 @@ class Panel(val category: Category) {
     private var scrollTarget = 0f
     private var scrollOffset = 0f
 
-    init {
-        for (module in ModuleManager.modules.sortedByDescending { NVGRenderer.textWidth(it.name, 16f, NVGRenderer.defaultFont) }) {
-            if (module.category == this@Panel.category) moduleButtons.add(ModuleButton(module, this@Panel))
-        }
-    }
-
     fun draw(mouseX: Double, mouseY: Double) {
         if (dragging) {
             x = floor(x2 + mouseX).toFloat()
@@ -54,7 +57,7 @@ class Panel(val category: Category) {
 
         NVGRenderer.dropShadow(x, y, WIDTH, (previousHeight + 10f).coerceAtLeast(HEIGHT), 12.5f, 6f, 5f)
 
-        NVGRenderer.rect(x, y, WIDTH, HEIGHT, gray26.rgba, 5f, 0f, 0f, 5f)
+        NVGRenderer.drawHalfRoundedRect(x, y, WIDTH, HEIGHT, gray26.rgba, 5f, true)
         NVGRenderer.text(category.displayName, x + WIDTH / 2f - textWidth / 2, y + HEIGHT / 2f - 11, 22f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
 
         scrollOffset = scrollAnimation.get(scrollOffset, scrollTarget)
@@ -62,7 +65,7 @@ class Panel(val category: Category) {
 
         if (scrollOffset != 0f) NVGRenderer.pushScissor(x, y + HEIGHT, WIDTH, previousHeight - HEIGHT + 10f)
 
-        if (extended && moduleButtons.isNotEmpty()) {
+        if (extended && !isModuleButtonEmpty) {
             for (button in moduleButtons.filter { it.module.name.contains(SearchBar.currentSearch, true) }) {
                 button.y = startY + y
                 startY += button.draw(mouseX, mouseY)
@@ -71,7 +74,7 @@ class Panel(val category: Category) {
         }
         previousHeight = startY
 
-        if (moduleButtons.isNotEmpty()) NVGRenderer.rect(x, y + startY, WIDTH, 10f, moduleButtons.last().color.rgba, 0f, 5f, 5f, 0f)
+        if (!isModuleButtonEmpty) NVGRenderer.drawHalfRoundedRect(x, y + startY, WIDTH, 10f, lastModuleButton?.color?.rgba ?: gray38.rgba, 5f, false)
         if (scrollOffset != 0f) NVGRenderer.popScissor()
     }
 

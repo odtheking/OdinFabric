@@ -95,7 +95,7 @@ class ColorSetting(
 
         // HUE
         NVGRenderer.dropShadow(x + 10f, y + 214f, width - 20f, 15f, 10f, 0.5f, 5f)
-        NVGRenderer.renderImage("/assets/odin/HueGradient.png", x + 10f, y + 214f, width - 20f, 15f, 5f, 5f, 5f, 5f)
+        NVGRenderer.image("/assets/odin/HueGradient.png", x + 10f, y + 214f, width - 20f, 15f, 5f)
         NVGRenderer.hollowRect(x + 10f, y + 214f, width - 20f, 15f, 1f, gray38.rgba, 5f)
 
         val huePos = x + 10f + hueSliderAnim.get(hueSliderPrev, value.hue, false) * 221f to y + 221f
