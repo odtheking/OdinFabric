@@ -80,7 +80,6 @@ object NVGRenderer {
         GlStateManager._blendFuncSeparate(770, 771, 1, 0)
 
         if (previousProgram != -1) GL20.glUseProgram(previousProgram) // fixes invalid program errors when using NVG
-        else GL20.glUseProgram(0)
 
         if (previousTexture != -1) { // prevents issues with gui background rendering
             GlStateManager._activeTexture(previousTexture)
@@ -88,7 +87,6 @@ object NVGRenderer {
         }
 
         if (prevVao != -1) GL30.glBindVertexArray(prevVao) // fixes glitches when updating font atlas
-        else GL30.glBindVertexArray(0)
 
         drawing = false
     }
