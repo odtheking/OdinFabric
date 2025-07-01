@@ -14,7 +14,7 @@ import org.lwjgl.glfw.GLFW
 object WardrobeKeybinds: Module(
     name = "Wardrobe Keybinds",
     description = "Allows you to use keybinds to navigate the wardrobe.",
-    key = GLFW.GLFW_KEY_UNKNOWN
+    key = null
 ) {
     private val nextPageKeybind by KeybindSetting("Next Page", GLFW.GLFW_KEY_RIGHT, desc = "Keybind to go to the next page in the wardrobe.")
     private val previousPageKeybind by KeybindSetting("Previous Page", GLFW.GLFW_KEY_LEFT, desc = "Keybind to go to the previous page in the wardrobe.")
