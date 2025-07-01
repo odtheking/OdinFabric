@@ -43,8 +43,9 @@ object ClickGUI : Screen(Text.literal("Click GUI")) {
     }
 
     private var lastResetTime = System.nanoTime()
-    private var maxFrameTimeMs = 0.0
-    private var displayedMaxFrameTimeMs = 0.0
+    private var avgFrameTimeMs = 0.0
+    private var frameTimeSum = 0.0
+    private var frameCount = 0
 
     @EventHandler
     fun render(event: GuiEvent.NVGRender) {
@@ -66,17 +67,19 @@ object ClickGUI : Screen(Text.literal("Click GUI")) {
         val frameTimeMs = (System.nanoTime() - startTime) / 1_000_000.0
         val now = System.nanoTime()
 
-        if (frameTimeMs > maxFrameTimeMs) maxFrameTimeMs = frameTimeMs
+        frameTimeSum += frameTimeMs
+        frameCount++
 
         if ((now - lastResetTime) > 500_000_000L) {
             lastResetTime = now
-            displayedMaxFrameTimeMs = maxFrameTimeMs
-            maxFrameTimeMs = 0.0
+            avgFrameTimeMs = if (frameCount > 0) frameTimeSum / frameCount else 0.0
+            frameTimeSum = 0.0
+            frameCount = 0
         }
 
         NVGRenderer.text(
-            text = "Max frame time: %.2f ms".format(displayedMaxFrameTimeMs),
-            x = 1920f - 280f - 10f,
+            text = "Avg frame time: %.2f ms".format(avgFrameTimeMs),
+            x = 1920f - 220f,
             y = 1080f - 28f,
             size = 18f,
             color = 0xFFFFFFFF.toInt(),

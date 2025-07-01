@@ -264,35 +264,6 @@ object NVGRenderer {
     }
 
     fun image(
-        image: Image,
-        x: Float,
-        y: Float,
-        w: Float,
-        h: Float
-    ) {
-        nvgImagePattern(vg, x, y, w, h, 0f, getImage(image), 1f, nvgPaint)
-        nvgBeginPath(vg)
-        nvgRect(vg, x, y, w, h + .5f)
-        nvgFillPaint(vg, nvgPaint)
-        nvgFill(vg)
-    }
-
-    fun image(
-        image: Image,
-        x: Float,
-        y: Float,
-        w: Float,
-        h: Float,
-        radius: Float
-    ) {
-        nvgImagePattern(vg, x, y, w, h, 0f, getImage(image), 1f, nvgPaint)
-        nvgBeginPath(vg)
-        nvgRoundedRect(vg, x, y, w, h + .5f, radius)
-        nvgFillPaint(vg, nvgPaint)
-        nvgFill(vg)
-    }
-
-    fun image(
         resourcePath: String,
         x: Float,
         y: Float,
@@ -303,8 +274,19 @@ object NVGRenderer {
         val image = images.keys.find { it.identifier == resourcePath } ?: Image(resourcePath)
         if (image.isSVG) images.getOrPut(image) { NVGImage(0, loadSVG(image)) }.count++
         else images.getOrPut(image) { NVGImage(0, loadImage(image)) }.count++
-        if (radius == 0f) image(image, x, y, w, h)
-        else image(image, x, y, w, h, radius)
+        if (radius == 0f) {
+            nvgImagePattern(vg, x, y, w, h, 0f, getImage(image), 1f, nvgPaint)
+            nvgBeginPath(vg)
+            nvgRect(vg, x, y, w, h + .5f)
+            nvgFillPaint(vg, nvgPaint)
+            nvgFill(vg)
+        } else {
+            nvgImagePattern(vg, x, y, w, h, 0f, getImage(image), 1f, nvgPaint)
+            nvgBeginPath(vg)
+            nvgRoundedRect(vg, x, y, w, h + .5f, radius)
+            nvgFillPaint(vg, nvgPaint)
+            nvgFill(vg)
+        }
     }
 
     // lowers reference count by 1, if it reaches 0 it gets deleted from mem

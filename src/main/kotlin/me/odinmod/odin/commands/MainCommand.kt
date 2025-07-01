@@ -2,6 +2,8 @@ package me.odinmod.odin.commands
 
 import com.github.stivais.commodore.Commodore
 import com.github.stivais.commodore.utils.GreedyString
+import kotlinx.coroutines.launch
+import me.odinmod.odin.OdinMod
 import me.odinmod.odin.OdinMod.mc
 import me.odinmod.odin.clickgui.ClickGUI
 import me.odinmod.odin.clickgui.HudManager
@@ -63,8 +65,10 @@ val mainCommand = Commodore("odin") {
     }
 
     literal("updatedevs").runs {
-        PlayerSize.updateCustomProperties()
-        modMessage("Updated devs.")
+        OdinMod.scope.launch {
+            PlayerSize.updateCustomProperties()
+            modMessage("Updated devs.")
+        }
     }
 
     literal("generatefeaturelist").runs {
