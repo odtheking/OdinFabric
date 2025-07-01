@@ -14,8 +14,6 @@ public class ClientCommonNetworkHandlerMixin {
 
     @Inject(method = "sendPacket(Lnet/minecraft/network/packet/Packet;)V", at = @At("HEAD"), cancellable = true)
     public void onSendPacket(Packet<?> packet, CallbackInfo ci) {
-        if (!ServerUtils.handleSendPacket(packet)) {
-            if (new PacketEvent.Send(packet).postAndCatch()) ci.cancel();
-        }
+        if (new PacketEvent.Send(packet).postAndCatch()) ci.cancel();
     }
 }

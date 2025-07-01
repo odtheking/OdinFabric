@@ -11,6 +11,8 @@
     "ClientCommonNetworkHandlerMixin",
     "ChatScreenMixin",
     "KeyBindingMixin",
+    "ClientPlayNetworkHandlerAccessor",
+    "PingMeasurerMixin",
     "MixinGameRenderer",
     "MixinPlayerEntityRender",
     "MouseMixin"
