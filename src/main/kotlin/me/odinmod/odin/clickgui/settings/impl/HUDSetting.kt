@@ -49,7 +49,6 @@ class HUDSetting(
         NVGRenderer.image("/assets/odin/MovementIcon.svg", iconX - offset, iconY - offset, imageSize, imageSize, 0f)
 
         if (toggleable) {
-            NVGRenderer.dropShadow(x + width - 70f, y + height / 2f - 10f, 34f, 20f, 10f, 0.75f, 9f)
             NVGRenderer.rect(x + width - 70f, y + height / 2f - 10f, 34f, 20f, gray38.rgba, 9f)
 
             if (value.enabled || toggleAnimation.isAnimating())

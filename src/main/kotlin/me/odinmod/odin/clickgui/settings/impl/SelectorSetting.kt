@@ -59,7 +59,6 @@ class SelectorSetting(
         val currentWidth = elementWidths[index]
 
         hover.handle(x + width - 20f - currentWidth, y + defaultHeight / 2f - 10f, currentWidth + 12f, 22f)
-        NVGRenderer.dropShadow(x + width - 20f - currentWidth, y + defaultHeight / 2f - 10f, currentWidth + 12f, 20f, 10f, 0.75f, 5f)
         NVGRenderer.rect(x + width - 20f - currentWidth, y + defaultHeight / 2f - 10f, currentWidth + 12f, 20f, color.rgba, 5f)
         NVGRenderer.hollowRect(x + width - 20f - currentWidth, y + defaultHeight / 2f - 10f, currentWidth + 12f, 20f, 1.5f, ClickGUIModule.clickGUIColor.rgba, 5f)
 
@@ -71,7 +70,6 @@ class SelectorSetting(
         val displayHeight = getHeight()
         if (settingAnim.isAnimating()) NVGRenderer.pushScissor(x, y, width, displayHeight)
 
-        NVGRenderer.dropShadow(x + 6, y + 37f, width - 12f, options.size * 32f, 10f, 0.75f, 5f)
         NVGRenderer.rect(x + 6, y + 37f, width - 12f, options.size * 32f, gray38.rgba, 5f)
 
         for (i in options.indices) {

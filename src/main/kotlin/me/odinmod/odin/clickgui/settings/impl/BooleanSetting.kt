@@ -29,7 +29,6 @@ class BooleanSetting(
 
         NVGRenderer.text(name, x + 6f, y + height / 2f - 8f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
 
-        NVGRenderer.dropShadow(x + width - 40f, y + height / 2f - 10f, 34f, 20f, 10f, 0.75f, 9f)
         NVGRenderer.rect(x + width - 40f, y + height / 2f - 10f, 34f, 20f, gray38.rgba, 9f)
 
         if (enabled || toggleAnimation.isAnimating())
