@@ -12,6 +12,7 @@
     "DrawContextMixin",
     "KeyBindingMixin",
     "MixinGameRenderer",
+    "KeyBindingAccessor",
     "MixinPlayerEntityRender",
     "MouseMixin"
   ],

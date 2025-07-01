@@ -66,7 +66,8 @@ class Panel(private val category: Category) {
         if (scrollOffset != 0f) NVGRenderer.pushScissor(x, y + HEIGHT, WIDTH, previousHeight - HEIGHT + 10f)
 
         if (extended && !isModuleButtonEmpty) {
-            for (button in moduleButtons.filter { it.module.name.contains(SearchBar.currentSearch, true) }) {
+            for (button in moduleButtons) {
+                if (!button.module.name.contains(SearchBar.currentSearch, true)) continue
                 button.y = startY + y
                 startY += button.draw(mouseX, mouseY)
             }
@@ -97,8 +98,9 @@ class Panel(private val category: Category) {
                 return true
             }
         } else if (isMouseOverExtended) {
-            for (i in moduleButtons.size - 1 downTo 0) {
-                if (moduleButtons[i].mouseClicked(mouseX, mouseY, button)) return true
+            return moduleButtons.reversed().any {
+                if (!it.module.name.contains(SearchBar.currentSearch, true)) return@any false
+                it.mouseClicked(mouseX, mouseY, button)
             }
         }
         return false
@@ -111,23 +113,29 @@ class Panel(private val category: Category) {
         ClickGUIModule.panelY[category]!!.value = y
         ClickGUIModule.panelExtended[category]!!.enabled = extended
 
-        if (extended) for (i in moduleButtons.size - 1 downTo 0) moduleButtons[i].mouseReleased(state)
+        if (extended)
+            moduleButtons.reversed().forEach {
+                if (!it.module.name.contains(SearchBar.currentSearch, true)) return@forEach
+                it.mouseReleased(state)
+            }
     }
 
     fun keyTyped(typedChar: Char, modifier: Int): Boolean {
         if (!extended) return false
-        for (i in moduleButtons.size - 1 downTo 0) {
-            if (moduleButtons[i].keyTyped(typedChar, modifier)) return true
+
+        return moduleButtons.reversed().any {
+            if (!it.module.name.contains(SearchBar.currentSearch, true)) return@any false
+            it.keyTyped(typedChar, modifier)
         }
-        return false
     }
 
     fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
         if (!extended) return false
-        for (i in moduleButtons.size - 1 downTo 0) {
-            if (moduleButtons[i].keyPressed(keyCode, scanCode, modifiers)) return true
+
+        return moduleButtons.reversed().any {
+            if (!it.module.name.contains(SearchBar.currentSearch, true)) return@any false
+            it.keyPressed(keyCode, scanCode, modifiers)
         }
-        return false
     }
 
     private inline val isHovered get() = isAreaHovered(x, y, WIDTH, HEIGHT)

@@ -34,7 +34,7 @@ object ModuleManager {
         ClickGUIModule, Camera, Etherwarp, PlayerSize,
 
         //skyblock
-        ChatCommands, NoCursorReset, RagnarockAxe, SpringBoots, WardrobeKeybinds, PetKeybinds, InvincibilityTimer
+        ChatCommands, NoCursorReset, RagnarockAxe, SpringBoots, WardrobeKeybinds, PetKeybinds, AutoSprint, CommandKeybinds, InvincibilityTimer
 
         // kuudra
 

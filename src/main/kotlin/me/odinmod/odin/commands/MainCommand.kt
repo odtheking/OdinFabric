@@ -2,10 +2,13 @@ package me.odinmod.odin.commands
 
 import com.github.stivais.commodore.Commodore
 import com.github.stivais.commodore.utils.GreedyString
+import kotlinx.coroutines.launch
+import me.odinmod.odin.OdinMod
 import me.odinmod.odin.OdinMod.mc
 import me.odinmod.odin.clickgui.ClickGUI
 import me.odinmod.odin.clickgui.HudManager
 import me.odinmod.odin.events.PacketEvent
+import me.odinmod.odin.features.ModuleManager.generateFeatureList
 import me.odinmod.odin.features.impl.foraging.TreeHud
 import me.odinmod.odin.features.impl.render.ClickGUIModule
 import me.odinmod.odin.features.impl.render.PlayerSize
@@ -62,7 +65,14 @@ val mainCommand = Commodore("odin") {
     }
 
     literal("updatedevs").runs {
-        PlayerSize.updateCustomProperties()
-        modMessage("Updated devs.")
+        OdinMod.scope.launch {
+            PlayerSize.updateCustomProperties()
+            modMessage("Updated devs.")
+        }
+    }
+
+    literal("generatefeaturelist").runs {
+        setClipboardContent(generateFeatureList())
+        modMessage("Generated feature list and copied to clipboard.")
     }
 }

@@ -74,7 +74,6 @@ class ColorSetting(
         previousMousePos = mouseX to mouseY
 
         NVGRenderer.text(name, x + 6f, y + defaultHeight / 2f - 8f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
-        NVGRenderer.dropShadow(x + width - 40f, y + defaultHeight / 2f - 10f, 34f, 20f, 10f, 0.75f, 5f)
         NVGRenderer.rect(x + width - 40f, y + defaultHeight / 2f - 10f, 34f, 20f, value.rgba, 5f)
         NVGRenderer.hollowRect(x + width - 40f, y + defaultHeight / 2f - 10f, 34f, 20f, 1.5f, value.withAlpha(1f).darker().rgba, 5f)
 
@@ -82,7 +81,6 @@ class ColorSetting(
 
         if (expandAnim.isAnimating()) NVGRenderer.pushScissor(x, y + defaultHeight, width, getHeight() - defaultHeight)
         // SATURATION AND BRIGHTNESS
-        NVGRenderer.dropShadow(x + 10f, y + 38f, width - 20f, 170f, 10f, 0.5f, 8f)
         NVGRenderer.gradientRect(x + 10f, y + 38f, width - 20f, 170f, Colors.WHITE.rgba, value.hsbMax().rgba, Gradient.LeftToRight, 5f)
         NVGRenderer.gradientRect(x + 10f, y + 38f, width - 20f, 170f, Colors.TRANSPARENT.rgba, Colors.BLACK.rgba, Gradient.TopToBottom, 5f)
 
@@ -94,7 +92,6 @@ class ColorSetting(
         NVGRenderer.circle(sbPointer.first, sbPointer.second, 7f, value.rgba)
 
         // HUE
-        NVGRenderer.dropShadow(x + 10f, y + 214f, width - 20f, 15f, 10f, 0.5f, 5f)
         NVGRenderer.image("/assets/odin/HueGradient.png", x + 10f, y + 214f, width - 20f, 15f, 5f)
         NVGRenderer.hollowRect(x + 10f, y + 214f, width - 20f, 15f, 1f, gray38.rgba, 5f)
 
@@ -105,7 +102,6 @@ class ColorSetting(
 
         // ALPHA
         if (allowAlpha) {
-            NVGRenderer.dropShadow(x + 10f, y + 235f, width - 20f, 15f, 10f, 0.5f, 5f)
             NVGRenderer.gradientRect(x + 10f, y + 235f, width - 20f, 15f, Colors.TRANSPARENT.rgba, value.withAlpha(1f).rgba, Gradient.LeftToRight, 5f)
 
             val alphaPos = Pair((x + 10f + alphaSliderAnim.get(alphaSliderPrev, value.alphaFloat, false) * 220f), y + 243f)

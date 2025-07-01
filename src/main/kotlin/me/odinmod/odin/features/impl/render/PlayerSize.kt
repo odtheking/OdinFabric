@@ -21,7 +21,7 @@ object PlayerSize: Module(
     private val devSizeY by NumberSetting("Size Y", 1f, -1f, 3f, 0.1, desc = "Y scale of the dev size.").withDependency { isRandom && devSize }
     private val devSizeZ by NumberSetting("Size Z", 1f, -1f, 3f, 0.1, desc = "Z scale of the dev size.").withDependency { isRandom && devSize }
     private val devWings by BooleanSetting("Wings", false, desc = "Toggles client side dev wings.").withDependency { isRandom }
-    private val devWingsColor by ColorSetting("Wings Color", Colors.WHITE, desc = "Color of the dev wings.").withDependency { isRandom }
+    private val devWingsColor by ColorSetting("Wings Color", Colors.WHITE, desc = "Color of the dev wings.").withDependency { isRandom && devWings }
     private var showHidden by DropdownSetting("Show Hidden", false).withDependency { isRandom }
     private val passcode by StringSetting("Passcode", "odin", desc = "Passcode for dev features.").withDependency { isRandom && showHidden }
 
@@ -51,23 +51,22 @@ object PlayerSize: Module(
     private val pattern = Regex("Decimal\\('(-?\\d+(?:\\.\\d+)?)'\\)")
 
     fun updateCustomProperties() {
-        OdinMod.scope.launch {
-            val data = fetchData("https://tj4yzotqjuanubvfcrfo7h5qlq0opcyk.lambda-url.eu-north-1.on.aws/").replace(pattern) { match -> match.groupValues[1] }.ifEmpty { null } ?: return@launch
-            JsonParser.parseString(data)?.asJsonArray?.forEach {
-                val jsonElement = it.asJsonObject
-                val randomsName = jsonElement.get("DevName")?.asString ?: return@forEach
-                val size = jsonElement.get("Size")?.asJsonArray?.let { sizeArray -> Triple(sizeArray[0].asFloat, sizeArray[1].asFloat, sizeArray[2].asFloat) } ?: return@forEach
-                val wings = jsonElement.get("Wings")?.asBoolean == true
-                val wingsColor = jsonElement.get("WingsColor")?.asJsonArray?.let { colorArray -> Color(colorArray[0].asInt, colorArray[1].asInt, colorArray[2].asInt) } ?: Colors.WHITE
-                val customName = jsonElement.get("CustomName")?.asString?.replace("COLOR", "§") ?: ""
-                val isDev = jsonElement.get("IsDev")?.asBoolean ?: false
-                randoms[randomsName] = RandomPlayer(size, wings, Color(wingsColor.red, wingsColor.green, wingsColor.blue), customName, isDev)
-                println("Random player updated: $randomsName with size $size, wings: $wings, color: $wingsColor, custom name: $customName, isDev: $isDev")
-            }
+        val data = fetchData("https://tj4yzotqjuanubvfcrfo7h5qlq0opcyk.lambda-url.eu-north-1.on.aws/").replace(pattern) { match -> match.groupValues[1] }.ifEmpty { null } ?: return
+        JsonParser.parseString(data)?.asJsonArray?.forEach {
+            val jsonElement = it.asJsonObject
+            val randomsName = jsonElement.get("DevName")?.asString ?: return@forEach
+            val size = jsonElement.get("Size")?.asJsonArray?.let { sizeArray -> Triple(sizeArray[0].asFloat, sizeArray[1].asFloat, sizeArray[2].asFloat) } ?: return@forEach
+            val wings = jsonElement.get("Wings")?.asBoolean == true
+            val wingsColor = jsonElement.get("WingsColor")?.asJsonArray?.let { colorArray -> Color(colorArray[0].asInt, colorArray[1].asInt, colorArray[2].asInt) } ?: Colors.WHITE
+            val customName = jsonElement.get("CustomName")?.asString?.replace("COLOR", "§") ?: ""
+            val isDev = jsonElement.get("IsDev")?.asBoolean ?: false
+            randoms[randomsName] = RandomPlayer(size, wings, Color(wingsColor.red, wingsColor.green, wingsColor.blue), customName, isDev)
         }
     }
 
     init {
-        updateCustomProperties()
+        OdinMod.scope.launch {
+            updateCustomProperties()
+        }
     }
 }
