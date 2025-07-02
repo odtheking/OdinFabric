@@ -9,11 +9,11 @@
   ],
   "client": [
     "ClientCommonNetworkHandlerMixin",
-    "KeyBindingMixin",
     "HandledScreenAccessor",
     "HandledScreenMixin",
-    "MixinGameRenderer",
     "KeyBindingAccessor",
+    "KeyBindingMixin",
+    "MixinGameRenderer",
     "MixinPlayerEntityRender",
     "MouseMixin"
   ],

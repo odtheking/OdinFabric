@@ -23,5 +23,4 @@ public interface HandledScreenAccessor {
 
     @Accessor("y")
     void setY(int newY);
-
 }

@@ -161,7 +161,6 @@ fun drawLine(
     matrices.push()
     matrices.translate(x1.toDouble(), y1.toDouble(), 0.0)
     matrices.multiply(RotationAxis.POSITIVE_Z.rotation(angle.toFloat()))
-
     context.fill(0, (-lineWidth / 2).toInt(), length.toInt(), (lineWidth / 2).toInt(), color.rgba)
 
     matrices.pop()
@@ -197,10 +196,4 @@ fun Formatting.floatValues(): List<Float> {
 fun List<Float>.withAlpha(alpha: Float): List<Float> {
     return if (this.size == 4) this.toMutableList().apply { this[3] = alpha }
     else this + alpha
-}
-
-enum class RenderStyle {
-    FILLED,
-    OULINE,
-    FILLED_OUTLINE,
 }

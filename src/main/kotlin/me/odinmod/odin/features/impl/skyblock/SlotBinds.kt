@@ -1,6 +1,5 @@
 package me.odinmod.odin.features.impl.skyblock
 
-import me.odinmod.odin.OdinMod
 import me.odinmod.odin.clickgui.settings.impl.ColorSetting
 import me.odinmod.odin.clickgui.settings.impl.KeybindSetting
 import me.odinmod.odin.clickgui.settings.impl.MapSetting
@@ -15,7 +14,6 @@ import meteordevelopment.orbit.EventPriority
 import mixins.HandledScreenAccessor
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.screen.ingame.InventoryScreen
-import net.minecraft.screen.slot.Slot
 import net.minecraft.screen.slot.SlotActionType
 import org.lwjgl.glfw.GLFW
 
@@ -24,26 +22,17 @@ object SlotBinds: Module(
     description = "Bind slots together for quick access.",
     key = null
 ) {
-    private val setNewSlotbind by KeybindSetting(
-        "Bind set key",
-        GLFW.GLFW_KEY_UNKNOWN,
-        desc = "Key to set new bindings."
-    )
-    private val lineColor by ColorSetting(
-        "LineColor",
-        Colors.MINECRAFT_GOLD,
-        desc = "Color of the line drawn between slots."
-    )
+    private val setNewSlotbind by KeybindSetting("Bind set key", GLFW.GLFW_KEY_UNKNOWN, desc = "Key to set new bindings.")
+    private val lineColor by ColorSetting("LineColor", Colors.MINECRAFT_GOLD, desc = "Color of the line drawn between slots.")
     private val slotBinds by MapSetting("slotBinds", mutableMapOf<Int, Int>())
 
     private var previousSlot: Int? = null
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onGuiClick(event: GuiEvent.MouseClick) {
-        val screen = event.screen as? InventoryScreen ?: return
-        if (!Screen.hasShiftDown()) return
+        if (!Screen.hasShiftDown() || event.screen !is InventoryScreen) return
 
-        val hoveredSlot = (screen as HandledScreenAccessor).focusedSlot?.takeIf { it.index in 0 until 40 } ?: return
+        val hoveredSlot = (event.screen as HandledScreenAccessor).focusedSlot?.takeIf { it.index in 0 until 40 } ?: return
         val boundSlot = slotBinds[hoveredSlot.index] ?: return
 
         val (from, to) = when {
@@ -52,67 +41,46 @@ object SlotBinds: Module(
             else -> return
         }
 
-        val fromSlot = screen.screenHandler.slots.indexOfFirst { it.index == from }.takeIf { it >= 0 } ?: return
-
-        mc.interactionManager?.clickSlot(screen.screenHandler.syncId, fromSlot, to, SlotActionType.SWAP, mc.player)
+        mc.interactionManager?.clickSlot(event.screen.screenHandler.syncId, from, to, SlotActionType.SWAP, mc.player)
         event.cancel()
     }
 
     @EventHandler
     fun onGuiPress(event: GuiEvent.KeyPress) {
-        val screen = event.screen as? InventoryScreen ?: return
+        if (event.screen !is InventoryScreen || event.keyCode != setNewSlotbind.code) return
+        val hoveredSlot = (event.screen as HandledScreenAccessor).focusedSlot?.takeIf { it.index in 0 until 40 } ?: return
 
-        if (event.keyCode != setNewSlotbind.code) return
-
-        val hoveredSlot = (screen as HandledScreenAccessor).focusedSlot?.takeIf { it.index in 0 until 40 } ?: return
         previousSlot?.let { slot ->
-            if (slot == hoveredSlot.index) {
-                modMessage("§cYou can't bind a slot to itself.")
-                return
-            }
-
-            if (slot !in 0..8 && hoveredSlot.index !in 0..8) {
-                modMessage("§cOne of the slots must be in the hotbar (0–8).")
-                return
-            }
+            if (slot == hoveredSlot.index) return modMessage("§cYou can't bind a slot to itself.")
+            if (slot !in 0..8 && hoveredSlot.index !in 0..8) return modMessage("§cOne of the slots must be in the hotbar (0–8).")
 
             modMessage("§aAdded bind from slot §b$slot §ato §d${hoveredSlot.index}.")
             slotBinds[slot] = hoveredSlot.index
             Config.save()
             previousSlot = null
         } ?: run {
-            val existing = slotBinds.entries.firstOrNull { it.key == hoveredSlot.index }
-            if (existing != null) {
-                slotBinds.remove(existing.key)
+            slotBinds.entries.firstOrNull { it.key == hoveredSlot.index }?.let {
+                slotBinds.remove(it.key)
                 Config.save()
-                modMessage("§cRemoved bind from slot §b${existing.key} §cto §d${existing.value}.")
-            } else {
-                previousSlot = hoveredSlot.index
+                return modMessage("§cRemoved bind from slot §b${it.key} §cto §d${it.value}.")
             }
+            previousSlot = hoveredSlot.index
         }
     }
 
     @EventHandler
-    fun onRenderScreen(event: GuiEvent.RenderScreen) {
+    fun onRenderScreen(event: GuiEvent.Render) {
         val screen = event.screen as? InventoryScreen ?: return
-
         val hoveredSlot = (screen as HandledScreenAccessor).focusedSlot?.takeIf { it.index in 0 until 40 } ?: return
         val boundSlot = slotBinds[hoveredSlot.index]
 
-        val slotA = screen.screenHandler.slots.firstOrNull {
-            it.inventory == mc.player?.inventory && it.index == (previousSlot ?: hoveredSlot.index)
-        } ?: return
-        val startX = slotA.x + screen.x + 8
-        val startY = slotA.y + screen.y + 8
+        val (startX, startY) = screen.screenHandler.getSlot(previousSlot ?: hoveredSlot.id)?.let { slot ->
+            slot.x + screen.x + 8 to slot.y + screen.y + 8 } ?: return modMessage("§cNo slot bound to draw line1.")
 
-        val (endX, endY) = previousSlot?.let {
-            event.mouseX to event.mouseY
-        } ?: boundSlot.let { index ->
-            val slotB: Slot = screen.screenHandler.slots.firstOrNull { it.inventory == mc.player?.inventory && it.index == index } ?: return
-            slotB.x + screen.x + 8 to slotB.y + screen.y + 8
-        }
+        val (endX, endY) = previousSlot?.let { event.mouseX to event.mouseY } ?: boundSlot?.let { slot ->
+            screen.screenHandler.getSlot(slot)?.let { it.x + screen.x + 8 to it.y + screen.y + 8 } } ?: return modMessage("§cNo slot bound to draw line.")
 
-        if (previousSlot == null && !(Screen.hasShiftDown())) return
+        if (previousSlot == null && !(Screen.hasShiftDown() && boundSlot != null)) return
 
         event.drawContext.matrices.push()
         event.drawContext.matrices.translate(0f, 0f, 999f)
@@ -121,7 +89,7 @@ object SlotBinds: Module(
     }
 
     @EventHandler
-    fun onGuiClose(event: GuiEvent.Open) {
-        if (event.screen == null) previousSlot = null;
+    fun onGuiClose(event: GuiEvent.Close) {
+        previousSlot = null;
     }
 }
