@@ -15,22 +15,8 @@ import net.minecraft.sound.SoundEvents
 import net.minecraft.text.ClickEvent
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import kotlin.collections.any
 import kotlin.collections.component1
 import kotlin.collections.component2
-import kotlin.collections.drop
-import kotlin.collections.find
-import kotlin.collections.getOrNull
-import kotlin.collections.groupBy
-import kotlin.collections.indices
-import kotlin.collections.joinToString
-import kotlin.collections.listOf
-import kotlin.collections.map
-import kotlin.collections.mapOf
-import kotlin.collections.mutableListOf
-import kotlin.collections.none
-import kotlin.collections.random
-import kotlin.collections.toMutableList
 import kotlin.random.Random
 
 object ChatCommands: Module(
@@ -71,13 +57,12 @@ object ChatCommands: Module(
 
     // https://regex101.com/r/joY7dm/1
     private val messageRegex = Regex("^(?:Party > (\\[[^]]*?])? ?(\\w{1,16})(?: [ቾ⚒])?: ?(.+)\$|Guild > (\\[[^]]*?])? ?(\\w{1,16})(?: \\[([^]]*?)])?: ?(.+)\$|From (\\[[^]]*?])? ?(\\w{1,16}): ?(.+)\$)")
-    private val dtRegex = Regex(" {29}> EXTRA STATS <|^\\[NPC] Elle: Good job everyone. A hard fought battle come to an end. Let's get out of here before we run into any more trouble!$")
 
     @EventHandler
     fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
         if (this !is GameMessageS2CPacket || overlay) return
 
-        if (dt && !dtReason.isEmpty()) {
+        if (dt && dtReason.isNotEmpty()) {
             dtReason.find { it.first == mc.player?.name?.string }?.let { sendCommand("p chat Downtime needed: ${it.second}") }
             modMessage("DT Reasons: ${dtReason.groupBy({ it.second }, { it.first }).entries.joinToString(separator = ", ") { (reason, names) -> "${names.joinToString(", ")}: $reason" }}")
             alert("§cPlayers need DT")
@@ -169,28 +154,11 @@ object ChatCommands: Module(
                 sendCommand("odin ${words[0].lowercase()}")
             }
 
-            "downtime", "dt" -> {
-                if (!dt || channel != ChatChannel.PARTY) return
-                val reason = words.drop(1).joinToString(" ").takeIf { it.isNotBlank() } ?: "No reason given"
-                if (dtReason.any { it.first == name }) return modMessage("§6${name} §calready has a reminder!")
-                modMessage("§aReminder set for the end of the run! §7(disabled auto requeue for this run)")
-                dtReason.add(name to reason)
-                //disableRequeue = true
-            }
-            "undowntime", "undt" -> {
-                if (!dt || channel != ChatChannel.PARTY) return
-                if (dtReason.none { it.first == name }) return modMessage("§6${name} §chas no reminder set!")
-                modMessage("§aReminder removed!")
-                dtReason.removeIf { it.first == name }
-                //if (dtReason.isEmpty()) disableRequeue = false
-            }
-
             // private commands
 
             "invite", "inv" -> if (invite && channel == ChatChannel.PRIVATE) {
                 if (autoConfirm) return sendCommand("p invite $name")
-                modMessage("§aClick on this message to invite $name to your party!", chatStyle = createClickStyle(
-                    ClickEvent.Action.RUN_COMMAND, "/party invite $name"))
+                modMessage("§aClick on this message to invite $name to your party!", chatStyle = createClickStyle(ClickEvent.Action.RUN_COMMAND, "/party invite $name"))
                 playSoundAtPlayer(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value())
             }
         }
@@ -247,7 +215,7 @@ object ChatCommands: Module(
         ":bum:" to "♿"
     )
 
-    enum class ChatChannel {
+    private enum class ChatChannel {
         PARTY, GUILD, PRIVATE
     }
 }
