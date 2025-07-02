@@ -1,34 +1,32 @@
 package me.odinmod.odin.utils
 
-import me.odinmod.odin.OdinMod.mc
 import me.odinmod.odin.events.PacketEvent
-import me.odinmod.odin.utils.handlers.TickTask
 import meteordevelopment.orbit.EventHandler
-import mixins.ClientPlayNetworkHandlerAccessor
 import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket
+import net.minecraft.network.packet.s2c.query.PingResultS2CPacket
+import net.minecraft.util.Util
 
 object ServerUtils {
     private var prevTime = 0L
     var averageTps = 20f
+        private set
 
-    @JvmField
     var currentPing: Int = 0
-
-    init {
-        TickTask(2) {
-            (mc.networkHandler as ClientPlayNetworkHandlerAccessor).pingMeasurer.ping()
-        }
-    }
+        private set
 
     @EventHandler
-    fun onPacketReceive(event: PacketEvent.Receive) {
-        when (event.packet) {
+    fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
+        when (this) {
             is WorldTimeUpdateS2CPacket -> {
                 if (prevTime != 0L)
                     averageTps = (20000f / (System.currentTimeMillis() - prevTime + 1)).coerceIn(0f, 20f)
 
                 prevTime = System.currentTimeMillis()
             }
+
+            is PingResultS2CPacket ->
+                currentPing = (Util.getMeasuringTimeMs() - startTime()).toInt().coerceAtLeast(0)
+
             else -> return
         }
     }
