@@ -10,12 +10,11 @@ import me.odinmod.odin.features.impl.render.ClickGUIModule
 import me.odinmod.odin.utils.Color
 import me.odinmod.odin.utils.Colors
 import me.odinmod.odin.utils.ui.HoverHandler
-import me.odinmod.odin.utils.ui.animations.EaseInOutAnimation
+import me.odinmod.odin.utils.ui.animations.LinearAnimation
 import me.odinmod.odin.utils.ui.rendering.NVGRenderer
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.text.Text
-import kotlin.math.floor
 import kotlin.math.sign
 
 /**
@@ -32,7 +31,7 @@ object ClickGUI : Screen(Text.literal("Click GUI")) {
     private val panels: ArrayList<Panel> = arrayListOf()
 
     private var desc = Description("", 0f, 0f, HoverHandler(100))
-    private var openAnim = EaseInOutAnimation(400)
+    private var openAnim = LinearAnimation<Float>(400)
 
     val gray38 = Color(38, 38, 38)
     val gray26 = Color(26, 26, 26)
@@ -54,7 +53,7 @@ object ClickGUI : Screen(Text.literal("Click GUI")) {
 
         NVGRenderer.beginFrame(1920f, 1080f)
         if (openAnim.isAnimating()) {
-            NVGRenderer.translate(0f, floor(openAnim.get(-10f, 0f)))
+            NVGRenderer.translate(0f, openAnim.get(-10f, 0f))
             NVGRenderer.globalAlpha(openAnim.get(0f, 1f))
         }
 
@@ -96,7 +95,7 @@ object ClickGUI : Screen(Text.literal("Click GUI")) {
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        SearchBar.mouseClicked(mouseX, mouseY, button)
+        SearchBar.mouseClicked(mc.mouse.x, mc.mouse.y, button)
         for (i in panels.size - 1 downTo 0) {
             if (panels[i].mouseClicked(mc.mouse.x, mc.mouse.y, button)) return true
         }

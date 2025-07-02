@@ -20,11 +20,6 @@ object ClickGUIModule : Module(
     val clickGUIColor by ColorSetting("Click GUI Color", Color(50, 150, 220), desc = "The color of the Click GUI.")
     private val action by ActionSetting("Open HUD Editor", desc = "Opens the HUD editor when clicked.") { mc.setScreen(HudManager) }
 
-//    private val hud by HUD("Test HUD", "HUD FOR TESTING") {
-//        fill(0, 0, 100, 50, Colors.MINECRAFT_GREEN.rgba)
-//        100f to 50f
-//    }
-
     override fun onKeybind() {
         toggle()
     }

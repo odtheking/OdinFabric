@@ -9,7 +9,6 @@ import me.odinmod.odin.features.impl.render.ClickGUIModule
 import me.odinmod.odin.features.impl.render.PlayerSize
 import me.odinmod.odin.utils.Colors
 import me.odinmod.odin.utils.ui.MouseUtils.isAreaHovered
-import me.odinmod.odin.utils.ui.animations.LinearAnimation
 import me.odinmod.odin.utils.ui.rendering.NVGRenderer
 import kotlin.math.floor
 
@@ -44,9 +43,7 @@ class Panel(private val category: Category) {
     private var y2 = 0f
 
     private val textWidth = NVGRenderer.textWidth(category.displayName, 22f, NVGRenderer.defaultFont)
-    private val scrollAnimation = LinearAnimation<Float>(200)
     private var previousHeight = 0f
-    private var scrollTarget = 0f
     private var scrollOffset = 0f
 
     fun draw(mouseX: Double, mouseY: Double) {
@@ -55,12 +52,11 @@ class Panel(private val category: Category) {
             y = floor(y2 + mouseY).toFloat()
         }
 
-        NVGRenderer.dropShadow(x, y, WIDTH, (previousHeight + 10f).coerceAtLeast(HEIGHT), 12.5f, 6f, 5f)
+        NVGRenderer.dropShadow(x, y, WIDTH, (previousHeight + 10f).coerceAtLeast(HEIGHT), 10f, 3f, 5f)
 
         NVGRenderer.drawHalfRoundedRect(x, y, WIDTH, HEIGHT, gray26.rgba, 5f, true)
         NVGRenderer.text(category.displayName, x + WIDTH / 2f - textWidth / 2, y + HEIGHT / 2f - 11, 22f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
 
-        scrollOffset = scrollAnimation.get(scrollOffset, scrollTarget)
         var startY = scrollOffset + HEIGHT
 
         if (scrollOffset != 0f) NVGRenderer.pushScissor(x, y + HEIGHT, WIDTH, previousHeight - HEIGHT + 10f)
@@ -81,8 +77,7 @@ class Panel(private val category: Category) {
 
     fun handleScroll(amount: Int): Boolean {
         if (!isMouseOverExtended) return false
-        scrollTarget = (scrollTarget + amount).coerceIn(-length + scrollOffset + 72f, 0f)
-        scrollAnimation.start()
+        scrollOffset = (scrollOffset + amount).coerceIn(-length + scrollOffset + 72f, 0f)
         return true
     }
 
