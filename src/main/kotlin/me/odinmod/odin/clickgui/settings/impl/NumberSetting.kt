@@ -98,7 +98,6 @@ class NumberSetting<E>(
         NVGRenderer.text(displayValue, x + width - valueWidth - 4f, y + height / 2f - 15f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
 
         NVGRenderer.rect(x + 6f, y + 24f, width - 12f, 8f, gray38.rgba, 3f)
-        NVGRenderer.dropShadow(x + 6f, y + 24f, width - 12f, 8f, 10f, 0.75f, 3f)
 
         if (x + sliderPercentage * (width - 12f) > x + 6)
             NVGRenderer.rect(x + 6f, y + 24f, sliderAnim.get(prevLocation, sliderPercentage, false) * (width - 12f), 8f, ClickGUIModule.clickGUIColor.rgba, 3f)

@@ -14,8 +14,9 @@ object SearchBar {
             field = value
             searchWidth = NVGRenderer.textWidth(value, 20f, NVGRenderer.defaultFont)
         }
-    private var searchWidth = NVGRenderer.textWidth(currentSearch, 20f, NVGRenderer.defaultFont)
+
     private var placeHolderWidth = NVGRenderer.textWidth("Search here...", 20f, NVGRenderer.defaultFont)
+    private var searchWidth = NVGRenderer.textWidth(currentSearch, 20f, NVGRenderer.defaultFont)
 
     private val textInputHandler = TextInputHandler(
         textProvider = { currentSearch },
@@ -37,7 +38,7 @@ object SearchBar {
         if (currentSearch.isEmpty()) NVGRenderer.text("Search here...", x + 175f - placeHolderWidth / 2, textY, 20f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
         textInputHandler.x = (x + 175f - searchWidth / 2 - if (currentSearch.isEmpty()) placeHolderWidth / 2 + 2f else 0f).coerceAtLeast(x)
         textInputHandler.y = textY
-        textInputHandler.width = 345f
+        textInputHandler.width = 250f
         textInputHandler.height = 22f
         textInputHandler.draw()
     }

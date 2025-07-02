@@ -40,26 +40,30 @@ object NVGRenderer {
 
     private var scissor: Scissor? = null
 
-    private var previousProgram = -1
     private var previousTexture = -1
     private var textureBinding = -1
-    private var prevVao = -1
+
     private var vg = -1L
 
     private var drawing: Boolean = false
 
     init {
-        vg = nvgCreate(NVG_ANTIALIAS or NVG_DEBUG)
+        vg = nvgCreate(NVG_ANTIALIAS or NVG_STENCIL_STROKES)
         require(vg != -1L) { "Failed to initialize NanoVG" }
+        push()
+        nvgFontSize(vg, 16f)
+        nvgFontFaceId(vg, getFontID(defaultFont))
+        nvgBeginPath(vg)
+        nvgText(vg, -1000f, -1000f, "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#\\\$%^&*()-_=+[]{};:'\\\",.<>?/|\\\\`~")
+        nvgClosePath(vg)
+        pop()
     }
 
     fun beginFrame(width: Float, height: Float) {
         if (drawing) throw IllegalStateException("[NVGRenderer] Already drawing, but called beginFrame")
 
-        previousProgram = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM)
         previousTexture = GL11.glGetInteger(GL13.GL_ACTIVE_TEXTURE)
         textureBinding = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D)
-        prevVao = GL11.glGetInteger(GL30.GL_VERTEX_ARRAY_BINDING)
 
         val framebuffer = mc.framebuffer
         val glFramebuffer = (framebuffer.colorAttachment as GlTexture).getOrCreateFramebuffer((RenderSystem.getDevice() as GlBackend).framebufferManager, null)
@@ -79,16 +83,13 @@ object NVGRenderer {
         GlStateManager._enableBlend()
         GlStateManager._blendFuncSeparate(770, 771, 1, 0)
 
-        if (previousProgram != -1) GL20.glUseProgram(previousProgram) // fixes invalid program errors when using NVG
-        else GL20.glUseProgram(0)
-
         if (previousTexture != -1) { // prevents issues with gui background rendering
             GlStateManager._activeTexture(previousTexture)
             if (textureBinding != -1) GlStateManager._bindTexture(textureBinding)
         }
 
-        if (prevVao != -1) GL30.glBindVertexArray(prevVao) // fixes glitches when updating font atlas
-        else GL30.glBindVertexArray(0)
+        GL30.glBindVertexArray(0) // fixes glitches when updating font atlas
+        GL20.glUseProgram(0) // fixes invalid program errors when using NVG
 
         drawing = false
     }
@@ -264,35 +265,6 @@ object NVGRenderer {
     }
 
     fun image(
-        image: Image,
-        x: Float,
-        y: Float,
-        w: Float,
-        h: Float
-    ) {
-        nvgImagePattern(vg, x, y, w, h, 0f, getImage(image), 1f, nvgPaint)
-        nvgBeginPath(vg)
-        nvgRect(vg, x, y, w, h + .5f)
-        nvgFillPaint(vg, nvgPaint)
-        nvgFill(vg)
-    }
-
-    fun image(
-        image: Image,
-        x: Float,
-        y: Float,
-        w: Float,
-        h: Float,
-        radius: Float
-    ) {
-        nvgImagePattern(vg, x, y, w, h, 0f, getImage(image), 1f, nvgPaint)
-        nvgBeginPath(vg)
-        nvgRoundedRect(vg, x, y, w, h + .5f, radius)
-        nvgFillPaint(vg, nvgPaint)
-        nvgFill(vg)
-    }
-
-    fun image(
         resourcePath: String,
         x: Float,
         y: Float,
@@ -303,8 +275,19 @@ object NVGRenderer {
         val image = images.keys.find { it.identifier == resourcePath } ?: Image(resourcePath)
         if (image.isSVG) images.getOrPut(image) { NVGImage(0, loadSVG(image)) }.count++
         else images.getOrPut(image) { NVGImage(0, loadImage(image)) }.count++
-        if (radius == 0f) image(image, x, y, w, h)
-        else image(image, x, y, w, h, radius)
+        if (radius == 0f) {
+            nvgImagePattern(vg, x, y, w, h, 0f, getImage(image), 1f, nvgPaint)
+            nvgBeginPath(vg)
+            nvgRect(vg, x, y, w, h + .5f)
+            nvgFillPaint(vg, nvgPaint)
+            nvgFill(vg)
+        } else {
+            nvgImagePattern(vg, x, y, w, h, 0f, getImage(image), 1f, nvgPaint)
+            nvgBeginPath(vg)
+            nvgRoundedRect(vg, x, y, w, h + .5f, radius)
+            nvgFillPaint(vg, nvgPaint)
+            nvgFill(vg)
+        }
     }
 
     // lowers reference count by 1, if it reaches 0 it gets deleted from mem

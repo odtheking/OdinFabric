@@ -10,12 +10,11 @@ import me.odinmod.odin.features.impl.render.ClickGUIModule
 import me.odinmod.odin.utils.Color
 import me.odinmod.odin.utils.Colors
 import me.odinmod.odin.utils.ui.HoverHandler
-import me.odinmod.odin.utils.ui.animations.EaseInOutAnimation
+import me.odinmod.odin.utils.ui.animations.LinearAnimation
 import me.odinmod.odin.utils.ui.rendering.NVGRenderer
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.text.Text
-import kotlin.math.floor
 import kotlin.math.sign
 
 /**
@@ -32,7 +31,7 @@ object ClickGUI : Screen(Text.literal("Click GUI")) {
     private val panels: ArrayList<Panel> = arrayListOf()
 
     private var desc = Description("", 0f, 0f, HoverHandler(100))
-    private var openAnim = EaseInOutAnimation(400)
+    private var openAnim = LinearAnimation<Float>(400)
 
     val gray38 = Color(38, 38, 38)
     val gray26 = Color(26, 26, 26)
@@ -43,8 +42,9 @@ object ClickGUI : Screen(Text.literal("Click GUI")) {
     }
 
     private var lastResetTime = System.nanoTime()
-    private var maxFrameTimeMs = 0.0
-    private var displayedMaxFrameTimeMs = 0.0
+    private var avgFrameTimeMs = 0.0
+    private var frameTimeSum = 0.0
+    private var frameCount = 0
 
     @EventHandler
     fun render(event: GuiEvent.NVGRender) {
@@ -53,7 +53,7 @@ object ClickGUI : Screen(Text.literal("Click GUI")) {
 
         NVGRenderer.beginFrame(1920f, 1080f)
         if (openAnim.isAnimating()) {
-            NVGRenderer.translate(0f, floor(openAnim.get(-10f, 0f)))
+            NVGRenderer.translate(0f, openAnim.get(-10f, 0f))
             NVGRenderer.globalAlpha(openAnim.get(0f, 1f))
         }
 
@@ -66,17 +66,19 @@ object ClickGUI : Screen(Text.literal("Click GUI")) {
         val frameTimeMs = (System.nanoTime() - startTime) / 1_000_000.0
         val now = System.nanoTime()
 
-        if (frameTimeMs > maxFrameTimeMs) maxFrameTimeMs = frameTimeMs
+        frameTimeSum += frameTimeMs
+        frameCount++
 
         if ((now - lastResetTime) > 500_000_000L) {
             lastResetTime = now
-            displayedMaxFrameTimeMs = maxFrameTimeMs
-            maxFrameTimeMs = 0.0
+            avgFrameTimeMs = if (frameCount > 0) frameTimeSum / frameCount else 0.0
+            frameTimeSum = 0.0
+            frameCount = 0
         }
 
         NVGRenderer.text(
-            text = "Max frame time: %.2f ms".format(displayedMaxFrameTimeMs),
-            x = 1920f - 280f - 10f,
+            text = "Avg frame time: %.2f ms".format(avgFrameTimeMs),
+            x = 1920f - 220f,
             y = 1080f - 28f,
             size = 18f,
             color = 0xFFFFFFFF.toInt(),
@@ -93,7 +95,7 @@ object ClickGUI : Screen(Text.literal("Click GUI")) {
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        SearchBar.mouseClicked(mouseX, mouseY, button)
+        SearchBar.mouseClicked(mc.mouse.x, mc.mouse.y, button)
         for (i in panels.size - 1 downTo 0) {
             if (panels[i].mouseClicked(mc.mouse.x, mc.mouse.y, button)) return true
         }

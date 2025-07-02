@@ -13,6 +13,7 @@
     "HandledScreenAccessor",
     "HandledScreenMixin",
     "MixinGameRenderer",
+    "KeyBindingAccessor",
     "MixinPlayerEntityRender",
     "MouseMixin"
   ],

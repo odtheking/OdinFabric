@@ -44,7 +44,6 @@ class KeybindSetting(
         val rectWidth = keyNameWidth + 12f
         val rectHeight = 20f
 
-        NVGRenderer.dropShadow(rectX, rectY, rectWidth, rectHeight, 10f, 0.75f, 5f)
         NVGRenderer.rect(rectX, rectY, rectWidth, rectHeight, gray38.rgba, 5f)
         NVGRenderer.hollowRect(rectX - 1, rectY - 1, rectWidth + 2f, rectHeight + 2f, 1.5f, ClickGUIModule.clickGUIColor.rgba, 4f)
 
