@@ -7,16 +7,7 @@ import me.odinmod.odin.events.MessageSentEvent
 import me.odinmod.odin.events.PacketEvent
 import me.odinmod.odin.events.WorldLoadEvent
 import me.odinmod.odin.features.Module
-import me.odinmod.odin.utils.ServerUtils
-import me.odinmod.odin.utils.alert
-import me.odinmod.odin.utils.capitalizeFirst
-import me.odinmod.odin.utils.createClickStyle
-import me.odinmod.odin.utils.getPositionString
-import me.odinmod.odin.utils.modMessage
-import me.odinmod.odin.utils.noControlCodes
-import me.odinmod.odin.utils.playSoundAtPlayer
-import me.odinmod.odin.utils.sendChatMessage
-import me.odinmod.odin.utils.sendCommand
+import me.odinmod.odin.utils.*
 import me.odinmod.odin.utils.skyblock.LocationUtils
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
@@ -24,6 +15,22 @@ import net.minecraft.sound.SoundEvents
 import net.minecraft.text.ClickEvent
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import kotlin.collections.any
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.drop
+import kotlin.collections.find
+import kotlin.collections.getOrNull
+import kotlin.collections.groupBy
+import kotlin.collections.indices
+import kotlin.collections.joinToString
+import kotlin.collections.listOf
+import kotlin.collections.map
+import kotlin.collections.mapOf
+import kotlin.collections.mutableListOf
+import kotlin.collections.none
+import kotlin.collections.random
+import kotlin.collections.toMutableList
 import kotlin.random.Random
 
 object ChatCommands: Module(
@@ -98,7 +105,7 @@ object ChatCommands: Module(
 
     @EventHandler
     fun onMessageSent(event: MessageSentEvent) {
-        if (!chatEmotes ||( event.message.startsWith("/") && !listOf("/pc", "/ac", "/gc", "/msg", "/w", "/r").any { event.message.startsWith(it) })) return
+        if (!chatEmotes || (event.message.startsWith("/") && !listOf("/pc", "/ac", "/gc", "/msg", "/w", "/r").any { event.message.startsWith(it) })) return
 
         var replaced = false
         val words = event.message.split(" ").toMutableList()
