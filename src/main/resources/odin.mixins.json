@@ -8,10 +8,12 @@
     "YggdrasilSignatureIgnoreMixin"
   ],
   "client": [
+    "ChatScreenMixin",
     "ClientCommonNetworkHandlerMixin",
     "HandledScreenAccessor",
     "HandledScreenMixin",
     "KeyBindingAccessor",
+    "ClientPlayNetworkHandlerMixin",
     "KeyBindingMixin",
     "MixinGameRenderer",
     "MixinPlayerEntityRender",

@@ -1,6 +1,7 @@
 package me.odinmod.odin.commands
 
 import com.github.stivais.commodore.Commodore
+import com.github.stivais.commodore.parsers.CommandParsable
 import com.github.stivais.commodore.utils.GreedyString
 import kotlinx.coroutines.launch
 import me.odinmod.odin.OdinMod
@@ -75,4 +76,22 @@ val mainCommand = Commodore("odin") {
         setClipboardContent(generateFeatureList())
         modMessage("Generated feature list and copied to clipboard.")
     }
+    
+    runs { floor: Floors -> sendCommand("joininstance ${floor.instance()}") }
+    runs { tier: KuudraTier -> sendCommand("joininstance ${tier.instance()}") }
+}
+
+@CommandParsable
+private enum class Floors {
+    F1, F2, F3, F4, F5, F6, F7, M1, M2, M3, M4, M5, M6, M7;
+
+    private val floors = listOf("one", "two", "three", "four", "five", "six", "seven")
+    fun instance() = "${if (ordinal > 6) "master_" else ""}catacombs_floor_${floors[(ordinal % 7)]}"
+}
+
+@CommandParsable
+private enum class KuudraTier(private val test: String) {
+    T1("normal"), T2("hot"), T3("burning"), T4("fiery"), T5("infernal");
+
+    fun instance() = "kuudra_${test}"
 }

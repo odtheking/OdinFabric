@@ -88,3 +88,5 @@ fun String.removeRangeSafe(from: Int, to: Int): String {
 fun String.dropAt(at: Int, amount: Int): String {
     return removeRangeSafe(at, at + amount)
 }
+
+fun String.capitalizeFirst(): String = if (isNotEmpty() && this[0] in 'a'..'z') this[0].uppercaseChar() + substring(1) else this
