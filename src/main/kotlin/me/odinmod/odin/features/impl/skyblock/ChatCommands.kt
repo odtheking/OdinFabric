@@ -5,7 +5,6 @@ import me.odinmod.odin.clickgui.settings.impl.BooleanSetting
 import me.odinmod.odin.clickgui.settings.impl.DropdownSetting
 import me.odinmod.odin.events.MessageSentEvent
 import me.odinmod.odin.events.PacketEvent
-import me.odinmod.odin.events.WorldLoadEvent
 import me.odinmod.odin.features.Module
 import me.odinmod.odin.utils.*
 import me.odinmod.odin.utils.skyblock.LocationUtils
@@ -15,8 +14,6 @@ import net.minecraft.sound.SoundEvents
 import net.minecraft.text.ClickEvent
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import kotlin.collections.component1
-import kotlin.collections.component2
 import kotlin.random.Random
 
 object ChatCommands: Module(
@@ -42,7 +39,6 @@ object ChatCommands: Module(
     private val ping by BooleanSetting("Ping", true, desc = "Sends your current Ping.").withDependency { showSettings }
     private val tps by BooleanSetting("Tps", true, desc = "Sends your server's current TPS.").withDependency { showSettings }
     private val fps by BooleanSetting("FPS", true, desc = "Sends your current FPS.").withDependency { showSettings }
-    private val dt by BooleanSetting("DT", true, desc = "Sets a reminder for the end of the run.").withDependency { showSettings }
     private val invite by BooleanSetting("Invite", true, desc = "Invites the player to your party.").withDependency { showSettings }
     private val autoConfirm by BooleanSetting("Auto Confirm", false, desc = "Removes the need to confirm a party invite with the !invite command.").withDependency { showSettings && invite }
     private val racism by BooleanSetting("Racism", false, desc = "Sends a random racism percentage.").withDependency { showSettings }
@@ -53,21 +49,12 @@ object ChatCommands: Module(
     private val location by BooleanSetting("Location", true, desc = "Sends your current location.").withDependency { showSettings }
     private val holding by BooleanSetting("Holding", true, desc = "Sends the item you are holding.").withDependency { showSettings }
 
-    private val dtReason = mutableListOf<Pair<String, String>>()
-
     // https://regex101.com/r/joY7dm/1
     private val messageRegex = Regex("^(?:Party > (\\[[^]]*?])? ?(\\w{1,16})(?: [ቾ⚒])?: ?(.+)\$|Guild > (\\[[^]]*?])? ?(\\w{1,16})(?: \\[([^]]*?)])?: ?(.+)\$|From (\\[[^]]*?])? ?(\\w{1,16}): ?(.+)\$)")
 
     @EventHandler
     fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
         if (this !is GameMessageS2CPacket || overlay) return
-
-        if (dt && dtReason.isNotEmpty()) {
-            dtReason.find { it.first == mc.player?.name?.string }?.let { sendCommand("p chat Downtime needed: ${it.second}") }
-            modMessage("DT Reasons: ${dtReason.groupBy({ it.second }, { it.first }).entries.joinToString(separator = ", ") { (reason, names) -> "${names.joinToString(", ")}: $reason" }}")
-            alert("§cPlayers need DT")
-            dtReason.clear()
-        }
 
         val result = messageRegex.find(content.string.noControlCodes) ?: return
         val channel = when(result.value.split(" ")[0]) {
@@ -81,11 +68,6 @@ object ChatCommands: Module(
         val msg = result.groups[3]?.value ?: result.groups[7]?.value ?: result.groups[10]?.value ?: return
 
         handleChatCommands(msg, ign, channel)
-    }
-
-    @EventHandler
-    fun onWorldLoad(event: WorldLoadEvent) {
-        dtReason.clear()
     }
 
     @EventHandler

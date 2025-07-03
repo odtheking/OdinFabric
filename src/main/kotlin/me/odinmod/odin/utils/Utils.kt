@@ -89,9 +89,4 @@ fun String.dropAt(at: Int, amount: Int): String {
     return removeRangeSafe(at, at + amount)
 }
 
-/**
- * Returns the String with the first letter capitalized
- *
- * @return The String with the first letter capitalized
- */
-fun String.capitalizeFirst(): String = replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+fun String.capitalizeFirst(): String = if (isNotEmpty() && this[0] in 'a'..'z') this[0].uppercaseChar() + substring(1) else this

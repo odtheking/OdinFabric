@@ -2,14 +2,13 @@ package me.odinmod.odin.utils.ui
 
 import me.odinmod.odin.OdinMod.mc
 import me.odinmod.odin.utils.Colors
-import me.odinmod.odin.utils.dropAt
-import me.odinmod.odin.utils.removeRangeSafe
-import me.odinmod.odin.utils.substringSafe
 import me.odinmod.odin.utils.ui.MouseUtils.isAreaHovered
 import me.odinmod.odin.utils.ui.rendering.NVGRenderer
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.util.StringHelper
 import org.lwjgl.glfw.GLFW
+import kotlin.math.max
+import kotlin.math.min
 
 class TextInputHandler(
     private val textProvider: () -> String,
@@ -315,4 +314,17 @@ class TextInputHandler(
         caret = text.length
         updateCaretPosition()
     }
+
+    private fun String.substringSafe(from: Int, to: Int): String {
+        val f = min(from, to).coerceAtLeast(0)
+        val t = max(to, from)
+        if (t > length) return substring(f)
+        return substring(f, t)
+    }
+
+    private fun String.removeRangeSafe(from: Int, to: Int): String =
+        removeRange(min(from, to), max(to, from))
+
+    private fun String.dropAt(at: Int, amount: Int): String =
+        removeRangeSafe(at, at + amount)
 }

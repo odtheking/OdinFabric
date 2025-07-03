@@ -26,8 +26,6 @@ object ServerUtils {
 
             is PingResultS2CPacket ->
                 currentPing = (Util.getMeasuringTimeMs() - startTime()).toInt().coerceAtLeast(0)
-
-            else -> return
         }
     }
 }
