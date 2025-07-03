@@ -3,6 +3,7 @@ package me.odinmod.odin.clickgui.settings.impl
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import me.odinmod.odin.OdinMod.mc
+import me.odinmod.odin.clickgui.ClickGUI
 import me.odinmod.odin.clickgui.ClickGUI.gray38
 import me.odinmod.odin.clickgui.HudManager
 import me.odinmod.odin.clickgui.settings.RenderableSetting
@@ -46,7 +47,7 @@ class HUDSetting(
         val imageSize = 24f + (6f * hoverHandler.percent() / 100f)
         val offset = (imageSize - 24f) / 2f
 
-        NVGRenderer.image("/assets/odin/MovementIcon.svg", iconX - offset, iconY - offset, imageSize, imageSize, 0f)
+        NVGRenderer.image(ClickGUI.movementImage, iconX - offset, iconY - offset, imageSize, imageSize)
 
         if (toggleable) {
             NVGRenderer.rect(x + width - 70f, y + height / 2f - 10f, 34f, 20f, gray38.rgba, 9f)

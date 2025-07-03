@@ -30,6 +30,10 @@ object ClickGUI : Screen(Text.literal("Click GUI")) {
 
     private val panels: ArrayList<Panel> = arrayListOf()
 
+    val movementImage = NVGRenderer.createImage("/assets/odin/MovementIcon.svg")
+    val hueImage = NVGRenderer.createImage("/assets/odin/HueGradient.png")
+    val chevronImage = NVGRenderer.createImage("/assets/odin/chevron.svg")
+
     private var desc = Description("", 0f, 0f, HoverHandler(100))
     private var openAnim = LinearAnimation<Float>(400)
 

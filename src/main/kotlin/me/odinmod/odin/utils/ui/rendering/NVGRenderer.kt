@@ -16,7 +16,6 @@ import org.lwjgl.nanovg.NanoVG.*
 import org.lwjgl.nanovg.NanoVGGL3.*
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL13
-import org.lwjgl.opengl.GL20
 import org.lwjgl.opengl.GL30
 import org.lwjgl.stb.STBImage.stbi_load_from_memory
 import org.lwjgl.system.MemoryUtil.memAlloc
@@ -68,7 +67,7 @@ object NVGRenderer {
         val framebuffer = mc.framebuffer
         val glFramebuffer = (framebuffer.colorAttachment as GlTexture).getOrCreateFramebuffer((RenderSystem.getDevice() as GlBackend).framebufferManager, null)
         GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, glFramebuffer)
-        GL11.glViewport(0, 0, framebuffer.viewportWidth, framebuffer.viewportHeight)
+        GlStateManager._viewport(0, 0, framebuffer.viewportWidth, framebuffer.viewportHeight)
 
         nvgBeginFrame(vg, width, height, 1f)
         nvgTextAlign(vg, NVG_ALIGN_LEFT or NVG_ALIGN_TOP)
@@ -88,8 +87,8 @@ object NVGRenderer {
             if (textureBinding != -1) GlStateManager._bindTexture(textureBinding)
         }
 
-        GL30.glBindVertexArray(0) // fixes glitches when updating font atlas
-        GL20.glUseProgram(0) // fixes invalid program errors when using NVG
+        GlStateManager._glBindVertexArray(0) // fixes glitches when updating font atlas
+        GlStateManager._glUseProgram(0) // fixes invalid program errors when using NVG
 
         drawing = false
     }
@@ -264,30 +263,27 @@ object NVGRenderer {
         return bounds // [minX, minY, maxX, maxY]
     }
 
-    fun image(
-        resourcePath: String,
-        x: Float,
-        y: Float,
-        w: Float,
-        h: Float,
-        radius: Float
-    ) {
+    fun image(image: Image, x: Float, y: Float, w: Float, h: Float, radius: Float) {
+        nvgImagePattern(vg, x, y, w, h, 0f, getImage(image), 1f, nvgPaint)
+        nvgBeginPath(vg)
+        nvgRoundedRect(vg, x, y, w, h + .5f, radius)
+        nvgFillPaint(vg, nvgPaint)
+        nvgFill(vg)
+    }
+
+    fun image(image: Image, x: Float, y: Float, w: Float, h: Float) {
+        nvgImagePattern(vg, x, y, w, h, 0f, getImage(image), 1f, nvgPaint)
+        nvgBeginPath(vg)
+        nvgRect(vg, x, y, w, h + .5f)
+        nvgFillPaint(vg, nvgPaint)
+        nvgFill(vg)
+    }
+
+    fun createImage(resourcePath: String): Image {
         val image = images.keys.find { it.identifier == resourcePath } ?: Image(resourcePath)
         if (image.isSVG) images.getOrPut(image) { NVGImage(0, loadSVG(image)) }.count++
         else images.getOrPut(image) { NVGImage(0, loadImage(image)) }.count++
-        if (radius == 0f) {
-            nvgImagePattern(vg, x, y, w, h, 0f, getImage(image), 1f, nvgPaint)
-            nvgBeginPath(vg)
-            nvgRect(vg, x, y, w, h + .5f)
-            nvgFillPaint(vg, nvgPaint)
-            nvgFill(vg)
-        } else {
-            nvgImagePattern(vg, x, y, w, h, 0f, getImage(image), 1f, nvgPaint)
-            nvgBeginPath(vg)
-            nvgRoundedRect(vg, x, y, w, h + .5f, radius)
-            nvgFillPaint(vg, nvgPaint)
-            nvgFill(vg)
-        }
+        return image
     }
 
     // lowers reference count by 1, if it reaches 0 it gets deleted from mem

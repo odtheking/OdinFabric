@@ -60,7 +60,7 @@ object TickTasks {
     }
 
     @EventHandler
-    fun onTick(event: TickEvent.Start) {
+    fun onTick(event: TickEvent.End) {
         for (task in clientTickTasks) task.run()
     }
 

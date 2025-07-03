@@ -2,6 +2,7 @@ package me.odinmod.odin.clickgui.settings.impl
 
 import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
+import me.odinmod.odin.clickgui.ClickGUI
 import me.odinmod.odin.clickgui.ClickGUI.gray38
 import me.odinmod.odin.clickgui.Panel
 import me.odinmod.odin.clickgui.settings.RenderableSetting
@@ -92,7 +93,7 @@ class ColorSetting(
         NVGRenderer.circle(sbPointer.first, sbPointer.second, 7f, value.rgba)
 
         // HUE
-        NVGRenderer.image("/assets/odin/HueGradient.png", x + 10f, y + 214f, width - 20f, 15f, 5f)
+        NVGRenderer.image(ClickGUI.hueImage, x + 10f, y + 214f, width - 20f, 15f, 5f)
         NVGRenderer.hollowRect(x + 10f, y + 214f, width - 20f, 15f, 1f, gray38.rgba, 5f)
 
         val huePos = x + 10f + hueSliderAnim.get(hueSliderPrev, value.hue, false) * 221f to y + 221f

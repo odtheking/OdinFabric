@@ -1,5 +1,6 @@
 package me.odinmod.odin.clickgui.settings.impl
 
+import me.odinmod.odin.clickgui.ClickGUI
 import me.odinmod.odin.clickgui.settings.RenderableSetting
 import me.odinmod.odin.utils.Colors
 import me.odinmod.odin.utils.ui.HoverHandler
@@ -39,7 +40,7 @@ class DropdownSetting(
         NVGRenderer.translate(x + width - 18f, y + height / 2f - 4f)
         NVGRenderer.rotate(toggleAnimation.get(0f, Math.PI.toFloat() / 2f, enabled))
         NVGRenderer.translate(-(12f + offset), -(12f + offset))
-        NVGRenderer.image("/assets/odin/chevron.svg", 0f, 0f, imageSize, imageSize, 0f)
+        NVGRenderer.image(ClickGUI.chevronImage, 0f, 0f, imageSize, imageSize)
         NVGRenderer.pop()
 
         return height
