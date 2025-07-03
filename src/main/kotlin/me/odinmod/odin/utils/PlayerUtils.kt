@@ -2,6 +2,7 @@ package me.odinmod.odin.utils
 
 import me.odinmod.odin.OdinMod.mc
 import net.minecraft.client.sound.PositionedSoundInstance
+import net.minecraft.screen.slot.SlotActionType
 import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvent
 import net.minecraft.sound.SoundEvents

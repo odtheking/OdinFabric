@@ -8,7 +8,7 @@ import me.odinmod.odin.utils.ui.MouseUtils.isAreaHovered
 abstract class RenderableSetting<T>(
     name: String,
     hidden: Boolean = false,
-    description: String = "",
+    description: String
 ) : Setting<T>(name, hidden, description) {
 
     private val hoverHandler = HoverHandler(750, 200)

@@ -10,10 +10,12 @@
   "client": [
     "ChatScreenMixin",
     "ClientCommonNetworkHandlerMixin",
+    "HandledScreenAccessor",
+    "HandledScreenMixin",
+    "KeyBindingAccessor",
     "ClientPlayNetworkHandlerMixin",
     "KeyBindingMixin",
     "MixinGameRenderer",
-    "KeyBindingAccessor",
     "MixinPlayerEntityRender",
     "MouseMixin"
   ],
