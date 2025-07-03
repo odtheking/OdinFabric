@@ -75,16 +75,16 @@ object SlotBinds: Module(
         val boundSlot = slotBinds[hoveredSlot.index]
 
         val (startX, startY) = screen.screenHandler.getSlot(previousSlot ?: hoveredSlot.id)?.let { slot ->
-            slot.x + screen.x + 8 to slot.y + screen.y + 8 } ?: return modMessage("§cNo slot bound to draw line1.")
+            slot.x + screen.x + 8 to slot.y + screen.y + 8 } ?: return
 
         val (endX, endY) = previousSlot?.let { event.mouseX to event.mouseY } ?: boundSlot?.let { slot ->
-            screen.screenHandler.getSlot(slot)?.let { it.x + screen.x + 8 to it.y + screen.y + 8 } } ?: return modMessage("§cNo slot bound to draw line.")
+            screen.screenHandler.getSlot(slot)?.let { it.x + screen.x + 8 to it.y + screen.y + 8 } } ?: return
 
         if (previousSlot == null && !(Screen.hasShiftDown() && boundSlot != null)) return
 
         event.drawContext.matrices.push()
         event.drawContext.matrices.translate(0f, 0f, 999f)
-        drawLine(event.drawContext, startX, startY, endX, endY, lineColor, 2f)
+        drawLine(event.drawContext, startX, startY, endX, endY, lineColor, 1)
         event.drawContext.matrices.pop()
     }
 
