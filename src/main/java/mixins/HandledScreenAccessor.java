@@ -15,12 +15,6 @@ public interface HandledScreenAccessor {
     @Accessor("x")
     int getX();
 
-    @Accessor("x")
-    void setX(int newX);
-
     @Accessor("y")
     int getY();
-
-    @Accessor("y")
-    void setY(int newY);
 }
