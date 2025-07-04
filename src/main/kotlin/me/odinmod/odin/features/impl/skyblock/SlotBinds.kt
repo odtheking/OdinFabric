@@ -23,7 +23,7 @@ object SlotBinds: Module(
     key = null
 ) {
     private val setNewSlotbind by KeybindSetting("Bind set key", GLFW.GLFW_KEY_UNKNOWN, desc = "Key to set new bindings.")
-    private val lineColor by ColorSetting("LineColor", Colors.MINECRAFT_GOLD, desc = "Color of the line drawn between slots.")
+    private val lineColor by ColorSetting("Line Color", Colors.MINECRAFT_GOLD, desc = "Color of the line drawn between slots.")
     private val slotBinds by MapSetting("slotBinds", mutableMapOf<Int, Int>())
 
     private var previousSlot: Int? = null
@@ -31,50 +31,50 @@ object SlotBinds: Module(
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onGuiClick(event: GuiEvent.MouseClick) {
         if (!Screen.hasShiftDown() || event.screen !is InventoryScreen) return
-
-        val hoveredSlot = (event.screen as HandledScreenAccessor).focusedSlot?.takeIf { it.index in 0 until 40 } ?: return
-        val boundSlot = slotBinds[hoveredSlot.index] ?: return
+        val clickedSlot = (event.screen as HandledScreenAccessor).focusedSlot?.id?.takeIf { it in 5 until 45 } ?: return modMessage("§cYou must be hovering over a valid slot (5–44).")
+        val boundSlot = slotBinds[clickedSlot] ?: return
 
         val (from, to) = when {
-            hoveredSlot.index in 0..8 -> boundSlot to hoveredSlot.index
-            boundSlot in 0..8 -> hoveredSlot.index to boundSlot
+            clickedSlot in 36..44 -> boundSlot to clickedSlot
+            boundSlot in 36..44 -> clickedSlot to boundSlot
             else -> return
         }
 
-        mc.interactionManager?.clickSlot(event.screen.screenHandler.syncId, from, to, SlotActionType.SWAP, mc.player)
+        mc.interactionManager?.clickSlot(event.screen.screenHandler.syncId, from, to % 36, SlotActionType.SWAP, mc.player)
         event.cancel()
     }
 
     @EventHandler
     fun onGuiPress(event: GuiEvent.KeyPress) {
         if (event.screen !is InventoryScreen || event.keyCode != setNewSlotbind.code) return
-        val hoveredSlot = (event.screen as HandledScreenAccessor).focusedSlot?.takeIf { it.index in 0 until 40 } ?: return
+        val clickedSlot = (event.screen as HandledScreenAccessor).focusedSlot?.id?.takeIf { it in 5 until 45 } ?: return
 
+        event.cancel()
         previousSlot?.let { slot ->
-            if (slot == hoveredSlot.index) return modMessage("§cYou can't bind a slot to itself.")
-            if (slot !in 0..8 && hoveredSlot.index !in 0..8) return modMessage("§cOne of the slots must be in the hotbar (0–8).")
+            if (slot == clickedSlot) return modMessage("§cYou can't bind a slot to itself.")
+            if (slot !in 36..44 && clickedSlot !in 36..44) return modMessage("§cOne of the slots must be in the hotbar (36–44).")
+            modMessage("§aAdded bind from slot §b$slot §ato §d${clickedSlot}.")
 
-            modMessage("§aAdded bind from slot §b$slot §ato §d${hoveredSlot.index}.")
-            slotBinds[slot] = hoveredSlot.index
+            slotBinds[slot] = clickedSlot
             Config.save()
             previousSlot = null
         } ?: run {
-            slotBinds.entries.firstOrNull { it.key == hoveredSlot.index }?.let {
+            slotBinds.entries.firstOrNull { it.key == clickedSlot }?.let {
                 slotBinds.remove(it.key)
                 Config.save()
                 return modMessage("§cRemoved bind from slot §b${it.key} §cto §d${it.value}.")
             }
-            previousSlot = hoveredSlot.index
+            previousSlot = clickedSlot
         }
     }
 
     @EventHandler
     fun onRenderScreen(event: GuiEvent.Render) {
         val screen = event.screen as? InventoryScreen ?: return
-        val hoveredSlot = (screen as HandledScreenAccessor).focusedSlot?.takeIf { it.index in 0 until 40 } ?: return
-        val boundSlot = slotBinds[hoveredSlot.index]
+        val hoveredSlot = (screen as HandledScreenAccessor).focusedSlot?.id?.takeIf { it in 5 until 45 } ?: return
+        val boundSlot = slotBinds[hoveredSlot]
 
-        val (startX, startY) = screen.screenHandler.getSlot(previousSlot ?: hoveredSlot.id)?.let { slot ->
+        val (startX, startY) = screen.screenHandler.getSlot(previousSlot ?: hoveredSlot)?.let { slot ->
             slot.x + screen.x + 8 to slot.y + screen.y + 8 } ?: return
 
         val (endX, endY) = previousSlot?.let { event.mouseX to event.mouseY } ?: boundSlot?.let { slot ->

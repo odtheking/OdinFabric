@@ -17,6 +17,9 @@ fun ItemStack.getCustomData(): NbtCompound =
 fun ItemStack.getItemId(): String =
     getCustomData().getString(ID, "")
 
+fun NbtCompound.getItemId(): String =
+    getString(ID, "")
+
 fun ItemStack.getItemUUID(): String =
     getCustomData().getString(UUID, "")
 

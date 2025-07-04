@@ -25,10 +25,9 @@ object RagnarockAxe: Module(
             is GameMessageS2CPacket ->
                 if (ragAxeAlert && content?.string?.matches(ragAxeCancelRegex) == true) alert("§cRagnarock Axe Cancelled!")
 
-            is PlaySoundS2CPacket -> {
+            is PlaySoundS2CPacket ->
                 if (ragAxeCancelAlert && pitch == 1.4920635f && mc.player?.mainHandStack?.getItemId() == "RAGNAROCK_AXE" &&
                     SoundEvents.WOLF_SOUNDS.entries.any { it.value.deathSound.value().id == sound.value().id }) alert("§aCasted Rag Axe")
-            }
         }
     }
 }

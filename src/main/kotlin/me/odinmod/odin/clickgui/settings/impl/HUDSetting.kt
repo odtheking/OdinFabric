@@ -15,6 +15,7 @@ import me.odinmod.odin.utils.ui.HoverHandler
 import me.odinmod.odin.utils.ui.MouseUtils.isAreaHovered
 import me.odinmod.odin.utils.ui.animations.LinearAnimation
 import me.odinmod.odin.utils.ui.rendering.NVGRenderer
+import net.minecraft.client.gui.DrawContext
 
 class HUDSetting(
     name: String,
@@ -24,7 +25,7 @@ class HUDSetting(
     val module: Module,
 ) : RenderableSetting<HudElement>(name, false, description), Saving {
 
-    constructor(name: String, x: Float, y: Float, scale: Float, toggleable: Boolean, description: String, module: Module, draw: Render)
+    constructor(name: String, x: Float, y: Float, scale: Float, toggleable: Boolean, description: String, module: Module, draw: DrawContext.(Boolean) -> Pair<Number, Number>)
             : this(name, HudElement(x, y, scale, toggleable, draw), toggleable, description, module)
 
     override val default: HudElement = hud

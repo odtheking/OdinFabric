@@ -104,7 +104,7 @@ abstract class Module(
         x: Float = 10f,
         y: Float = 10f,
         scale: Float = 2f,
-        block: DrawContext.(example: Boolean) -> Pair<Float, Float>
+        block: DrawContext.(example: Boolean) -> Pair<Number, Number>
     ): HUDSetting = HUDSetting(name, x, y, scale, toggleable, desc, this, block)
 
     private companion object {

@@ -15,14 +15,12 @@ import meteordevelopment.orbit.EventHandler
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.Blocks
-import net.minecraft.client.util.InputUtil
 import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Box
 import net.minecraft.util.math.ChunkSectionPos
 import net.minecraft.util.math.Vec3d
-import org.lwjgl.glfw.GLFW
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.max
@@ -43,42 +41,33 @@ object Etherwarp: Module(
     @EventHandler
     fun onRenderLast(event: RenderEvent.Last) {
         if (mc.player?.isSneaking == false || mc.currentScreen != null) return
-        val mainHand = mc.player?.mainHandStack ?: return
+        val customData = mc.player?.mainHandStack?.getCustomData()?.takeIf { it.getInt("ethermerge", 0) == 1 || it.getItemId() == "ETHERWARP_CONDUIT" } ?: return
 
-        val customData = mainHand.getCustomData().takeIf { it.getInt("ethermerge", 0) == 1 || mainHand.getItemId() == "ETHERWARP_CONDUIT" } ?: return
-        etherPos = getEtherPos(56.0 + customData.getInt("tuned_transmission", 0)).apply {
-            if (etherPos?.succeeded == true || renderFail) {
-                val color = if (etherPos?.succeeded == true) color.rgba.floatValues() else wrongColor.rgba.floatValues()
-                pos?.let {
-                    when (renderStyle) {
-                        0 -> drawBox(Box(it), event.context, color)
-
-                        1 -> drawFilledBox(Box(it), event.context, color)
-
-                        2 -> {
-                            drawBox(Box(it), event.context, color)
-                            drawFilledBox(Box(it), event.context, color.withAlpha(0.5f))
-                        }
-                    }
+        etherPos = getEtherPos(56.0 + customData.getInt("tuned_transmission", 0))
+        if (etherPos?.succeeded != true && !renderFail) return
+        val color = if (etherPos?.succeeded == true) color.rgba.floatValues() else wrongColor.rgba.floatValues()
+        etherPos?.pos?.let {
+            when (renderStyle) {
+                0 -> drawBox(Box(it), event.context, color)
+                1 -> drawFilledBox(Box(it), event.context, color)
+                2 -> {
+                    drawBox(Box(it), event.context, color)
+                    drawFilledBox(Box(it), event.context, color.withAlpha(0.5f))
                 }
             }
         }
     }
 
+
     @EventHandler
-    fun onPacketReceived(event: PacketEvent.Send) {
-        val packet = event.packet
-        if (packet !is PlayerInteractItemC2SPacket || !LocationUtils.currentArea.isArea(Island.SinglePlayer) || !InputUtil.isKeyPressed(mc.window.handle, GLFW.GLFW_KEY_LEFT_SHIFT) || mc.currentScreen != null) return
-        mc.player?.mainHandStack?.let { stack -> stack.getCustomData().takeIf { it.getInt("ethermerge", 0) == 1 || stack.getItemId() == "ETHERWARP_CONDUIT" } ?: return }
+    fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
+        if (this !is PlayerInteractItemC2SPacket || !LocationUtils.currentArea.isArea(Island.SinglePlayer) || mc.player?.isSneaking == false || mc.currentScreen != null) return@with
+        mc.player?.mainHandStack?.getCustomData()?.takeIf { it.getInt("ethermerge", 0) == 1 || it.getItemId() == "ETHERWARP_CONDUIT" } ?: return@with
         etherPos?.pos?.let {
             if (etherPos?.succeeded == false) return@let
             mc.executeSync {
                 mc.player?.networkHandler?.sendPacket(
-                    PlayerMoveC2SPacket.Full(
-                        it.x + 0.5, it.y + 1.05, it.z + 0.5,
-                        mc.player?.yaw ?: 0f, mc.player?.pitch ?: 0f, mc.player?.isOnGround ?: false,
-                        false
-                    )
+                    PlayerMoveC2SPacket.Full(it.x + 0.5, it.y + 1.05, it.z + 0.5, mc.player?.yaw ?: 0f, mc.player?.pitch ?: 0f, mc.player?.isOnGround ?: false, false)
                 )
                 mc.player?.setPosition(it.x + 0.5, it.y + 1.05, it.z + 0.5)
                 mc.player?.setVelocity(0.0, 0.0, 0.0)
@@ -86,27 +75,20 @@ object Etherwarp: Module(
         }
     }
 
-    data class EtherPos(val succeeded: Boolean, val pos: BlockPos?, val state: BlockState?) {
+    private data class EtherPos(val succeeded: Boolean, val pos: BlockPos?, val state: BlockState?) {
         val vec: Vec3d? by lazy { pos?.let { Vec3d(it) } }
         companion object {
             val NONE = EtherPos(false, null, null)
         }
     }
 
-    /**
-     * Gets the position of an entity in the "ether" based on the player's view direction.
-     *
-     * @param yaw The yaw angle representing the player's horizontal viewing direction.
-     * @param pitch The pitch angle representing the player's vertical viewing direction.
-     * @return An `EtherPos` representing the calculated position in the "ether" or `EtherPos.NONE` if the player is not present.
-     */
-    fun getEtherPos(yaw: Float, pitch: Float, distance: Double, returnEnd: Boolean = false): EtherPos {
+    private fun getEtherPos(yaw: Float, pitch: Float, distance: Double, returnEnd: Boolean = false): EtherPos {
         val startPos = mc.player?.pos?.add(0.0, 1.54, 0.0) ?: return EtherPos.NONE
         val endPos = getLook(yaw, pitch).normalize().multiply(distance).add(startPos)
         return traverseVoxels(startPos, endPos).takeUnless { it == EtherPos.NONE && returnEnd } ?: EtherPos(true, endPos.toBlockPos(), null)
     }
 
-    fun getEtherPos(distance: Double): EtherPos =
+    private fun getEtherPos(distance: Double): EtherPos =
         mc.player?.let { getEtherPos(it.yaw, it.pitch, distance) } ?: EtherPos.NONE
 
     /**

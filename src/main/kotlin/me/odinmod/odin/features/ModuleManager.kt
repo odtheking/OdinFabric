@@ -5,10 +5,7 @@ import me.odinmod.odin.OdinMod.mc
 import me.odinmod.odin.clickgui.settings.impl.HUDSetting
 import me.odinmod.odin.clickgui.settings.impl.KeybindSetting
 import me.odinmod.odin.events.InputEvent
-import me.odinmod.odin.features.impl.render.Camera
-import me.odinmod.odin.features.impl.render.ClickGUIModule
-import me.odinmod.odin.features.impl.render.Etherwarp
-import me.odinmod.odin.features.impl.render.PlayerSize
+import me.odinmod.odin.features.impl.render.*
 import me.odinmod.odin.features.impl.skyblock.*
 import me.odinmod.odin.utils.ui.rendering.NVGRenderer
 import meteordevelopment.orbit.EventHandler
@@ -32,7 +29,7 @@ object ModuleManager {
 
     val modules: ArrayList<Module> = arrayListOf(
         // render
-        ClickGUIModule, Camera, Etherwarp, PlayerSize,
+        ClickGUIModule, Camera, Etherwarp, PlayerSize, PerformanceHUD,
 
         //skyblock
         ChatCommands, NoCursorReset, RagnarockAxe, SpringBoots, WardrobeKeybinds, PetKeybinds, AutoSprint, CommandKeybinds, SlotBinds
@@ -63,7 +60,7 @@ object ModuleManager {
         val sf = mc.window.scaleFactor.toFloat()
         context.matrices.scale(1f / sf, 1f / sf, 1f)
         for (hudSettings in hudSettingsCache) {
-             if (hudSettings.isEnabled) hudSettings.value.draw(context, false)
+            if (hudSettings.isEnabled) hudSettings.value.draw(context, false)
         }
         context.matrices?.pop()
     }
