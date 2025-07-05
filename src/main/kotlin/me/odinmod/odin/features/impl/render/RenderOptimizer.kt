@@ -16,10 +16,12 @@ object RenderOptimizer : Module(
 
     @EventHandler
     fun onMobMetadata(event: PacketEvent.Receive) = with (event.packet) {
-        if (this is EntitySpawnS2CPacket) {
-            if (disableFallingBlocks && this.entityType == EntityType.FALLING_BLOCK) event.cancel()
+        when (this) {
+            is EntitySpawnS2CPacket -> {
+                if (disableFallingBlocks && this.entityType == EntityType.FALLING_BLOCK) event.cancel()
 
-            if (disableLighting && this.entityType == EntityType.LIGHTNING_BOLT) event.cancel()
+                if (disableLighting && this.entityType == EntityType.LIGHTNING_BOLT) event.cancel()
+            }
         }
     }
 }

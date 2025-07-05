@@ -34,7 +34,7 @@ object PlayerDisplay : Module(
 
     private val showIcons by BooleanSetting("Show Icons", true, desc = "Shows icons indicating what the number means.")
 
-    private val healthHud by HUD("Health HUD", "") { example ->
+    private val healthHud by HUD("Health HUD", "Displays the player's health.") { example ->
         val text = when {
             example -> 3000 to 4000
             !LocationUtils.isInSkyblock -> return@HUD 0f to 0f
@@ -45,7 +45,7 @@ object PlayerDisplay : Module(
     }
     private val healthColor by ColorSetting("Health Color", Colors.MINECRAFT_RED, true, "The color of the health text.")
 
-    private val manaHud by HUD("Mana HUD", "") { example ->
+    private val manaHud by HUD("Mana HUD", "Displays the player's mana.") { example ->
         val text = when {
             example -> generateText(2000, 20000, "✎") + (if(!separateOverflow) " ${generateText(SkyblockPlayer.overflowMana, "ʬ", hideZeroSF)}" else "")
             !LocationUtils.isInSkyblock -> return@HUD 0f to 0f
@@ -60,7 +60,7 @@ object PlayerDisplay : Module(
     }
     private val manaColor by ColorSetting("Mana Color", Colors.MINECRAFT_AQUA, true, "The color of the mana text.")
 
-    private val overflowManaHud by HUD("Overflow Mana HUD", "") { example ->
+    private val overflowManaHud by HUD("Overflow Mana HUD", "Displays the player's overflow mana.") { example ->
         val text = when {
             example -> 333
             !LocationUtils.isInSkyblock -> return@HUD 0f to 0f
@@ -71,7 +71,7 @@ object PlayerDisplay : Module(
     }
     private val overflowManaColor by ColorSetting("Overflow Mana Color", Colors.MINECRAFT_DARK_AQUA, true, desc = "The color of the overflow mana text.")
 
-    private val defenseHud by HUD("Defense HUD", "") { example ->
+    private val defenseHud by HUD("Defense HUD", "Displays the player's defense.") { example ->
         val text = when {
             example -> 1000
             !LocationUtils.isInSkyblock -> return@HUD 0f to 0f
@@ -82,7 +82,7 @@ object PlayerDisplay : Module(
     }
     private val defenseColor by ColorSetting("Defense Color", Colors.MINECRAFT_GREEN, true, desc = "The color of the defense text.")
 
-    private val eHPHud by HUD("EHP HUD", "") { example ->
+    private val eHPHud by HUD("EHP HUD", "Displays the player's effective health (EHP).") { example ->
         val text = when {
             example -> 1000000
             !LocationUtils.isInSkyblock -> return@HUD 0f to 0f

@@ -3,6 +3,7 @@ package mixins;
 import me.odinmod.odin.features.impl.skyblock.PlayerDisplay;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
+import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -29,6 +30,11 @@ public class InGameHudMixin {
 
     @Inject(method = "renderExperienceBar", at = @At("HEAD"), cancellable = true)
     private void cancelXPBar(DrawContext context, int x, CallbackInfo ci) {
+        if (PlayerDisplay.shouldCancelOverlay("xp")) ci.cancel();
+    }
+
+    @Inject(method = "renderExperienceLevel", at = @At("HEAD"), cancellable = true)
+    private void cancelXPLevel(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
         if (PlayerDisplay.shouldCancelOverlay("xp")) ci.cancel();
     }
 }

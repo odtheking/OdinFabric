@@ -15,6 +15,7 @@ import meteordevelopment.orbit.EventHandler
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.Blocks
+import net.minecraft.nbt.NbtCompound
 import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket
@@ -50,9 +51,8 @@ object Etherwarp : Module(
     @EventHandler
     fun onRenderLast(event: RenderEvent.Last) {
         if (mc.player?.isSneaking == false || mc.currentScreen != null) return
-        val customData = mc.player?.mainHandStack?.getCustomData()?.takeIf { it.getInt("ethermerge", 0) == 1 || it.getItemId() == "ETHERWARP_CONDUIT" } ?: return
 
-        etherPos = getEtherPos(56.0 + customData.getInt("tuned_transmission", 0))
+        etherPos = getEtherPos(56.0 + (isEtherwarpItem()?.getInt("tuned_transmission", 0) ?: return))
         if (etherPos?.succeeded != true && !renderFail) return
         val color = if (etherPos?.succeeded == true) color else failColor
         etherPos?.pos?.let {
@@ -76,8 +76,8 @@ object Etherwarp : Module(
 
     @EventHandler
     fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
-        if (this !is PlayerInteractItemC2SPacket || !LocationUtils.currentArea.isArea(Island.SinglePlayer) || mc.player?.isSneaking == false || mc.currentScreen != null) return
-        mc.player?.mainHandStack?.getCustomData()?.takeIf { it.getInt("ethermerge", 0) == 1 || it.getItemId() == "ETHERWARP_CONDUIT" } ?: return
+        if (this !is PlayerInteractItemC2SPacket || !LocationUtils.currentArea.isArea(Island.SinglePlayer) || mc.player?.isSneaking == false || mc.currentScreen != null || isEtherwarpItem() == null) return
+
         etherPos?.pos?.let {
             if (etherPos?.succeeded == false) return@let
             mc.executeSync {
@@ -90,6 +90,9 @@ object Etherwarp : Module(
         }
         Unit
     }
+
+    private fun isEtherwarpItem(): NbtCompound? =
+        mc.player?.mainHandStack?.getCustomData()?.takeIf { it.getInt("ethermerge", 0) == 1 || it.getItemId() == "ETHERWARP_CONDUIT" }
 
     private data class EtherPos(val succeeded: Boolean, val pos: BlockPos?, val state: BlockState?) {
         val vec: Vec3d? by lazy { pos?.let { Vec3d(it) } }
