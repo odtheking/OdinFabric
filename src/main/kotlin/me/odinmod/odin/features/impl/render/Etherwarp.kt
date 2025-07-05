@@ -1,9 +1,7 @@
 package me.odinmod.odin.features.impl.render
 
 import me.odinmod.odin.clickgui.settings.Setting.Companion.withDependency
-import me.odinmod.odin.clickgui.settings.impl.BooleanSetting
-import me.odinmod.odin.clickgui.settings.impl.ColorSetting
-import me.odinmod.odin.clickgui.settings.impl.SelectorSetting
+import me.odinmod.odin.clickgui.settings.impl.*
 import me.odinmod.odin.events.PacketEvent
 import me.odinmod.odin.events.RenderEvent
 import me.odinmod.odin.features.Module
@@ -19,6 +17,10 @@ import net.minecraft.block.BlockState
 import net.minecraft.block.Blocks
 import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket
+import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket
+import net.minecraft.sound.SoundEvent
+import net.minecraft.sound.SoundEvents
+import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Box
 import net.minecraft.util.math.ChunkSectionPos
@@ -32,11 +34,16 @@ object Etherwarp : Module(
     name = "Etherwarp",
     description = "Provides configurable visual feedback for etherwarp."
 ) {
-    private val render by BooleanSetting("Show Etherwarp Guess", true, desc = "Shows where etherwarp will take you.")
+    private val render by BooleanSetting("Show Guess", true, desc = "Shows where etherwarp will take you.")
     private val color by ColorSetting("Color", Colors.MINECRAFT_GOLD.withAlpha(.5f), allowAlpha = true, desc = "Color of the box.").withDependency { render }
     private val renderFail by BooleanSetting("Show when failed", true, desc = "Shows the box even when the guess failed.").withDependency { render }
     private val failColor by ColorSetting("Fail Color", Colors.MINECRAFT_RED.withAlpha(.5f), allowAlpha = true, desc = "Color of the box if guess failed.").withDependency { renderFail }
     private val renderStyle by SelectorSetting("Render Style", "Outline", listOf("Outline", "Filled", "Filled Outline"), desc = "Style of the box.").withDependency { render }
+
+    private val dropdown by DropdownSetting("Sounds", false)
+    private val sounds by BooleanSetting("Custom Sounds", false, desc = "Plays the selected custom sound when you etherwarp.").withDependency { dropdown }
+    private val customSound by StringSetting("Custom Sound", "entity.experience_orb.pickup", desc = "Name of a custom sound to play.", length = 64).withDependency { sounds && dropdown }
+    private val reset by ActionSetting("Play sound", desc = "Plays the selected sound.") { playSoundAtPlayer(SoundEvent.of(Identifier.of(customSound))) }.withDependency { sounds && dropdown }
 
     private var etherPos: EtherPos? = null
 
@@ -60,6 +67,12 @@ object Etherwarp : Module(
         }
     }
 
+    @EventHandler
+    fun onSoundPacket(event: PacketEvent.Receive) = with (event.packet) {
+        if (!sounds || this !is PlaySoundS2CPacket || sound.value() != SoundEvents.ENTITY_ENDER_DRAGON_HURT || volume != 1f || pitch != 0.53968257f) return
+        mc.execute { playSoundAtPlayer(SoundEvent.of(Identifier.of(customSound))) }
+        event.cancel()
+    }
 
     @EventHandler
     fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {

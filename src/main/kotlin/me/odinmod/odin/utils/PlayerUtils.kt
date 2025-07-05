@@ -1,18 +1,13 @@
 package me.odinmod.odin.utils
 
 import me.odinmod.odin.OdinMod.mc
-import net.minecraft.client.sound.PositionedSoundInstance
-import net.minecraft.screen.slot.SlotActionType
-import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvent
 import net.minecraft.sound.SoundEvents
 import net.minecraft.text.Text
 import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.random.LocalRandom
 
-fun playSoundAtPlayer(event: SoundEvent) =
-    PositionedSoundInstance(event, SoundCategory.MASTER, 1f, 1f, LocalRandom(0L), mc.player?.blockPos ?: BlockPos(0, 0, 0))
-        .also { mc.soundManager?.play(it) }
+fun playSoundAtPlayer(event: SoundEvent, volume: Float = 1f, pitch: Float = 1f) =
+    mc.player?.playSound(event, volume, pitch)
 
 fun setTitle(title: String) {
     mc.inGameHud.setTitleTicks(5, 20, 5)
