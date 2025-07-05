@@ -14,7 +14,7 @@ public class InGameHudMixin {
 
     @Inject(method = "renderHealthBar", at = @At("HEAD"), cancellable = true)
     private void cancelHealthBar(DrawContext context, PlayerEntity player, int x, int y, int lines, int regeneratingHeartIndex, float maxHealth, int lastHealth, int health, int absorption, boolean blinking, CallbackInfo ci) {
-        if (PlayerDisplay.shouldCancelOverlay("health")) ci.cancel();
+        if (PlayerDisplay.shouldCancelOverlay("hearts")) ci.cancel();
     }
 
     @Inject(method = "renderArmor", at = @At("HEAD"), cancellable = true)

@@ -19,10 +19,10 @@ object PlayerDisplay : Module(
     description = "Allows to customize the player stat displays (health, strength and more)."
 ) {
     private val hideElements by DropdownSetting("Hide Elements")
-    private val hideArmor by BooleanSetting("Hide Armor", true, desc = "Hides the armor bar.").withDependency { hideElements }
-    private val hideFood by BooleanSetting("Hide Food", true, desc = "Hides the food bar.").withDependency { hideElements }
-    private val hideHearts by BooleanSetting("Hide Hearts", true, desc = "Hides the hearts.").withDependency { hideElements }
-    private val hideXP by BooleanSetting("Hide XP Level", true, desc = "Hides the XP level.").withDependency { hideElements }
+    private val hideArmor by BooleanSetting("Hide Armor", false, desc = "Hides the armor bar.").withDependency { hideElements }
+    private val hideFood by BooleanSetting("Hide Food", false, desc = "Hides the food bar.").withDependency { hideElements }
+    private val hideHearts by BooleanSetting("Hide Hearts", false, desc = "Hides the hearts.").withDependency { hideElements }
+    private val hideXP by BooleanSetting("Hide XP Level", false, desc = "Hides the XP level.").withDependency { hideElements }
     private val hideActionBar by DropdownSetting("Hide Action Bar Elements")
     private val hideHealth by BooleanSetting("Hide Health", true, desc = "Hides the health bar.").withDependency { hideActionBar }
     private val hideMana by BooleanSetting("Hide Mana", true, desc = "Hides the mana bar.").withDependency { hideActionBar }
