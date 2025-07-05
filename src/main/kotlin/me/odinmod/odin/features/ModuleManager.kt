@@ -51,7 +51,7 @@ object ModuleManager {
         }
 
         HudLayerRegistrationCallback.EVENT.register(HudLayerRegistrationCallback { drawer: LayeredDrawerWrapper ->
-            drawer.attachLayerBefore(IdentifiedLayer.DEBUG, HUD_LAYER, ModuleManager::render)
+            drawer.attachLayerBefore(IdentifiedLayer.MISC_OVERLAYS, HUD_LAYER, ModuleManager::render)
         })
     }
 

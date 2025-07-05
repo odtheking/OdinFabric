@@ -5,7 +5,7 @@ import me.odinmod.odin.clickgui.HudManager
 import me.odinmod.odin.clickgui.settings.impl.ActionSetting
 import me.odinmod.odin.clickgui.settings.impl.BooleanSetting
 import me.odinmod.odin.clickgui.settings.impl.ColorSetting
-import me.odinmod.odin.clickgui.settings.impl.NumberSetting
+import me.odinmod.odin.clickgui.settings.impl.MapSetting
 import me.odinmod.odin.features.Category
 import me.odinmod.odin.features.Module
 import me.odinmod.odin.utils.Color
@@ -30,9 +30,8 @@ object ClickGUIModule : Module(
         toggle()
     }
 
-    val panelX = mutableMapOf<Category, NumberSetting<Float>>()
-    val panelY = mutableMapOf<Category, NumberSetting<Float>>()
-    val panelExtended = mutableMapOf<Category, BooleanSetting>()
+    data class PanelData(var x: Float = 10f, var y: Float = 10f, var extended: Boolean = true)
+    val panelSetting by MapSetting("Panel Settings", mutableMapOf<Category, PanelData>())
 
     init {
         resetPositions()
@@ -41,9 +40,7 @@ object ClickGUIModule : Module(
     fun resetPositions() {
         Category.entries.forEach {
             val incr = 10f + 260f * it.ordinal
-            panelX.getOrPut(it) { +NumberSetting(it.name + ",x", default = incr, desc = "", hidden = true) }.value = incr
-            panelY.getOrPut(it) { +NumberSetting(it.name + ",y", default = 10f, desc = "", hidden = true) }.value = 10f
-            panelExtended.getOrPut(it) { +BooleanSetting(it.name + ",extended", default = true, desc = "", hidden = true) }.enabled = true
+            panelSetting[it] = PanelData(incr, 10f, true)
         }
     }
 }

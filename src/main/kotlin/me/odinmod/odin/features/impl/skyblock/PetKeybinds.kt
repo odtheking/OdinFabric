@@ -37,7 +37,7 @@ object PetKeybinds: Module (
 
     private val petsRegex = Regex("Pets(?: \\((\\d)/(\\d)\\))?")
 
-    val petList by ListSetting("List", mutableListOf<String>())
+    val petList by ListSetting("PetKeys List", mutableListOf<String>())
 
     @EventHandler
     fun onGuiEvent(event: GuiEvent.MouseClick) {

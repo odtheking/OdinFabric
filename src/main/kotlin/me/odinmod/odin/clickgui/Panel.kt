@@ -32,9 +32,7 @@ class Panel(private val category: Category) {
     private val lastModuleButton: ModuleButton? = moduleButtons.lastOrNull()
     private val isModuleButtonEmpty: Boolean = moduleButtons.isEmpty()
 
-    var extended: Boolean = ClickGUIModule.panelExtended[category]!!.enabled
-    var x = ClickGUIModule.panelX[category]!!.value
-    var y = ClickGUIModule.panelY[category]!!.value
+    val panelSetting = ClickGUIModule.panelSetting[category] ?: ClickGUIModule.PanelData()
 
     private var dragging = false
 
@@ -48,30 +46,30 @@ class Panel(private val category: Category) {
 
     fun draw(mouseX: Double, mouseY: Double) {
         if (dragging) {
-            x = floor(x2 + mouseX).toFloat()
-            y = floor(y2 + mouseY).toFloat()
+            panelSetting.x = floor(x2 + mouseX).toFloat()
+            panelSetting.y = floor(y2 + mouseY).toFloat()
         }
 
-        NVGRenderer.dropShadow(x, y, WIDTH, (previousHeight + 10f).coerceAtLeast(HEIGHT), 10f, 3f, 5f)
+        NVGRenderer.dropShadow(panelSetting.x, panelSetting.y, WIDTH, (previousHeight + 10f).coerceAtLeast(HEIGHT), 10f, 3f, 5f)
 
-        NVGRenderer.drawHalfRoundedRect(x, y, WIDTH, HEIGHT, gray26.rgba, 5f, true)
-        NVGRenderer.text(category.displayName, x + WIDTH / 2f - textWidth / 2, y + HEIGHT / 2f - 11, 22f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
+        NVGRenderer.drawHalfRoundedRect(panelSetting.x, panelSetting.y, WIDTH, HEIGHT, gray26.rgba, 5f, true)
+        NVGRenderer.text(category.displayName, panelSetting.x + WIDTH / 2f - textWidth / 2, panelSetting.y + HEIGHT / 2f - 11, 22f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
 
         var startY = scrollOffset + HEIGHT
 
-        if (scrollOffset != 0f) NVGRenderer.pushScissor(x, y + HEIGHT, WIDTH, previousHeight - HEIGHT + 10f)
+        if (scrollOffset != 0f) NVGRenderer.pushScissor(panelSetting.x, panelSetting.y + HEIGHT, WIDTH, previousHeight - HEIGHT + 10f)
 
-        if (extended && !isModuleButtonEmpty) {
+        if (panelSetting.extended && !isModuleButtonEmpty) {
             for (button in moduleButtons) {
                 if (!button.module.name.contains(SearchBar.currentSearch, true)) continue
-                button.y = startY + y
+                button.y = startY + panelSetting.y
                 startY += button.draw(mouseX, mouseY)
             }
             length = startY + 5f
         }
         previousHeight = startY
 
-        if (!isModuleButtonEmpty) NVGRenderer.drawHalfRoundedRect(x, y + startY, WIDTH, 10f, lastModuleButton?.color?.rgba ?: gray38.rgba, 5f, false)
+        if (!isModuleButtonEmpty) NVGRenderer.drawHalfRoundedRect(panelSetting.x, panelSetting.y + startY, WIDTH, 10f, lastModuleButton?.color?.rgba ?: gray38.rgba, 5f, false)
         if (scrollOffset != 0f) NVGRenderer.popScissor()
     }
 
@@ -84,12 +82,12 @@ class Panel(private val category: Category) {
     fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         if (isHovered) {
             if (button == 0) {
-                x2 = (x - mouseX).toFloat()
-                y2 = (y - mouseY).toFloat()
+                x2 = (panelSetting.x - mouseX).toFloat()
+                y2 = (panelSetting.y - mouseY).toFloat()
                 dragging = true
                 return true
             } else if (button == 1) {
-                extended = !extended
+                panelSetting.extended = !panelSetting.extended
                 return true
             }
         } else if (isMouseOverExtended) {
@@ -104,11 +102,7 @@ class Panel(private val category: Category) {
     fun mouseReleased(state: Int) {
         if (state == 0) dragging = false
 
-        ClickGUIModule.panelX[category]!!.value = x
-        ClickGUIModule.panelY[category]!!.value = y
-        ClickGUIModule.panelExtended[category]!!.enabled = extended
-
-        if (extended)
+        if (panelSetting.extended)
             moduleButtons.reversed().forEach {
                 if (!it.module.name.contains(SearchBar.currentSearch, true)) return@forEach
                 it.mouseReleased(state)
@@ -116,7 +110,7 @@ class Panel(private val category: Category) {
     }
 
     fun keyTyped(typedChar: Char, modifier: Int): Boolean {
-        if (!extended) return false
+        if (!panelSetting.extended) return false
 
         return moduleButtons.reversed().any {
             if (!it.module.name.contains(SearchBar.currentSearch, true)) return@any false
@@ -125,7 +119,7 @@ class Panel(private val category: Category) {
     }
 
     fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
-        if (!extended) return false
+        if (!panelSetting.extended) return false
 
         return moduleButtons.reversed().any {
             if (!it.module.name.contains(SearchBar.currentSearch, true)) return@any false
@@ -133,9 +127,9 @@ class Panel(private val category: Category) {
         }
     }
 
-    private inline val isHovered get() = isAreaHovered(x, y, WIDTH, HEIGHT)
+    private inline val isHovered get() = isAreaHovered(panelSetting.x, panelSetting.y, WIDTH, HEIGHT)
 
-    private inline val isMouseOverExtended get() = extended && isAreaHovered(x, y, WIDTH, length.coerceAtLeast(HEIGHT))
+    private inline val isMouseOverExtended get() = panelSetting.extended && isAreaHovered(panelSetting.x, panelSetting.y, WIDTH, length.coerceAtLeast(HEIGHT))
 
     companion object {
         const val WIDTH = 240f

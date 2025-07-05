@@ -76,8 +76,8 @@ object Etherwarp : Module(
 
     @EventHandler
     fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
-        if (this !is PlayerInteractItemC2SPacket || !LocationUtils.currentArea.isArea(Island.SinglePlayer) || mc.player?.isSneaking == false || mc.currentScreen != null) return@with
-        mc.player?.mainHandStack?.getCustomData()?.takeIf { it.getInt("ethermerge", 0) == 1 || it.getItemId() == "ETHERWARP_CONDUIT" } ?: return@with
+        if (this !is PlayerInteractItemC2SPacket || !LocationUtils.currentArea.isArea(Island.SinglePlayer) || mc.player?.isSneaking == false || mc.currentScreen != null) return
+        mc.player?.mainHandStack?.getCustomData()?.takeIf { it.getInt("ethermerge", 0) == 1 || it.getItemId() == "ETHERWARP_CONDUIT" } ?: return
         etherPos?.pos?.let {
             if (etherPos?.succeeded == false) return@let
             mc.executeSync {
@@ -88,6 +88,7 @@ object Etherwarp : Module(
                 mc.player?.setVelocity(0.0, 0.0, 0.0)
             }
         }
+        Unit
     }
 
     private data class EtherPos(val succeeded: Boolean, val pos: BlockPos?, val state: BlockState?) {

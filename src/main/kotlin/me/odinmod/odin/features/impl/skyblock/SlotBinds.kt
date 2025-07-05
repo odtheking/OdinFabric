@@ -24,7 +24,7 @@ object SlotBinds : Module(
 ) {
     private val setNewSlotbind by KeybindSetting("Bind set key", GLFW.GLFW_KEY_UNKNOWN, desc = "Key to set new bindings.")
     private val lineColor by ColorSetting("Line Color", Colors.MINECRAFT_GOLD, desc = "Color of the line drawn between slots.")
-    private val slotBinds by MapSetting("slotBinds", mutableMapOf<Int, Int>())
+    private val slotBinds by MapSetting("SlotBinds", mutableMapOf<Int, Int>())
 
     private var previousSlot: Int? = null
 

@@ -37,7 +37,7 @@ object HudManager : Screen(Text.literal("HUD Manager")) {
         val actualAmount = verticalAmount.sign.toFloat() * 0.2f
         for (hud in hudSettingsCache) {
             if (hud.value.isHovered()) {
-                hud.value.scale = (hud.value.scale + actualAmount).coerceIn(1f, 5f)
+                hud.value.scale = (hud.value.scale + actualAmount).coerceIn(2f, 10f)
                 return true
             }
         }
@@ -64,7 +64,6 @@ object HudManager : Screen(Text.literal("HUD Manager")) {
 
     override fun close()  {
         Config.save()
-
         super.close()
     }
 

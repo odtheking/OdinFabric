@@ -26,7 +26,7 @@ class ModuleButton(val module: Module, val panel: Panel) {
 
     val representableSettings = module.settings.filterIsInstance<RenderableSetting<*>>()
 
-    inline val x: Float get() = panel.x
+    inline val x: Float get() = panel.panelSetting.x
     var y = 0f
 
     private val colorAnim = ColorAnimation(150)
@@ -45,7 +45,7 @@ class ModuleButton(val module: Module, val panel: Panel) {
         hoverHandler.handle(x, y, Panel.WIDTH, Panel.HEIGHT - 1)
         hover.handle(x, y, Panel.WIDTH, Panel.HEIGHT - 1)
 
-        if (hoverHandler.percent() > 0 && y >= panel.y + Panel.HEIGHT)
+        if (hoverHandler.percent() > 0 && y >= panel.panelSetting.y + Panel.HEIGHT)
             ClickGUI.setDescription(module.description, x + Panel.WIDTH + 10f, y, hoverHandler)
 
         NVGRenderer.rect(x, y, Panel.WIDTH, Panel.HEIGHT, color.rgba)

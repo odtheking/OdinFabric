@@ -140,7 +140,7 @@ object ClickGUI : Screen(Text.literal("Click GUI")) {
     }
 
     override fun close()  {
-        for (panel in panels.filter { it.extended }.reversed()) {
+        for (panel in panels.filter { it.panelSetting.extended }.reversed()) {
             for (moduleButton in panel.moduleButtons.filter { it.extended }) {
                 for (setting in moduleButton.representableSettings) {
                     if (setting is ColorSetting) setting.section = null
