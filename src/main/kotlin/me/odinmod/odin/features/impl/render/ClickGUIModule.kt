@@ -13,11 +13,11 @@ import org.lwjgl.glfw.GLFW
 
 object ClickGUIModule : Module(
     name = "Click GUI",
-    key = GLFW.GLFW_KEY_RIGHT_SHIFT,
-    description = "Allows you to customize the UI."
+    description = "Allows you to customize the UI.",
+    key = GLFW.GLFW_KEY_RIGHT_SHIFT
 ) {
     val enableNotification by BooleanSetting("Chat notifications", true, desc = "Sends a message when you toggle a module with a keybind")
-    val clickGUIColor by ColorSetting("Click GUI Color", Color(50, 150, 220), desc = "The color of the Click GUI.")
+    val clickGUIColor by ColorSetting("Color", Color(50, 150, 220), desc = "The color of the Click GUI.")
     private val action by ActionSetting("Open HUD Editor", desc = "Opens the HUD editor when clicked.") { mc.setScreen(HudManager) }
 
     override fun onKeybind() {

@@ -2,7 +2,9 @@ package me.odinmod.odin
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import me.odinmod.odin.commands.devCommand
 import me.odinmod.odin.commands.mainCommand
+import me.odinmod.odin.commands.petCommand
 import me.odinmod.odin.config.Config
 import me.odinmod.odin.events.EventDispatcher
 import me.odinmod.odin.features.ModuleManager
@@ -45,7 +47,7 @@ object OdinMod : ModInitializer {
         }
 
         ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
-            arrayOf(mainCommand).forEach { commodore ->
+            arrayOf(mainCommand, petCommand, devCommand).forEach { commodore ->
                 commodore.register(dispatcher)
             }
         }

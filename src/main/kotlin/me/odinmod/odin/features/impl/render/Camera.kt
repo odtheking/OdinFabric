@@ -7,7 +7,7 @@ import net.minecraft.client.option.Perspective
 
 object Camera: Module(
     name = "Camera",
-    description = "Disables front camera when enabled"
+    description = "Disables front camera when enabled."
 ) {
 
     @EventHandler

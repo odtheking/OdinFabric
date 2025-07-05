@@ -28,12 +28,12 @@ import kotlin.math.sign
 
 object Etherwarp: Module(
     name = "Etherwarp",
-    description = "Helps you find the etherwarp position in the ether."
+    description = "Provides configurable visual feedback for etherwarp."
 ) {
     private val render by BooleanSetting("Show Etherwarp Guess", true, desc = "Shows where etherwarp will take you.")
     private val color by ColorSetting("Color", Colors.MINECRAFT_GOLD.withAlpha(.5f), allowAlpha = true, desc = "Color of the box.").withDependency { render }
     private val renderFail by BooleanSetting("Show when failed", true, desc = "Shows the box even when the guess failed.").withDependency { render }
-    private val wrongColor by ColorSetting("Wrong Color", Colors.MINECRAFT_RED.withAlpha(.5f), allowAlpha = true, desc = "Color of the box if guess failed.").withDependency { renderFail }
+    private val failColor by ColorSetting("Fail Color", Colors.MINECRAFT_RED.withAlpha(.5f), allowAlpha = true, desc = "Color of the box if guess failed.").withDependency { renderFail }
     private val renderStyle by SelectorSetting("Render Style", "Outline", listOf("Outline", "Filled", "Filled Outline"), desc = "Style of the box.").withDependency { render }
 
     private var etherPos: EtherPos? = null
@@ -45,7 +45,7 @@ object Etherwarp: Module(
 
         etherPos = getEtherPos(56.0 + customData.getInt("tuned_transmission", 0))
         if (etherPos?.succeeded != true && !renderFail) return
-        val color = if (etherPos?.succeeded == true) color.rgba.floatValues() else wrongColor.rgba.floatValues()
+        val color = if (etherPos?.succeeded == true) color.rgba.floatValues() else failColor.rgba.floatValues()
         etherPos?.pos?.let {
             when (renderStyle) {
                 0 -> drawBox(Box(it), event.context, color)

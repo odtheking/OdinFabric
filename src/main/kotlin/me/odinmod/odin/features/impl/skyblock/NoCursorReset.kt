@@ -6,7 +6,7 @@ import meteordevelopment.orbit.EventHandler
 
 object NoCursorReset: Module(
     name = "No Cursor Reset",
-    description = "Prevents the cursor from being reset when opening a GUI"
+    description = "Prevents the cursor from being reset when opening a GUI."
 ) {
     private var clock: Long = System.currentTimeMillis()
     private var wasNotNull = false

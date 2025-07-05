@@ -29,10 +29,10 @@ object ModuleManager {
 
     val modules: ArrayList<Module> = arrayListOf(
         // render
-        ClickGUIModule, Camera, Etherwarp, PlayerSize, PerformanceHUD,
+        ClickGUIModule, Camera, Etherwarp, PlayerSize, PerformanceHUD, RenderOptimizer,
 
         //skyblock
-        ChatCommands, NoCursorReset, RagnarockAxe, SpringBoots, WardrobeKeybinds, PetKeybinds, AutoSprint, CommandKeybinds, SlotBinds
+        ChatCommands, NoCursorReset, Ragnarock, SpringBoots, WardrobeKeybinds, PetKeybinds, AutoSprint, CommandKeybinds, SlotBinds
 
         // kuudra
 

@@ -14,7 +14,7 @@ import net.minecraft.client.util.math.MatrixStack
 @DevModule
 object PlayerSize: Module(
     name = "Player Size",
-    description = "Changes the size of the player"
+    description = "Changes the size of the player."
 ) {
     private val devSize by BooleanSetting("Dev Size", true, desc = "Toggles client side dev size.").withDependency { isRandom }
     private val devSizeX by NumberSetting("Size X", 1f, -1f, 3f, 0.1, desc = "X scale of the dev size.").withDependency { isRandom && devSize }

@@ -46,8 +46,7 @@ object WardrobeKeybinds: Module(
     }
 
     private fun onClick(screen: HandledScreen<*>, keyCode: Int): Boolean {
-        val title = screen.title?.string ?: return false
-        val (current, total) = wardrobeRegex.find(title)?.destructured?.let { it.component1().toIntOrNull() to it.component2().toIntOrNull() } ?: return false
+        val (current, total) = wardrobeRegex.find(screen.title?.string ?: "")?.destructured?.let { it.component1().toIntOrNull() to it.component2().toIntOrNull() } ?: return false
         if (current == null || total == null) return false
 
         val equippedIndex = screen.screenHandler.slots.find { equippedRegex.matches(it.stack.itemName.string) }?.index

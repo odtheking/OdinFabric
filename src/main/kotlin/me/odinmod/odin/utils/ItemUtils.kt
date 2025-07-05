@@ -26,7 +26,7 @@ fun ItemStack.getItemUUID(): String =
 fun ItemStack.getLore(): List<Text> =
     getOrDefault(DataComponentTypes.LORE, LoreComponent.DEFAULT).styledLines()
 
-fun ItemStack.getLoreText(): List<String> =
+fun ItemStack.getLoreString(): List<String> =
     getLore().map { it.string }
 
 enum class ItemRarity(
@@ -48,7 +48,7 @@ enum class ItemRarity(
 private val rarityRegex = Regex("(${ItemRarity.entries.joinToString("|") { it.loreName }}) ?([A-Z ]+)?")
 
 fun ItemStack.getSkyblockRarity(): ItemRarity? {
-    val lore = getLoreText()
+    val lore = getLoreString()
     for (i in lore.indices.reversed()) {
         val rarity = rarityRegex.find(lore[i])?.groups?.get(1)?.value ?: continue
         return ItemRarity.entries.find { it.loreName == rarity }
