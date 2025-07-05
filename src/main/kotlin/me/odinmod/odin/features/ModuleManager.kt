@@ -2,6 +2,7 @@ package me.odinmod.odin.features
 
 import me.odinmod.odin.OdinMod
 import me.odinmod.odin.OdinMod.mc
+import me.odinmod.odin.clickgui.HudManager
 import me.odinmod.odin.clickgui.settings.impl.HUDSetting
 import me.odinmod.odin.clickgui.settings.impl.KeybindSetting
 import me.odinmod.odin.events.InputEvent
@@ -29,7 +30,7 @@ object ModuleManager {
 
     val modules: ArrayList<Module> = arrayListOf(
         // render
-        ClickGUIModule, Camera, Etherwarp, PlayerSize, PerformanceHUD, RenderOptimizer,
+        ClickGUIModule, Camera, Etherwarp, PlayerSize, PerformanceHUD, RenderOptimizer, PlayerDisplay,
 
         //skyblock
         ChatCommands, NoCursorReset, Ragnarock, SpringBoots, WardrobeKeybinds, PetKeybinds, AutoSprint, CommandKeybinds, SlotBinds
@@ -55,7 +56,7 @@ object ModuleManager {
     }
 
     fun render(context: DrawContext, tickCounter: RenderTickCounter) {
-        if (mc.world == null || mc.player == null) return
+        if (mc.world == null || mc.player == null || mc.currentScreen == HudManager) return
         context.matrices.push()
         val sf = mc.window.scaleFactor.toFloat()
         context.matrices.scale(1f / sf, 1f / sf, 1f)

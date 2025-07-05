@@ -5,9 +5,9 @@ import me.odinmod.odin.features.Module
 import me.odinmod.odin.utils.Color
 import me.odinmod.odin.utils.Colors
 import me.odinmod.odin.utils.ServerUtils
-import me.odinmod.odin.utils.drawStringWidth
+import me.odinmod.odin.utils.render.drawStringWidth
 
-object PerformanceHUD: Module(
+object PerformanceHUD : Module(
     name = "Performance HUD",
     description = "Shows performance information on the screen."
 ) {

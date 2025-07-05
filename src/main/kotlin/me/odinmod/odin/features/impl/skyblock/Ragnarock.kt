@@ -10,7 +10,7 @@ import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket
 import net.minecraft.sound.SoundEvents
 
-object Ragnarock: Module(
+object Ragnarock : Module(
     name = "Ragnarock",
     description = "Alerts when you cast the Ragnarock or it gets cancelled."
 ) {

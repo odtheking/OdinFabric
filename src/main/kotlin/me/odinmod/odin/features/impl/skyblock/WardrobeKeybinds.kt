@@ -11,7 +11,7 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen
 import net.minecraft.screen.slot.SlotActionType
 import org.lwjgl.glfw.GLFW
 
-object WardrobeKeybinds: Module(
+object WardrobeKeybinds : Module(
     name = "Wardrobe Keybinds",
     description = "Allows you to use keybinds to navigate the wardrobe.",
     key = null

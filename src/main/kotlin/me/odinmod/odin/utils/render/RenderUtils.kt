@@ -1,6 +1,9 @@
-package me.odinmod.odin.utils
+package me.odinmod.odin.utils.render
 
 import me.odinmod.odin.OdinMod.mc
+import me.odinmod.odin.utils.Color
+import me.odinmod.odin.utils.translate
+import me.odinmod.odin.utils.unaryMinus
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gl.RenderPipelines
@@ -8,7 +11,6 @@ import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.render.*
 import net.minecraft.client.util.BufferAllocator
 import net.minecraft.text.OrderedText
-import net.minecraft.util.Formatting
 import net.minecraft.util.math.Box
 import net.minecraft.util.math.MathHelper
 import net.minecraft.util.math.RotationAxis
@@ -20,7 +22,7 @@ import kotlin.math.sin
 
 private val ALLOCATOR = BufferAllocator(1536)
 
-fun drawBox(box: Box, context: WorldRenderContext, color: List<Float>) {
+fun drawBox(box: Box, context: WorldRenderContext, color: Color) {
     val matrix = context.matrixStack() ?: return
     val bufferSource = context.consumers() as? VertexConsumerProvider.Immediate ?: return
     val buffer = bufferSource.getBuffer(CUSTOM_LINE_LAYER)
@@ -28,13 +30,13 @@ fun drawBox(box: Box, context: WorldRenderContext, color: List<Float>) {
 
     matrix.push()
     matrix.translate(-camPos.x, -camPos.y, -camPos.z)
-    VertexRendering.drawBox(matrix, buffer, box, color[0], color[1], color[2], color[3])
+    VertexRendering.drawBox(matrix, buffer, box, color.redFloat, color.greenFloat, color.blueFloat, color.alphaFloat)
     matrix.pop()
 
     bufferSource.draw(CUSTOM_LINE_LAYER)
 }
 
-fun drawFilledBox(box: Box, context: WorldRenderContext, color: List<Float>) {
+fun drawFilledBox(box: Box, context: WorldRenderContext, color: Color) {
     val matrix = context.matrixStack() ?: return
     val bufferSource = context.consumers() as? VertexConsumerProvider.Immediate ?: return
     val buffer = bufferSource.getBuffer(FILLED_BOX_LAYER)
@@ -42,7 +44,7 @@ fun drawFilledBox(box: Box, context: WorldRenderContext, color: List<Float>) {
 
     matrix.push()
     matrix.translate(-camPos.x, -camPos.y, -camPos.z)
-    VertexRendering.drawFilledBox(matrix, buffer, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, color[0], color[1], color[2], color[3])
+    VertexRendering.drawFilledBox(matrix, buffer, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, color.redFloat, color.greenFloat, color.blueFloat, color.alphaFloat)
     matrix.pop()
 
     bufferSource.draw(CUSTOM_LINE_LAYER)
@@ -81,7 +83,7 @@ fun drawSphere(
     radius: Double,
     segments: Int,
     context: WorldRenderContext,
-    color: List<Float>
+    color: Color
 ) {
     val matrixStack = context.matrixStack() ?: return
     val bufferSource = context.consumers() as? VertexConsumerProvider.Immediate ?: return
@@ -92,8 +94,6 @@ fun drawSphere(
     matrixStack.translate(-camPos.x, -camPos.y, -camPos.z)
 
     val matrix = matrixStack.peek().positionMatrix
-
-    val (r, g, b, a) = color
 
     // Draw latitude lines
     for (i in 0..segments) {
@@ -112,8 +112,8 @@ fun drawSphere(
             val x2 = center.x + radius * sinTheta * cos(phi2)
             val z2 = center.z + radius * sinTheta * sin(phi2)
 
-            buffer.vertex(matrix, x1.toFloat(), y1.toFloat(), z1.toFloat()).color(r, g, b, a).normal(1f, 1f, 1f)
-            buffer.vertex(matrix, x2.toFloat(), y1.toFloat(), z2.toFloat()).color(r, g, b, a).normal(1f, 1f, 1f)
+            buffer.vertex(matrix, x1.toFloat(), y1.toFloat(), z1.toFloat()).color(color.red, color.green, color.blue, color.alpha).normal(1f, 1f, 1f)
+            buffer.vertex(matrix, x2.toFloat(), y1.toFloat(), z2.toFloat()).color(color.red, color.green, color.blue, color.alpha).normal(1f, 1f, 1f)
         }
     }
 
@@ -133,8 +133,8 @@ fun drawSphere(
             val y2 = center.y + radius * cos(theta2)
             val z2 = center.z + radius * sin(theta2) * sin(phi)
 
-            buffer.vertex(matrix, x1.toFloat(), y1.toFloat(), z1.toFloat()).color(r, g, b, a).normal(1f, 1f, 1f)
-            buffer.vertex(matrix, x2.toFloat(), y2.toFloat(), z2.toFloat()).color(r, g, b, a).normal(1f, 1f, 1f)
+            buffer.vertex(matrix, x1.toFloat(), y1.toFloat(), z1.toFloat()).color(color.red, color.green, color.blue, color.alpha).normal(1f, 1f, 1f)
+            buffer.vertex(matrix, x2.toFloat(), y2.toFloat(), z2.toFloat()).color(color.red, color.green, color.blue, color.alpha).normal(1f, 1f, 1f)
         }
     }
 
@@ -178,21 +178,3 @@ val FILLED_BOX_LAYER: RenderLayer = RenderLayer.of(
     RenderLayer.MultiPhaseParameters.builder()
         .layering(RenderPhase.VIEW_OFFSET_Z_LAYERING)
         .build(false))
-
-fun Int.floatValues(): List<Float> {
-    return listOf(
-        (this shr 16 and 0xFF) / 255f,
-        (this shr 8 and 0xFF) / 255f,
-        (this and 0xFF) / 255f,
-        1f
-    )
-}
-
-fun Formatting.floatValues(): List<Float> {
-    return this.colorValue?.floatValues() ?: listOf(1f, 1f, 1f, 1f)
-}
-
-fun List<Float>.withAlpha(alpha: Float): List<Float> {
-    return if (this.size == 4) this.toMutableList().apply { this[3] = alpha }
-    else this + alpha
-}

@@ -4,7 +4,7 @@ import me.odinmod.odin.events.TickEvent
 import me.odinmod.odin.features.Module
 import meteordevelopment.orbit.EventHandler
 
-object NoCursorReset: Module(
+object NoCursorReset : Module(
     name = "No Cursor Reset",
     description = "Prevents the cursor from being reset when opening a GUI."
 ) {

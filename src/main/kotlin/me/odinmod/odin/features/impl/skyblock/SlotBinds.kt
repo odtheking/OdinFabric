@@ -7,8 +7,8 @@ import me.odinmod.odin.config.Config
 import me.odinmod.odin.events.GuiEvent
 import me.odinmod.odin.features.Module
 import me.odinmod.odin.utils.Colors
-import me.odinmod.odin.utils.drawLine
 import me.odinmod.odin.utils.modMessage
+import me.odinmod.odin.utils.render.drawLine
 import meteordevelopment.orbit.EventHandler
 import meteordevelopment.orbit.EventPriority
 import mixins.HandledScreenAccessor
@@ -17,7 +17,7 @@ import net.minecraft.client.gui.screen.ingame.InventoryScreen
 import net.minecraft.screen.slot.SlotActionType
 import org.lwjgl.glfw.GLFW
 
-object SlotBinds: Module(
+object SlotBinds : Module(
     name = "Slot Binds",
     description = "Bind slots together for quick access.",
     key = null

@@ -12,7 +12,7 @@ import net.minecraft.client.render.entity.state.PlayerEntityRenderState
 import net.minecraft.client.util.math.MatrixStack
 
 @DevModule
-object PlayerSize: Module(
+object PlayerSize : Module(
     name = "Player Size",
     description = "Changes the size of the player."
 ) {

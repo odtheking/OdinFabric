@@ -4,13 +4,16 @@ import me.odinmod.odin.events.PacketEvent
 import me.odinmod.odin.events.RenderEvent
 import me.odinmod.odin.events.TickEvent
 import me.odinmod.odin.features.Module
-import me.odinmod.odin.utils.*
+import me.odinmod.odin.utils.Colors
+import me.odinmod.odin.utils.equalsOneOf
+import me.odinmod.odin.utils.getItemId
+import me.odinmod.odin.utils.render.drawBox
+import me.odinmod.odin.utils.render.drawStringWidth
 import me.odinmod.odin.utils.skyblock.LocationUtils
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.entity.EquipmentSlot
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket
 import net.minecraft.sound.SoundEvents
-import net.minecraft.util.Formatting
 import net.minecraft.util.math.Box
 
 object SpringBoots : Module(
@@ -19,7 +22,7 @@ object SpringBoots : Module(
 ) {
     private val hud by HUD("Spring Boots", "Shows the how high you will jump.") {
         var width = 1f
-        width += drawStringWidth("Block Position: ", width, 1f, Colors.MINECRAFT_LIGHT_PURPLE.rgba, true)
+        width += drawStringWidth("Height: ", width, 1f, Colors.MINECRAFT_LIGHT_PURPLE.rgba, true)
         width += drawStringWidth(getColor(blockAmount), width, 1f, Colors.WHITE.rgba, true)
         width to mc.textRenderer.fontHeight
     }
@@ -52,7 +55,7 @@ object SpringBoots : Module(
     @EventHandler
     fun onRenderWorld(event: RenderEvent.Last) {
         if (!LocationUtils.isInSkyblock || blockAmount == 0.0) return
-        mc.player?.pos?.add(0.0, blockAmount, 0.0)?.let { drawBox(Box.from(it), event.context, Formatting.RED.floatValues()) }
+        mc.player?.pos?.add(0.0, blockAmount, 0.0)?.let { drawBox(Box.from(it), event.context, Colors.MINECRAFT_RED) }
     }
 
     @EventHandler

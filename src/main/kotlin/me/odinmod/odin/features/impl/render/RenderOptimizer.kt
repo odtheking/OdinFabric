@@ -7,7 +7,7 @@ import meteordevelopment.orbit.EventHandler
 import net.minecraft.entity.EntityType
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket
 
-object RenderOptimizer: Module(
+object RenderOptimizer : Module(
     name = "Render Optimizer",
     description = "Optimizes rendering by disabling unnecessary features."
 ) {

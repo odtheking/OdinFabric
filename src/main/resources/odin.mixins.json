@@ -14,8 +14,10 @@
     "DrawContextAccessor",
     "HandledScreenAccessor",
     "HandledScreenMixin",
+    "InGameHudMixin",
     "KeyBindingAccessor",
     "KeyBindingMixin",
+    "MessageHandlerMixin",
     "MixinGameRenderer",
     "MixinPlayerEntityRender",
     "MouseMixin"

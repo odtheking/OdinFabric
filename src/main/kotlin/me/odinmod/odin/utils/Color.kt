@@ -69,6 +69,10 @@ class Color(hue: Float, saturation: Float, brightness: Float, alpha: Float = 1f)
     inline val blue get() = rgba.blue
     inline val alpha get() = rgba.alpha
 
+    inline val redFloat get() = red / 255f
+    inline val greenFloat get() = green / 255f
+    inline val blueFloat get() = blue / 255f
+
    @OptIn(ExperimentalStdlibApi::class)
    fun hex(includeAlpha: Boolean = true): String {
        val hexString = rgba.toHexString(HexFormat.UpperCase)

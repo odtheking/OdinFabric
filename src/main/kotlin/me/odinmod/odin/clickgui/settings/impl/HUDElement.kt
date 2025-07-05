@@ -1,7 +1,7 @@
 package me.odinmod.odin.clickgui.settings.impl
 
 import me.odinmod.odin.utils.Colors
-import me.odinmod.odin.utils.hollowFill
+import me.odinmod.odin.utils.render.hollowFill
 import me.odinmod.odin.utils.ui.HoverHandler
 import net.minecraft.client.gui.DrawContext
 

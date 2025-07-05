@@ -30,14 +30,8 @@ fun sendDataToServer(body: String, url: String = "https://gi2wsqbyse6tnfhqakbnq6
             flush()
         }
 
-       // val responseCode = connection.responseCode
-       // if (RandomPlayers.isDev) println("Response Code: $responseCode")
-
-        val response = connection.inputStream.bufferedReader().use { it.readText() }
-       // if (RandomPlayers.isDev) println("Response: $response")
-
         connection.disconnect()
 
-        response
+        connection.inputStream.bufferedReader().use { it.readText() }
     } catch (_: Exception) { "" }
 }

@@ -5,7 +5,7 @@ import me.odinmod.odin.features.Module
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.client.option.Perspective
 
-object Camera: Module(
+object Camera : Module(
     name = "Camera",
     description = "Disables front camera when enabled."
 ) {

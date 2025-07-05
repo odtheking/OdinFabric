@@ -9,6 +9,8 @@ import me.odinmod.odin.events.RenderEvent
 import me.odinmod.odin.features.Module
 import me.odinmod.odin.utils.*
 import me.odinmod.odin.utils.Color.Companion.withAlpha
+import me.odinmod.odin.utils.render.drawBox
+import me.odinmod.odin.utils.render.drawFilledBox
 import me.odinmod.odin.utils.skyblock.Island
 import me.odinmod.odin.utils.skyblock.LocationUtils
 import meteordevelopment.orbit.EventHandler
@@ -26,7 +28,7 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.sign
 
-object Etherwarp: Module(
+object Etherwarp : Module(
     name = "Etherwarp",
     description = "Provides configurable visual feedback for etherwarp."
 ) {
@@ -45,7 +47,7 @@ object Etherwarp: Module(
 
         etherPos = getEtherPos(56.0 + customData.getInt("tuned_transmission", 0))
         if (etherPos?.succeeded != true && !renderFail) return
-        val color = if (etherPos?.succeeded == true) color.rgba.floatValues() else failColor.rgba.floatValues()
+        val color = if (etherPos?.succeeded == true) color else failColor
         etherPos?.pos?.let {
             when (renderStyle) {
                 0 -> drawBox(Box(it), event.context, color)

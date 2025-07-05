@@ -16,7 +16,7 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.random.Random
 
-object ChatCommands: Module(
+object ChatCommands : Module(
     name = "Chat Commands",
     description = "Handles chat commands in Skyblock."
 ) {
