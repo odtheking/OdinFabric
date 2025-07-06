@@ -96,7 +96,7 @@ object PearlWaypoints : Module(
                     if (dynamicWaypoints) {
                         val destinationSupply = if (lineup.supply == Supply.Square) NoPre.missing else lineup.supply
                         calculatePearl(destinationSupply.dropOffSpot)?.let { event.context.drawWireFrameBox(Box.of(it, 0.12, 0.12, 0.12), dynamicWaypointsColor, 2f) }
-                        event.context.drawWireFrameBox(Box(BlockPos(lineup.supply.dropOffSpot)), dynamicWaypointsColor)
+                        event.context.drawWireFrameBox(Box(BlockPos(lineup.supply.dropOffSpot.up())), dynamicWaypointsColor)
                     }
                 }
             }
