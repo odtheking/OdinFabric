@@ -1,9 +1,7 @@
 package me.odinmod.odin.utils
 
-import com.google.gson.*
 import java.awt.Color.HSBtoRGB
 import java.awt.Color.RGBtoHSB
-import java.lang.reflect.Type
 
 class Color(hue: Float, saturation: Float, brightness: Float, alpha: Float = 1f) {
     constructor(hsb: FloatArray, alpha: Float = 1f) : this(hsb[0], hsb[1], hsb[2], alpha)
@@ -123,10 +121,6 @@ class Color(hue: Float, saturation: Float, brightness: Float, alpha: Float = 1f)
             return Color(hue, saturation, brightness * factor, this.alphaFloat)
         }
 
-        fun Color.darkerIf(condition: Boolean, factor: Float = 0.7f): Color {
-            return if (condition) darker(factor) else this
-        }
-
         fun Color.withAlpha(alpha: Float, newInstance: Boolean = true): Color {
             return if (newInstance) Color(red, green, blue, alpha)
             else {
@@ -137,17 +131,6 @@ class Color(hue: Float, saturation: Float, brightness: Float, alpha: Float = 1f)
 
         fun Color.hsbMax(): Color {
             return Color(hue, 1f, 1f)
-        }
-    }
-
-    class ColorSerializer : JsonSerializer<Color>, JsonDeserializer<Color> {
-        override fun serialize(src: Color?, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement {
-            return JsonPrimitive("#${src?.hex() ?: Colors.BLACK.hex()}")
-        }
-
-        override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): Color {
-            val hexValue = json?.asString?.replace("#", "") ?: "00000000"
-            return Color(hexValue)
         }
     }
 }

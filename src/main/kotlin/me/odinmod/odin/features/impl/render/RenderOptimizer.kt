@@ -13,9 +13,9 @@ object RenderOptimizer : Module(
     name = "Render Optimizer",
     description = "Optimizes rendering by disabling unnecessary features."
 ) {
-    private val disableFallingBlocks by BooleanSetting("Disable Falling Blocks", true, desc = "Disables rendering of falling blocks to improve performance.")
-    private val disableLighting by BooleanSetting("Disable Lighting", true, desc = "Disables lighting updates to improve performance.")
-    private val disableExplosion by BooleanSetting("Disable Explosion Particles", true, desc = "Disables explosion particles to improve performance.")
+    private val disableFallingBlocks by BooleanSetting("Hide Falling Blocks", true, desc = "Hides rendering of falling blocks to improve performance.")
+    private val disableLighting by BooleanSetting("Hide Lighting", true, desc = "Hides lighting updates to improve performance.")
+    private val disableExplosion by BooleanSetting("Hide Explosion Particles", true, desc = "Hides explosion particles to improve performance.")
 
     @EventHandler
     fun onMobMetadata(event: PacketEvent.Receive) = with (event.packet) {

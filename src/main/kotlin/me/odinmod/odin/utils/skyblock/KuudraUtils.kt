@@ -23,7 +23,6 @@ object KuudraUtils {
     val giantZombies: ArrayList<GiantEntity> = arrayListOf()
     var kuudraEntity: MagmaCubeEntity? = null
         private set
-    val supplies = BooleanArray(6) { true }
     var phase = 0
         private set
 
@@ -99,12 +98,12 @@ object KuudraUtils {
                         val x = entity.x.toInt()
                         val z = entity.z.toInt()
                         when {
-                            x == -98 && z == -112 -> supplies[0] = false
-                            x == -98 && z == -99 -> supplies[1] = false
-                            x == -110 && z == -106 -> supplies[2] = false
-                            x == -106 && z == -112 -> supplies[3] = false
-                            x == -94 && z == -106 -> supplies[4] = false
-                            x == -106 && z == -99 -> supplies[5] = false
+                            x == -98 && z == -112 -> Supply.Shop.isActive = false
+                            x == -98 && z == -99 -> Supply.Equals.isActive = false
+                            x == -110 && z == -106 -> Supply.xCannon.isActive = false
+                            x == -106 && z == -112 -> Supply.X.isActive = false
+                            x == -94 && z == -106 -> Supply.Triangle.isActive = false
+                            x == -106 && z == -99 -> Supply.Slash.isActive = false
                         }
                     }
                 }
@@ -128,12 +127,12 @@ object KuudraUtils {
 
     @EventHandler
     fun onWorldLoad(event: WorldLoadEvent) {
+        Supply.entries.forEach { it.isActive = true }
         playersBuildingAmount = 0
         buildDonePercentage = 0
         buildingPiles.clear()
         giantZombies.clear()
         kuudraEntity = null
-        supplies.fill(true)
         freshers.clear()
         kuudraTier = 0
         phase = 0

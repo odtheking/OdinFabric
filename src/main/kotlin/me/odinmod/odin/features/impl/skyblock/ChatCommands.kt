@@ -11,14 +11,13 @@ import me.odinmod.odin.utils.skyblock.LocationUtils
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 import net.minecraft.sound.SoundEvents
-import net.minecraft.text.ClickEvent
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.random.Random
 
 object ChatCommands : Module(
     name = "Chat Commands",
-    description = "Handles chat commands in Skyblock."
+    description = "Adds various chat commands (boop, kick, coinFlip, 8ball, etc..)."
 ) {
     private val chatEmotes by BooleanSetting("Chat Emotes", true, desc = "Replaces chat emotes with their corresponding emojis.")
     private val partyChatCommands by BooleanSetting("Party Commands", true, "Enables party chat commands.")
@@ -151,7 +150,7 @@ object ChatCommands : Module(
 
             "invite", "inv" -> if (invite && channel == ChatChannel.PRIVATE) {
                 if (autoConfirm) return sendCommand("p invite $name")
-                modMessage("§aClick on this message to invite $name to your party!", chatStyle = createClickStyle(ClickEvent.Action.RUN_COMMAND, "/party invite $name"))
+                modMessage("§aClick on this message to invite $name to your party!", chatStyle = createClickStyle("/party invite $name"))
                 playSoundAtPlayer(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value())
             }
         }

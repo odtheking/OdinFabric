@@ -19,19 +19,6 @@ object LocationUtils {
         private set
 
     @EventHandler
-    fun onDisconnect(event: ServerEvent.Disconnect) {
-        currentArea = Island.Unknown
-        isInSkyblock = false
-        isOnHypixel = false
-    }
-
-    @EventHandler
-    fun onWorldChange(event: WorldLoadEvent) {
-        currentArea = Island.Unknown
-        isInSkyblock = false
-    }
-
-    @EventHandler
     fun onConnect(event: ServerEvent.Connect) {
         if (mc.isInSingleplayer) {
             currentArea = Island.SinglePlayer
@@ -52,5 +39,18 @@ object LocationUtils {
             is ScoreboardObjectiveUpdateS2CPacket ->
                 if (!isInSkyblock) isInSkyblock = isOnHypixel && name == "SBScoreboard"
         }
+    }
+
+    @EventHandler
+    fun onWorldChange(event: WorldLoadEvent) {
+        currentArea = Island.Unknown
+        isInSkyblock = false
+    }
+
+    @EventHandler
+    fun onDisconnect(event: ServerEvent.Disconnect) {
+        currentArea = Island.Unknown
+        isInSkyblock = false
+        isOnHypixel = false
     }
 }

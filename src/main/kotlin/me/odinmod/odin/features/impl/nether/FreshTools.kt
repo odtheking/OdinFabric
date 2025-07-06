@@ -13,7 +13,7 @@ import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 
 object FreshTools : Module(
     name = "Fresh Tools",
-    description = "Shows the time until fresh timer."
+    description = "Tracks your party's fresh tools time.",
 ){
     private val notifyFresh by BooleanSetting("Notify Fresh", true, desc = "Notifies your party when you get fresh timer.")
     private val hud by HUD("Fresh timer", "Displays how long players have fresh for.") { example ->
@@ -45,7 +45,7 @@ object FreshTools : Module(
 
     @EventHandler
     fun onChat(event: PacketEvent.Receive) = with (event.packet) {
-        if (this is GameMessageS2CPacket && !overlay && !notifyFresh && KuudraUtils.inKuudra && ownFreshRegex.matches(content.string.noControlCodes))
+        if (this is GameMessageS2CPacket && !overlay && notifyFresh && KuudraUtils.inKuudra && ownFreshRegex.matches(content.string.noControlCodes))
             sendCommand("pc FRESH")
     }
 }

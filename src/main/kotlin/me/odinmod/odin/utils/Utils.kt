@@ -4,6 +4,7 @@ package me.odinmod.odin.utils
 
 import me.odinmod.odin.OdinMod
 import me.odinmod.odin.OdinMod.mc
+import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.text.ClickEvent
 import net.minecraft.text.HoverEvent
 import net.minecraft.text.Text
@@ -85,3 +86,12 @@ fun formatTime(time: Long, decimalPlaces: Int = 2): String {
     }
     return "$hours$minutes${(remaining / 1000f).toFixed(decimalPlaces)}s"
 }
+
+fun PlayerEntity.renderX(): Double =
+    lastX + (x - lastX) * mc.renderTickCounter.getTickProgress(true)
+
+fun PlayerEntity.renderY(): Double =
+    lastY + (y - lastY) * mc.renderTickCounter.getTickProgress(true)
+
+fun PlayerEntity.renderZ(): Double =
+    lastZ + (z - lastZ) * mc.renderTickCounter.getTickProgress(true)

@@ -29,7 +29,7 @@ object Waypoints : Module(
 
     private val pingLocationDropDown by DropdownSetting("Ping Location Dropdown", false)
     private val pingLocationToggle by BooleanSetting("Ping Location", false, desc = "Adds a waypoint at the location you are looking at.").withDependency { pingLocationDropDown }
-    private val pingLocation by KeybindSetting("Ping Location Keybind", GLFW.GLFW_KEY_UNKNOWN, desc = "Sends the location you are looking at as coords in chat for waypoints.").onPress {
+    private val pingLocation by KeybindSetting("Ping Location", GLFW.GLFW_KEY_UNKNOWN, desc = "Sends the location you are looking at as coords in chat for waypoints.").onPress {
         if (!pingLocationToggle) return@onPress
         Etherwarp.getEtherPos(pingDistance).pos?.let { pos ->
             addTempWaypoint("§fWaypoint", pos.x, pos.y, pos.z, pingWaypointTime)

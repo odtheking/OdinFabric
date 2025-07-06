@@ -16,14 +16,14 @@ object PlayerSize : Module(
     name = "Player Size",
     description = "Changes the size of the player."
 ) {
-    private val devSize by BooleanSetting("Dev Size", true, desc = "Toggles client side dev size.").withDependency { isRandom }
-    private val devSizeX by NumberSetting("Size X", 1f, -1f, 3f, 0.1, desc = "X scale of the dev size.").withDependency { isRandom && devSize }
-    private val devSizeY by NumberSetting("Size Y", 1f, -1f, 3f, 0.1, desc = "Y scale of the dev size.").withDependency { isRandom && devSize }
-    private val devSizeZ by NumberSetting("Size Z", 1f, -1f, 3f, 0.1, desc = "Z scale of the dev size.").withDependency { isRandom && devSize }
-    private val devWings by BooleanSetting("Wings", false, desc = "Toggles client side dev wings.").withDependency { isRandom }
-    private val devWingsColor by ColorSetting("Wings Color", Colors.WHITE, desc = "Color of the dev wings.").withDependency { isRandom && devWings }
-    private var showHidden by DropdownSetting("Show Hidden", false).withDependency { isRandom }
-    private val passcode by StringSetting("Passcode", "odin", desc = "Passcode for dev features.").withDependency { isRandom && showHidden }
+    private val devSize by BooleanSetting("Dev Size", true, desc = "Toggles client side dev size for your own player.")
+    private val devSizeX by NumberSetting("Size X", 1f, -1f, 3f, 0.1, desc = "X scale of the dev size.")
+    private val devSizeY by NumberSetting("Size Y", 1f, -1f, 3f, 0.1, desc = "Y scale of the dev size.")
+    private val devSizeZ by NumberSetting("Size Z", 1f, -1f, 3f, 0.1, desc = "Z scale of the dev size.")
+    private val devWings by BooleanSetting("Wings", false, desc = "Toggles client side dev wings.")
+    private val devWingsColor by ColorSetting("Wings Color", Colors.WHITE, desc = "Color of the dev wings.").withDependency { devWings }
+    private var showHidden by DropdownSetting("Show Hidden", false)
+    private val passcode by StringSetting("Passcode", "odin", desc = "Passcode for dev features.").withDependency { showHidden }
 
     private val sendDevData by ActionSetting("Send Dev Data", desc = "Sends dev data to the server.") {
         showHidden = false

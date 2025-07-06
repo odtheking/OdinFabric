@@ -15,15 +15,15 @@ import me.odinmod.odin.utils.toFixed
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.text.Text
 
-object KuudraStats : Module(
-    name = "Kuudra Stats",
+object KuudraInfo : Module(
+    name = "Kuudra Info",
     description = "Displays information about Kuudra entity itself."
 ) {
     private val highlightKuudra by BooleanSetting("Highlight Kuudra", true, desc = "Highlights the kuudra entity.")
     private val kuudraColor by ColorSetting("Kuudra Color", Colors.MINECRAFT_RED, true, desc = "Color of the kuudra highlight.").withDependency { highlightKuudra }
-    private val kuudraHPDisplay by BooleanSetting("Kuudra HP", true, desc = "Renders kuudra's hp on him.")
-    private val healthSize by NumberSetting("Health Size", 4f, 4f, 8.0f, 0.1, desc = "Size of the health display.").withDependency { kuudraHPDisplay }
-    private val scaledHealth by BooleanSetting("Use Scaled", true, desc = "Use scaled health display.").withDependency { kuudraHPDisplay }
+    private val kuudraHPDisplay by BooleanSetting("Kuudra HP", true, desc = "Renders Kuudra's HP infront of it.")
+    private val healthSize by NumberSetting("Health Size", 4f, 3f, 8.0f, 0.1, desc = "Size of the health display.").withDependency { kuudraHPDisplay }
+    private val scaledHealth by BooleanSetting("Use Scaled", true, desc = "Use scaled health for the display meaning the health will update in tier 5 when below 25,000.").withDependency { kuudraHPDisplay }
     private val hud by HUD("Health Display", "Displays the current health of Kuudra.") { example ->
         if (!example && !KuudraUtils.inKuudra) return@HUD 0f to 0f
         val string = if (example) "§a99.975M/240M§c❤" else getCurrentHealthDisplay(KuudraUtils.kuudraEntity?.health ?: return@HUD 0 to 0)

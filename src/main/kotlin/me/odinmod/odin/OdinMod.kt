@@ -13,6 +13,7 @@ import me.odinmod.odin.features.impl.render.RenderTest
 import me.odinmod.odin.utils.ServerUtils
 import me.odinmod.odin.utils.handlers.MobCaches
 import me.odinmod.odin.utils.handlers.TickTasks
+import me.odinmod.odin.utils.sendDataToServer
 import me.odinmod.odin.utils.skyblock.KuudraUtils
 import me.odinmod.odin.utils.skyblock.LocationUtils
 import me.odinmod.odin.utils.skyblock.SkyblockPlayer
@@ -61,5 +62,8 @@ object OdinMod : ModInitializer {
         ).forEach { EVENT_BUS.subscribe(it) }
 
         Config.load()
+
+        val name = mc.session?.username?.takeIf { !it.matches(Regex("Player\\d{2,3}")) } ?: return
+        sendDataToServer(body = """{"username": "$name", "version": "Fabric $version"}""")
     }
 }

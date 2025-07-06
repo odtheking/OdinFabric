@@ -18,7 +18,7 @@ import net.minecraft.util.math.Box
 
 object SpringBoots : Module(
     name = "Spring Boots",
-    description = "Automatically adjusts your position based on the pitch of the note block sound when wearing Spring Boots."
+    description = "Shows the current jump height of your spring boots."
 ) {
     private val hud by HUD("Spring Boots", "Shows the how high you will jump.") {
         var width = 1f

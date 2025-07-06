@@ -30,16 +30,13 @@ fun modMessage(message: Text, prefix: String = "§3Odin §8»§r ", chatStyle: S
 /**
  * Creates a `ChatStyle` with click and hover events for making a message clickable.
  *
- * @param action Action to be executed on click.
  * @param value Text to show up when hovered.
  * @return A `ChatStyle` with click and hover events.
  */
-fun createClickStyle(action: ClickEvent.Action?, value: String): Style {
+fun createClickStyle(value: String): Style {
     return Style.EMPTY
         .withClickEvent(ClickEvent.RunCommand(value))
         .withHoverEvent(
-            HoverEvent.ShowText(
-                Text.literal(value).styled { it.withColor(Formatting.YELLOW) }
-            )
+            HoverEvent.ShowText(Text.literal(value).styled { it.withColor(Formatting.YELLOW) })
         )
 }

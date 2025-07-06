@@ -37,7 +37,7 @@ object ModuleManager {
         ChatCommands, NoCursorReset, Ragnarock, SpringBoots, WardrobeKeybinds, PetKeybinds, AutoSprint, CommandKeybinds, SlotBinds,
 
         // nether
-        SupplyHelper, BuildHelper, RemovePerks, NoPre, PearlWaypoints, FreshTools, KuudraStats
+        SupplyHelper, BuildHelper, RemovePerks, NoPre, PearlWaypoints, FreshTools, KuudraInfo
     )
 
     init {

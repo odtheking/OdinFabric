@@ -16,6 +16,7 @@ import me.odinmod.odin.utils.setClipboardContent
 import me.odinmod.odin.utils.skyblock.KuudraUtils
 import me.odinmod.odin.utils.skyblock.LocationUtils
 import me.odinmod.odin.utils.skyblock.SkyblockPlayer
+import me.odinmod.odin.utils.skyblock.Supply
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 import net.minecraft.text.Text
 
@@ -60,7 +61,7 @@ val devCommand = Commodore("oddev") {
             |inKuudra: ${KuudraUtils.inKuudra}, tier: ${KuudraUtils.kuudraTier}, phase: ${KuudraUtils.phase}    
             |kuudraTeammates: ${KuudraUtils.freshers.map { it.key }}
             |giantZombies: ${KuudraUtils.giantZombies.joinToString { it.pos.toString() }}
-            |supplies: ${KuudraUtils.supplies.joinToString()}
+            |supplies: ${Supply.entries.joinToString { "${it.name} -> ${it.isActive}" }}
             |kuudraEntity: ${KuudraUtils.kuudraEntity}
             |builders: ${KuudraUtils.playersBuildingAmount}
             |build: ${KuudraUtils.buildDonePercentage}

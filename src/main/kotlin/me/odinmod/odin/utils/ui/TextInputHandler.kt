@@ -39,6 +39,15 @@ class TextInputHandler(
     private var dragging = false
     private var clickCount = 1
 
+    // History for undo/redo functionality
+    private val history = mutableListOf<String>()
+    private var historyIndex = -1
+    private var lastSavedText = ""
+
+    init {
+        saveState()
+    }
+
     fun draw() {
         NVGRenderer.pushScissor(x, y, width, height)
         if (selectionWidth != 0f) NVGRenderer.rect(x + caretX + 4f, y, selectionWidth, height, Colors.MINECRAFT_BLUE.rgba, 4f)
@@ -189,6 +198,16 @@ class TextInputHandler(
                             true
                         }
 
+                        GLFW.GLFW_KEY_Z -> {
+                            undo()
+                            true
+                        }
+
+                        GLFW.GLFW_KEY_Y -> {
+                            redo()
+                            true
+                        }
+
                         else -> false
                     }
                 } else false
@@ -215,12 +234,14 @@ class TextInputHandler(
         if (text.length != tl) caret += string.length
         clearSelection()
         updateCaretPosition()
+        saveState()
     }
 
     private fun deleteSelection() {
         if (caret == selection) return
         textSetter(text.removeRangeSafe(caret, selection))
         caret = if (selection > caret) caret else selection
+        saveState()
     }
 
     private fun caretFromMouse(mouseX: Double) {
@@ -313,6 +334,36 @@ class TextInputHandler(
         selection = 0
         caret = text.length
         updateCaretPosition()
+    }
+
+    private fun saveState() {
+        if (text == lastSavedText) return
+
+        if (historyIndex < history.size - 1) history.subList(historyIndex + 1, history.size).clear()
+
+        history.add(text)
+        historyIndex = history.size - 1
+        lastSavedText = text
+    }
+
+    private fun undo() {
+        if (historyIndex <= 0) return
+
+        historyIndex--
+        textSetter(history[historyIndex])
+        caret = text.length
+        selection = caret
+        lastSavedText = text
+    }
+
+    private fun redo() {
+        if (historyIndex >= history.size - 1) return
+
+        historyIndex++
+        textSetter(history[historyIndex])
+        caret = text.length
+        selection = caret
+        lastSavedText = text
     }
 
     private fun String.substringSafe(from: Int, to: Int): String {
