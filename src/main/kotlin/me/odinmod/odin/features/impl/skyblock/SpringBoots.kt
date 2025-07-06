@@ -7,8 +7,8 @@ import me.odinmod.odin.features.Module
 import me.odinmod.odin.utils.Colors
 import me.odinmod.odin.utils.equalsOneOf
 import me.odinmod.odin.utils.getItemId
-import me.odinmod.odin.utils.render.drawBox
 import me.odinmod.odin.utils.render.drawStringWidth
+import me.odinmod.odin.utils.render.drawWireFrameBox
 import me.odinmod.odin.utils.skyblock.LocationUtils
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.entity.EquipmentSlot
@@ -55,7 +55,7 @@ object SpringBoots : Module(
     @EventHandler
     fun onRenderWorld(event: RenderEvent.Last) {
         if (!LocationUtils.isInSkyblock || blockAmount == 0.0) return
-        mc.player?.pos?.add(0.0, blockAmount, 0.0)?.let { drawBox(Box.from(it), event.context, Colors.MINECRAFT_RED) }
+        mc.player?.pos?.add(0.0, blockAmount, 0.0)?.let { event.context.drawWireFrameBox(Box.from(it), Colors.MINECRAFT_RED) }
     }
 
     @EventHandler

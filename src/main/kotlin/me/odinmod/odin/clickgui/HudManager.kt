@@ -36,7 +36,7 @@ object HudManager : Screen(Text.literal("HUD Manager")) {
     override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {
         val actualAmount = verticalAmount.sign.toFloat() * 0.2f
         for (hud in hudSettingsCache) {
-            if (hud.value.isHovered()) {
+            if (hud.isEnabled && hud.value.isHovered()) {
                 hud.value.scale = (hud.value.scale + actualAmount).coerceIn(2f, 10f)
                 return true
             }
@@ -46,7 +46,7 @@ object HudManager : Screen(Text.literal("HUD Manager")) {
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         for (hud in hudSettingsCache) {
-            if (hud.value.isHovered()) {
+            if (hud.isEnabled && hud.value.isHovered()) {
                 dragging = hud.value
 
                 startX = (mc.mouse.x - hud.value.x).toFloat()

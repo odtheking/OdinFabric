@@ -6,6 +6,7 @@ import me.odinmod.odin.clickgui.HudManager
 import me.odinmod.odin.clickgui.settings.impl.HUDSetting
 import me.odinmod.odin.clickgui.settings.impl.KeybindSetting
 import me.odinmod.odin.events.InputEvent
+import me.odinmod.odin.features.impl.nether.*
 import me.odinmod.odin.features.impl.render.*
 import me.odinmod.odin.features.impl.skyblock.*
 import me.odinmod.odin.utils.ui.rendering.NVGRenderer
@@ -33,10 +34,10 @@ object ModuleManager {
         ClickGUIModule, Camera, Etherwarp, PlayerSize, PerformanceHUD, RenderOptimizer, PlayerDisplay, Waypoints,
 
         //skyblock
-        ChatCommands, NoCursorReset, Ragnarock, SpringBoots, WardrobeKeybinds, PetKeybinds, AutoSprint, CommandKeybinds, SlotBinds
+        ChatCommands, NoCursorReset, Ragnarock, SpringBoots, WardrobeKeybinds, PetKeybinds, AutoSprint, CommandKeybinds, SlotBinds,
 
-        // kuudra
-
+        // nether
+        SupplyHelper, BuildHelper, RemovePerks, NoPre, PearlWaypoints, FreshTools, KuudraStats
     )
 
     init {

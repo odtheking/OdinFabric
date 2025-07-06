@@ -10,18 +10,13 @@ import me.odinmod.odin.events.RenderEvent
 import me.odinmod.odin.events.WorldLoadEvent
 import me.odinmod.odin.features.Module
 import me.odinmod.odin.utils.Color
-import me.odinmod.odin.utils.Color.Companion.withAlpha
 import me.odinmod.odin.utils.Colors
 import me.odinmod.odin.utils.modMessage
-import me.odinmod.odin.utils.render.drawBox
-import me.odinmod.odin.utils.render.drawFilledBox
-import me.odinmod.odin.utils.render.renderText
+import me.odinmod.odin.utils.render.drawCustomBeacon
 import me.odinmod.odin.utils.sendCommand
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
-import net.minecraft.text.Text
 import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.Box
 import org.lwjgl.glfw.GLFW
 import kotlin.math.abs
 
@@ -66,9 +61,7 @@ object Waypoints : Module(
     @EventHandler
     fun onRenderWorld(event: RenderEvent.Last) {
         temporaryWaypoints.removeAll {
-            drawBox(Box(it.blockPos), event.context, it.color)
-            drawFilledBox(Box(it.blockPos), event.context, it.color.withAlpha(0.75f))
-            renderText(event.context, Text.literal(it.name).asOrderedText(), it.blockPos.toCenterPos().add(0.0, 1.5, 0.0), 1f, 0f, true)
+            event.context.drawCustomBeacon(it.name, it.blockPos, it.color)
             System.currentTimeMillis() > it.timeAdded + it.duration
         }
     }

@@ -3,6 +3,7 @@ package me.odinmod.odin.events
 import me.odinmod.odin.events.core.CancellableEvent
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
+import net.minecraft.screen.slot.Slot
 
 abstract class GuiEvent(val screen: Screen): CancellableEvent() {
 
@@ -15,6 +16,8 @@ abstract class GuiEvent(val screen: Screen): CancellableEvent() {
     class KeyPress(screen: Screen, val keyCode: Int, val scanCode: Int, val modifiers: Int) : GuiEvent(screen)
 
     class Render(screen: Screen, val drawContext: DrawContext, val mouseX: Int, val mouseY: Int) : GuiEvent(screen)
+
+    class DrawSlot(screen: Screen, val drawContext: DrawContext, val slot: Slot) : GuiEvent(screen)
 
     class NVGRender(screen: Screen) : GuiEvent(screen)
 }

@@ -6,6 +6,8 @@ import me.odinmod.odin.features.Module
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.entity.EntityType
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket
+import net.minecraft.network.packet.s2c.play.ParticleS2CPacket
+import net.minecraft.particle.ParticleTypes
 
 object RenderOptimizer : Module(
     name = "Render Optimizer",
@@ -13,14 +15,19 @@ object RenderOptimizer : Module(
 ) {
     private val disableFallingBlocks by BooleanSetting("Disable Falling Blocks", true, desc = "Disables rendering of falling blocks to improve performance.")
     private val disableLighting by BooleanSetting("Disable Lighting", true, desc = "Disables lighting updates to improve performance.")
+    private val disableExplosion by BooleanSetting("Disable Explosion Particles", true, desc = "Disables explosion particles to improve performance.")
 
     @EventHandler
     fun onMobMetadata(event: PacketEvent.Receive) = with (event.packet) {
         when (this) {
             is EntitySpawnS2CPacket -> {
-                if (disableFallingBlocks && this.entityType == EntityType.FALLING_BLOCK) event.cancel()
+                if (disableFallingBlocks && entityType == EntityType.FALLING_BLOCK) event.cancel()
 
-                if (disableLighting && this.entityType == EntityType.LIGHTNING_BOLT) event.cancel()
+                if (disableLighting && entityType == EntityType.LIGHTNING_BOLT) event.cancel()
+            }
+
+            is ParticleS2CPacket -> {
+                if (disableExplosion && parameters == ParticleTypes.EXPLOSION) event.cancel()
             }
         }
     }

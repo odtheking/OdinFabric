@@ -10,13 +10,13 @@ fun playSoundAtPlayer(event: SoundEvent, volume: Float = 1f, pitch: Float = 1f) 
     mc.player?.playSound(event, volume, pitch)
 
 fun setTitle(title: String) {
-    mc.inGameHud.setTitleTicks(5, 20, 5)
+    mc.inGameHud.setTitleTicks(0, 20, 5)
     mc.inGameHud.setTitle(Text.literal(title))
 }
 
-fun alert(title: String) {
+fun alert(title: String, playSound: Boolean = true) {
     setTitle(title)
-    playSoundAtPlayer(SoundEvent.of(SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH.id))
+    if (playSound) playSoundAtPlayer(SoundEvent.of(SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH.id))
 }
 
 fun getPositionString(): String {

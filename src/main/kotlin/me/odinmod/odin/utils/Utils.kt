@@ -71,3 +71,17 @@ fun setClipboardContent(string: String) {
 }
 
 fun String.capitalizeFirst(): String = if (isNotEmpty() && this[0] in 'a'..'z') this[0].uppercaseChar() + substring(1) else this
+
+fun formatTime(time: Long, decimalPlaces: Int = 2): String {
+    if (time == 0L) return "0s"
+    var remaining = time
+    val hours = (remaining / 3600000).toInt().let {
+        remaining -= it * 3600000
+        if (it > 0) "${it}h " else ""
+    }
+    val minutes = (remaining / 60000).toInt().let {
+        remaining -= it * 60000
+        if (it > 0) "${it}m " else ""
+    }
+    return "$hours$minutes${(remaining / 1000f).toFixed(decimalPlaces)}s"
+}

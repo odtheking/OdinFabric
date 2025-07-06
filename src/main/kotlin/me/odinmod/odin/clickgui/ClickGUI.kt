@@ -41,6 +41,7 @@ object ClickGUI : Screen(Text.literal("Click GUI")) {
     val gray26 = Color(26, 26, 26)
 
     init {
+        if (Category.entries.any { ClickGUIModule.panelSetting[it] == null }) ClickGUIModule.resetPositions()
         for (category in Category.entries) panels.add(Panel(category))
         OdinMod.EVENT_BUS.subscribe(this)
     }

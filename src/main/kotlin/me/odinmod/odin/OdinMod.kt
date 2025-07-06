@@ -13,6 +13,7 @@ import me.odinmod.odin.features.impl.render.RenderTest
 import me.odinmod.odin.utils.ServerUtils
 import me.odinmod.odin.utils.handlers.MobCaches
 import me.odinmod.odin.utils.handlers.TickTasks
+import me.odinmod.odin.utils.skyblock.KuudraUtils
 import me.odinmod.odin.utils.skyblock.LocationUtils
 import me.odinmod.odin.utils.skyblock.SkyblockPlayer
 import meteordevelopment.orbit.EventBus
@@ -54,7 +55,7 @@ object OdinMod : ModInitializer {
         }
 
         listOf(
-            this, LocationUtils, TickTasks,
+            this, LocationUtils, TickTasks, KuudraUtils,
             SkyblockPlayer, MobCaches, RenderTest,
             ServerUtils, EventDispatcher, ModuleManager
         ).forEach { EVENT_BUS.subscribe(it) }
