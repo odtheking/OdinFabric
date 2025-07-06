@@ -8,10 +8,8 @@ import me.odinmod.odin.clickgui.ClickGUI
 import me.odinmod.odin.clickgui.HudManager
 import me.odinmod.odin.events.PacketEvent
 import me.odinmod.odin.features.impl.render.ClickGUIModule
+import me.odinmod.odin.utils.*
 import me.odinmod.odin.utils.handlers.LimitedTickTask
-import me.odinmod.odin.utils.modMessage
-import me.odinmod.odin.utils.sendCommand
-import me.odinmod.odin.utils.setClipboardContent
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 import net.minecraft.text.Text
 
@@ -39,7 +37,11 @@ val mainCommand = Commodore("odin") {
         PacketEvent.Receive(GameMessageS2CPacket(Text.literal(greedyString.string), false)).postAndCatch()
         modMessage("§8Simulated message: ${greedyString.string}")
     }
-    
+
+    literal("sendcoords").runs { message: GreedyString? ->
+        sendChatMessage(getPositionString() + if (message == null) "" else " ${message.string}")
+    }
+
     runs { floor: Floors -> sendCommand("joininstance ${floor.instance()}") }
     runs { tier: KuudraTier -> sendCommand("joininstance ${tier.instance()}") }
 }

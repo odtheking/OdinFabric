@@ -22,8 +22,8 @@ object SpringBoots : Module(
 ) {
     private val hud by HUD("Spring Boots", "Shows the how high you will jump.") {
         var width = 1f
-        width += drawStringWidth("Height: ", width, 1f, Colors.MINECRAFT_LIGHT_PURPLE.rgba, true)
-        width += drawStringWidth(getColor(blockAmount), width, 1f, Colors.WHITE.rgba, true)
+        width += drawStringWidth("Height: ", width, 1f, Colors.MINECRAFT_LIGHT_PURPLE, true)
+        width += drawStringWidth(getColor(blockAmount), width, 1f, Colors.WHITE, true)
         width to mc.textRenderer.fontHeight
     }
 

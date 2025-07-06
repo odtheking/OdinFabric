@@ -94,7 +94,7 @@ object Etherwarp : Module(
     private fun isEtherwarpItem(): NbtCompound? =
         mc.player?.mainHandStack?.getCustomData()?.takeIf { it.getInt("ethermerge", 0) == 1 || it.getItemId() == "ETHERWARP_CONDUIT" }
 
-    private data class EtherPos(val succeeded: Boolean, val pos: BlockPos?, val state: BlockState?) {
+    data class EtherPos(val succeeded: Boolean, val pos: BlockPos?, val state: BlockState?) {
         val vec: Vec3d? by lazy { pos?.let { Vec3d(it) } }
         companion object {
             val NONE = EtherPos(false, null, null)
@@ -107,7 +107,7 @@ object Etherwarp : Module(
         return traverseVoxels(startPos, endPos).takeUnless { it == EtherPos.NONE && returnEnd } ?: EtherPos(true, endPos.toBlockPos(), null)
     }
 
-    private fun getEtherPos(distance: Double): EtherPos =
+    fun getEtherPos(distance: Double): EtherPos =
         mc.player?.let { getEtherPos(it.yaw, it.pitch, distance) } ?: EtherPos.NONE
 
     /**

@@ -16,14 +16,14 @@ object PerformanceHUD : Module(
 
     private val hud by HUD("Performance HUD", "Shows performance information on the screen.") {
         var width = 1f
-        width += drawStringWidth("TPS: ", width, 1f, nameColor.rgba, true)
-        width += drawStringWidth("${ServerUtils.averageTps.toInt()} ", width, 1f, valueColor.rgba, true)
+        width += drawStringWidth("TPS: ", width, 1f, nameColor, true)
+        width += drawStringWidth("${ServerUtils.averageTps.toInt()} ", width, 1f, valueColor, true)
 
-        width += drawStringWidth("FPS: ", width, 1f, nameColor.rgba, true)
-        width += drawStringWidth("${mc.currentFps} ", width, 1f, valueColor.rgba, true)
+        width += drawStringWidth("FPS: ", width, 1f, nameColor, true)
+        width += drawStringWidth("${mc.currentFps} ", width, 1f, valueColor, true)
 
-        width += drawStringWidth("Ping: ", width, 1f, nameColor.rgba, true)
-        width += drawStringWidth("${ServerUtils.currentPing}ms", width, 1f, valueColor.rgba, true)
+        width += drawStringWidth("Ping: ", width, 1f, nameColor, true)
+        width += drawStringWidth("${ServerUtils.currentPing}ms", width, 1f, valueColor, true)
 
         width to mc.textRenderer.fontHeight
     }

@@ -41,7 +41,7 @@ object PlayerDisplay : Module(
             SkyblockPlayer.currentHealth != 0 && SkyblockPlayer.maxHealth != 0 -> SkyblockPlayer.currentHealth to SkyblockPlayer.maxHealth
             else -> return@HUD 0f to 0f
         }
-        return@HUD drawStringWidth(generateText(text.first, text.second, "❤"), 1f, 1f, healthColor.rgba) + 2f to mc.textRenderer.fontHeight
+        return@HUD drawStringWidth(generateText(text.first, text.second, "❤"), 1f, 1f, healthColor) + 2f to mc.textRenderer.fontHeight
     }
     private val healthColor by ColorSetting("Health Color", Colors.MINECRAFT_RED, true, "The color of the health text.")
 
@@ -56,7 +56,7 @@ object PlayerDisplay : Module(
             }
             else -> return@HUD 0f to 0f
         }
-        return@HUD drawStringWidth(text, 1f, 1f, manaColor.rgba) + 2f to mc.textRenderer.fontHeight
+        return@HUD drawStringWidth(text, 1f, 1f, manaColor) + 2f to mc.textRenderer.fontHeight
     }
     private val manaColor by ColorSetting("Mana Color", Colors.MINECRAFT_AQUA, true, "The color of the mana text.")
 
@@ -67,7 +67,7 @@ object PlayerDisplay : Module(
             separateOverflow -> SkyblockPlayer.overflowMana
             else -> return@HUD 0f to 0f
         }
-        return@HUD drawStringWidth(generateText(text, "ʬ", hideZeroSF), 1f, 1f, overflowManaColor.rgba) + 2f to mc.textRenderer.fontHeight
+        return@HUD drawStringWidth(generateText(text, "ʬ", hideZeroSF), 1f, 1f, overflowManaColor) + 2f to mc.textRenderer.fontHeight
     }
     private val overflowManaColor by ColorSetting("Overflow Mana Color", Colors.MINECRAFT_DARK_AQUA, true, desc = "The color of the overflow mana text.")
 
@@ -78,7 +78,7 @@ object PlayerDisplay : Module(
             SkyblockPlayer.currentDefense != 0 -> SkyblockPlayer.currentDefense
             else -> return@HUD 0f to 0f
         }
-        return@HUD drawStringWidth(generateText(text, "❈", true), 1f, 1f, defenseColor.rgba) + 2f to mc.textRenderer.fontHeight
+        return@HUD drawStringWidth(generateText(text, "❈", true), 1f, 1f, defenseColor) + 2f to mc.textRenderer.fontHeight
     }
     private val defenseColor by ColorSetting("Defense Color", Colors.MINECRAFT_GREEN, true, desc = "The color of the defense text.")
 
@@ -89,7 +89,7 @@ object PlayerDisplay : Module(
             SkyblockPlayer.effectiveHP != 0 -> SkyblockPlayer.effectiveHP
             else -> return@HUD 0f to 0f
         }
-        return@HUD drawStringWidth(generateText(text, "", true), 1f, 1f, ehpColor.rgba) + 2f to mc.textRenderer.fontHeight
+        return@HUD drawStringWidth(generateText(text, "", true), 1f, 1f, ehpColor) + 2f to mc.textRenderer.fontHeight
     }
     private val ehpColor by ColorSetting("EHP", Colors.MINECRAFT_DARK_GREEN, true, "The color of the effective health text.")
 

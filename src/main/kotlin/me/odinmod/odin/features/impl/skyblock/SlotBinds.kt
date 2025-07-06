@@ -84,7 +84,7 @@ object SlotBinds : Module(
 
         event.drawContext.matrices.push()
         event.drawContext.matrices.translate(0f, 0f, 999f)
-        drawLine(event.drawContext, startX, startY, endX, endY, lineColor, 1)
+        event.drawContext.drawLine(startX.toFloat(), startY.toFloat(), endX.toFloat(), endY.toFloat(), lineColor, 1f)
         event.drawContext.matrices.pop()
     }
 

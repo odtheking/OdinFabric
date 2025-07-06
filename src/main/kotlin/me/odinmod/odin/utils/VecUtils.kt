@@ -12,6 +12,10 @@ operator fun Vec3d.component1(): Double = x
 operator fun Vec3d.component2(): Double = y
 operator fun Vec3d.component3(): Double = z
 
+operator fun BlockPos.component1(): Int = x
+operator fun BlockPos.component2(): Int = y
+operator fun BlockPos.component3(): Int = z
+
 operator fun Vec3d.unaryMinus(): Vec3d = Vec3d(-x, -y, -z)
 
 fun Vec3d.floorVec(): Vec3d =
