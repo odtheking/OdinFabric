@@ -34,3 +34,6 @@ fun Vec3d.toBlockPos(): BlockPos =
     BlockPos(x.toInt(), y.toInt(), z.toInt())
 
 fun Matrix4f.translate(vec: Vec3d): Matrix4f = this.translate(vec.x.toFloat(), vec.y.toFloat(), vec.z.toFloat())
+
+fun Vec3d.addVec(x: Double = 0.0, y: Double = 0.0, z: Double = 0.0): Vec3d =
+    Vec3d(this.x + x, this.y + y, this.z + z)

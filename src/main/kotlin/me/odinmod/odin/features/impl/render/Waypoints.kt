@@ -16,6 +16,7 @@ import me.odinmod.odin.utils.render.drawCustomBeacon
 import me.odinmod.odin.utils.sendCommand
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
+import net.minecraft.text.Text
 import net.minecraft.util.math.BlockPos
 import org.lwjgl.glfw.GLFW
 import kotlin.math.abs
@@ -31,7 +32,7 @@ object Waypoints : Module(
     private val pingLocationToggle by BooleanSetting("Ping Location", false, desc = "Adds a waypoint at the location you are looking at.").withDependency { pingLocationDropDown }
     private val pingLocation by KeybindSetting("Ping Location", GLFW.GLFW_KEY_UNKNOWN, desc = "Sends the location you are looking at as coords in chat for waypoints.").onPress {
         if (!pingLocationToggle) return@onPress
-        Etherwarp.getEtherPos(pingDistance).pos?.let { pos ->
+        Etherwarp.getEtherPos(mc.player?.pos, pingDistance).pos?.let { pos ->
             addTempWaypoint("§fWaypoint", pos.x, pos.y, pos.z, pingWaypointTime)
             if (sendPingedLocation) sendCommand("odinwaypoint share ${pos.x} ${pos.y} ${pos.z}")
         }
@@ -61,7 +62,7 @@ object Waypoints : Module(
     @EventHandler
     fun onRenderWorld(event: RenderEvent.Last) {
         temporaryWaypoints.removeAll {
-            event.context.drawCustomBeacon(it.name, it.blockPos, it.color)
+            event.context.drawCustomBeacon(Text.of(it.name).asOrderedText(), it.blockPos, it.color)
             System.currentTimeMillis() > it.timeAdded + it.duration
         }
     }

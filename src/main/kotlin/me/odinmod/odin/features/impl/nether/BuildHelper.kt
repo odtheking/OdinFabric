@@ -1,5 +1,6 @@
 package me.odinmod.odin.features.impl.nether
 
+import me.odinmod.odin.clickgui.settings.Setting.Companion.withDependency
 import me.odinmod.odin.clickgui.settings.impl.BooleanSetting
 import me.odinmod.odin.clickgui.settings.impl.NumberSetting
 import me.odinmod.odin.events.RenderEvent
@@ -20,6 +21,7 @@ object BuildHelper : Module(
 ) {
     private val buildHelperDraw by BooleanSetting("Render on Ballista", false, desc = "Draws the build information on the ballista.")
     private val unfinishedWaypoints by BooleanSetting("Unfinished Waypoints", true, desc = "Draws waypoints over the unfinished piles.")
+    private val hideDefaultTag by BooleanSetting("Hide Default Tag", true, desc = "Hides the default tag for unfinished piles.").withDependency { unfinishedWaypoints }
     private val hud by HUD("Build helper", "Shows information about the build progress.") { example ->
         if (!example && (!KuudraUtils.inKuudra || KuudraUtils.phase != 2)) return@HUD 0f to 0f
         drawString("§bFreshers: ${colorBuilders(KuudraUtils.freshers.size)}", 1f, 1f)
@@ -35,14 +37,15 @@ object BuildHelper : Module(
         if (!KuudraUtils.inKuudra || KuudraUtils.phase != 2) return
         if (stunNotificationNumber != 0 && KuudraUtils.buildDonePercentage >= stunNotificationNumber) alert("§l§3Go to stun", false)
         if (buildHelperDraw)
-            event.context.drawText(Text.literal("§bBuild §c${colorBuild(KuudraUtils.buildDonePercentage)}%").asOrderedText(), Vec3d(-101.5, 82.0, -105.5), 3f, false)
+            event.context.drawText(Text.of("§bBuild §c${colorBuild(KuudraUtils.buildDonePercentage)}%").asOrderedText(), Vec3d(-101.5, 82.0, -105.5), 3f, false)
 
         if (buildHelperDraw)
-            event.context.drawText(Text.literal("§bBuilders ${colorBuilders(KuudraUtils.playersBuildingAmount)}").asOrderedText(), Vec3d(-101.5, 81.0, -105.5), 3f, false)
+            event.context.drawText(Text.of("§bBuilders ${colorBuilders(KuudraUtils.playersBuildingAmount)}").asOrderedText(), Vec3d(-101.5, 81.0, -105.5), 3f, false)
 
         if (unfinishedWaypoints)
             KuudraUtils.buildingPiles.forEach {
-                event.context.drawCustomBeacon(it.name.string, it.blockPos, Colors.MINECRAFT_DARK_RED, false)
+                event.context.drawCustomBeacon(it.name.asOrderedText(), it.blockPos, Colors.MINECRAFT_DARK_RED, false)
+                if (hideDefaultTag) it.isCustomNameVisible = false
             }
     }
 

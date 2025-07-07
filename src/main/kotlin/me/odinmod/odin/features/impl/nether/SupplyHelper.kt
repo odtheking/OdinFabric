@@ -34,14 +34,14 @@ object SupplyHelper : Module(
 
     @EventHandler
     fun onChat(event: PacketEvent.Receive) = with (event.packet) {
-        if (this !is GameMessageS2CPacket || overlay || !KuudraUtils.inKuudra) return
+        if (this !is GameMessageS2CPacket || overlay || !KuudraUtils.inKuudra || !sendSupplyTime) return
         val message = content.string.noControlCodes
 
         when {
             runStartRegex.matches(message) -> startRun = System.currentTimeMillis()
 
             supplyPickUpRegex.matches(message) -> {
-                if (!sendSupplyTime || KuudraUtils.phase != 1) return
+                if (KuudraUtils.phase != 1) return
                 val (name, current, total) = supplyPickUpRegex.find(message)?.destructured ?: return
                 modMessage("§6$name §a§lrecovered a supply in ${formatTime(System.currentTimeMillis() - startRun)}! §r§8($current/$total)", "")
                 event.cancel()
@@ -56,19 +56,19 @@ object SupplyHelper : Module(
         if (supplyDropWaypoints) {
             Supply.entries.forEach { type ->
                 if (type.equalsOneOf(Supply.None, Supply.Square) || !type.isActive) return@forEach
-                event.context.drawCustomBeacon("§ePlace Here!", type.dropOffSpot, if (NoPre.missing == type) Colors.MINECRAFT_GREEN else Colors.MINECRAFT_RED, increase = false)
+                event.context.drawCustomBeacon(Text.of("§ePlace Here!").asOrderedText(), type.dropOffSpot, if (NoPre.missing == type) Colors.MINECRAFT_GREEN else Colors.MINECRAFT_RED, increase = false)
             }
         }
 
         if (suppliesWaypoints) {
             KuudraUtils.giantZombies.forEach {
-                event.context.drawCustomBeacon("Pick Up!", Vec3d(it.x + (3.7 * cos((it.yaw + 130) * (Math.PI / 180))), 73.0, it.z + (3.7 * sin((it.yaw + 130) * (Math.PI / 180)))).toBlockPos(), supplyWaypointColor, increase = false)
+                event.context.drawCustomBeacon(Text.of("Pick Up!").asOrderedText(), Vec3d(it.x + (3.7 * cos((it.yaw + 130) * (Math.PI / 180))), 73.0, it.z + (3.7 * sin((it.yaw + 130) * (Math.PI / 180)))).toBlockPos(), supplyWaypointColor, increase = false)
             }
         }
 
         if (renderArea) {
             Supply.entries.forEach { type ->
-                event.context.drawText(Text.literal("§e${type.name}").asOrderedText(), type.pickUpSpot.toCenterPos(), 2f, true)
+                event.context.drawText(Text.of("§e${type.name}").asOrderedText(), type.pickUpSpot.toCenterPos(), 2f, true)
             }
         }
     }

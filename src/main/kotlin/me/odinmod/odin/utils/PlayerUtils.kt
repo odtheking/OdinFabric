@@ -11,7 +11,7 @@ fun playSoundAtPlayer(event: SoundEvent, volume: Float = 1f, pitch: Float = 1f) 
 
 fun setTitle(title: String) {
     mc.inGameHud.setTitleTicks(0, 20, 5)
-    mc.inGameHud.setTitle(Text.literal(title))
+    mc.inGameHud.setTitle(Text.of(title))
 }
 
 fun alert(title: String, playSound: Boolean = true) {

@@ -40,6 +40,7 @@ object Etherwarp : Module(
     private val renderFail by BooleanSetting("Show when failed", true, desc = "Shows the box even when the guess failed.").withDependency { render }
     private val failColor by ColorSetting("Fail Color", Colors.MINECRAFT_RED.withAlpha(.5f), allowAlpha = true, desc = "Color of the box if guess failed.").withDependency { renderFail }
     private val renderStyle by SelectorSetting("Render Style", "Outline", listOf("Outline", "Filled", "Filled Outline"), desc = "Style of the box.").withDependency { render }
+    private val useServerPosition by BooleanSetting("Use Server Position", true, desc = "Uses the server position for etherwarp instead of the client position.").withDependency { render }
 
     private val dropdown by DropdownSetting("Sounds", false)
     private val sounds by BooleanSetting("Custom Sounds", false, desc = "Plays the selected custom sound when you etherwarp.").withDependency { dropdown }
@@ -52,7 +53,7 @@ object Etherwarp : Module(
     fun onRenderLast(event: RenderEvent.Last) {
         if (mc.player?.isSneaking == false || mc.currentScreen != null) return
 
-        etherPos = getEtherPos(56.0 + (isEtherwarpItem()?.getInt("tuned_transmission", 0) ?: return))
+        etherPos = getEtherPos(if (useServerPosition) mc.player?.lastPos else mc.player?.pos, 56.0 + (isEtherwarpItem()?.getInt("tuned_transmission", 0) ?: return))
         if (etherPos?.succeeded != true && !renderFail) return
         val color = if (etherPos?.succeeded == true) color else failColor
         etherPos?.pos?.let {
@@ -92,7 +93,7 @@ object Etherwarp : Module(
     }
 
     private fun isEtherwarpItem(): NbtCompound? =
-        mc.player?.mainHandStack?.getCustomData()?.takeIf { it.getInt("ethermerge", 0) == 1 || it.getItemId() == "ETHERWARP_CONDUIT" }
+        mc.player?.mainHandStack?.customData?.takeIf { it.getInt("ethermerge", 0) == 1 || it.itemId == "ETHERWARP_CONDUIT" }
 
     data class EtherPos(val succeeded: Boolean, val pos: BlockPos?, val state: BlockState?) {
         val vec: Vec3d? by lazy { pos?.let { Vec3d(it) } }
@@ -101,14 +102,14 @@ object Etherwarp : Module(
         }
     }
 
-    private fun getEtherPos(yaw: Float, pitch: Float, distance: Double, returnEnd: Boolean = false): EtherPos {
-        val startPos = mc.player?.pos?.add(0.0, 1.54, 0.0) ?: return EtherPos.NONE
+    private fun getEtherPos(position: Vec3d?, yaw: Float, pitch: Float, distance: Double, returnEnd: Boolean = false): EtherPos {
+        val startPos = position?.addVec(y = 1.54) ?: return EtherPos.NONE
         val endPos = getLook(yaw, pitch).normalize().multiply(distance).add(startPos)
         return traverseVoxels(startPos, endPos).takeUnless { it == EtherPos.NONE && returnEnd } ?: EtherPos(true, endPos.toBlockPos(), null)
     }
 
-    fun getEtherPos(distance: Double): EtherPos =
-        mc.player?.let { getEtherPos(it.yaw, it.pitch, distance) } ?: EtherPos.NONE
+    fun getEtherPos(position: Vec3d?, distance: Double): EtherPos =
+        mc.player?.let { getEtherPos(position, it.yaw, it.pitch, distance) } ?: EtherPos.NONE
 
     /**
      * Traverses voxels from start to end and returns the first non-air block it hits.

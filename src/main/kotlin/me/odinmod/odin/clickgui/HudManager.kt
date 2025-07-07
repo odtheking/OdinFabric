@@ -9,7 +9,7 @@ import net.minecraft.client.gui.screen.Screen
 import net.minecraft.text.Text
 import kotlin.math.sign
 
-object HudManager : Screen(Text.literal("HUD Manager")) {
+object HudManager : Screen(Text.of("HUD Manager")) {
 
     private var dragging: HudElement? = null
 

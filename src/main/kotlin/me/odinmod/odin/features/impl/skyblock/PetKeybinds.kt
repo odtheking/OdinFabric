@@ -7,8 +7,8 @@ import me.odinmod.odin.clickgui.settings.impl.KeybindSetting
 import me.odinmod.odin.clickgui.settings.impl.ListSetting
 import me.odinmod.odin.events.GuiEvent
 import me.odinmod.odin.features.Module
-import me.odinmod.odin.utils.getItemUUID
-import me.odinmod.odin.utils.getLoreString
+import me.odinmod.odin.utils.itemUUID
+import me.odinmod.odin.utils.loreString
 import me.odinmod.odin.utils.modMessage
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.client.gui.screen.ingame.HandledScreen
@@ -56,15 +56,15 @@ object PetKeybinds: Module (
             nextPageKeybind.code -> if (current < total) 53 else return modMessage("§cYou are already on the last page.").let { false }
             previousPageKeybind.code -> if (current > 1) 45 else return modMessage("§cYou are already on the first page.").let { false }
             unequipKeybind.code ->
-                screen.screenHandler.slots.subList(10, 43).indexOfFirst { it.stack?.getLoreString()?.contains("§7§cClick to despawn!") == true }.takeIf { it != -1 }?.plus(10) ?: return modMessage("§cCouldn't find equipped pet").let { false }
+                screen.screenHandler.slots.subList(10, 43).indexOfFirst { it.stack?.loreString?.contains("§7§cClick to despawn!") == true }.takeIf { it != -1 }?.plus(10) ?: return modMessage("§cCouldn't find equipped pet").let { false }
 
             else -> {
                 val petIndex = arrayOf(pet1, pet2, pet3, pet4, pet5, pet6, pet7, pet8, pet9).indexOfFirst { it.code == keyCode }.takeIf { it != -1 } ?: return false
-                petList.getOrNull(petIndex)?.let { uuid -> screen.screenHandler.slots.subList(10, 43).indexOfFirst { it?.stack?.getItemUUID() == uuid } }?.takeIf { it != -1 }?.plus(10) ?: return modMessage("§cCouldn't find matching pet or there is no pet in that position.").let { false }
+                petList.getOrNull(petIndex)?.let { uuid -> screen.screenHandler.slots.subList(10, 43).indexOfFirst { it?.stack?.itemUUID == uuid } }?.takeIf { it != -1 }?.plus(10) ?: return modMessage("§cCouldn't find matching pet or there is no pet in that position.").let { false }
             }
         }
 
-        if (nounequip && screen.screenHandler.slots.subList(10, 43).indexOfFirst { it.stack?.getLoreString()?.contains("§7§cClick to despawn!") == true } == index && unequipKeybind.code != keyCode) return modMessage("§cThat pet is already equipped!").let { false }
+        if (nounequip && screen.screenHandler.slots.subList(10, 43).indexOfFirst { it.stack?.loreString?.contains("§7§cClick to despawn!") == true } == index && unequipKeybind.code != keyCode) return modMessage("§cThat pet is already equipped!").let { false }
         mc.interactionManager?.clickSlot(screen.screenHandler.syncId, index, GLFW.GLFW_MOUSE_BUTTON_1, SlotActionType.PICKUP, mc.player)
         return true
     }

@@ -15,6 +15,7 @@
     "HandledScreenAccessor",
     "HandledScreenMixin",
     "InGameHudMixin",
+    "InGameOverlayRendererMixin",
     "KeyBindingAccessor",
     "KeyBindingMixin",
     "MessageHandlerMixin",

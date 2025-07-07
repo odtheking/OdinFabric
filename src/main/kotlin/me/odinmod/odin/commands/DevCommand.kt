@@ -9,7 +9,7 @@ import me.odinmod.odin.events.PacketEvent
 import me.odinmod.odin.features.ModuleManager.generateFeatureList
 import me.odinmod.odin.features.impl.foraging.TreeHud
 import me.odinmod.odin.features.impl.render.PlayerSize
-import me.odinmod.odin.utils.getCustomData
+import me.odinmod.odin.utils.customData
 import me.odinmod.odin.utils.modMessage
 import me.odinmod.odin.utils.sendCommand
 import me.odinmod.odin.utils.setClipboardContent
@@ -27,7 +27,7 @@ val devCommand = Commodore("oddev") {
     }
 
     literal("getitem").runs {
-        modMessage("Item in hand: ${mc.player?.mainHandStack?.getCustomData()}")
+        modMessage("Item in hand: ${mc.player?.mainHandStack?.customData}")
     }
 
     literal("giveaotv").runs { tuners: Int? ->
@@ -40,7 +40,7 @@ val devCommand = Commodore("oddev") {
     }
 
     literal("simulate").runs { greedyString: GreedyString ->
-        PacketEvent.Receive(GameMessageS2CPacket(Text.literal(greedyString.string), false)).postAndCatch()
+        PacketEvent.Receive(GameMessageS2CPacket(Text.of(greedyString.string), false)).postAndCatch()
         modMessage("§8Simulated message: ${greedyString.string}")
     }
 

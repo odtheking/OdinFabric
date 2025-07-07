@@ -106,7 +106,7 @@ object PlayerDisplay : Module(
         toReturn = if (hideMana) toReturn.replace(MANA_REGEX, "") else toReturn
         toReturn = if (hideOverflow) toReturn.replace(OVERFLOW_MANA_REGEX, "") else toReturn
         toReturn = if (hideDefense) toReturn.replace(DEFENSE_REGEX, "") else toReturn
-        return Text.literal(toReturn.trim())
+        return Text.of(toReturn.trim())
     }
 
     private fun generateText(current: Int, max: Int, icon: String): String =

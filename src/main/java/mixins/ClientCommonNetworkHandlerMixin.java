@@ -1,7 +1,6 @@
 package mixins;
 
 import me.odinmod.odin.events.PacketEvent;
-import me.odinmod.odin.utils.ServerUtils;
 import net.minecraft.client.network.ClientCommonNetworkHandler;
 import net.minecraft.network.packet.Packet;
 import org.spongepowered.asm.mixin.Mixin;

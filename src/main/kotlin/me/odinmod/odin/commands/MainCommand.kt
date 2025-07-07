@@ -18,6 +18,10 @@ val mainCommand = Commodore("odin") {
         LimitedTickTask(0, 1) { mc.setScreen(ClickGUI) }
     }
 
+    literal("edithud").runs {
+        LimitedTickTask(0, 1) { mc.setScreen(HudManager) }
+    }
+
     literal("reset") {
         literal("clickgui").runs {
             ClickGUIModule.resetPositions()
@@ -33,8 +37,24 @@ val mainCommand = Commodore("odin") {
         setClipboardContent(greedyString.string)
     }
 
+    literal("ep").runs {
+        fillItemFromSack(16, "ENDER_PEARL", "ender_pearl", true)
+    }
+
+    literal("ij").runs {
+        fillItemFromSack(64, "INFLATABLE_JERRY", "inflatable_jerry", true)
+    }
+
+    literal("sl").runs {
+        fillItemFromSack(16, "SPIRIT_LEAP", "spirit_leap", true)
+    }
+
+    literal("sb").runs {
+        fillItemFromSack(64, "SUPERBOOM_TNT", "superboom_tnt", true)
+    }
+
     literal("simulate").runs { greedyString: GreedyString ->
-        PacketEvent.Receive(GameMessageS2CPacket(Text.literal(greedyString.string), false)).postAndCatch()
+        PacketEvent.Receive(GameMessageS2CPacket(Text.of(greedyString.string), false)).postAndCatch()
         modMessage("§8Simulated message: ${greedyString.string}")
     }
 

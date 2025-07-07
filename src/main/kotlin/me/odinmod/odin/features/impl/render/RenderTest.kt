@@ -32,6 +32,6 @@ object RenderTest {
         event.context.drawSphere(center, radius, segments, Colors.MINECRAFT_GREEN)
         event.context.drawBeaconBeam(BlockPos(2, 100, 0), Colors.MINECRAFT_BLUE)
 
-        event.context.drawCustomBeacon("Odin", BlockPos(2, 100, 5), Colors.MINECRAFT_BLUE)
+        event.context.drawCustomBeacon(Text.of("Odon").asOrderedText(), BlockPos(2, 100, 5), Colors.MINECRAFT_BLUE)
     }
 }

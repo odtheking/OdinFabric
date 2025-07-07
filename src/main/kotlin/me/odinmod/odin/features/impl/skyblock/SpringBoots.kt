@@ -5,8 +5,9 @@ import me.odinmod.odin.events.RenderEvent
 import me.odinmod.odin.events.TickEvent
 import me.odinmod.odin.features.Module
 import me.odinmod.odin.utils.Colors
+import me.odinmod.odin.utils.addVec
 import me.odinmod.odin.utils.equalsOneOf
-import me.odinmod.odin.utils.getItemId
+import me.odinmod.odin.utils.isItem
 import me.odinmod.odin.utils.render.drawStringWidth
 import me.odinmod.odin.utils.render.drawWireFrameBox
 import me.odinmod.odin.utils.skyblock.LocationUtils
@@ -37,7 +38,7 @@ object SpringBoots : Module(
         val id = sound.value().id
 
         when {
-            SoundEvents.BLOCK_NOTE_BLOCK_PLING.matchesId(id) && mc.player?.isSneaking == true && mc.player?.getEquippedStack(EquipmentSlot.FEET)?.getItemId() == "SPRING_BOOTS" ->
+            SoundEvents.BLOCK_NOTE_BLOCK_PLING.matchesId(id) && mc.player?.isSneaking == true && EquipmentSlot.FEET isItem "SPRING_BOOTS" ->
                 when (pitch) {
                     0.6984127f -> lowCount = (lowCount + 1).coerceAtMost(2)
                     in setOf(0.82539684f, 0.8888889f, 0.93650794f, 1.0476191f, 1.1746032f, 1.3174603f, 1.7777778f) -> highCount++
@@ -55,12 +56,12 @@ object SpringBoots : Module(
     @EventHandler
     fun onRenderWorld(event: RenderEvent.Last) {
         if (!LocationUtils.isInSkyblock || blockAmount == 0.0) return
-        mc.player?.pos?.add(0.0, blockAmount, 0.0)?.let { event.context.drawWireFrameBox(Box.from(it), Colors.MINECRAFT_RED) }
+        mc.player?.pos?.addVec(y = blockAmount)?.let { event.context.drawWireFrameBox(Box.from(it), Colors.MINECRAFT_RED) }
     }
 
     @EventHandler
     fun onTick(event: TickEvent.End) {
-        if (!LocationUtils.isInSkyblock || !(mc.player?.isSneaking == false || mc.player?.getEquippedStack(EquipmentSlot.FEET)?.getItemId() != "SPRING_BOOTS")) return
+        if (!LocationUtils.isInSkyblock || !(mc.player?.isSneaking == false || EquipmentSlot.FEET isItem "SPRING_BOOTS")) return
         highCount = 0
         lowCount = 0
     }

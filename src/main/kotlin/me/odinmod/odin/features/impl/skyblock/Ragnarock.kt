@@ -4,7 +4,7 @@ import me.odinmod.odin.clickgui.settings.impl.BooleanSetting
 import me.odinmod.odin.events.PacketEvent
 import me.odinmod.odin.features.Module
 import me.odinmod.odin.utils.alert
-import me.odinmod.odin.utils.getItemId
+import me.odinmod.odin.utils.itemId
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket
@@ -26,7 +26,7 @@ object Ragnarock : Module(
                 if (castAlert && content?.string?.matches(cancelRegex) == true) alert("§cRagnarock Cancelled!")
 
             is PlaySoundS2CPacket ->
-                if (cancelAlert && pitch == 1.4920635f && mc.player?.mainHandStack?.getItemId() == "RAGNAROCK_AXE" &&
+                if (cancelAlert && pitch == 1.4920635f && mc.player?.mainHandStack?.itemId == "RAGNAROCK_AXE" &&
                     SoundEvents.WOLF_SOUNDS.entries.any { it.value.deathSound.value().id == sound.value().id }) alert("§aCasted Rag")
         }
     }

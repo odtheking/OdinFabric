@@ -31,7 +31,7 @@ object NoPre : Module(
 
     @EventHandler
     fun onChat(event: PacketEvent.Receive) = with (event.packet) {
-        if (!KuudraUtils.inKuudra || this !is GameMessageS2CPacket || overlay) return
+        if (this !is GameMessageS2CPacket || overlay || !KuudraUtils.inKuudra) return
         val message = content.string.noControlCodes
 
         when {
@@ -76,7 +76,6 @@ object NoPre : Module(
 
             partyRegex.matches(message) -> {
                 val match = partyRegex.find(message)?.groupValues ?: return
-                modMessage(match)
                 missing = Supply.valueOf(match.lastOrNull() ?: return)
                 if (!showCratePriority) return
                 val cratePriority = cratePriority(missing).ifEmpty { return }

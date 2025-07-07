@@ -7,26 +7,26 @@ import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.text.Text
 
-private const val ID = "id"
-private const val UUID = "uuid"
+const val ID = "id"
+const val UUID = "uuid"
 
-fun ItemStack.getCustomData(): NbtCompound =
+inline val ItemStack.customData: NbtCompound get() =
     getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT).copyNbt()
 
-fun ItemStack.getItemId(): String =
-    getCustomData().getString(ID, "")
+inline val ItemStack.itemId: String get() =
+    customData.getString(ID, "")
 
-fun NbtCompound.getItemId(): String =
+inline val NbtCompound.itemId: String get() =
     getString(ID, "")
 
-fun ItemStack.getItemUUID(): String =
-    getCustomData().getString(UUID, "")
+inline val ItemStack.itemUUID: String get() =
+    customData.getString(UUID, "")
 
-fun ItemStack.getLore(): List<Text> =
+inline val ItemStack.lore: List<Text> get() =
     getOrDefault(DataComponentTypes.LORE, LoreComponent.DEFAULT).styledLines()
 
-fun ItemStack.getLoreString(): List<String> =
-    getLore().map { it.string }
+inline val ItemStack.loreString: List<String> get() =
+    lore.map { it.string }
 
 enum class ItemRarity(
     val loreName: String,
@@ -47,7 +47,7 @@ enum class ItemRarity(
 private val rarityRegex = Regex("(${ItemRarity.entries.joinToString("|") { it.loreName }}) ?([A-Z ]+)?")
 
 fun ItemStack.getSkyblockRarity(): ItemRarity? {
-    val lore = getLoreString()
+    val lore = loreString
     for (i in lore.indices.reversed()) {
         val rarity = rarityRegex.find(lore[i])?.groups?.get(1)?.value ?: continue
         return ItemRarity.entries.find { it.loreName == rarity }

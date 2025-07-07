@@ -4,13 +4,13 @@ import com.github.stivais.commodore.Commodore
 import me.odinmod.odin.OdinMod.mc
 import me.odinmod.odin.config.Config
 import me.odinmod.odin.features.impl.skyblock.PetKeybinds.petList
-import me.odinmod.odin.utils.getItemId
-import me.odinmod.odin.utils.getItemUUID
+import me.odinmod.odin.utils.itemId
+import me.odinmod.odin.utils.itemUUID
 import me.odinmod.odin.utils.modMessage
 
 val petCommand = Commodore("petkeys") {
     literal("add").runs {
-        val petID = if (mc.player?.mainHandStack?.getItemId() == "PET") mc.player?.mainHandStack?.getItemUUID() else null
+        val petID = if (mc.player?.mainHandStack?.itemId == "PET") mc.player?.mainHandStack?.itemUUID else null
         if (petID == null) return@runs modMessage("§cYou can only add pets to the pet list!")
         if (petList.size >= 9) return@runs modMessage("§cYou cannot add more than 9 pets to the list. Remove a pet using §e/petkeys remove §cor clear the list using §e/petkeys clear§c.")
         if (petID in petList) return@runs modMessage("§cThis pet is already in the list!")
@@ -21,13 +21,13 @@ val petCommand = Commodore("petkeys") {
     }
 
     literal("petpos").runs {
-        val petID = if (mc.player?.mainHandStack?.getItemId() == "PET") mc.player?.mainHandStack?.getItemUUID() else return@runs modMessage("§cThis is not a pet!")
+        val petID = if (mc.player?.mainHandStack?.itemId == "PET") mc.player?.mainHandStack?.itemUUID else return@runs modMessage("§cThis is not a pet!")
         if (petID !in petList) return@runs modMessage("§cThis pet is not in the list!")
         modMessage("§bThis pet is position §6${petList.indexOf(petID) +1} §bin the list.")
     }
 
     literal("remove").runs {
-        val petID = if (mc.player?.mainHandStack?.getItemId() == "PET") mc.player?.mainHandStack?.getItemUUID() else return@runs modMessage("§cThis is not a pet!")
+        val petID = if (mc.player?.mainHandStack?.itemId == "PET") mc.player?.mainHandStack?.itemUUID else return@runs modMessage("§cThis is not a pet!")
         if (petID !in petList) return@runs modMessage("§cThis pet is not in the list!")
 
         petList.remove(petID)

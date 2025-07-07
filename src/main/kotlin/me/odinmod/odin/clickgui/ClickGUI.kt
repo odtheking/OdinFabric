@@ -26,7 +26,7 @@ import kotlin.math.sign
  * @author Stivais, Aton
  * @see [Panel]
  */
-object ClickGUI : Screen(Text.literal("Click GUI")) {
+object ClickGUI : Screen(Text.of("Click GUI")) {
 
     private val panels: ArrayList<Panel> = arrayListOf()
 

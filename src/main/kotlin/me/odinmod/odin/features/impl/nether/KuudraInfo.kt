@@ -7,6 +7,7 @@ import me.odinmod.odin.clickgui.settings.impl.NumberSetting
 import me.odinmod.odin.events.RenderEvent
 import me.odinmod.odin.features.Module
 import me.odinmod.odin.utils.Colors
+import me.odinmod.odin.utils.addVec
 import me.odinmod.odin.utils.render.drawString
 import me.odinmod.odin.utils.render.drawText
 import me.odinmod.odin.utils.render.drawWireFrameBox
@@ -43,8 +44,8 @@ object KuudraInfo : Module(
 
             if (kuudraHPDisplay) {
                 event.context.drawText(
-                    Text.literal(getCurrentHealthDisplay(it.health)).asOrderedText(),
-                    it.pos.add(it.rotationVector.multiply(13.0).add(0.0, 10.0, 0.0)), healthSize, depth = true
+                    Text.of(getCurrentHealthDisplay(it.health)).asOrderedText(),
+                    it.pos.add(it.rotationVector.multiply(13.0).addVec(y = 10.0)), healthSize, depth = true
                 )
             }
         }

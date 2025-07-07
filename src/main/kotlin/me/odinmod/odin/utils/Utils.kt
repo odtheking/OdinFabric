@@ -4,10 +4,12 @@ package me.odinmod.odin.utils
 
 import me.odinmod.odin.OdinMod
 import me.odinmod.odin.OdinMod.mc
+import net.minecraft.entity.EquipmentSlot
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.text.ClickEvent
 import net.minecraft.text.HoverEvent
 import net.minecraft.text.Text
+import net.minecraft.util.math.Vec3d
 import java.util.*
 
 val FORMATTING_CODE_PATTERN = Regex("§[0-9a-fk-or]", RegexOption.IGNORE_CASE)
@@ -87,11 +89,25 @@ fun formatTime(time: Long, decimalPlaces: Int = 2): String {
     return "$hours$minutes${(remaining / 1000f).toFixed(decimalPlaces)}s"
 }
 
-fun PlayerEntity.renderX(): Double =
+inline val PlayerEntity.renderX: Double get() =
     lastX + (x - lastX) * mc.renderTickCounter.getTickProgress(true)
 
-fun PlayerEntity.renderY(): Double =
+inline val PlayerEntity.renderY: Double get() =
     lastY + (y - lastY) * mc.renderTickCounter.getTickProgress(true)
 
-fun PlayerEntity.renderZ(): Double =
+inline val PlayerEntity.renderZ: Double get() =
     lastZ + (z - lastZ) * mc.renderTickCounter.getTickProgress(true)
+
+inline val PlayerEntity.renderPos: Vec3d get() =
+    Vec3d(renderX, renderY, renderZ)
+
+inline val PlayerEntity.lastPos: Vec3d get() =
+    Vec3d(lastX, lastY, lastZ)
+
+infix fun EquipmentSlot.isItem(itemId: String): Boolean =
+    mc.player?.getEquippedStack(this)?.itemId == itemId
+
+fun fillItemFromSack(amount: Int, itemId: String, sackName: String, sendMessage: Boolean) {
+    val needed = mc.player?.inventory?.find { it?.itemId == itemId }?.count ?: 0
+    if (needed != amount) sendCommand("gfs $sackName ${amount - needed}") else if (sendMessage) modMessage("§cAlready at max stack size.")
+}

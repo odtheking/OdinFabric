@@ -124,26 +124,26 @@ object PearlWaypoints : Module(
     private const val DEG_TO_RAD = PI / 180
     private const val RAD_TO_DEG = 180 / PI
     private const val E_VEL = 1.67
+    private const val E_VEL_SQ = E_VEL * E_VEL
     private const val GRAV = 0.05
 
     // Made by Aidanmao
     private fun calculatePearl(targetPos: BlockPos): Vec3d? {
-        val posX = mc.player?.renderX() ?: return null
-        val posY = mc.player?.renderY() ?: return null
-        val posZ = mc.player?.renderZ() ?: return null
+        val posX = mc.player?.renderX ?: return null
+        val posY = mc.player?.renderY ?: return null
+        val posZ = mc.player?.renderZ ?: return null
 
         val offX = targetPos.x - posX
         val offZ = targetPos.z - posZ
         val offHor = hypot(offX, offZ)
 
-        val vSq = E_VEL * E_VEL
-        val discrim = vSq - GRAV * (((GRAV * offHor * offHor) / (2 * vSq)) - (targetPos.y - posY + 1.62))
+        val discrim = E_VEL_SQ - GRAV * (((GRAV * offHor * offHor) / (2 * E_VEL_SQ)) - (targetPos.y - posY + 1.62))
         if (discrim < 0) return null
 
         val sqrtDiscrim = sqrt(discrim)
         val atanFactor = GRAV * offHor
-        val angle1 = (atan((vSq + sqrtDiscrim) / atanFactor)) * RAD_TO_DEG
-        val angle2 = (atan((vSq - sqrtDiscrim) / atanFactor)) * RAD_TO_DEG
+        val angle1 = (atan((E_VEL_SQ + sqrtDiscrim) / atanFactor)) * RAD_TO_DEG
+        val angle2 = (atan((E_VEL_SQ - sqrtDiscrim) / atanFactor)) * RAD_TO_DEG
 
         val angle = when {
             angle1 >= 45.0 -> angle1

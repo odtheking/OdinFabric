@@ -3,6 +3,7 @@ package me.odinmod.odin.utils.render
 import com.mojang.blaze3d.systems.RenderSystem
 import me.odinmod.odin.OdinMod.mc
 import me.odinmod.odin.utils.Color
+import me.odinmod.odin.utils.addVec
 import me.odinmod.odin.utils.translate
 import me.odinmod.odin.utils.unaryMinus
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
@@ -13,6 +14,7 @@ import net.minecraft.client.render.VertexRendering
 import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer
 import net.minecraft.client.util.BufferAllocator
 import net.minecraft.text.OrderedText
+import net.minecraft.text.OrderedText.concat
 import net.minecraft.text.Text
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Box
@@ -153,7 +155,7 @@ fun WorldRenderContext.drawSphere(
 }
 
 fun WorldRenderContext.drawCustomBeacon(
-    title: String,
+    title: OrderedText,
     position: BlockPos,
     color: Color,
     increase: Boolean = true
@@ -164,9 +166,9 @@ fun WorldRenderContext.drawCustomBeacon(
     drawBeaconBeam(position, color)
 
     drawText(
-        Text.literal("$title §r§f(§3${dist}m§f)").asOrderedText(),
-        position.toCenterPos().add(0.0, 1.7, 0.0),
+        concat(title, Text.of(" §r§f(§3${dist}m§f)").asOrderedText()),
+        position.toCenterPos().addVec(y = 1.7),
         if (increase) max(1f, (dist / 20.0).toFloat()) else 2f,
-        true
+        false
     )
 }
