@@ -39,7 +39,6 @@ class TextInputHandler(
     private var dragging = false
     private var clickCount = 1
 
-    // History for undo/redo functionality
     private val history = mutableListOf<String>()
     private var historyIndex = -1
     private var lastSavedText = ""
@@ -271,13 +270,9 @@ class TextInputHandler(
             caretX = textWidth(text.substringSafe(0, caret))
 
             if (previousX < caretX) {
-                if (caretX - textOffset >= width) {
-                    textOffset = caretX - width
-                }
+                if (caretX - textOffset >= width) textOffset = caretX - width
             } else {
-                if (caretX - textOffset <= 0f) {
-                    textOffset = textWidth(text.substringSafe(0, caret - 1))
-                }
+                if (caretX - textOffset <= 0f) textOffset = textWidth(text.substringSafe(0, caret - 1))
             }
 
             if (textOffset > 0 && textWidth(text) - textOffset < width)

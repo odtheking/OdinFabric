@@ -1,8 +1,11 @@
 package me.odinmod.odin.features.impl.nether
 
+import me.odinmod.odin.clickgui.settings.Setting.Companion.withDependency
 import me.odinmod.odin.clickgui.settings.impl.BooleanSetting
+import me.odinmod.odin.clickgui.settings.impl.NumberSetting
 import me.odinmod.odin.events.PacketEvent
 import me.odinmod.odin.features.Module
+import me.odinmod.odin.utils.handlers.LimitedTickTask
 import me.odinmod.odin.utils.noControlCodes
 import me.odinmod.odin.utils.sendCommand
 import meteordevelopment.orbit.EventHandler
@@ -13,6 +16,10 @@ object Misc : Module(
     description = "Miscellaneous Nether features."
 ) {
     private val manaDrain by BooleanSetting("Mana Drain", true, desc = "Sends in party chat when you drain mana near players.")
+    private val autoRequeue by BooleanSetting("Auto Requeue", true, desc = "Automatically requeues you after a Kuudra run.")
+    private val requeueDelay by NumberSetting("Requeue Delay", 20, 0, 1000, 1, unit = "ticks", desc = "Delay before requeuing after a run ends.").withDependency { autoRequeue }
+
+    private val endRunRegex = Regex("^\\[NPC] Elle: Good job everyone. A hard fought battle come to an end. Let's get out of here before we run into any more trouble!\$")
     private val endStoneRegex = Regex("^Used Extreme Focus! \\((\\d+) Mana\\)$")
 
     @EventHandler
@@ -20,11 +27,13 @@ object Misc : Module(
         if (this !is GameMessageS2CPacket || overlay) return
         val message = content.string.noControlCodes
 
-
         if (manaDrain) endStoneRegex.find(message)?.groupValues?.getOrNull(1)?.let { mana ->
             val players = mc.world?.players?.filter { it.squaredDistanceTo(mc.player) < 49 && it.uuid.version() == 4 } ?: return
             sendCommand("pc Used $mana mana (${players.size} players nearby)")
         }
+
+        if (autoRequeue && endRunRegex.matches(message))
+            LimitedTickTask(requeueDelay, 1) { sendCommand("instancerequeue") }
 
         Unit
     }
