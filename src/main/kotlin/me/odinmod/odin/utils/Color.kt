@@ -129,6 +129,10 @@ class Color(hue: Float, saturation: Float, brightness: Float, alpha: Float = 1f)
             }
         }
 
+        fun Color.multiplyAlpha(factor: Float): Color {
+            return Color(red, green, blue, (alphaFloat * factor).coerceIn(0f, 1f))
+        }
+
         fun Color.hsbMax(): Color {
             return Color(hue, 1f, 1f)
         }

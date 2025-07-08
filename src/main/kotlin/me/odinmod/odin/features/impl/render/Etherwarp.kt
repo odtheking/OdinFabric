@@ -6,6 +6,7 @@ import me.odinmod.odin.events.PacketEvent
 import me.odinmod.odin.events.RenderEvent
 import me.odinmod.odin.features.Module
 import me.odinmod.odin.utils.*
+import me.odinmod.odin.utils.Color.Companion.multiplyAlpha
 import me.odinmod.odin.utils.Color.Companion.withAlpha
 import me.odinmod.odin.utils.render.drawFilledBox
 import me.odinmod.odin.utils.render.drawWireFrameBox
@@ -62,7 +63,7 @@ object Etherwarp : Module(
                 1 -> event.context.drawFilledBox(Box(it), color)
                 2 -> {
                     event.context.drawWireFrameBox(Box(it), color)
-                    event.context.drawFilledBox(Box(it), color.withAlpha(0.5f))
+                    event.context.drawFilledBox(Box(it), color.multiplyAlpha(0.5f))
                 }
             }
         }

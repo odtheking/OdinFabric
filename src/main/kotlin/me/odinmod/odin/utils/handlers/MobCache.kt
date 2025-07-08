@@ -11,7 +11,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 
 class MobCache(
     private val maxSize: Int = 0,
-    private val entityOffset: Int = 0,
+    private val entityOffset: () -> Int = { 0 },
     val predicate: (Entity) -> Boolean = { true }
 ) : CopyOnWriteArrayList<Entity>() {
     init {
@@ -19,12 +19,9 @@ class MobCache(
     }
 
     fun addEntityToCache(entityID: Int) {
-        val entity = mc.world?.getEntityById(entityID + entityOffset) ?: return
-
+        val entity = mc.world?.getEntityById(entityID + entityOffset()) ?: return
         if (!this.any { it.id == entity.id }) {
-            if (maxSize != 0 && size >= maxSize) {
-                removeAt(0)
-            }
+            if (maxSize != 0 && size >= maxSize) removeAt(0)
             add(entity)
         }
     }
@@ -55,16 +52,14 @@ object MobCaches {
         TickTask(20) {
             val toRemove = mutableListOf<Int>()
 
-            mobProcessQueue.filter { mc.world?.getEntityById(it) != null }
-                .forEach {
-                    val entity = mc.world?.getEntityById(it) ?: return@forEach
+            mobProcessQueue.forEach {
+                val entity = mc.world?.getEntityById(it) ?: return@forEach
+                toRemove.add(it)
 
-                    toRemove.add(it)
-
-                    mobCaches.forEach { cache ->
-                        if (cache.predicate(entity)) cache.addEntityToCache(it)
-                    }
+                mobCaches.forEach { cache ->
+                    if (cache.predicate(entity)) cache.addEntityToCache(it)
                 }
+            }
         }
     }
 

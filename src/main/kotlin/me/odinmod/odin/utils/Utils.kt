@@ -4,11 +4,12 @@ package me.odinmod.odin.utils
 
 import me.odinmod.odin.OdinMod
 import me.odinmod.odin.OdinMod.mc
+import net.minecraft.entity.Entity
 import net.minecraft.entity.EquipmentSlot
-import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.text.ClickEvent
 import net.minecraft.text.HoverEvent
 import net.minecraft.text.Text
+import net.minecraft.util.math.Box
 import net.minecraft.util.math.Vec3d
 import java.util.*
 
@@ -89,20 +90,23 @@ fun formatTime(time: Long, decimalPlaces: Int = 2): String {
     return "$hours$minutes${(remaining / 1000f).toFixed(decimalPlaces)}s"
 }
 
-inline val PlayerEntity.renderX: Double get() =
+inline val Entity.renderX: Double get() =
     lastX + (x - lastX) * mc.renderTickCounter.getTickProgress(true)
 
-inline val PlayerEntity.renderY: Double get() =
+inline val Entity.renderY: Double get() =
     lastY + (y - lastY) * mc.renderTickCounter.getTickProgress(true)
 
-inline val PlayerEntity.renderZ: Double get() =
+inline val Entity.renderZ: Double get() =
     lastZ + (z - lastZ) * mc.renderTickCounter.getTickProgress(true)
 
-inline val PlayerEntity.renderPos: Vec3d get() =
+inline val Entity.renderPos: Vec3d get() =
     Vec3d(renderX, renderY, renderZ)
 
-inline val PlayerEntity.lastPos: Vec3d get() =
+inline val Entity.lastPos: Vec3d get() =
     Vec3d(lastX, lastY, lastZ)
+
+inline val Entity.renderBoundingBox: Box get() =
+    boundingBox.offset(renderX - x, renderY - y, renderZ - z)
 
 infix fun EquipmentSlot.isItem(itemId: String): Boolean =
     mc.player?.getEquippedStack(this)?.itemId == itemId

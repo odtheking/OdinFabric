@@ -144,7 +144,7 @@ class ColorSetting(
         if (section != null) hexString = value.hex(allowAlpha)
         else {
             if (hexString.length == 8 && allowAlpha || hexString.length == 6 && !allowAlpha)
-                value = Color(if (allowAlpha) hexString else hexString + "FF")
+                value = Color(if (allowAlpha) hexString else hexString.padEnd(8, 'F'))
         }
 
         val rectX = x + (width - width / 2) / 2
