@@ -31,7 +31,7 @@ object ModuleManager {
 
     val modules: ArrayList<Module> = arrayListOf(
         // render
-        ClickGUIModule, Camera, Etherwarp, PlayerSize, PerformanceHUD, RenderOptimizer, PlayerDisplay, Waypoints,
+        ClickGUIModule, Camera, Etherwarp, PlayerSize, PerformanceHUD, RenderOptimizer, PlayerDisplay, Waypoints, HidePlayers,
 
         //skyblock
         ChatCommands, NoCursorReset, Ragnarock, SpringBoots, WardrobeKeybinds, PetKeybinds, AutoSprint, CommandKeybinds, SlotBinds,

@@ -12,6 +12,7 @@
     "ClientCommonNetworkHandlerMixin",
     "ClientPlayNetworkHandlerMixin",
     "DrawContextAccessor",
+    "EntityRendererMixin",
     "HandledScreenAccessor",
     "HandledScreenMixin",
     "InGameHudMixin",
@@ -20,8 +21,8 @@
     "KeyBindingMixin",
     "MessageHandlerMixin",
     "MixinGameRenderer",
-    "MixinPlayerEntityRender",
-    "MouseMixin"
+    "MouseMixin",
+    "PlayerEntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
