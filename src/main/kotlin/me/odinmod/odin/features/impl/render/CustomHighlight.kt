@@ -34,14 +34,14 @@ object CustomHighlight : Module(
         entities.forEach { entity ->
             val boundingBox = entity.renderBoundingBox
             val color = highlightMap[entity.displayName?.string] ?: this.color
-            if (mc.player?.canSee(entity) == false) return@forEach
+            val canSee = mc.player?.canSee(entity) ?: false
 
             when (renderStyle) {
-                0 -> event.context.drawWireFrameBox(boundingBox, color, depth = false)
-                1 -> event.context.drawFilledBox(boundingBox, color, depth = false)
+                0 -> event.context.drawWireFrameBox(boundingBox, color, depth = !canSee)
+                1 -> event.context.drawFilledBox(boundingBox, color, depth = !canSee)
                 2 -> {
-                    event.context.drawWireFrameBox(boundingBox, color, depth = false)
-                    event.context.drawFilledBox(boundingBox, color.multiplyAlpha(0.5f), depth = false)
+                    event.context.drawWireFrameBox(boundingBox, color, depth = !canSee)
+                    event.context.drawFilledBox(boundingBox, color.multiplyAlpha(0.5f), depth = !canSee)
                 }
             }
         }
