@@ -4,6 +4,10 @@ import me.odinmod.odin.OdinMod.mc
 import me.odinmod.odin.clickgui.settings.impl.HudElement
 import me.odinmod.odin.config.Config
 import me.odinmod.odin.features.ModuleManager.hudSettingsCache
+import me.odinmod.odin.utils.ui.heightResFactor
+import me.odinmod.odin.utils.ui.scaledMouseX
+import me.odinmod.odin.utils.ui.scaledMouseY
+import me.odinmod.odin.utils.ui.widthResFactor
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.text.Text
@@ -18,13 +22,14 @@ object HudManager : Screen(Text.of("HUD Manager")) {
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, deltaTicks: Float) {
         dragging?.let {
-            it.x = (mc.mouse.x - startX).toFloat().coerceIn(0f, mc.window.width - (it.width * it.scale).coerceAtLeast(50f))
-            it.y = (mc.mouse.y - startY).toFloat().coerceIn(0f, mc.window.height - (it.height * it.scale).coerceAtLeast(20f))
+            it.x = (scaledMouseX - startX).coerceIn(0f, mc.window.width / mc.window.widthResFactor - (it.width * it.scale))
+            it.y = (scaledMouseY - startY).coerceIn(0f, mc.window.height / mc.window.heightResFactor - (it.height * it.scale))
         }
 
         context?.matrices?.push()
         val sf = mc.window.scaleFactor.toFloat()
         context?.matrices?.scale(1f / sf, 1f / sf, 1f)
+        context?.matrices?.scale(mc.window.widthResFactor, mc.window.heightResFactor, 1f)
 
         for (hud in hudSettingsCache) {
             if (hud.isEnabled) hud.value.draw(context!!, true)
@@ -49,8 +54,8 @@ object HudManager : Screen(Text.of("HUD Manager")) {
             if (hud.isEnabled && hud.value.isHovered()) {
                 dragging = hud.value
 
-                startX = (mc.mouse.x - hud.value.x).toFloat()
-                startY = (mc.mouse.y - hud.value.y).toFloat()
+                startX = (scaledMouseX - hud.value.x)
+                startY = (scaledMouseY - hud.value.y)
                 return true
             }
         }

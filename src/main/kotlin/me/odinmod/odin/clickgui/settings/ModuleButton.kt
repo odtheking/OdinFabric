@@ -9,9 +9,9 @@ import me.odinmod.odin.utils.Color
 import me.odinmod.odin.utils.Color.Companion.brighter
 import me.odinmod.odin.utils.Colors
 import me.odinmod.odin.utils.ui.HoverHandler
-import me.odinmod.odin.utils.ui.MouseUtils.isAreaHovered
 import me.odinmod.odin.utils.ui.animations.ColorAnimation
 import me.odinmod.odin.utils.ui.animations.EaseInOutAnimation
+import me.odinmod.odin.utils.ui.isAreaHovered
 import me.odinmod.odin.utils.ui.rendering.NVGRenderer
 import kotlin.math.floor
 
@@ -41,7 +41,7 @@ class ModuleButton(val module: Module, val panel: Panel) {
     private val extendAnim = EaseInOutAnimation(250)
     private val hover = HoverHandler(250)
 
-    fun draw(mouseX: Double, mouseY: Double): Float {
+    fun draw(mouseX: Float, mouseY: Float): Float {
         hoverHandler.handle(x, y, Panel.WIDTH, Panel.HEIGHT - 1)
         hover.handle(x, y, Panel.WIDTH, Panel.HEIGHT - 1)
 
@@ -67,7 +67,7 @@ class ModuleButton(val module: Module, val panel: Panel) {
         return totalHeight
     }
 
-    fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+    fun mouseClicked(mouseX: Float, mouseY: Float, button: Int): Boolean {
         if (isButtonHovered) {
             if (button == 0) {
                 colorAnim.start()

@@ -7,8 +7,8 @@ import me.odinmod.odin.clickgui.settings.RenderableSetting
 import me.odinmod.odin.clickgui.settings.Saving
 import me.odinmod.odin.features.impl.render.ClickGUIModule
 import me.odinmod.odin.utils.Colors
-import me.odinmod.odin.utils.ui.MouseUtils.isAreaHovered
 import me.odinmod.odin.utils.ui.animations.LinearAnimation
+import me.odinmod.odin.utils.ui.isAreaHovered
 import me.odinmod.odin.utils.ui.rendering.NVGRenderer
 
 class BooleanSetting(
@@ -23,7 +23,7 @@ class BooleanSetting(
 
     private val toggleAnimation = LinearAnimation<Float>(200)
 
-    override fun render(x: Float, y: Float, mouseX: Double, mouseY: Double): Float {
+    override fun render(x: Float, y: Float, mouseX: Float, mouseY: Float): Float {
         super.render(x, y, mouseX, mouseY)
         val height = getHeight()
 
@@ -40,7 +40,7 @@ class BooleanSetting(
         return height
     }
 
-    override fun mouseClicked(mouseX: Double, mouseY: Double, mouseButton: Int): Boolean {
+    override fun mouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int): Boolean {
         return if (mouseButton != 0 || !isHovered) false
         else {
             toggleAnimation.start()

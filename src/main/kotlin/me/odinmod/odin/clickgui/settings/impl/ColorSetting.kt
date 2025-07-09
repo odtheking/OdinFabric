@@ -13,10 +13,10 @@ import me.odinmod.odin.utils.Color.Companion.darker
 import me.odinmod.odin.utils.Color.Companion.hsbMax
 import me.odinmod.odin.utils.Color.Companion.withAlpha
 import me.odinmod.odin.utils.Colors
-import me.odinmod.odin.utils.ui.MouseUtils.isAreaHovered
 import me.odinmod.odin.utils.ui.TextInputHandler
 import me.odinmod.odin.utils.ui.animations.EaseInOutAnimation
 import me.odinmod.odin.utils.ui.animations.LinearAnimation
+import me.odinmod.odin.utils.ui.isAreaHovered
 import me.odinmod.odin.utils.ui.rendering.Gradient
 import me.odinmod.odin.utils.ui.rendering.NVGRenderer
 
@@ -62,9 +62,9 @@ class ColorSetting(
         textSetter = { hexString = it }
     )
 
-    private var previousMousePos = 0.0 to 0.0
+    private var previousMousePos = 0f to 0f
 
-    override fun render(x: Float, y: Float, mouseX: Double, mouseY: Double): Float {
+    override fun render(x: Float, y: Float, mouseX: Float, mouseY: Float): Float {
         super.render(x, y, mouseX, mouseY)
         if (hexWidth < 0) {
             hexString = value.hex(allowAlpha)
@@ -162,7 +162,7 @@ class ColorSetting(
         return getHeight()
     }
 
-    override fun mouseClicked(mouseX: Double, mouseY: Double, mouseButton: Int): Boolean {
+    override fun mouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int): Boolean {
         if (isHovered) {
             expandAnim.start()
             extended = !extended

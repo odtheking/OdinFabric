@@ -12,8 +12,8 @@ import me.odinmod.odin.features.Module
 import me.odinmod.odin.features.impl.render.ClickGUIModule
 import me.odinmod.odin.utils.Colors
 import me.odinmod.odin.utils.ui.HoverHandler
-import me.odinmod.odin.utils.ui.MouseUtils.isAreaHovered
 import me.odinmod.odin.utils.ui.animations.LinearAnimation
+import me.odinmod.odin.utils.ui.isAreaHovered
 import me.odinmod.odin.utils.ui.rendering.NVGRenderer
 import net.minecraft.client.gui.DrawContext
 
@@ -36,7 +36,7 @@ class HUDSetting(
     private val toggleAnimation = LinearAnimation<Float>(200)
     private val hoverHandler = HoverHandler(150)
 
-    override fun render(x: Float, y: Float, mouseX: Double, mouseY: Double): Float {
+    override fun render(x: Float, y: Float, mouseX: Float, mouseY: Float): Float {
         super.render(x, y, mouseX, mouseY)
         val height = getHeight()
         NVGRenderer.text(name, x + 6f, y + height / 2f - 8f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
@@ -62,7 +62,7 @@ class HUDSetting(
         return height
     }
 
-    override fun mouseClicked(mouseX: Double, mouseY: Double, mouseButton: Int): Boolean {
+    override fun mouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int): Boolean {
         if (mouseButton != 0) return false
         return if (isHovered) {
             mc.setScreen(HudManager)

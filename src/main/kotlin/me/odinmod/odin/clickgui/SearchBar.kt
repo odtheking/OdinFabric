@@ -5,6 +5,8 @@ import me.odinmod.odin.features.impl.render.ClickGUIModule
 import me.odinmod.odin.utils.Colors
 import me.odinmod.odin.utils.ui.TextInputHandler
 import me.odinmod.odin.utils.ui.rendering.NVGRenderer
+import me.odinmod.odin.utils.ui.scaledMouseX
+import me.odinmod.odin.utils.ui.scaledMouseY
 
 object SearchBar {
 
@@ -23,9 +25,9 @@ object SearchBar {
         textSetter = { currentSearch = it }
     )
 
-    private var previousMousePos = 0.0 to 0.0
+    private var previousMousePos = 0f to 0f
 
-    fun draw(x: Float, y: Float, mouseX: Double, mouseY: Double) {
+    fun draw(x: Float, y: Float, mouseX: Float, mouseY: Float) {
         if (previousMousePos != mouseX to mouseY) textInputHandler.mouseDragged(mouseX)
         previousMousePos = mouseX to mouseY
 
@@ -43,8 +45,8 @@ object SearchBar {
         textInputHandler.draw()
     }
 
-    fun mouseClicked(mouseX: Double, mouseY: Double, mouseButton: Int): Boolean {
-        return textInputHandler.mouseClicked(mouseX, mouseY, mouseButton)
+    fun mouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int): Boolean {
+        return textInputHandler.mouseClicked(scaledMouseX, scaledMouseY, mouseButton)
     }
 
     fun mouseReleased() {

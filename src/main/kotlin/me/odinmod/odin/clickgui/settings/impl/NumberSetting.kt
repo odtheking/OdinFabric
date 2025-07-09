@@ -9,8 +9,8 @@ import me.odinmod.odin.clickgui.settings.Saving
 import me.odinmod.odin.features.impl.render.ClickGUIModule
 import me.odinmod.odin.utils.Colors
 import me.odinmod.odin.utils.ui.HoverHandler
-import me.odinmod.odin.utils.ui.MouseUtils.isAreaHovered
 import me.odinmod.odin.utils.ui.animations.LinearAnimation
+import me.odinmod.odin.utils.ui.isAreaHovered
 import me.odinmod.odin.utils.ui.rendering.NVGRenderer
 import org.lwjgl.glfw.GLFW
 import kotlin.math.floor
@@ -78,7 +78,7 @@ class NumberSetting<E>(
         else
             "${(valueDouble * 100.0).roundToInt() / 100.0}${unit}"
 
-    override fun render(x: Float, y: Float, mouseX: Double, mouseY: Double): Float {
+    override fun render(x: Float, y: Float, mouseX: Float, mouseY: Float): Float {
         super.render(x, y, mouseX, mouseY)
         if (valueWidth < 0) {
             sliderPercentage = ((valueDouble - minDouble) / (maxDouble - minDouble)).toFloat()
@@ -107,7 +107,7 @@ class NumberSetting<E>(
         return height
     }
 
-    override fun mouseClicked(mouseX: Double, mouseY: Double, mouseButton: Int): Boolean {
+    override fun mouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int): Boolean {
         return if (mouseButton != 0 || !isHovered) false
         else {
             listening = true

@@ -2,7 +2,7 @@ package me.odinmod.odin.clickgui.settings.impl
 
 import me.odinmod.odin.utils.Colors
 import me.odinmod.odin.utils.render.hollowFill
-import me.odinmod.odin.utils.ui.MouseUtils.isAreaHovered
+import me.odinmod.odin.utils.ui.isAreaHovered
 import net.minecraft.client.gui.DrawContext
 
 open class HudElement(

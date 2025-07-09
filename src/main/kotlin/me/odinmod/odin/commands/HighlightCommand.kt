@@ -60,7 +60,7 @@ val highlightCommand = Commodore("highlight") {
     literal("list").runs {
         if (CustomHighlight.highlightMap.isEmpty()) return@runs modMessage("Highlight list is empty")
         modMessage("Highlight list:\n${CustomHighlight.highlightMap.entries.joinToString("\n") {
-            "${it.key} - ${if (it.value.isTransparent) "default" else it.value.rgba.toHexString()}"
+            "${it.key} - ${if (it.value.isTransparent) "default color" else it.value.rgba.toHexString()}"
         }}")
     }
 }

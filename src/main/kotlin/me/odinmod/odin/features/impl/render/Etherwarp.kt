@@ -185,17 +185,21 @@ object Etherwarp : Module(
     private val validEtherwarpFeetIds = BitSet(176).apply {
         arrayOf(
             Blocks.AIR, Blocks.FIRE, Blocks.SKELETON_SKULL, Blocks.PLAYER_HEAD, Blocks.LEVER,
-            Blocks.STONE_BUTTON, Blocks.OAK_BUTTON, Blocks.TORCH, Blocks.TRIPWIRE_HOOK, Blocks.TRIPWIRE,
+            Blocks.TORCH, Blocks.TRIPWIRE_HOOK, Blocks.TRIPWIRE,
             Blocks.RAIL, Blocks.ACTIVATOR_RAIL, Blocks.SNOW, Blocks.CARROTS, Blocks.WHEAT, Blocks.POTATOES,
             Blocks.NETHER_WART, Blocks.PUMPKIN_STEM, Blocks.MELON_STEM, Blocks.REDSTONE_TORCH, Blocks.REDSTONE_WIRE,
             Blocks.POPPY, Blocks.DANDELION, Blocks.OAK_SAPLING, Blocks.FLOWER_POT, Blocks.DEAD_BUSH,
-            Blocks.LADDER, Blocks.SUNFLOWER, Blocks.REPEATER, Blocks.COMPARATOR, Blocks.COBWEB, Blocks.LILY_PAD,
+            Blocks.LADDER, Blocks.SUNFLOWER, Blocks.REPEATER, Blocks.COMPARATOR, Blocks.COBWEB, Blocks.SHORT_GRASS,
+            Blocks.SEAGRASS, Blocks.TALL_SEAGRASS, Blocks.SUGAR_CANE,
             Blocks.WATER, Blocks.LAVA, Blocks.VINE, Blocks.BROWN_MUSHROOM, Blocks.RED_MUSHROOM, Blocks.PISTON_HEAD,
 
-            // All 16 carpets
+            // All carpets
             Blocks.WHITE_CARPET, Blocks.ORANGE_CARPET, Blocks.MAGENTA_CARPET, Blocks.LIGHT_BLUE_CARPET, Blocks.YELLOW_CARPET,
             Blocks.LIME_CARPET, Blocks.PINK_CARPET, Blocks.GRAY_CARPET, Blocks.LIGHT_GRAY_CARPET, Blocks.CYAN_CARPET, Blocks.PURPLE_CARPET,
-            Blocks.BLUE_CARPET, Blocks.BROWN_CARPET, Blocks.GREEN_CARPET, Blocks.RED_CARPET, Blocks.BLACK_CARPET, Blocks.MOSS_CARPET
+            Blocks.BLUE_CARPET, Blocks.BROWN_CARPET, Blocks.GREEN_CARPET, Blocks.RED_CARPET, Blocks.BLACK_CARPET, Blocks.MOSS_CARPET,
+
+            // All buttons
+            Blocks.STONE_BUTTON, Blocks.OAK_BUTTON, Blocks.SPRUCE_BUTTON, Blocks.BIRCH_BUTTON, Blocks.JUNGLE_BUTTON
         ).forEach { set(Block.getRawIdFromState(it.defaultState)) }
     }
 }

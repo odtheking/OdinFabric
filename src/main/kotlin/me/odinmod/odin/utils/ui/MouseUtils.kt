@@ -1,32 +1,25 @@
 package me.odinmod.odin.utils.ui
 
 import me.odinmod.odin.OdinMod.mc
+import net.minecraft.client.util.Window
 
-object MouseUtils {
-    val virtualWidth = 1920f
-    val virtualHeight = 1080f
+const val VIRTUAL_WIDTH = 1920f
+const val VIRTUAL_HEIGHT = 1080f
 
-    fun getScaledMouseX(): Float {
-        val mouseX = mc.mouse.x.toFloat()
-        val windowWidth = mc.window.width.toFloat()
-        return (mouseX / windowWidth) * virtualWidth
-    }
+inline val scaledMouseX: Float get() =
+    (mc.mouse.x.toFloat() / mc.window.width.toFloat()) * VIRTUAL_WIDTH
 
-    fun getScaledMouseY(): Float {
-        val mouseY = mc.mouse.y.toFloat()
-        val windowHeight = mc.window.height.toFloat()
-        return (mouseY / windowHeight) * virtualHeight
-    }
+inline val scaledMouseY: Float get() =
+    (mc.mouse.y.toFloat() / mc.window.height.toFloat()) * VIRTUAL_HEIGHT
 
-    fun isAreaHovered(x: Float, y: Float, w: Float, h: Float): Boolean {
-        val mouseX = getScaledMouseX()
-        val mouseY = getScaledMouseY()
-        return mouseX in x..(x + w) && mouseY in y..(y + h)
-    }
+fun isAreaHovered(x: Float, y: Float, w: Float, h: Float): Boolean =
+    scaledMouseX in x..(x + w) && scaledMouseY in y..(y + h)
 
-    fun isAreaHovered(x: Float, y: Float, w: Float): Boolean {
-        val mouseX = getScaledMouseX()
-        val mouseY = getScaledMouseY()
-        return mouseX in x..(x + w) && mouseY >= y
-    }
-}
+fun isAreaHovered(x: Float, y: Float, w: Float): Boolean =
+    scaledMouseX in x..(x + w) && scaledMouseY >= y
+
+inline val Window.widthResFactor: Float get() =
+    width / VIRTUAL_WIDTH
+
+inline val Window.heightResFactor: Float get() =
+    height / VIRTUAL_HEIGHT

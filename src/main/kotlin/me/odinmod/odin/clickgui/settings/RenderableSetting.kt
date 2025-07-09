@@ -3,7 +3,7 @@ package me.odinmod.odin.clickgui.settings
 import me.odinmod.odin.clickgui.ClickGUI
 import me.odinmod.odin.clickgui.Panel
 import me.odinmod.odin.utils.ui.HoverHandler
-import me.odinmod.odin.utils.ui.MouseUtils.isAreaHovered
+import me.odinmod.odin.utils.ui.isAreaHovered
 
 abstract class RenderableSetting<T>(
     name: String,
@@ -17,7 +17,7 @@ abstract class RenderableSetting<T>(
     protected var lastY = 0f
     var listening = false
 
-    open fun render(x: Float, y: Float, mouseX: Double, mouseY: Double): Float {
+    open fun render(x: Float, y: Float, mouseX: Float, mouseY: Float): Float {
         lastX = x
         lastY = y
         val height = getHeight()
@@ -28,7 +28,7 @@ abstract class RenderableSetting<T>(
         return height
     }
 
-    open fun mouseClicked(mouseX: Double, mouseY: Double, mouseButton: Int): Boolean = false
+    open fun mouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int): Boolean = false
     open fun mouseReleased(state: Int) {}
     open fun keyTyped(typedChar: Char, modifier: Int): Boolean = false
     open fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean = false

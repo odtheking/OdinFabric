@@ -1,6 +1,5 @@
 package me.odinmod.odin.utils.ui
 
-import me.odinmod.odin.utils.ui.MouseUtils.isAreaHovered
 import me.odinmod.odin.utils.ui.animations.LinearAnimation
 
 class HoverHandler(private val startDelay: Long, delay: Long) {

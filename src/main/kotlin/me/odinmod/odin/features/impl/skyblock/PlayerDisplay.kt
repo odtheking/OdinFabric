@@ -16,7 +16,7 @@ import java.util.*
 
 object PlayerDisplay : Module(
     name = "Player Display",
-    description = "Allows to customize the player stat displays (health, strength and more)."
+    description = "Allows to customize the player stat displays (health, defense and more)."
 ) {
     private val hideElements by DropdownSetting("Hide Elements")
     private val hideArmor by BooleanSetting("Hide Armor", false, desc = "Hides the armor bar.").withDependency { hideElements }

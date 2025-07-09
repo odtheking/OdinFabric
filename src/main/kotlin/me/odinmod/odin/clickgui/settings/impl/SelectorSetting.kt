@@ -11,8 +11,8 @@ import me.odinmod.odin.utils.Color
 import me.odinmod.odin.utils.Color.Companion.brighter
 import me.odinmod.odin.utils.Colors
 import me.odinmod.odin.utils.ui.HoverHandler
-import me.odinmod.odin.utils.ui.MouseUtils.isAreaHovered
 import me.odinmod.odin.utils.ui.animations.EaseInOutAnimation
+import me.odinmod.odin.utils.ui.isAreaHovered
 import me.odinmod.odin.utils.ui.rendering.NVGRenderer
 
 class SelectorSetting(
@@ -53,7 +53,7 @@ class SelectorSetting(
     private fun isSettingHovered(index: Int): Boolean =
         isAreaHovered(lastX, lastY + 38f + 32f * index, width, 32f)
 
-    override fun render(x: Float, y: Float, mouseX: Double, mouseY: Double): Float {
+    override fun render(x: Float, y: Float, mouseX: Float, mouseY: Float): Float {
         super.render(x, y, mouseX, mouseY)
 
         val currentWidth = elementWidths[index]
@@ -83,7 +83,7 @@ class SelectorSetting(
         return displayHeight
     }
 
-    override fun mouseClicked(mouseX: Double, mouseY: Double, mouseButton: Int): Boolean {
+    override fun mouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int): Boolean {
         if (mouseButton == 0) {
             if (isHovered) {
                 settingAnim.start()

@@ -29,9 +29,9 @@ class StringSetting(
         textSetter = { value = it }
     )
 
-    private var previousMousePos = 0.0 to 0.0
+    private var previousMousePos = 0f to 0f
 
-    override fun render(x: Float, y: Float, mouseX: Double, mouseY: Double): Float {
+    override fun render(x: Float, y: Float, mouseX: Float, mouseY: Float): Float {
         super.render(x, y, mouseX, mouseY)
 
         if (previousMousePos != mouseX to mouseY) textInputHandler.mouseDragged(mouseX)
@@ -52,7 +52,7 @@ class StringSetting(
         return getHeight()
     }
 
-    override fun mouseClicked(mouseX: Double, mouseY: Double, mouseButton: Int): Boolean {
+    override fun mouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int): Boolean {
         return if (mouseButton == 0) textInputHandler.mouseClicked(mouseX, mouseY, mouseButton)
         else false
     }

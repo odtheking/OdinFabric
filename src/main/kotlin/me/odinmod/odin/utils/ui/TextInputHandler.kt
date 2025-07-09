@@ -2,7 +2,6 @@ package me.odinmod.odin.utils.ui
 
 import me.odinmod.odin.OdinMod.mc
 import me.odinmod.odin.utils.Colors
-import me.odinmod.odin.utils.ui.MouseUtils.isAreaHovered
 import me.odinmod.odin.utils.ui.rendering.NVGRenderer
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.util.StringHelper
@@ -66,7 +65,7 @@ class TextInputHandler(
         NVGRenderer.popScissor()
     }
 
-    fun mouseClicked(mouseX: Double, mouseY: Double, mouseButton: Int): Boolean {
+    fun mouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int): Boolean {
         if (!isAreaHovered(x, y, width, height)) {
             resetState()
             return false
@@ -96,7 +95,7 @@ class TextInputHandler(
         dragging = false
     }
 
-    fun mouseDragged(mouseX: Double) {
+    fun mouseDragged(mouseX: Float) {
         if (dragging) caretFromMouse(mouseX)
     }
 
@@ -243,7 +242,7 @@ class TextInputHandler(
         saveState()
     }
 
-    private fun caretFromMouse(mouseX: Double) {
+    private fun caretFromMouse(mouseX: Float) {
         val mx = mouseX - (x + textOffset)
 
         var currWidth = 0f

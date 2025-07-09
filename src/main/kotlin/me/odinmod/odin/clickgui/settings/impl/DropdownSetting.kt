@@ -4,8 +4,8 @@ import me.odinmod.odin.clickgui.ClickGUI
 import me.odinmod.odin.clickgui.settings.RenderableSetting
 import me.odinmod.odin.utils.Colors
 import me.odinmod.odin.utils.ui.HoverHandler
-import me.odinmod.odin.utils.ui.MouseUtils.isAreaHovered
 import me.odinmod.odin.utils.ui.animations.LinearAnimation
+import me.odinmod.odin.utils.ui.isAreaHovered
 import me.odinmod.odin.utils.ui.rendering.NVGRenderer
 
 /**
@@ -25,7 +25,7 @@ class DropdownSetting(
     private val toggleAnimation = LinearAnimation<Float>(200)
     private val hoverHandler = HoverHandler(150)
 
-    override fun render(x: Float, y: Float, mouseX: Double, mouseY: Double): Float {
+    override fun render(x: Float, y: Float, mouseX: Float, mouseY: Float): Float {
         super.render(x, y, mouseX, mouseY)
         val height = getHeight()
 
@@ -46,7 +46,7 @@ class DropdownSetting(
         return height
     }
 
-    override fun mouseClicked(mouseX: Double, mouseY: Double, mouseButton: Int): Boolean {
+    override fun mouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int): Boolean {
         if (mouseButton != 0 || !isHovered) return false
         enabled = !enabled
         toggleAnimation.start()

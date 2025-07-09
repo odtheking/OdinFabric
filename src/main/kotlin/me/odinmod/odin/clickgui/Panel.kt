@@ -8,7 +8,7 @@ import me.odinmod.odin.features.ModuleManager
 import me.odinmod.odin.features.impl.render.ClickGUIModule
 import me.odinmod.odin.features.impl.render.PlayerSize
 import me.odinmod.odin.utils.Colors
-import me.odinmod.odin.utils.ui.MouseUtils.isAreaHovered
+import me.odinmod.odin.utils.ui.isAreaHovered
 import me.odinmod.odin.utils.ui.rendering.NVGRenderer
 import kotlin.math.floor
 
@@ -44,10 +44,10 @@ class Panel(private val category: Category) {
     private var previousHeight = 0f
     private var scrollOffset = 0f
 
-    fun draw(mouseX: Double, mouseY: Double) {
+    fun draw(mouseX: Float, mouseY: Float) {
         if (dragging) {
-            panelSetting.x = floor(x2 + mouseX).toFloat()
-            panelSetting.y = floor(y2 + mouseY).toFloat()
+            panelSetting.x = floor(x2 + mouseX)
+            panelSetting.y = floor(y2 + mouseY)
         }
 
         NVGRenderer.dropShadow(panelSetting.x, panelSetting.y, WIDTH, (previousHeight + 10f).coerceAtLeast(HEIGHT), 10f, 3f, 5f)
@@ -79,11 +79,11 @@ class Panel(private val category: Category) {
         return true
     }
 
-    fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+    fun mouseClicked(mouseX: Float, mouseY: Float, button: Int): Boolean {
         if (isHovered) {
             if (button == 0) {
-                x2 = (panelSetting.x - mouseX).toFloat()
-                y2 = (panelSetting.y - mouseY).toFloat()
+                x2 = (panelSetting.x - mouseX)
+                y2 = (panelSetting.y - mouseY)
                 dragging = true
                 return true
             } else if (button == 1) {

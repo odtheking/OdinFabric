@@ -12,6 +12,8 @@ import me.odinmod.odin.utils.Colors
 import me.odinmod.odin.utils.ui.HoverHandler
 import me.odinmod.odin.utils.ui.animations.LinearAnimation
 import me.odinmod.odin.utils.ui.rendering.NVGRenderer
+import me.odinmod.odin.utils.ui.scaledMouseX
+import me.odinmod.odin.utils.ui.scaledMouseY
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.text.Text
@@ -62,8 +64,8 @@ object ClickGUI : Screen(Text.of("Click GUI")) {
             NVGRenderer.globalAlpha(openAnim.get(0f, 1f))
         }
 
-        for (i in 0 until panels.size) { panels[i].draw(mc.mouse.x, mc.mouse.y) }
-        SearchBar.draw(1920f / 2f - 175f, 1080f - 110f, mc.mouse.x, mc.mouse.y)
+        for (i in 0 until panels.size) { panels[i].draw(scaledMouseX, scaledMouseY) }
+        SearchBar.draw(1920f / 2f - 175f, 1080f - 110f, scaledMouseX, scaledMouseY)
         desc.render()
 
         NVGRenderer.endFrame()
@@ -100,9 +102,9 @@ object ClickGUI : Screen(Text.of("Click GUI")) {
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        SearchBar.mouseClicked(mc.mouse.x, mc.mouse.y, button)
+        SearchBar.mouseClicked(scaledMouseX, scaledMouseY, button)
         for (i in panels.size - 1 downTo 0) {
-            if (panels[i].mouseClicked(mc.mouse.x, mc.mouse.y, button)) return true
+            if (panels[i].mouseClicked(scaledMouseX, scaledMouseY, button)) return true
         }
         return super.mouseClicked(mouseX, mouseY, button)
     }

@@ -8,7 +8,7 @@ import me.odinmod.odin.clickgui.settings.RenderableSetting
 import me.odinmod.odin.clickgui.settings.Saving
 import me.odinmod.odin.features.impl.render.ClickGUIModule
 import me.odinmod.odin.utils.Colors
-import me.odinmod.odin.utils.ui.MouseUtils.isAreaHovered
+import me.odinmod.odin.utils.ui.isAreaHovered
 import me.odinmod.odin.utils.ui.rendering.NVGRenderer
 import net.minecraft.client.util.InputUtil
 import org.lwjgl.glfw.GLFW
@@ -34,7 +34,7 @@ class KeybindSetting(
             keyNameWidth = NVGRenderer.textWidth(value.localizedText.string, 16f, NVGRenderer.defaultFont)
         }
 
-    override fun render(x: Float, y: Float, mouseX: Double, mouseY: Double): Float {
+    override fun render(x: Float, y: Float, mouseX: Float, mouseY: Float): Float {
         super.render(x, y, mouseX, mouseY)
         if (keyNameWidth < 0) keyNameWidth = NVGRenderer.textWidth(value.localizedText.string, 16f, NVGRenderer.defaultFont)
         val height = getHeight()
@@ -53,7 +53,7 @@ class KeybindSetting(
         return height
     }
 
-    override fun mouseClicked(mouseX: Double, mouseY: Double, mouseButton: Int): Boolean {
+    override fun mouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int): Boolean {
         if (listening) {
             key = InputUtil.Type.MOUSE.createFromCode(mouseButton)
             listening = false
