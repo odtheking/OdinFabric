@@ -15,6 +15,7 @@ import me.odinmod.odin.utils.render.drawFilledBox
 import me.odinmod.odin.utils.render.drawWireFrameBox
 import me.odinmod.odin.utils.renderBoundingBox
 import meteordevelopment.orbit.EventHandler
+import net.minecraft.world.RaycastContext
 
 object CustomHighlight : Module(
     name = "Custom Highlight",
@@ -34,7 +35,7 @@ object CustomHighlight : Module(
         entities.forEach { entity ->
             val boundingBox = entity.renderBoundingBox
             val color = highlightMap[entity.displayName?.string] ?: this.color
-            val canSee = mc.player?.canSee(entity) ?: false
+            val canSee = mc.player?.canSee(entity, RaycastContext.ShapeType.VISUAL, RaycastContext.FluidHandling.NONE, entity.eyeY) ?: false
 
             when (renderStyle) {
                 0 -> event.context.drawWireFrameBox(boundingBox, color, depth = !canSee)

@@ -102,14 +102,11 @@ object Etherwarp : Module(
         }
     }
 
-    private fun getEtherPos(position: Vec3d?, yaw: Float, pitch: Float, distance: Double, returnEnd: Boolean = false): EtherPos {
+    private fun getEtherPos(position: Vec3d?, distance: Double, returnEnd: Boolean = false): EtherPos {
         val startPos = position?.addVec(y = 1.54) ?: return EtherPos.NONE
-        val endPos = getLook(yaw, pitch).normalize().multiply(distance).add(startPos)
+        val endPos = mc.player?.rotationVector?.multiply(distance)?.add(startPos) ?: return EtherPos.NONE
         return traverseVoxels(startPos, endPos).takeUnless { it == EtherPos.NONE && returnEnd } ?: EtherPos(true, endPos.toBlockPos(), null)
     }
-
-    fun getEtherPos(position: Vec3d?, distance: Double): EtherPos =
-        mc.player?.let { getEtherPos(position, it.yaw, it.pitch, distance) } ?: EtherPos.NONE
 
     /**
      * Traverses voxels from start to end and returns the first non-air block it hits.
