@@ -185,10 +185,11 @@ object Etherwarp : Module(
         RailBlock::class, SnowBlock::class, RedstoneBlock::class,
         TripwireBlock::class, TripwireHookBlock::class, FireBlock::class,
         AirBlock::class, TorchBlock::class, FlowerPotBlock::class,
-        TallFlowerBlock::class, ShortPlantBlock::class,
+        TallFlowerBlock::class, ShortPlantBlock::class, BushBlock::class,
         SeagrassBlock::class, TallSeagrassBlock::class, SugarCaneBlock::class,
         FluidBlock::class, VineBlock::class, MushroomPlantBlock::class,
-        MushroomBlock::class, PistonHeadBlock::class, DyedCarpetBlock::class
+        MushroomBlock::class, PistonHeadBlock::class, DyedCarpetBlock::class,
+        DryVegetationBlock::class, SmallDripleafBlock::class,
     )
 
     private val validEtherwarpFeetIds = BitSet(0).apply {

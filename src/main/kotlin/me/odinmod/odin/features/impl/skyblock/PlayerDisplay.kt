@@ -10,9 +10,7 @@ import me.odinmod.odin.utils.render.drawStringWidth
 import me.odinmod.odin.utils.skyblock.LocationUtils
 import me.odinmod.odin.utils.skyblock.SkyblockPlayer
 import net.minecraft.text.Text
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
-import java.util.*
+import kotlin.math.abs
 
 object PlayerDisplay : Module(
     name = "Player Display",
@@ -110,13 +108,23 @@ object PlayerDisplay : Module(
     }
 
     private fun generateText(current: Int, max: Int, icon: String): String =
-        "${formatNumberWithCustomSeparator(current)}/${formatNumberWithCustomSeparator(max)}${if (showIcons) icon else ""}"
+        "${formatNumber(current)}/${formatNumber(max)}${if (showIcons) icon else ""}"
 
     private fun generateText(current: Int, icon: String, hideZero: Boolean): String =
-        if (!hideZero || current != 0) "${formatNumberWithCustomSeparator(current)}${if (showIcons) icon else ""}" else ""
+        if (!hideZero || current != 0) "${formatNumber(current)}${if (showIcons) icon else ""}" else ""
 
-    private fun formatNumberWithCustomSeparator(number: Int): String =
-        DecimalFormat("#,###", DecimalFormatSymbols(Locale.US)).format(number)
+    private fun formatNumber(n: Int): String {
+        val absStr = abs(n).toString()
+        val len = absStr.length
+        val sb = StringBuilder(len + len / 3)
+        val rem = len % 3
+        if (rem != 0) sb.append(absStr, 0, rem)
+        for (i in rem until len step 3) {
+            if (sb.isNotEmpty()) sb.append(',')
+            sb.append(absStr, i, i + 3)
+        }
+        return if (n < 0) "-$sb" else sb.toString()
+    }
 
     @JvmStatic
     fun shouldCancelOverlay(type: String): Boolean {

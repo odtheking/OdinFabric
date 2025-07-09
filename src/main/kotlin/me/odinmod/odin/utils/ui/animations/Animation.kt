@@ -1,8 +1,7 @@
 package me.odinmod.odin.utils.ui.animations
 
-abstract class Animation<T>(private var duration: Long) {
+abstract class Animation<T>(private val duration: Long) {
 
-    private var progressOnReverse = 0f
     private var startTime: Long = 0L
     private var animating = false
     private var reversed = false
