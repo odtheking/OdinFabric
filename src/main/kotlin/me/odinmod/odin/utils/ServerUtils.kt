@@ -5,6 +5,7 @@ import meteordevelopment.orbit.EventHandler
 import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket
 import net.minecraft.network.packet.s2c.query.PingResultS2CPacket
 import net.minecraft.util.Util
+import java.util.*
 
 object ServerUtils {
     private var prevTime = 0L
@@ -13,6 +14,12 @@ object ServerUtils {
 
     var currentPing: Int = 0
         private set
+
+    var averagePing: Int = 0
+        private set
+
+    private val pingHistory = LinkedList<Int>()
+    private const val PING_HISTORY_SIZE = 10
 
     @EventHandler
     fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
@@ -24,8 +31,15 @@ object ServerUtils {
                 prevTime = System.currentTimeMillis()
             }
 
-            is PingResultS2CPacket ->
-                currentPing = (Util.getMeasuringTimeMs() - startTime()).toInt().coerceAtLeast(0)
+            is PingResultS2CPacket -> {
+                val newPing = (Util.getMeasuringTimeMs() - startTime()).toInt().coerceAtLeast(0)
+                currentPing = newPing
+
+                pingHistory.add(newPing)
+                if (pingHistory.size > PING_HISTORY_SIZE) pingHistory.removeFirst()
+
+                averagePing = if (pingHistory.isNotEmpty()) pingHistory.sum() / pingHistory.size else newPing
+            }
         }
     }
 }

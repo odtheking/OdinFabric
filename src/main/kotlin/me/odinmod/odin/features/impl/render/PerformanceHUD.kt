@@ -23,7 +23,7 @@ object PerformanceHUD : Module(
         width += drawStringWidth("${mc.currentFps} ", width, 1f, valueColor, true)
 
         width += drawStringWidth("Ping: ", width, 1f, nameColor, true)
-        width += drawStringWidth("${ServerUtils.currentPing}ms", width, 1f, valueColor, true)
+        width += drawStringWidth("${ServerUtils.averagePing}ms", width, 1f, valueColor, true)
 
         width to mc.textRenderer.fontHeight
     }
