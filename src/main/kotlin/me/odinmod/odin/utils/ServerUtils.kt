@@ -38,7 +38,7 @@ object ServerUtils {
                 pingHistory.add(newPing)
                 if (pingHistory.size > PING_HISTORY_SIZE) pingHistory.removeFirst()
 
-                averagePing = if (pingHistory.isNotEmpty()) pingHistory.sum() / pingHistory.size else newPing
+                averagePing = if (pingHistory.isNotEmpty()) ArrayList(pingHistory).sum() / pingHistory.size else newPing
             }
         }
     }

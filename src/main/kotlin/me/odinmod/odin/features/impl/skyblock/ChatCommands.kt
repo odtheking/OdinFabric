@@ -7,6 +7,7 @@ import me.odinmod.odin.events.MessageSentEvent
 import me.odinmod.odin.events.PacketEvent
 import me.odinmod.odin.features.Module
 import me.odinmod.odin.utils.*
+import me.odinmod.odin.utils.handlers.LimitedTickTask
 import me.odinmod.odin.utils.skyblock.LocationUtils
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
@@ -67,7 +68,10 @@ object ChatCommands : Module(
         val msg = result.groups[3]?.value ?: result.groups[7]?.value ?: result.groups[10]?.value ?: return
         if (!msg.startsWith("!")) return
 
-        handleChatCommands(msg, ign, channel)
+        LimitedTickTask(4, 1) {
+            handleChatCommands(msg, ign, channel)
+        }
+        Unit
     }
 
     @EventHandler

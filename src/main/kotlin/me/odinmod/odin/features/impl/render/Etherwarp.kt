@@ -40,7 +40,7 @@ object Etherwarp : Module(
     private val renderFail by BooleanSetting("Show when failed", true, desc = "Shows the box even when the guess failed.").withDependency { render }
     private val failColor by ColorSetting("Fail Color", Colors.MINECRAFT_RED.withAlpha(.5f), allowAlpha = true, desc = "Color of the box if guess failed.").withDependency { renderFail }
     private val renderStyle by SelectorSetting("Render Style", "Outline", listOf("Outline", "Filled", "Filled Outline"), desc = "Style of the box.").withDependency { render }
-    private val useServerPosition by BooleanSetting("Use Server Position", true, desc = "Uses the server position for etherwarp instead of the client position.").withDependency { render }
+    private val useServerPosition by BooleanSetting("Use Server Position", false, desc = "Uses the server position for etherwarp instead of the client position.").withDependency { render }
 
     private val dropdown by DropdownSetting("Sounds", false)
     private val sounds by BooleanSetting("Custom Sounds", false, desc = "Plays the selected custom sound when you etherwarp.").withDependency { dropdown }
@@ -146,13 +146,13 @@ object Etherwarp : Module(
             val currentBlockId = Block.getRawIdFromState(currentBlock.block.defaultState)
 
             if (currentBlockId != 0) {
-                if (inValidEtherwarpFeetIds.get(currentBlockId)) return EtherPos(false, blockPos, currentBlock)
+                if (validEtherwarpFeetIds.get(currentBlockId)) return EtherPos(false, blockPos, currentBlock)
 
                 val footBlockId = Block.getRawIdFromState(chunk.getBlockState(BlockPos(blockPos.x, blockPos.y + 1, blockPos.z)).block.defaultState)
-                if (!inValidEtherwarpFeetIds.get(footBlockId)) return EtherPos(false, blockPos, currentBlock)
+                if (!validEtherwarpFeetIds.get(footBlockId)) return EtherPos(false, blockPos, currentBlock)
 
                 val headBlockId = Block.getRawIdFromState(chunk.getBlockState(BlockPos(blockPos.x, blockPos.y + 2, blockPos.z)).block.defaultState)
-                if (!inValidEtherwarpFeetIds.get(headBlockId)) return EtherPos(false, blockPos, currentBlock)
+                if (!validEtherwarpFeetIds.get(headBlockId)) return EtherPos(false, blockPos, currentBlock)
 
                 return EtherPos(true, blockPos, currentBlock)
             }
@@ -191,7 +191,7 @@ object Etherwarp : Module(
         MushroomBlock::class, PistonHeadBlock::class, DyedCarpetBlock::class
     )
 
-    private val inValidEtherwarpFeetIds = BitSet(0).apply {
+    private val validEtherwarpFeetIds = BitSet(0).apply {
         Registries.BLOCK.forEach { block ->
             if (validTypes.any { it.isInstance(block) }) set(Block.getRawIdFromState(block.defaultState))
         }
