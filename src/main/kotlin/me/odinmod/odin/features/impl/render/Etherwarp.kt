@@ -13,13 +13,12 @@ import me.odinmod.odin.utils.render.drawWireFrameBox
 import me.odinmod.odin.utils.skyblock.Island
 import me.odinmod.odin.utils.skyblock.LocationUtils
 import meteordevelopment.orbit.EventHandler
-import net.minecraft.block.Block
-import net.minecraft.block.BlockState
-import net.minecraft.block.Blocks
+import net.minecraft.block.*
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket
+import net.minecraft.registry.Registries
 import net.minecraft.sound.SoundEvent
 import net.minecraft.sound.SoundEvents
 import net.minecraft.util.Identifier
@@ -147,16 +146,16 @@ object Etherwarp : Module(
             val blockPos = BlockPos(x.toInt(), y.toInt(), z.toInt())
             val chunk = mc.world?.getChunk(ChunkSectionPos.getSectionCoord(blockPos.x), ChunkSectionPos.getSectionCoord(blockPos.z)) ?: return EtherPos.NONE
             val currentBlock = chunk.getBlockState(blockPos).takeIf { it.block is Block } ?: return EtherPos.NONE
-            val currentBlockId = Block.getRawIdFromState(currentBlock)
+            val currentBlockId = Block.getRawIdFromState(currentBlock.block.defaultState)
 
             if (currentBlockId != 0) {
-                if (validEtherwarpFeetIds.get(currentBlockId)) return EtherPos(false, blockPos, currentBlock)
+                if (inValidEtherwarpFeetIds.get(currentBlockId)) return EtherPos(false, blockPos, currentBlock)
 
-                val footBlockId = Block.getRawIdFromState(chunk.getBlockState(BlockPos(blockPos.x, blockPos.y + 1, blockPos.z)))
-                if (!validEtherwarpFeetIds.get(footBlockId)) return EtherPos(false, blockPos, currentBlock)
+                val footBlockId = Block.getRawIdFromState(chunk.getBlockState(BlockPos(blockPos.x, blockPos.y + 1, blockPos.z)).block.defaultState)
+                if (!inValidEtherwarpFeetIds.get(footBlockId)) return EtherPos(false, blockPos, currentBlock)
 
-                val headBlockId = Block.getRawIdFromState(chunk.getBlockState(BlockPos(blockPos.x, blockPos.y + 2, blockPos.z)))
-                if (!validEtherwarpFeetIds.get(headBlockId)) return EtherPos(false, blockPos, currentBlock)
+                val headBlockId = Block.getRawIdFromState(chunk.getBlockState(BlockPos(blockPos.x, blockPos.y + 2, blockPos.z)).block.defaultState)
+                if (!inValidEtherwarpFeetIds.get(headBlockId)) return EtherPos(false, blockPos, currentBlock)
 
                 return EtherPos(true, blockPos, currentBlock)
             }
@@ -182,24 +181,22 @@ object Etherwarp : Module(
         return EtherPos.NONE
     }
 
-    private val validEtherwarpFeetIds = BitSet(176).apply {
-        arrayOf(
-            Blocks.AIR, Blocks.FIRE, Blocks.SKELETON_SKULL, Blocks.PLAYER_HEAD, Blocks.LEVER,
-            Blocks.TORCH, Blocks.TRIPWIRE_HOOK, Blocks.TRIPWIRE,
-            Blocks.RAIL, Blocks.ACTIVATOR_RAIL, Blocks.SNOW, Blocks.CARROTS, Blocks.WHEAT, Blocks.POTATOES,
-            Blocks.NETHER_WART, Blocks.PUMPKIN_STEM, Blocks.MELON_STEM, Blocks.REDSTONE_TORCH, Blocks.REDSTONE_WIRE,
-            Blocks.POPPY, Blocks.DANDELION, Blocks.OAK_SAPLING, Blocks.FLOWER_POT, Blocks.DEAD_BUSH,
-            Blocks.LADDER, Blocks.SUNFLOWER, Blocks.REPEATER, Blocks.COMPARATOR, Blocks.COBWEB, Blocks.SHORT_GRASS,
-            Blocks.SEAGRASS, Blocks.TALL_SEAGRASS, Blocks.SUGAR_CANE,
-            Blocks.WATER, Blocks.LAVA, Blocks.VINE, Blocks.BROWN_MUSHROOM, Blocks.RED_MUSHROOM, Blocks.PISTON_HEAD,
+    private val validTypes = setOf(
+        ButtonBlock::class, CarpetBlock::class, SkullBlock::class,
+        WallSkullBlock::class, LadderBlock::class, SaplingBlock::class,
+        FlowerBlock::class, StemBlock::class, CropBlock::class,
+        RailBlock::class, SnowBlock::class, RedstoneBlock::class,
+        TripwireBlock::class, TripwireHookBlock::class, FireBlock::class,
+        AirBlock::class, TorchBlock::class, FlowerPotBlock::class,
+        TallFlowerBlock::class, ShortPlantBlock::class,
+        SeagrassBlock::class, TallSeagrassBlock::class, SugarCaneBlock::class,
+        FluidBlock::class, VineBlock::class, MushroomPlantBlock::class,
+        MushroomBlock::class, PistonHeadBlock::class, DyedCarpetBlock::class
+    )
 
-            // All carpets
-            Blocks.WHITE_CARPET, Blocks.ORANGE_CARPET, Blocks.MAGENTA_CARPET, Blocks.LIGHT_BLUE_CARPET, Blocks.YELLOW_CARPET,
-            Blocks.LIME_CARPET, Blocks.PINK_CARPET, Blocks.GRAY_CARPET, Blocks.LIGHT_GRAY_CARPET, Blocks.CYAN_CARPET, Blocks.PURPLE_CARPET,
-            Blocks.BLUE_CARPET, Blocks.BROWN_CARPET, Blocks.GREEN_CARPET, Blocks.RED_CARPET, Blocks.BLACK_CARPET, Blocks.MOSS_CARPET,
-
-            // All buttons
-            Blocks.STONE_BUTTON, Blocks.OAK_BUTTON, Blocks.SPRUCE_BUTTON, Blocks.BIRCH_BUTTON, Blocks.JUNGLE_BUTTON
-        ).forEach { set(Block.getRawIdFromState(it.defaultState)) }
+    private val inValidEtherwarpFeetIds = BitSet(0).apply {
+        Registries.BLOCK.forEach { block ->
+            if (validTypes.any { it.isInstance(block) }) set(Block.getRawIdFromState(block.defaultState))
+        }
     }
 }

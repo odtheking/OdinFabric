@@ -21,7 +21,7 @@ class HUDSetting(
     name: String,
     hud: HudElement,
     private val toggleable: Boolean = false,
-    description: String = "",
+    description: String,
     val module: Module,
 ) : RenderableSetting<HudElement>(name, false, description), Saving {
 
