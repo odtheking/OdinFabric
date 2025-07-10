@@ -29,9 +29,8 @@ class NumberSetting<E>(
     max: Number = 10000,
     increment: Number = 1,
     desc: String,
-    private val unit: String = "",
-    hidden: Boolean = false
-) : RenderableSetting<E>(name, hidden, desc), Saving where E : Number, E : Comparable<E> {
+    private val unit: String = ""
+) : RenderableSetting<E>(name, desc), Saving where E : Number, E : Comparable<E> {
 
     override var value: E = default
         set(value) {

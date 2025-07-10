@@ -15,8 +15,7 @@ class BooleanSetting(
     name: String,
     override val default: Boolean = false,
     desc: String,
-    hidden: Boolean = false
-) : RenderableSetting<Boolean>(name, hidden, desc), Saving {
+) : RenderableSetting<Boolean>(name, desc), Saving {
 
     override var value: Boolean = default
     var enabled: Boolean by this::value

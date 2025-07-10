@@ -19,9 +19,8 @@ class SelectorSetting(
     name: String,
     default: String,
     private var options: List<String>,
-    desc: String,
-    hidden: Boolean = false
-) : RenderableSetting<Int>(name, hidden, desc), Saving {
+    desc: String
+) : RenderableSetting<Int>(name, desc), Saving {
 
     override val default: Int = optionIndex(default)
 

@@ -24,9 +24,8 @@ class ColorSetting(
     name: String,
     override val default: Color,
     private var allowAlpha: Boolean = false,
-    desc: String,
-    hidden: Boolean = false
-) : RenderableSetting<Color>(name, hidden, desc), Saving {
+    desc: String
+) : RenderableSetting<Color>(name, desc), Saving {
 
     override var value: Color = default.copy()
 

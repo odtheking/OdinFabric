@@ -23,7 +23,7 @@ class HUDSetting(
     private val toggleable: Boolean = false,
     description: String,
     val module: Module,
-) : RenderableSetting<HudElement>(name, false, description), Saving {
+) : RenderableSetting<HudElement>(name, description), Saving {
 
     constructor(name: String, x: Float, y: Float, scale: Float, toggleable: Boolean, description: String, module: Module, draw: DrawContext.(Boolean) -> Pair<Number, Number>)
             : this(name, HudElement(x, y, scale, toggleable, draw), toggleable, description, module)

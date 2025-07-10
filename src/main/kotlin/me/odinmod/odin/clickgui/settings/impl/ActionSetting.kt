@@ -10,9 +10,8 @@ import me.odinmod.odin.utils.ui.rendering.NVGRenderer
 class ActionSetting(
     name: String,
     desc: String,
-    hidden: Boolean = false,
     override val default: () -> Unit = {}
-) : RenderableSetting<() -> Unit>(name, hidden, desc) {
+) : RenderableSetting<() -> Unit>(name, desc) {
 
     override var value: () -> Unit = default
 

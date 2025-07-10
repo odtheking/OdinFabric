@@ -13,7 +13,6 @@ import kotlin.reflect.KProperty
  */
 abstract class Setting<T> (
     val name: String,
-    var hidden: Boolean = false,
     var description: String = "",
 ) : ReadWriteProperty<Module, T>, PropertyDelegateProvider<Module, ReadWriteProperty<Module, T>> {
 
@@ -26,6 +25,13 @@ abstract class Setting<T> (
      * Value of the setting
      */
     abstract var value: T
+
+    protected var hidden = false
+
+    fun hide(): Setting<T> {
+        hidden = true
+        return this
+    }
 
     /**
      * Dependency for if it should be shown in the [click gui][Module].

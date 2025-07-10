@@ -7,9 +7,8 @@ import me.odinmod.odin.utils.ui.isAreaHovered
 
 abstract class RenderableSetting<T>(
     name: String,
-    hidden: Boolean = false,
     description: String
-) : Setting<T>(name, hidden, description) {
+) : Setting<T>(name, description) {
 
     private val hoverHandler = HoverHandler(750, 200)
     protected val width = Panel.WIDTH

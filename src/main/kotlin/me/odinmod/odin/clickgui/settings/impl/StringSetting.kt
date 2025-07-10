@@ -15,9 +15,8 @@ class StringSetting(
     name: String,
     override val default: String = "",
     private var length: Int = 32,
-    desc: String,
-    hidden: Boolean = false
-) : RenderableSetting<String>(name, hidden, desc), Saving {
+    desc: String
+) : RenderableSetting<String>(name, desc), Saving {
 
     override var value: String = default
         set(value) {

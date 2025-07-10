@@ -17,7 +17,7 @@ class DropdownSetting(
     name: String,
     override val default: Boolean = false,
     desc: String = ""
-) : RenderableSetting<Boolean>(name, false, desc) {
+) : RenderableSetting<Boolean>(name, desc) {
 
     override var value: Boolean = default
     private var enabled: Boolean by this::value

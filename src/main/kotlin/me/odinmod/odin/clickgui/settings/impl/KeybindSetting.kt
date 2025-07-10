@@ -16,11 +16,10 @@ import org.lwjgl.glfw.GLFW
 class KeybindSetting(
     name: String,
     override val default: InputUtil.Key,
-    desc: String,
-    hidden: Boolean = false
-) : RenderableSetting<InputUtil.Key>(name, hidden, desc), Saving {
+    desc: String
+) : RenderableSetting<InputUtil.Key>(name, desc), Saving {
 
-    constructor(name: String, defaultKeyCode: Int, desc: String = "", hidden: Boolean = false) : this(name, InputUtil.Type.KEYSYM.createFromCode(defaultKeyCode), desc, hidden)
+    constructor(name: String, defaultKeyCode: Int, desc: String = "", hidden: Boolean = false) : this(name, InputUtil.Type.KEYSYM.createFromCode(defaultKeyCode), desc)
 
     override var value: InputUtil.Key = default
     var onPress: (() -> Unit)? = null
