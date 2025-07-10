@@ -39,7 +39,7 @@ abstract class Setting<T> (
         value = default
     }
 
-    val shouldBeVisible: Boolean
+    val isVisible: Boolean
         get() {
             return (visibilityDependency?.invoke() ?: true) && !hidden
         }

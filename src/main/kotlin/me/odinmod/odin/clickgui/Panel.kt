@@ -29,25 +29,21 @@ class Panel(private val category: Category) {
             .sortedByDescending { NVGRenderer.textWidth(it.name, 16f, NVGRenderer.defaultFont) }
             .forEach { add(ModuleButton(it, this@Panel)) }
     }
-    private val lastModuleButton: ModuleButton? = moduleButtons.lastOrNull()
-    private val isModuleButtonEmpty: Boolean = moduleButtons.isEmpty()
+    private val lastModuleButton by lazy { moduleButtons.lastOrNull() }
 
-    val panelSetting = ClickGUIModule.panelSetting[category] ?: ClickGUIModule.PanelData()
-
-    private var dragging = false
-
-    private var length = 0f
-    private var x2 = 0f
-    private var y2 = 0f
+    val panelSetting = ClickGUIModule.panelSetting[category] ?: throw IllegalStateException("Panel setting for category $category is not initialized")
 
     private val textWidth = NVGRenderer.textWidth(category.displayName, 22f, NVGRenderer.defaultFont)
     private var previousHeight = 0f
     private var scrollOffset = 0f
+    private var dragging = false
+    private var deltaX = 0f
+    private var deltaY = 0f
 
     fun draw(mouseX: Float, mouseY: Float) {
         if (dragging) {
-            panelSetting.x = floor(x2 + mouseX)
-            panelSetting.y = floor(y2 + mouseY)
+            panelSetting.x = floor(deltaX + mouseX)
+            panelSetting.y = floor(deltaY + mouseY)
         }
 
         NVGRenderer.dropShadow(panelSetting.x, panelSetting.y, WIDTH, (previousHeight + 10f).coerceAtLeast(HEIGHT), 10f, 3f, 5f)
@@ -55,35 +51,32 @@ class Panel(private val category: Category) {
         NVGRenderer.drawHalfRoundedRect(panelSetting.x, panelSetting.y, WIDTH, HEIGHT, gray26.rgba, 5f, true)
         NVGRenderer.text(category.displayName, panelSetting.x + WIDTH / 2f - textWidth / 2, panelSetting.y + HEIGHT / 2f - 11, 22f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
 
-        var startY = scrollOffset + HEIGHT
-
         if (scrollOffset != 0f) NVGRenderer.pushScissor(panelSetting.x, panelSetting.y + HEIGHT, WIDTH, previousHeight - HEIGHT + 10f)
 
-        if (panelSetting.extended && !isModuleButtonEmpty) {
+        var startY = scrollOffset + HEIGHT
+        if (panelSetting.extended) {
             for (button in moduleButtons) {
                 if (!button.module.name.contains(SearchBar.currentSearch, true)) continue
-                button.y = startY + panelSetting.y
-                startY += button.draw(mouseX, mouseY)
+                startY += button.draw(panelSetting.x, startY + panelSetting.y)
             }
-            length = startY + 5f
         }
         previousHeight = startY
 
-        if (!isModuleButtonEmpty) NVGRenderer.drawHalfRoundedRect(panelSetting.x, panelSetting.y + startY, WIDTH, 10f, lastModuleButton?.color?.rgba ?: gray38.rgba, 5f, false)
+        NVGRenderer.drawHalfRoundedRect(panelSetting.x, panelSetting.y + startY, WIDTH, 10f, if (lastModuleButton?.module?.enabled == true) ClickGUIModule.clickGUIColor.rgba else gray38.rgba, 5f, false)
         if (scrollOffset != 0f) NVGRenderer.popScissor()
     }
 
     fun handleScroll(amount: Int): Boolean {
         if (!isMouseOverExtended) return false
-        scrollOffset = (scrollOffset + amount).coerceIn(-length + scrollOffset + 72f, 0f)
+        scrollOffset = (scrollOffset + amount).coerceIn(-previousHeight + scrollOffset + 72f, 0f)
         return true
     }
 
     fun mouseClicked(mouseX: Float, mouseY: Float, button: Int): Boolean {
-        if (isHovered) {
+        if (isAreaHovered(panelSetting.x, panelSetting.y, WIDTH, HEIGHT)) {
             if (button == 0) {
-                x2 = (panelSetting.x - mouseX)
-                y2 = (panelSetting.y - mouseY)
+                deltaX = (panelSetting.x - mouseX)
+                deltaY = (panelSetting.y - mouseY)
                 dragging = true
                 return true
             } else if (button == 1) {
@@ -127,9 +120,7 @@ class Panel(private val category: Category) {
         }
     }
 
-    private inline val isHovered get() = isAreaHovered(panelSetting.x, panelSetting.y, WIDTH, HEIGHT)
-
-    private inline val isMouseOverExtended get() = panelSetting.extended && isAreaHovered(panelSetting.x, panelSetting.y, WIDTH, length.coerceAtLeast(HEIGHT))
+    private inline val isMouseOverExtended get() = panelSetting.extended && isAreaHovered(panelSetting.x, panelSetting.y, WIDTH, previousHeight.coerceAtLeast(HEIGHT))
 
     companion object {
         const val WIDTH = 240f

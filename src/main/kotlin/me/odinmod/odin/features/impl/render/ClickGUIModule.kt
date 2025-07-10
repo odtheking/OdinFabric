@@ -39,8 +39,7 @@ object ClickGUIModule : Module(
 
     fun resetPositions() {
         Category.entries.forEach {
-            val incr = 10f + 260f * it.ordinal
-            panelSetting[it] = PanelData(incr, 10f, true)
+            panelSetting[it] = PanelData(10f + 260f * it.ordinal, 10f, true)
         }
     }
 }

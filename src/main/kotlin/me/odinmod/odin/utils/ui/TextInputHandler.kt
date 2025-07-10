@@ -46,7 +46,12 @@ class TextInputHandler(
         saveState()
     }
 
-    fun draw() {
+    private var previousMousePos = 0f to 0f
+
+    fun draw(mouseX: Float, mouseY: Float) {
+        if (previousMousePos != mouseX to mouseY) mouseDragged(mouseX)
+        previousMousePos = mouseX to mouseY
+
         NVGRenderer.pushScissor(x, y, width, height)
         if (selectionWidth != 0f) NVGRenderer.rect(x + caretX + 4f, y, selectionWidth, height, Colors.MINECRAFT_BLUE.rgba, 4f)
         NVGRenderer.popScissor()
@@ -95,7 +100,7 @@ class TextInputHandler(
         dragging = false
     }
 
-    fun mouseDragged(mouseX: Float) {
+    private fun mouseDragged(mouseX: Float) {
         if (dragging) caretFromMouse(mouseX)
     }
 

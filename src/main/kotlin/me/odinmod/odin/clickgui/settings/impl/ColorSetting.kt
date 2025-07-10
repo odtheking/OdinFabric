@@ -49,20 +49,27 @@ class ColorSetting(
     private var hexString = value.hex(allowAlpha)
         set(value) {
             if (value == field) return
-            if (value.length > 8 && allowAlpha) return
-            if (value.length > 6 && !allowAlpha) return
-            field = value.filter { it in '0'..'9' || it in 'A'..'F' || it in 'a'..'f' }
+            field = value
             hexWidth = NVGRenderer.textWidth(field, 16f, NVGRenderer.defaultFont)
         }
 
     private var hexWidth = -1f
 
     private val textInputHandler = TextInputHandler(
-        textProvider = { hexString },
-        textSetter = { hexString = it }
+        textProvider = { textInputValue },
+        textSetter = { textInputValue = it }
     )
 
-    private var previousMousePos = 0f to 0f
+    private var textInputValue
+        get() = hexString
+        set(textValue) {
+            if (textValue.length > 8 && allowAlpha) return
+            if (textValue.length > 6 && !allowAlpha) return
+            hexString = textValue.filter { it in '0'..'9' || it in 'A'..'F' || it in 'a'..'f' }
+
+            if (hexString.length == 8 && allowAlpha || hexString.length == 6 && !allowAlpha)
+                value = Color(if (allowAlpha) hexString else hexString.padEnd(8, 'F'))
+        }
 
     override fun render(x: Float, y: Float, mouseX: Float, mouseY: Float): Float {
         super.render(x, y, mouseX, mouseY)
@@ -71,92 +78,57 @@ class ColorSetting(
             hexWidth = NVGRenderer.textWidth(hexString, 16f, NVGRenderer.defaultFont)
         }
 
-        if (previousMousePos != mouseX to mouseY) textInputHandler.mouseDragged(mouseX)
-        previousMousePos = mouseX to mouseY
-
         NVGRenderer.text(name, x + 6f, y + defaultHeight / 2f - 8f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
         NVGRenderer.rect(x + width - 40f, y + defaultHeight / 2f - 10f, 34f, 20f, value.rgba, 5f)
-        NVGRenderer.hollowRect(x + width - 40f, y + defaultHeight / 2f - 10f, 34f, 20f, 1.5f, value.withAlpha(1f).darker().rgba, 5f)
+        NVGRenderer.hollowRect(x + width - 40f, y + defaultHeight / 2f - 10f, 34f, 20f, 2f, value.withAlpha(1f).darker().rgba, 5f)
 
         if (!extended && !expandAnim.isAnimating()) return defaultHeight
 
         if (expandAnim.isAnimating()) NVGRenderer.pushScissor(x, y + defaultHeight, width, getHeight() - defaultHeight)
         // SATURATION AND BRIGHTNESS
-        NVGRenderer.gradientRect(x + 10f, y + 38f, width - 20f, 170f, Colors.WHITE.rgba, value.hsbMax().rgba, Gradient.LeftToRight, 5f)
-        NVGRenderer.gradientRect(x + 10f, y + 38f, width - 20f, 170f, Colors.TRANSPARENT.rgba, Colors.BLACK.rgba, Gradient.TopToBottom, 5f)
+        NVGRenderer.gradientRect(x + 6f, y + defaultHeight + 4f, width - 12f, 169f, Colors.WHITE.rgba, value.hsbMax().rgba, Gradient.LeftToRight, 5f)
+        NVGRenderer.gradientRect(x + 6f, y + defaultHeight + 4f, width - 12f, 170f, Colors.TRANSPARENT.rgba, Colors.BLACK.rgba, Gradient.TopToBottom, 5f)
 
         val animatedSat = mainSliderAnim.get(mainSliderPrevSat, value.saturation, false)
         val animatedBright = mainSliderAnim.get(mainSliderPrevBright, value.brightness, false)
-        val sbPointer = Pair((x + 10f + animatedSat * 220), (y + 38f + (1 - animatedBright) * 170))
+        val sbPointer = Pair((x + 6f + animatedSat * 220), (y + 38f + (1 - animatedBright) * 170))
         NVGRenderer.dropShadow(sbPointer.first - 8.5f, sbPointer.second - 8.5f, 17f, 17f, 2.5f, 2.5f, 9f)
-        NVGRenderer.circle(sbPointer.first, sbPointer.second, 9f, value.darker(0.5f).rgba)
-        NVGRenderer.circle(sbPointer.first, sbPointer.second, 7f, value.rgba)
+        NVGRenderer.circle(sbPointer.first, sbPointer.second, 8f, Colors.WHITE.rgba)
+        NVGRenderer.circle(sbPointer.first, sbPointer.second, 7f, value.withAlpha(1f).rgba)
 
         // HUE
-        NVGRenderer.image(ClickGUI.hueImage, x + 10f, y + 214f, width - 20f, 15f, 5f)
-        NVGRenderer.hollowRect(x + 10f, y + 214f, width - 20f, 15f, 1f, gray38.rgba, 5f)
+        NVGRenderer.image(ClickGUI.hueImage, x + 6f, y + 212f, width - 12f, 15f, 5f)
+        NVGRenderer.hollowRect(x + 6f, y + 212f, width - 12f, 15f, 1f, gray38.rgba, 5f)
 
-        val huePos = x + 10f + hueSliderAnim.get(hueSliderPrev, value.hue, false) * 221f to y + 221f
+        val huePos = x + 6f + hueSliderAnim.get(hueSliderPrev, value.hue, false) * 219f to y + 219f
         NVGRenderer.dropShadow(huePos.first - 8.5f, huePos.second - 8.5f, 17f, 17f, 2.5f, 2.5f, 9f)
-        NVGRenderer.circle(huePos.first, huePos.second, 9f, value.hsbMax().darker(0.5f).rgba)
-        NVGRenderer.circle(huePos.first, huePos.second, 7f, value.withAlpha(1f).hsbMax().rgba)
+        NVGRenderer.circle(huePos.first, huePos.second, 8f, Colors.WHITE.rgba)
+        NVGRenderer.circle(huePos.first, huePos.second, 7f, value.hsbMax().withAlpha(1f).rgba)
 
         // ALPHA
         if (allowAlpha) {
-            NVGRenderer.gradientRect(x + 10f, y + 235f, width - 20f, 15f, Colors.TRANSPARENT.rgba, value.withAlpha(1f).rgba, Gradient.LeftToRight, 5f)
+            NVGRenderer.gradientRect(x + 6f, y + 232f, width - 12f, 15f, Colors.TRANSPARENT.rgba, value.withAlpha(1f).rgba, Gradient.LeftToRight, 5f)
 
-            val alphaPos = Pair((x + 10f + alphaSliderAnim.get(alphaSliderPrev, value.alphaFloat, false) * 220f), y + 243f)
+            val alphaPos = Pair((x + 6f + alphaSliderAnim.get(alphaSliderPrev, value.alphaFloat, false) * 217f), y + 240f)
             NVGRenderer.dropShadow(alphaPos.first - 8.5f, alphaPos.second - 8.5f, 17f, 17f, 2.5f, 2.5f, 9f)
-            NVGRenderer.circle(alphaPos.first, alphaPos.second, 9f, Colors.WHITE.withAlpha(value.alphaFloat).darker(.5f).rgba)
-            NVGRenderer.circle(alphaPos.first, alphaPos.second, 7f, Colors.WHITE.withAlpha(value.alphaFloat).rgba)
+            NVGRenderer.circle(alphaPos.first, alphaPos.second, 8f, Colors.WHITE.darker(.5f).rgba)
+            NVGRenderer.circle(alphaPos.first, alphaPos.second, 7f, Colors.WHITE.rgba)
         }
 
-        when (section) {
-            0 -> {
-                val newSaturation = (mouseX.toFloat() - (x + 10f)) / 220f
-                val newBrightness = -((mouseY.toFloat() - (y + 38f)) - 170f) / 170f
-                if (newSaturation != value.saturation || newBrightness != value.brightness) {
-                    mainSliderPrevSat = mainSliderAnim.get(mainSliderPrevSat, value.saturation, false)
-                    mainSliderPrevBright = mainSliderAnim.get(mainSliderPrevBright, value.brightness, false)
-                    mainSliderAnim.start()
-                    value.saturation = newSaturation.coerceIn(0f, 1f)
-                    value.brightness = newBrightness.coerceIn(0f, 1f)
-                }
-            }
-            1 -> {
-                val newHue = (mouseX.toFloat() - (x + 10f)) / (width - 20f)
-                if (newHue != value.hue) {
-                    hueSliderPrev = hueSliderAnim.get(hueSliderPrev, value.hue, false)
-                    hueSliderAnim.start()
-                    value.hue = newHue.coerceIn(0f, 1f)
-                }
-            }
-            2 -> {
-                val newAlpha = (mouseX.toFloat() - (x + 10f)) / (width - 20f)
-                if (newAlpha != value.alphaFloat) {
-                    alphaSliderPrev = alphaSliderAnim.get(alphaSliderPrev, value.alphaFloat, false)
-                    alphaSliderAnim.start()
-                    value.alphaFloat = newAlpha.coerceIn(0f, 1f)
-                }
-            }
-        }
+        handleColorDrag(mouseX, mouseY, x, y, width)
 
         if (section != null) hexString = value.hex(allowAlpha)
-        else {
-            if (hexString.length == 8 && allowAlpha || hexString.length == 6 && !allowAlpha)
-                value = Color(if (allowAlpha) hexString else hexString.padEnd(8, 'F'))
-        }
 
         val rectX = x + (width - width / 2) / 2
         val actualHeight = defaultHeight + if (allowAlpha) 250f else 230f
 
-        NVGRenderer.rect(rectX, y + actualHeight - 26f, width / 2, 24f, gray38.rgba, 4f)
-        NVGRenderer.hollowRect(rectX, y + actualHeight - 26f, width / 2, 24f, 2f, ClickGUIModule.clickGUIColor.rgba, 4f)
+        NVGRenderer.rect(rectX, y + actualHeight - 28f, width / 2, 24f, gray38.rgba, 4f)
+        NVGRenderer.hollowRect(rectX, y + actualHeight - 28f, width / 2, 24f, 2f, ClickGUIModule.clickGUIColor.rgba, 4f)
 
         textInputHandler.x = rectX + (width / 4) - (hexWidth / 2)
-        textInputHandler.y = y + actualHeight - 24f
+        textInputHandler.y = y + actualHeight - 26f
         textInputHandler.width = width / 2
-        textInputHandler.draw()
+        textInputHandler.draw(mouseX, mouseY)
 
         if (expandAnim.isAnimating()) NVGRenderer.popScissor()
         return getHeight()
@@ -173,9 +145,9 @@ class ColorSetting(
         textInputHandler.mouseClicked(mouseX, mouseY, mouseButton)
 
         section = when {
-            isAreaHovered(lastX + 10f, lastY + 38f, width - 20f, 170f) -> 0 // sat & brightness
-            isAreaHovered(lastX + 10f, lastY + 214f, width - 20f, 15f) -> 1 // hue
-            isAreaHovered(lastX + 10f, lastY + 235f, width - 20f, 15f) && allowAlpha -> 2 // alpha
+            isAreaHovered(lastX + 6f, lastY + 38f, width - 12f, 170f) -> 0 // sat & brightness
+            isAreaHovered(lastX + 6f, lastY + 214f, width - 12f, 15f) -> 1 // hue
+            isAreaHovered(lastX + 6f, lastY + 235f, width - 12f, 15f) && allowAlpha -> 2 // alpha
             else -> null
         }
 
@@ -207,4 +179,41 @@ class ColorSetting(
     override fun read(element: JsonElement?) {
         if (element?.asString?.startsWith("#") == true) value = Color(element.asString.drop(1))
     }
+
+    private fun handleColorDrag(mouseX: Float, mouseY: Float, x: Float, y: Float, width: Float) {
+        when (section) {
+            0 -> { // Saturation & Brightness
+                val newSaturation = ((mouseX - (x + 6f)) / (width - 12f)).coerceIn(0f, 1f)
+                val newBrightness = (1f - ((mouseY - (y + 38f)) / 170f)).coerceIn(0f, 1f)
+
+                if (newSaturation != value.saturation || newBrightness != value.brightness) {
+                    mainSliderPrevSat = mainSliderAnim.get(mainSliderPrevSat, value.saturation, false)
+                    mainSliderPrevBright = mainSliderAnim.get(mainSliderPrevBright, value.brightness, false)
+                    mainSliderAnim.start()
+
+                    value.saturation = newSaturation
+                    value.brightness = newBrightness
+                }
+            }
+
+            1 -> { // Hue
+                val newHue = ((mouseX - (x + 6f)) / (width - 12f)).coerceIn(0f, 1f)
+                if (newHue != value.hue) {
+                    hueSliderPrev = hueSliderAnim.get(hueSliderPrev, value.hue, false)
+                    hueSliderAnim.start()
+                    value.hue = newHue
+                }
+            }
+
+            2 -> { // Alpha
+                val newAlpha = ((mouseX - (x + 6f)) / (width - 12f)).coerceIn(0f, 1f)
+                if (newAlpha != value.alphaFloat) {
+                    alphaSliderPrev = alphaSliderAnim.get(alphaSliderPrev, value.alphaFloat, false)
+                    alphaSliderAnim.start()
+                    value.alphaFloat = newAlpha
+                }
+            }
+        }
+    }
+
 }

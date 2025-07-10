@@ -72,12 +72,6 @@ class NumberSetting<E>(
             field = value
         }
 
-    private fun getDisplay(): String =
-        if (valueDouble - floor(valueDouble) == 0.0)
-            "${(valueInt * 100.0).roundToInt() / 100}${unit}"
-        else
-            "${(valueDouble * 100.0).roundToInt() / 100.0}${unit}"
-
     override fun render(x: Float, y: Float, mouseX: Float, mouseY: Float): Float {
         super.render(x, y, mouseX, mouseY)
         if (valueWidth < 0) {
@@ -89,7 +83,7 @@ class NumberSetting<E>(
         handler.handle(x, y + height / 2, width, height / 2)
 
         if (listening) {
-            val newPercentage = ((mouseX.toFloat() - (x + 6f)) / (width - 12f)).coerceIn(0f, 1f)
+            val newPercentage = ((mouseX - (x + 6f)) / (width - 12f)).coerceIn(0f, 1f)
             valueDouble = minDouble + newPercentage * (maxDouble - minDouble)
             sliderPercentage = newPercentage
         }
@@ -147,4 +141,10 @@ class NumberSetting<E>(
 
     private fun roundToIncrement(x: Number): Double =
         round((x.toDouble() / incrementDouble)) * incrementDouble
+
+    private fun getDisplay(): String =
+        if (valueDouble - floor(valueDouble) == 0.0)
+            "${(valueInt * 100.0).roundToInt() / 100}${unit}"
+        else
+            "${(valueDouble * 100.0).roundToInt() / 100.0}${unit}"
 }

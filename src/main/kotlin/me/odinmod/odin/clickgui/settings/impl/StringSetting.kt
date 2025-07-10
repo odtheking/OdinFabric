@@ -29,13 +29,8 @@ class StringSetting(
         textSetter = { value = it }
     )
 
-    private var previousMousePos = 0f to 0f
-
     override fun render(x: Float, y: Float, mouseX: Float, mouseY: Float): Float {
         super.render(x, y, mouseX, mouseY)
-
-        if (previousMousePos != mouseX to mouseY) textInputHandler.mouseDragged(mouseX)
-        previousMousePos = mouseX to mouseY
 
         val rectStartX = x + 6f
 
@@ -47,7 +42,7 @@ class StringSetting(
         textInputHandler.x = rectStartX
         textInputHandler.y = y + getHeight() - 30f
         textInputHandler.width = width - 16f
-        textInputHandler.draw()
+        textInputHandler.draw(mouseX, mouseY)
 
         return getHeight()
     }
@@ -71,13 +66,9 @@ class StringSetting(
 
     override fun getHeight(): Float = Panel.HEIGHT + 28f
 
-    override fun write(): JsonElement {
-        return JsonPrimitive(value)
-    }
+    override fun write(): JsonElement = JsonPrimitive(value)
 
     override fun read(element: JsonElement?) {
-        element?.asString?.let {
-            value = it
-        }
+        element?.asString?.let { value = it }
     }
 }

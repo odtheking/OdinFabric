@@ -9,7 +9,7 @@ class HoverHandler(private val startDelay: Long, delay: Long) {
     val anim = LinearAnimation<Float>(delay)
 
     private var hoverStartTime: Long? = null
-    private var hasStarted = false
+    var hasStarted = false
 
     fun percent(): Float {
         if (!hasStarted) return 100f - anim.getPercent()

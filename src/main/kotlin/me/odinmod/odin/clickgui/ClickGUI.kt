@@ -30,33 +30,22 @@ import kotlin.math.sign
  */
 object ClickGUI : Screen(Text.of("Click GUI")) {
 
-    private val panels: ArrayList<Panel> = arrayListOf()
+    private val panels: ArrayList<Panel> = arrayListOf<Panel>().apply {
+        if (Category.entries.any { ClickGUIModule.panelSetting[it] == null }) ClickGUIModule.resetPositions()
+        for (category in Category.entries) add(Panel(category))
+    }
 
-    val movementImage = NVGRenderer.createImage("/assets/odin/MovementIcon.svg")
-    val hueImage = NVGRenderer.createImage("/assets/odin/HueGradient.png")
-    val chevronImage = NVGRenderer.createImage("/assets/odin/chevron.svg")
-
-    private var desc = Description("", 0f, 0f, HoverHandler(100))
     private var openAnim = LinearAnimation<Float>(400)
-
     val gray38 = Color(38, 38, 38)
     val gray26 = Color(26, 26, 26)
 
     init {
-        if (Category.entries.any { ClickGUIModule.panelSetting[it] == null }) ClickGUIModule.resetPositions()
-        for (category in Category.entries) panels.add(Panel(category))
         OdinMod.EVENT_BUS.subscribe(this)
     }
-
-    private var lastResetTime = System.nanoTime()
-    private var avgFrameTimeMs = 0.0
-    private var frameTimeSum = 0.0
-    private var frameCount = 0
 
     @EventHandler
     fun render(event: GuiEvent.NVGRender) {
         if (mc.currentScreen != this) return
-        val startTime = System.nanoTime()
 
         NVGRenderer.beginFrame(1920f, 1080f)
         if (openAnim.isAnimating()) {
@@ -66,37 +55,15 @@ object ClickGUI : Screen(Text.of("Click GUI")) {
 
         for (i in 0 until panels.size) { panels[i].draw(scaledMouseX, scaledMouseY) }
         SearchBar.draw(1920f / 2f - 175f, 1080f - 110f, scaledMouseX, scaledMouseY)
-        desc.render()
+        desc?.render()
 
         NVGRenderer.endFrame()
-
-        val frameTimeMs = (System.nanoTime() - startTime) / 1_000_000.0
-        val now = System.nanoTime()
-
-        frameTimeSum += frameTimeMs
-        frameCount++
-
-        if ((now - lastResetTime) > 500_000_000L) {
-            lastResetTime = now
-            avgFrameTimeMs = if (frameCount > 0) frameTimeSum / frameCount else 0.0
-            frameTimeSum = 0.0
-            frameCount = 0
-        }
-
-        NVGRenderer.text(
-            text = "Avg frame time: %.2f ms".format(avgFrameTimeMs),
-            x = 1920f - 220f,
-            y = 1080f - 28f,
-            size = 18f,
-            color = 0xFFFFFFFF.toInt(),
-            font = NVGRenderer.defaultFont
-        )
     }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {
-        val actualAmount = verticalAmount.sign * 16
+        val actualAmount = (verticalAmount.sign * 16).toInt()
         for (i in panels.size - 1 downTo 0) {
-            if (panels[i].handleScroll(actualAmount.toInt())) return true
+            if (panels[i].handleScroll(actualAmount)) return true
         }
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)
     }
@@ -130,10 +97,6 @@ object ClickGUI : Screen(Text.of("Click GUI")) {
         for (i in panels.size - 1 downTo 0) {
             if (panels[i].keyPressed(keyCode, scanCode, modifiers)) return true
         }
-        if (keyCode == ClickGUIModule.settings.last().value && !openAnim.isAnimating()) {
-            mc.setScreen(null)
-            if (mc.currentScreen == null) mc.onWindowFocusChanged(true)
-        }
         return super.keyPressed(keyCode, scanCode, modifiers)
     }
 
@@ -158,12 +121,14 @@ object ClickGUI : Screen(Text.of("Click GUI")) {
 
     override fun shouldPause(): Boolean = false
 
+    private var desc: Description? = null
+
     /** Sets the description without creating a new data class which isn't optimal */
-    fun setDescription(text: String, x: Float,  y: Float, hoverHandler: HoverHandler) {
-        desc.text = text
-        desc.x = x
-        desc.y = y
-        desc.hoverHandler = hoverHandler
+    fun setDescription(text: String, x: Float, y: Float, hoverHandler: HoverHandler) {
+        desc?.text = text
+        desc?.x = x
+        desc?.y = y
+        desc?.hoverHandler = hoverHandler
     }
 
     data class Description(var text: String, var x: Float, var y: Float, var hoverHandler: HoverHandler) {
@@ -176,4 +141,8 @@ object ClickGUI : Screen(Text.of("Click GUI")) {
             NVGRenderer.drawWrappedString(text, x + 8f, y + 8f, 300f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
         }
     }
+
+    val movementImage = NVGRenderer.createImage("/assets/odin/MovementIcon.svg")
+    val hueImage = NVGRenderer.createImage("/assets/odin/HueGradient.png")
+    val chevronImage = NVGRenderer.createImage("/assets/odin/chevron.svg")
 }

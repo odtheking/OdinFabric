@@ -337,7 +337,6 @@ object NVGRenderer {
         }
     }
 
-
     private fun color(color: Int) {
         nvgRGBA(color.red.toByte(), color.green.toByte(), color.blue.toByte(), color.alpha.toByte(), nvgColor)
     }
