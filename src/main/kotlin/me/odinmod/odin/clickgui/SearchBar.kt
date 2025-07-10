@@ -47,11 +47,11 @@ object SearchBar {
         textInputHandler.mouseReleased()
     }
 
-    fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
-        return textInputHandler.keyPressed(keyCode, scanCode, modifiers)
+    fun keyPressed(keyCode: Int): Boolean {
+        return textInputHandler.keyPressed(keyCode)
     }
 
-    fun keyTyped(typedChar: Char, modifier: Int): Boolean {
+    fun keyTyped(typedChar: Char): Boolean {
         return textInputHandler.keyTyped(typedChar)
     }
 }

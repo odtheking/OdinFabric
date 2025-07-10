@@ -85,17 +85,17 @@ object ClickGUI : Screen(Text.of("Click GUI")) {
     }
 
     override fun charTyped(chr: Char, modifiers: Int): Boolean {
-        SearchBar.keyTyped(chr, modifiers)
+        SearchBar.keyTyped(chr)
         for (i in panels.size - 1 downTo 0) {
-            if (panels[i].keyTyped(chr, modifiers)) return true
+            if (panels[i].keyTyped(chr)) return true
         }
         return super.charTyped(chr, modifiers)
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
-        SearchBar.keyPressed(keyCode, scanCode, modifiers)
+        SearchBar.keyPressed(keyCode)
         for (i in panels.size - 1 downTo 0) {
-            if (panels[i].keyPressed(keyCode, scanCode, modifiers)) return true
+            if (panels[i].keyPressed(keyCode, scanCode)) return true
         }
         return super.keyPressed(keyCode, scanCode, modifiers)
     }

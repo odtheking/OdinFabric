@@ -112,7 +112,7 @@ class NumberSetting<E>(
         listening = false
     }
 
-    override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+    override fun keyPressed(keyCode: Int, scanCode: Int): Boolean {
         if (!isHovered) return false
 
         val amount = when (keyCode) {

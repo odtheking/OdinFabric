@@ -29,8 +29,8 @@ abstract class RenderableSetting<T>(
 
     open fun mouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int): Boolean = false
     open fun mouseReleased(state: Int) {}
-    open fun keyTyped(typedChar: Char, modifier: Int): Boolean = false
-    open fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean = false
+    open fun keyTyped(typedChar: Char): Boolean = false
+    open fun keyPressed(keyCode: Int, scanCode: Int): Boolean = false
     open fun getHeight(): Float = Panel.HEIGHT
 
     open val isHovered get() = isAreaHovered(lastX, lastY, width, getHeight())

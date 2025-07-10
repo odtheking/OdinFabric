@@ -102,21 +102,21 @@ class Panel(private val category: Category) {
             }
     }
 
-    fun keyTyped(typedChar: Char, modifier: Int): Boolean {
+    fun keyTyped(typedChar: Char): Boolean {
         if (!panelSetting.extended) return false
 
         return moduleButtons.reversed().any {
             if (!it.module.name.contains(SearchBar.currentSearch, true)) return@any false
-            it.keyTyped(typedChar, modifier)
+            it.keyTyped(typedChar)
         }
     }
 
-    fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+    fun keyPressed(keyCode: Int, scanCode: Int): Boolean {
         if (!panelSetting.extended) return false
 
         return moduleButtons.reversed().any {
             if (!it.module.name.contains(SearchBar.currentSearch, true)) return@any false
-            it.keyPressed(keyCode, scanCode, modifiers)
+            it.keyPressed(keyCode, scanCode)
         }
     }
 

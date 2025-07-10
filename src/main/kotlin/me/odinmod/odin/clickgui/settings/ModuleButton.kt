@@ -93,18 +93,18 @@ class ModuleButton(val module: Module, val panel: Panel) {
         }
     }
 
-    fun keyTyped(typedChar: Char, modifier: Int): Boolean {
+    fun keyTyped(typedChar: Char): Boolean {
         if (!extended) return false
         for (setting in representableSettings) {
-            if (setting.isVisible && setting.keyTyped(typedChar, modifier)) return true
+            if (setting.isVisible && setting.keyTyped(typedChar)) return true
         }
         return false
     }
 
-    fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+    fun keyPressed(keyCode: Int, scanCode: Int): Boolean {
         if (!extended) return false
         for (setting in representableSettings) {
-            if (setting.isVisible && setting.keyPressed(keyCode, scanCode, modifiers)) return true
+            if (setting.isVisible && setting.keyPressed(keyCode, scanCode)) return true
         }
         return false
     }

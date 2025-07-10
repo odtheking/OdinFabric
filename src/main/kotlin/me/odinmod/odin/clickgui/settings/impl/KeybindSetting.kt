@@ -64,7 +64,7 @@ class KeybindSetting(
         return false
     }
 
-    override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+    override fun keyPressed(keyCode: Int, scanCode: Int): Boolean {
         if (!listening) return false
 
         when (keyCode) {

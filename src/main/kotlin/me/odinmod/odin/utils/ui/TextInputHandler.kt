@@ -104,7 +104,7 @@ class TextInputHandler(
         if (dragging) caretFromMouse(mouseX)
     }
 
-    fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+    fun keyPressed(keyCode: Int): Boolean {
         if (!listening) return false
         val returnValue = when (keyCode) {
             GLFW.GLFW_KEY_BACKSPACE -> {

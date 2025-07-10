@@ -158,12 +158,12 @@ class ColorSetting(
         section = null
     }
 
-    override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
-        return if (extended) textInputHandler.keyPressed(keyCode, scanCode, modifiers)
+    override fun keyPressed(keyCode: Int, scanCode: Int): Boolean {
+        return if (extended) textInputHandler.keyPressed(keyCode)
         else false
     }
 
-    override fun keyTyped(typedChar: Char, modifier: Int): Boolean {
+    override fun keyTyped(typedChar: Char): Boolean {
         return if (extended) textInputHandler.keyTyped(typedChar)
         else false
     }

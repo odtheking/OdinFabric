@@ -55,11 +55,11 @@ class StringSetting(
         if (state == 0) textInputHandler.mouseReleased()
     }
 
-    override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
-        return textInputHandler.keyPressed(keyCode, scanCode, modifiers)
+    override fun keyPressed(keyCode: Int, scanCode: Int): Boolean {
+        return textInputHandler.keyPressed(keyCode)
     }
 
-    override fun keyTyped(typedChar: Char, modifier: Int): Boolean {
+    override fun keyTyped(typedChar: Char): Boolean {
         return textInputHandler.keyTyped(typedChar)
     }
 
