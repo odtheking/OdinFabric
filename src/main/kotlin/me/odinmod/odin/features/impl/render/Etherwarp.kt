@@ -41,6 +41,7 @@ object Etherwarp : Module(
     private val failColor by ColorSetting("Fail Color", Colors.MINECRAFT_RED.withAlpha(.5f), allowAlpha = true, desc = "Color of the box if guess failed.").withDependency { renderFail }
     private val renderStyle by SelectorSetting("Render Style", "Outline", listOf("Outline", "Filled", "Filled Outline"), desc = "Style of the box.").withDependency { render }
     private val useServerPosition by BooleanSetting("Use Server Position", false, desc = "Uses the server position for etherwarp instead of the client position.").withDependency { render }
+    private val fullBlock by BooleanSetting("Full Block", false, desc = "Renders the the 1x1x1 block instead of it's actual size.").withDependency { render }
 
     private val dropdown by DropdownSetting("Sounds", false)
     private val sounds by BooleanSetting("Custom Sounds", false, desc = "Plays the selected custom sound when you etherwarp.").withDependency { dropdown }
@@ -56,13 +57,17 @@ object Etherwarp : Module(
         etherPos = getEtherPos(if (useServerPosition) mc.player?.lastPos else mc.player?.pos, 56.0 + (isEtherwarpItem()?.getInt("tuned_transmission", 0) ?: return))
         if (etherPos?.succeeded != true && !renderFail) return
         val color = if (etherPos?.succeeded == true) color else failColor
-        etherPos?.pos?.let {
+        etherPos?.pos?.let { pos ->
+            val box = if (fullBlock) Box(pos) else {
+                mc.world?.getBlockState(pos)?.getOutlineShape(mc.world, pos)?.asCuboid()?.takeIf { !it.isEmpty }?.boundingBox?.offset(pos) ?: Box(pos)
+            }
+
             when (renderStyle) {
-                0 -> event.context.drawWireFrameBox(Box(it), color)
-                1 -> event.context.drawFilledBox(Box(it), color)
+                0 -> event.context.drawWireFrameBox(box, color)
+                1 -> event.context.drawFilledBox(box, color)
                 2 -> {
-                    event.context.drawWireFrameBox(Box(it), color)
-                    event.context.drawFilledBox(Box(it), color.multiplyAlpha(0.5f))
+                    event.context.drawWireFrameBox(box, color)
+                    event.context.drawFilledBox(box, color.multiplyAlpha(0.5f))
                 }
             }
         }
