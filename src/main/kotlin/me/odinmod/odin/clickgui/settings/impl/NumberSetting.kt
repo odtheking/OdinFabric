@@ -127,8 +127,8 @@ class NumberSetting<E>(
         return true
     }
 
-    override val isHovered: Boolean
-        get() = isAreaHovered(lastX, lastY + getHeight() / 2, width, getHeight() / 2)
+    override val isHovered: Boolean get() =
+        isAreaHovered(lastX, lastY + getHeight() / 2, width, getHeight() / 2)
 
     override fun getHeight(): Float = Panel.HEIGHT + 8f
 

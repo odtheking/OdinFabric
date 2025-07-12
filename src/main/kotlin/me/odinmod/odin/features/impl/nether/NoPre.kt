@@ -71,7 +71,7 @@ object NoPre : Module(
                         else -> return
                     }
                 }
-                if (msg.isNotEmpty()) sendCommand("/pc $msg")
+                if (msg.isNotEmpty()) sendCommand("pc $msg")
             }
 
             partyRegex.matches(message) -> {

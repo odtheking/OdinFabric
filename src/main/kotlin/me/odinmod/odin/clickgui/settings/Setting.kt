@@ -53,7 +53,6 @@ abstract class Setting<T> (
     override operator fun provideDelegate(thisRef: Module, property: KProperty<*>): ReadWriteProperty<Module, T> =
         thisRef.register(this)
 
-
     override operator fun getValue(thisRef: Module, property: KProperty<*>): T =
         value
 
