@@ -29,8 +29,8 @@ dependencies {
     implementation("meteordevelopment:orbit:0.2.3")
     include("meteordevelopment:orbit:0.2.3")
 
-    implementation("com.github.Stivais:Commodore:1.0.0")
-    include("com.github.Stivais:Commodore:1.0.0")
+    implementation("com.github.stivais:Commodore:1.0.1")
+    include("com.github.stivais:Commodore:1.0.1")
 
     modCompileOnly("com.terraformersmc:modmenu:${property("modmenu_version")}")
 
