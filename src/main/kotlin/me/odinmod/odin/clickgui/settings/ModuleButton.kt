@@ -11,9 +11,9 @@ import me.odinmod.odin.utils.Colors
 import me.odinmod.odin.utils.ui.HoverHandler
 import me.odinmod.odin.utils.ui.animations.ColorAnimation
 import me.odinmod.odin.utils.ui.animations.EaseInOutAnimation
+import me.odinmod.odin.utils.ui.mouseX
+import me.odinmod.odin.utils.ui.mouseY
 import me.odinmod.odin.utils.ui.rendering.NVGRenderer
-import me.odinmod.odin.utils.ui.scaledMouseX
-import me.odinmod.odin.utils.ui.scaledMouseY
 import kotlin.math.floor
 
 /**
@@ -57,7 +57,7 @@ class ModuleButton(val module: Module, val panel: Panel) {
 
         if (extendAnim.isAnimating() || extended) {
             for (setting in module.settings) {
-                if (setting is RenderableSetting<*> && setting.isVisible) drawY += setting.render(x, y + drawY, scaledMouseX, scaledMouseY)
+                if (setting is RenderableSetting<*> && setting.isVisible) drawY += setting.render(x, y + drawY, mouseX, mouseY)
             }
         }
 
