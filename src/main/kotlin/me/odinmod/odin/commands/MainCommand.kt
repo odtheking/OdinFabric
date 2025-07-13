@@ -13,7 +13,7 @@ import me.odinmod.odin.utils.handlers.LimitedTickTask
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 import net.minecraft.text.Text
 
-val mainCommand = Commodore("odin") {
+val mainCommand = Commodore("odin", "od") {
     runs {
         LimitedTickTask(0, 1) { mc.setScreen(ClickGUI) }
     }

@@ -9,9 +9,7 @@ import me.odinmod.odin.events.InputEvent
 import me.odinmod.odin.features.impl.nether.*
 import me.odinmod.odin.features.impl.render.*
 import me.odinmod.odin.features.impl.skyblock.*
-import me.odinmod.odin.utils.ui.heightResFactor
 import me.odinmod.odin.utils.ui.rendering.NVGRenderer
-import me.odinmod.odin.utils.ui.widthResFactor
 import meteordevelopment.orbit.EventHandler
 import net.fabricmc.fabric.api.client.rendering.v1.HudLayerRegistrationCallback
 import net.fabricmc.fabric.api.client.rendering.v1.IdentifiedLayer
@@ -63,7 +61,6 @@ object ModuleManager {
         context.matrices.push()
         val sf = mc.window.scaleFactor.toFloat()
         context.matrices?.scale(1f / sf, 1f / sf, 1f)
-        context.matrices?.scale(mc.window.widthResFactor, mc.window.heightResFactor, 1f)
         for (hudSettings in hudSettingsCache) {
             if (hudSettings.isEnabled) hudSettings.value.draw(context, false)
         }

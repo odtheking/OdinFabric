@@ -47,7 +47,7 @@ object ClickGUI : Screen(Text.of("Click GUI")) {
     fun render(event: GuiEvent.NVGRender) {
         if (mc.currentScreen != this) return
 
-        NVGRenderer.beginFrame(1920f, 1080f)
+        NVGRenderer.beginFrame(mc.window.width.toFloat(), mc.window.height.toFloat())
         if (openAnim.isAnimating()) {
             NVGRenderer.translate(0f, openAnim.get(-10f, 0f))
             NVGRenderer.globalAlpha(openAnim.get(0f, 1f))

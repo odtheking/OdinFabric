@@ -12,11 +12,10 @@ version = property("mod_version")!!
 
 repositories {
     mavenCentral()
-    maven { url = uri("https://jitpack.io") }
-    maven { url = uri("https://maven.meteordev.org/releases") }
-    maven { url = uri("https://nexus.resourcefulbees.com/repository/maven-public/") }
-    maven { url = uri("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1") }
-    maven { url = uri("https://maven.terraformersmc.com/") }
+    maven("https://jitpack.io")
+    maven("https://maven.meteordev.org/releases")
+    maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
+    maven("https://maven.terraformersmc.com/")
 }
 
 dependencies {

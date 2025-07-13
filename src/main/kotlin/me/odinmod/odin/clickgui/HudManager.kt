@@ -29,7 +29,6 @@ object HudManager : Screen(Text.of("HUD Manager")) {
         context?.matrices?.push()
         val sf = mc.window.scaleFactor.toFloat()
         context?.matrices?.scale(1f / sf, 1f / sf, 1f)
-        context?.matrices?.scale(mc.window.widthResFactor, mc.window.heightResFactor, 1f)
 
         for (hud in hudSettingsCache) {
             if (hud.isEnabled) hud.value.draw(context!!, true)

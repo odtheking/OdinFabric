@@ -1,11 +1,10 @@
 rootProject.name = "Odin"
 pluginManagement {
     repositories {
-        maven("https://maven.fabricmc.net/") { name = "Fabric" }
-        maven { url = uri("https://jitpack.io") }
-
         mavenCentral()
         gradlePluginPortal()
+        maven("https://maven.fabricmc.net/") { name = "Fabric" }
+        maven("https://jitpack.io")
     }
 
     val loom_version: String by settings
