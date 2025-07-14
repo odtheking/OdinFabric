@@ -193,7 +193,7 @@ object Etherwarp : Module(
         TallFlowerBlock::class, ShortPlantBlock::class, BushBlock::class,
         SeagrassBlock::class, TallSeagrassBlock::class, SugarCaneBlock::class,
         FluidBlock::class, VineBlock::class, MushroomPlantBlock::class,
-        MushroomBlock::class, PistonHeadBlock::class, DyedCarpetBlock::class,
+        PistonHeadBlock::class, DyedCarpetBlock::class,
         DryVegetationBlock::class, SmallDripleafBlock::class,
     )
 

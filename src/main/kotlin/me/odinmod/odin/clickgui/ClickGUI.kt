@@ -54,7 +54,7 @@ object ClickGUI : Screen(Text.of("Click GUI")) {
         }
 
         for (i in 0 until panels.size) { panels[i].draw(mouseX, mouseY) }
-        SearchBar.draw(1920f / 2f - 175f, 1080f - 110f, mouseX, mouseY)
+        SearchBar.draw(mc.window.width / 2f - 175f, mc.window.height - 110f, mouseX, mouseY)
         desc?.render()
 
         NVGRenderer.endFrame()
