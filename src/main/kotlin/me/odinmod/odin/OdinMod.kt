@@ -6,7 +6,6 @@ import me.odinmod.odin.commands.*
 import me.odinmod.odin.config.Config
 import me.odinmod.odin.events.EventDispatcher
 import me.odinmod.odin.features.ModuleManager
-import me.odinmod.odin.features.impl.render.RenderTest
 import me.odinmod.odin.utils.ServerUtils
 import me.odinmod.odin.utils.handlers.MobCaches
 import me.odinmod.odin.utils.handlers.TickTasks
@@ -54,8 +53,8 @@ object OdinMod : ModInitializer {
 
         listOf(
             this, LocationUtils, TickTasks, KuudraUtils,
-            SkyblockPlayer, MobCaches, RenderTest,
-            ServerUtils, EventDispatcher, ModuleManager
+            SkyblockPlayer, MobCaches, ServerUtils,
+            EventDispatcher, ModuleManager
         ).forEach { EVENT_BUS.subscribe(it) }
 
         Config.load()
