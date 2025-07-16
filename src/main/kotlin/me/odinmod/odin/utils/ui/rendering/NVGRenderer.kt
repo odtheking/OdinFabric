@@ -51,13 +51,6 @@ object NVGRenderer {
     init {
         vg = nvgCreate(NVG_ANTIALIAS or NVG_STENCIL_STROKES)
         require(vg != -1L) { "Failed to initialize NanoVG" }
-        push()
-        nvgFontSize(vg, 16f)
-        nvgFontFaceId(vg, getFontID(defaultFont))
-        nvgBeginPath(vg)
-        nvgText(vg, -1000f, -1000f, "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#\\\$%^&*()-_=+[]{};:'\\\",.<>?/|\\\\`~")
-        nvgClosePath(vg)
-        pop()
     }
 
     fun beginFrame(width: Float, height: Float) {
@@ -92,7 +85,6 @@ object NVGRenderer {
 
         if (previousProgram != -1) GlStateManager._glUseProgram(previousProgram) // fixes invalid program errors when using NVG
         GlStateManager._glBindVertexArray(0) // fixes glitches when updating font atlas
-        GL11.glFlush()
 
         drawing = false
     }
