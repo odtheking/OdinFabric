@@ -42,7 +42,7 @@ dependencies {
     modImplementation("org.lwjgl:lwjgl-nanovg:$lwjglVersion")
     include("org.lwjgl:lwjgl-nanovg:$lwjglVersion")
 
-    listOf("windows", "linux", "macos").forEach {
+    listOf("windows", "linux", "macos", "natives-macos-arm64").forEach {
         modImplementation("org.lwjgl:lwjgl:$lwjglVersion:natives-$it")
         include("org.lwjgl:lwjgl:$lwjglVersion:natives-$it")
 

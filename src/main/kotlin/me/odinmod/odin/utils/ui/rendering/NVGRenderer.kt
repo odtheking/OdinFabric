@@ -92,6 +92,7 @@ object NVGRenderer {
 
         if (previousProgram != -1) GlStateManager._glUseProgram(previousProgram) // fixes invalid program errors when using NVG
         GlStateManager._glBindVertexArray(0) // fixes glitches when updating font atlas
+        GL11.glFlush()
 
         drawing = false
     }
@@ -190,15 +191,7 @@ object NVGRenderer {
         nvgFill(vg)
     }
 
-    fun dropShadow(
-        x: Float,
-        y: Float,
-        width: Float,
-        height: Float,
-        blur: Float,
-        spread: Float,
-        radius: Float
-    ) {
+    fun dropShadow(x: Float, y: Float, width: Float, height: Float, blur: Float, spread: Float, radius: Float) {
         nvgRGBA(0, 0, 0, 125, nvgColor)
         nvgRGBA(0, 0, 0, 0, nvgColor2)
 
