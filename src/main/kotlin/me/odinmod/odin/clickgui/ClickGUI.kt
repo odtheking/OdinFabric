@@ -11,13 +11,13 @@ import me.odinmod.odin.utils.Color
 import me.odinmod.odin.utils.Colors
 import me.odinmod.odin.utils.ui.HoverHandler
 import me.odinmod.odin.utils.ui.animations.LinearAnimation
-import me.odinmod.odin.utils.ui.mouseX
-import me.odinmod.odin.utils.ui.mouseY
 import me.odinmod.odin.utils.ui.rendering.NVGRenderer
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.text.Text
 import kotlin.math.sign
+import me.odinmod.odin.utils.ui.mouseX as odinMouseX
+import me.odinmod.odin.utils.ui.mouseY as odinMouseY
 
 /**
  * Renders all the modules.
@@ -53,8 +53,8 @@ object ClickGUI : Screen(Text.of("Click GUI")) {
             NVGRenderer.globalAlpha(openAnim.get(0f, 1f))
         }
 
-        for (i in 0 until panels.size) { panels[i].draw(mouseX, mouseY) }
-        SearchBar.draw(mc.window.width / 2f - 175f, mc.window.height - 110f, mouseX, mouseY)
+        for (i in 0 until panels.size) { panels[i].draw(odinMouseX, odinMouseY) }
+        SearchBar.draw(mc.window.width / 2f - 175f, mc.window.height - 110f, odinMouseX, odinMouseY)
         desc.render()
 
         NVGRenderer.endFrame()
@@ -69,9 +69,9 @@ object ClickGUI : Screen(Text.of("Click GUI")) {
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        SearchBar.mouseClicked(me.odinmod.odin.utils.ui.mouseX, me.odinmod.odin.utils.ui.mouseY, button)
+        SearchBar.mouseClicked(odinMouseX, odinMouseY, button)
         for (i in panels.size - 1 downTo 0) {
-            if (panels[i].mouseClicked(me.odinmod.odin.utils.ui.mouseX, me.odinmod.odin.utils.ui.mouseY, button)) return true
+            if (panels[i].mouseClicked(odinMouseX, odinMouseY, button)) return true
         }
         return super.mouseClicked(mouseX, mouseY, button)
     }
