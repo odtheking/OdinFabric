@@ -13,29 +13,29 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(InGameHud.class)
 public class InGameHudMixin {
 
-    @Inject(method = "renderHealthBar", at = @At("HEAD"), cancellable = true)
-    private void cancelHealthBar(DrawContext context, PlayerEntity player, int x, int y, int lines, int regeneratingHeartIndex, float maxHealth, int lastHealth, int health, int absorption, boolean blinking, CallbackInfo ci) {
-        if (PlayerDisplay.shouldCancelOverlay("hearts")) ci.cancel();
-    }
-
     @Inject(method = "renderArmor", at = @At("HEAD"), cancellable = true)
     private static void cancelArmorBar(DrawContext context, PlayerEntity player, int i, int j, int k, int x, CallbackInfo ci) {
-        if (PlayerDisplay.shouldCancelOverlay("armor")) ci.cancel();
+        if (PlayerDisplay.shouldCancelOverlay(1)) ci.cancel();
+    }
+
+    @Inject(method = "renderHealthBar", at = @At("HEAD"), cancellable = true)
+    private void cancelHealthBar(DrawContext context, PlayerEntity player, int x, int y, int lines, int regeneratingHeartIndex, float maxHealth, int lastHealth, int health, int absorption, boolean blinking, CallbackInfo ci) {
+        if (PlayerDisplay.shouldCancelOverlay(2)) ci.cancel();
     }
 
     @Inject(method = "renderFood", at = @At("HEAD"), cancellable = true)
     private void cancelFoodBar(DrawContext context, PlayerEntity player, int top, int right, CallbackInfo ci) {
-        if (PlayerDisplay.shouldCancelOverlay("food")) ci.cancel();
+        if (PlayerDisplay.shouldCancelOverlay(3)) ci.cancel();
     }
 
     @Inject(method = "renderExperienceBar", at = @At("HEAD"), cancellable = true)
     private void cancelXPBar(DrawContext context, int x, CallbackInfo ci) {
-        if (PlayerDisplay.shouldCancelOverlay("xp")) ci.cancel();
+        if (PlayerDisplay.shouldCancelOverlay(4)) ci.cancel();
     }
 
     @Inject(method = "renderExperienceLevel", at = @At("HEAD"), cancellable = true)
     private void cancelXPLevel(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
-        if (PlayerDisplay.shouldCancelOverlay("xp")) ci.cancel();
+        if (PlayerDisplay.shouldCancelOverlay(4)) ci.cancel();
     }
 }
 

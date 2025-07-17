@@ -127,13 +127,13 @@ object PlayerDisplay : Module(
     }
 
     @JvmStatic
-    fun shouldCancelOverlay(type: String): Boolean {
+    fun shouldCancelOverlay(type: Int): Boolean {
         if (!enabled || !LocationUtils.isInSkyblock) return false
         return when (type) {
-            "armor" -> hideArmor
-            "hearts" -> hideHearts
-            "food" -> hideFood
-            "xp" -> hideXP
+            1 -> hideArmor
+            2 -> hideHearts
+            3 -> hideFood
+            4 -> hideXP
             else -> false
         }
     }

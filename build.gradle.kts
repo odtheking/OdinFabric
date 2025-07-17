@@ -36,16 +36,10 @@ dependencies {
 
     val lwjglVersion = property("minecraft_lwjgl_version")
 
-    modImplementation("org.lwjgl:lwjgl:$lwjglVersion")
-    include("org.lwjgl:lwjgl:$lwjglVersion")
-
     modImplementation("org.lwjgl:lwjgl-nanovg:$lwjglVersion")
     include("org.lwjgl:lwjgl-nanovg:$lwjglVersion")
 
     listOf("windows", "linux", "macos", "macos-arm64").forEach {
-        modImplementation("org.lwjgl:lwjgl:$lwjglVersion:natives-$it")
-        include("org.lwjgl:lwjgl:$lwjglVersion:natives-$it")
-
         modImplementation("org.lwjgl:lwjgl-nanovg:$lwjglVersion:natives-$it")
         include("org.lwjgl:lwjgl-nanovg:$lwjglVersion:natives-$it")
     }

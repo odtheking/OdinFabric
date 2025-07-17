@@ -1,7 +1,6 @@
 package me.odinmod.odin.clickgui
 
 import me.odinmod.odin.clickgui.ClickGUI.gray26
-import me.odinmod.odin.clickgui.ClickGUI.gray38
 import me.odinmod.odin.clickgui.settings.ModuleButton
 import me.odinmod.odin.features.Category
 import me.odinmod.odin.features.ModuleManager
@@ -62,7 +61,7 @@ class Panel(private val category: Category) {
         }
         previousHeight = startY
 
-        NVGRenderer.drawHalfRoundedRect(panelSetting.x, panelSetting.y + startY, WIDTH, 10f, if (lastModuleButton?.module?.enabled == true) ClickGUIModule.clickGUIColor.rgba else gray38.rgba, 5f, false)
+        NVGRenderer.drawHalfRoundedRect(panelSetting.x, panelSetting.y + startY, WIDTH, 10f, if (lastModuleButton?.module?.enabled == true) ClickGUIModule.clickGUIColor.rgba else gray26.rgba, 5f, false)
         if (scrollOffset != 0f) NVGRenderer.popScissor()
     }
 
