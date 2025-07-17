@@ -43,7 +43,6 @@ object WardrobeKeybinds : Module(
 
     @EventHandler
     fun onGuiEvent(event: GuiEvent.KeyPress) {
-        modMessage(event.keyCode)
         if (onClick((event.screen as? HandledScreen<*>) ?: return, event.keyCode)) event.cancel()
     }
 
@@ -51,7 +50,7 @@ object WardrobeKeybinds : Module(
         val (current, total) = wardrobeRegex.find(screen.title?.string ?: "")?.destructured?.let { it.component1().toIntOrNull() to it.component2().toIntOrNull() } ?: return false
         if (current == null || total == null) return false
 
-        val equippedIndex = screen.screenHandler.slots.find { equippedRegex.matches(it.stack.itemName.string) }?.index
+        val equippedIndex = screen.screenHandler.slots.find { equippedRegex.matches(it.stack.name.string) }?.index
 
         val index = when (keyCode) {
             nextPageKeybind.code -> if (current < total) 53 else return false
@@ -60,7 +59,7 @@ object WardrobeKeybinds : Module(
             else -> {
                 val keyIndex = arrayOf(wardrobe1, wardrobe2, wardrobe3, wardrobe4, wardrobe5, wardrobe6, wardrobe7, wardrobe8, wardrobe9)
                     .indexOfFirst { it.code == keyCode }.takeIf { it != -1 } ?: return false
-                if (equippedIndex == keyIndex + 36 && disallowUnequippingEquipped) return false
+                if (equippedIndex == keyIndex + 36 && disallowUnequippingEquipped) return modMessage("§cArmor already equipped.").let { false }
                 keyIndex + 36
             }
         }
