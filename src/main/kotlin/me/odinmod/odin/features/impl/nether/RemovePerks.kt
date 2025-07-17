@@ -20,7 +20,7 @@ object RemovePerks : Module(
     }
 
     @EventHandler
-    fun guiMouseClick(event: GuiEvent.MouseClick) = with(event.screen) {
+    fun guiMouseClick(event: GuiEvent.SlotClick) = with(event.screen) {
         if (this is HandledScreen<*> && title.string == "Perk Menu" && slotCheck(screenHandler?.getSlot(event.slotId)?.stack?.name?.string ?: return))
             event.cancel()
     }

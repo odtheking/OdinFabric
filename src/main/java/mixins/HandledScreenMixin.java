@@ -39,7 +39,12 @@ public class HandledScreenMixin {
 
     @Inject(method = "onMouseClick(Lnet/minecraft/screen/slot/Slot;IILnet/minecraft/screen/slot/SlotActionType;)V", at = @At("HEAD"), cancellable = true)
     public void onMouseClickedSlot(Slot slot, int slotId, int button, SlotActionType actionType, CallbackInfo ci) {
-        if (new GuiEvent.MouseClick((Screen)(Object) this, slotId, button).postAndCatch()) ci.cancel();
+        if (new GuiEvent.SlotClick((Screen)(Object) this, slotId, button).postAndCatch()) ci.cancel();
+    }
+
+    @Inject(method= "mouseClicked", at = @At("HEAD"), cancellable = true)
+    public void onMouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
+        if (new GuiEvent.MouseClick((Screen)(Object) this, (int) mouseX, (int) mouseY, button).postAndCatch()) cir.cancel();
     }
 
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)

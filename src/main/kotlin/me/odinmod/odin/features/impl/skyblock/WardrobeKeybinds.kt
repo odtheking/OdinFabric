@@ -6,6 +6,7 @@ import me.odinmod.odin.clickgui.settings.impl.DropdownSetting
 import me.odinmod.odin.clickgui.settings.impl.KeybindSetting
 import me.odinmod.odin.events.GuiEvent
 import me.odinmod.odin.features.Module
+import me.odinmod.odin.utils.modMessage
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.client.gui.screen.ingame.HandledScreen
 import net.minecraft.screen.slot.SlotActionType
@@ -42,6 +43,7 @@ object WardrobeKeybinds : Module(
 
     @EventHandler
     fun onGuiEvent(event: GuiEvent.KeyPress) {
+        modMessage(event.keyCode)
         if (onClick((event.screen as? HandledScreen<*>) ?: return, event.keyCode)) event.cancel()
     }
 

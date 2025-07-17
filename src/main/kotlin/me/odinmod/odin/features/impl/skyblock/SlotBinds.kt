@@ -29,7 +29,7 @@ object SlotBinds : Module(
     private var previousSlot: Int? = null
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    fun onGuiClick(event: GuiEvent.MouseClick) {
+    fun onGuiClick(event: GuiEvent.SlotClick) {
         if (!Screen.hasShiftDown() || event.screen !is InventoryScreen) return
         val clickedSlot = (event.screen as HandledScreenAccessor).focusedSlot?.id?.takeIf { it in 5 until 45 } ?: return modMessage("§cYou must be hovering over a valid slot (5–44).")
         val boundSlot = slotBinds[clickedSlot] ?: return
