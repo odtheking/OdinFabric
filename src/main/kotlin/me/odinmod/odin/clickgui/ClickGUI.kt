@@ -55,7 +55,7 @@ object ClickGUI : Screen(Text.of("Click GUI")) {
 
         for (i in 0 until panels.size) { panels[i].draw(mouseX, mouseY) }
         SearchBar.draw(mc.window.width / 2f - 175f, mc.window.height - 110f, mouseX, mouseY)
-        desc?.render()
+        desc.render()
 
         NVGRenderer.endFrame()
     }
@@ -121,14 +121,14 @@ object ClickGUI : Screen(Text.of("Click GUI")) {
 
     override fun shouldPause(): Boolean = false
 
-    private var desc: Description? = null
+    private var desc = Description("", 0f, 0f, HoverHandler(150))
 
     /** Sets the description without creating a new data class which isn't optimal */
     fun setDescription(text: String, x: Float, y: Float, hoverHandler: HoverHandler) {
-        desc?.text = text
-        desc?.x = x
-        desc?.y = y
-        desc?.hoverHandler = hoverHandler
+        desc.text = text
+        desc.x = x
+        desc.y = y
+        desc.hoverHandler = hoverHandler
     }
 
     data class Description(var text: String, var x: Float, var y: Float, var hoverHandler: HoverHandler) {
