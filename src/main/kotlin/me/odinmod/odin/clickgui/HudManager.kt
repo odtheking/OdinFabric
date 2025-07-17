@@ -19,6 +19,8 @@ object HudManager : Screen(Text.of("HUD Manager")) {
     private var deltaY = 0f
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, deltaTicks: Float) {
+        super.render(context, mouseX, mouseY, deltaTicks)
+
         dragging?.let {
             it.x = (odinMouseX + deltaX).coerceIn(0f, mc.window.width - (it.width * it.scale))
             it.y = (odinMouseY + deltaY).coerceIn(0f, mc.window.height - (it.height * it.scale))
@@ -32,7 +34,6 @@ object HudManager : Screen(Text.of("HUD Manager")) {
             if (hud.isEnabled) hud.value.draw(context!!, true)
         }
         context?.matrices?.pop()
-        super.render(context, mouseX, mouseY, deltaTicks)
     }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {
