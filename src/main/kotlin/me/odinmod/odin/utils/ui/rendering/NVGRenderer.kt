@@ -43,6 +43,7 @@ object NVGRenderer {
     private var previousTexture = -1
     private var textureBinding = -1
     private var previousProgram = -1
+    private var previousBuffer = -1
 
     private var vg = -1L
 
@@ -66,6 +67,7 @@ object NVGRenderer {
         previousTexture = GL11.glGetInteger(GL13.GL_ACTIVE_TEXTURE)
         textureBinding = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D)
         previousProgram = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM)
+        previousBuffer = GlStateManager.getFrameBuffer(GL30.GL_FRAMEBUFFER)
 
         val framebuffer = mc.framebuffer
         val glFramebuffer = (framebuffer.colorAttachment as GlTexture).getOrCreateFramebuffer((RenderSystem.getDevice() as GlBackend).framebufferManager, null)
@@ -92,6 +94,7 @@ object NVGRenderer {
 
         if (previousProgram != -1) GlStateManager._glUseProgram(previousProgram) // fixes invalid program errors when using NVG
         GlStateManager._glBindVertexArray(0) // fixes glitches when updating font atlas
+        GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, previousBuffer)
 
         drawing = false
     }
