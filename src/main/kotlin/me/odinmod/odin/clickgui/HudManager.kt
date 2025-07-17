@@ -9,18 +9,19 @@ import net.minecraft.client.gui.screen.Screen
 import net.minecraft.text.Text
 import kotlin.math.sign
 import me.odinmod.odin.utils.ui.mouseX as odinMouseX
+import me.odinmod.odin.utils.ui.mouseY as odinMouseY
 
 object HudManager : Screen(Text.of("HUD Manager")) {
 
     private var dragging: HudElement? = null
 
-    private var startX = 0f
-    private var startY = 0f
+    private var deltaX = 0f
+    private var deltaY = 0f
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, deltaTicks: Float) {
         dragging?.let {
-            it.x = (odinMouseX - startX).coerceIn(0f, mc.window.width - (it.width * it.scale))
-            it.y = (odinMouseX - startY).coerceIn(0f, mc.window.height - (it.height * it.scale))
+            it.x = (odinMouseX + deltaX).coerceIn(0f, mc.window.width - (it.width * it.scale))
+            it.y = (odinMouseY + deltaY).coerceIn(0f, mc.window.height - (it.height * it.scale))
         }
 
         context?.matrices?.push()
@@ -50,8 +51,8 @@ object HudManager : Screen(Text.of("HUD Manager")) {
             if (hud.isEnabled && hud.value.isHovered()) {
                 dragging = hud.value
 
-                startX = (odinMouseX - hud.value.x)
-                startY = (odinMouseX - hud.value.y)
+                deltaX = (hud.value.x - odinMouseX)
+                deltaY = (hud.value.y - odinMouseY)
                 return true
             }
         }
