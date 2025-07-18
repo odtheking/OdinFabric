@@ -32,13 +32,14 @@ object ServerUtils {
             }
 
             is PingResultS2CPacket -> {
-                val newPing = (Util.getMeasuringTimeMs() - startTime()).toInt().coerceAtLeast(0)
-                currentPing = newPing
+                currentPing = (Util.getMeasuringTimeMs() - startTime()).toInt().coerceAtLeast(0)
 
-                pingHistory.add(newPing)
-                if (pingHistory.size > PING_HISTORY_SIZE) pingHistory.removeFirst()
+                synchronized(pingHistory) {
+                    pingHistory.add(currentPing)
+                    if (pingHistory.size > PING_HISTORY_SIZE) pingHistory.removeFirst()
 
-                averagePing = if (pingHistory.isNotEmpty()) ArrayList(pingHistory).sum() / pingHistory.size else newPing
+                    averagePing = if (pingHistory.isNotEmpty()) pingHistory.sum() / pingHistory.size else currentPing
+                }
             }
         }
     }

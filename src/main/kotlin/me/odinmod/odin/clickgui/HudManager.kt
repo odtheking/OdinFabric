@@ -4,9 +4,11 @@ import me.odinmod.odin.OdinMod.mc
 import me.odinmod.odin.clickgui.settings.impl.HudElement
 import me.odinmod.odin.config.Config
 import me.odinmod.odin.features.ModuleManager.hudSettingsCache
+import me.odinmod.odin.utils.Colors
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.text.Text
+import org.lwjgl.glfw.GLFW
 import kotlin.math.sign
 import me.odinmod.odin.utils.ui.mouseX as odinMouseX
 import me.odinmod.odin.utils.ui.mouseY as odinMouseY
@@ -32,6 +34,13 @@ object HudManager : Screen(Text.of("HUD Manager")) {
 
         for (hud in hudSettingsCache) {
             if (hud.isEnabled) hud.value.draw(context!!, true)
+            if (!hud.value.isHovered()) continue
+            context?.matrices?.push()
+            context?.matrices?.translate(hud.value.x + hud.value.width * hud.value.scale + 10.0, hud.value.y.toDouble(), 1.0)
+            context?.matrices?.scale(2f, 2f, 1f)
+            context?.drawTextWithShadow(mc.textRenderer, Text.of(hud.name), 0, 0, Colors.WHITE.rgba)
+            context?.drawWrappedTextWithShadow(mc.textRenderer, Text.of(hud.description), 0, 10, 150, Colors.WHITE.rgba)
+            context?.matrices?.pop()
         }
         context?.matrices?.pop()
     }
@@ -40,7 +49,7 @@ object HudManager : Screen(Text.of("HUD Manager")) {
         val actualAmount = verticalAmount.sign.toFloat() * 0.2f
         for (hud in hudSettingsCache) {
             if (hud.isEnabled && hud.value.isHovered()) {
-                hud.value.scale = (hud.value.scale + actualAmount).coerceIn(2f, 10f)
+                hud.value.scale = (hud.value.scale + actualAmount).coerceIn(1f, 10f)
                 return true
             }
         }
@@ -63,6 +72,60 @@ object HudManager : Screen(Text.of("HUD Manager")) {
     override fun mouseReleased(mouseX: Double, mouseY: Double, state: Int): Boolean {
         dragging = null
         return super.mouseReleased(mouseX, mouseY, state)
+    }
+
+    override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+        when (keyCode) {
+            GLFW.GLFW_KEY_EQUAL -> {
+                for (hud in hudSettingsCache) {
+                    if (hud.isEnabled && hud.value.isHovered()) {
+                        hud.value.scale = (hud.value.scale + 0.1f).coerceIn(1f, 10f)
+                        return true
+                    }
+                }
+            }
+            GLFW.GLFW_KEY_MINUS -> {
+                for (hud in hudSettingsCache) {
+                    if (hud.isEnabled && hud.value.isHovered()) {
+                        hud.value.scale = (hud.value.scale - 0.1f).coerceIn(1f, 10f)
+                        return true
+                    }
+                }
+            }
+            GLFW.GLFW_KEY_RIGHT -> {
+                for (hud in hudSettingsCache) {
+                    if (hud.isEnabled && hud.value.isHovered()) {
+                        hud.value.x += 10f
+                        return true
+                    }
+                }
+            }
+            GLFW.GLFW_KEY_LEFT -> {
+                for (hud in hudSettingsCache) {
+                    if (hud.isEnabled && hud.value.isHovered()) {
+                        hud.value.x -= 10f
+                        return true
+                    }
+                }
+            }
+            GLFW.GLFW_KEY_UP -> {
+                for (hud in hudSettingsCache) {
+                    if (hud.isEnabled && hud.value.isHovered()) {
+                        hud.value.y -= 10f
+                        return true
+                    }
+                }
+            }
+            GLFW.GLFW_KEY_DOWN -> {
+                for (hud in hudSettingsCache) {
+                    if (hud.isEnabled && hud.value.isHovered()) {
+                        hud.value.y += 10f
+                        return true
+                    }
+                }
+            }
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers)
     }
 
     override fun close()  {
