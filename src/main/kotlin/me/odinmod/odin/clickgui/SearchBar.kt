@@ -23,7 +23,6 @@ object SearchBar {
         textSetter = { currentSearch = it }
     )
 
-
     fun draw(x: Float, y: Float, mouseX: Float, mouseY: Float) {
         NVGRenderer.dropShadow(x, y, 350f, 40f, 10f, 0.75f, 9f)
         NVGRenderer.rect(x, y, 350f, 40f, gray38.rgba, 9f)

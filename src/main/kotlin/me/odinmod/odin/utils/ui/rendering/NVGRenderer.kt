@@ -9,6 +9,7 @@ import me.odinmod.odin.utils.Color.Companion.green
 import me.odinmod.odin.utils.Color.Companion.red
 import net.minecraft.client.gl.GlBackend
 import net.minecraft.client.texture.GlTexture
+import net.minecraft.util.Identifier
 import org.lwjgl.nanovg.NVGColor
 import org.lwjgl.nanovg.NVGPaint
 import org.lwjgl.nanovg.NanoSVG.*
@@ -31,7 +32,7 @@ object NVGRenderer {
     private val nvgColor = NVGColor.malloc()
     private val nvgColor2: NVGColor = NVGColor.malloc()
 
-    val defaultFont = Font("Inter", "/assets/odin/Inter.otf")
+    val defaultFont = Font("Inter", mc.resourceManager.getResource(Identifier.of("odin:font.ttf")).get().inputStream)
 
     private val fontMap = HashMap<Font, NVGFont>()
     private val fontBounds = FloatArray(4)
@@ -52,7 +53,6 @@ object NVGRenderer {
     init {
         vg = nvgCreate(NVG_ANTIALIAS or NVG_STENCIL_STROKES)
         require(vg != -1L) { "Failed to initialize NanoVG" }
-        push()
         nvgFontSize(vg, 16f)
         nvgFontFaceId(vg, getFontID(defaultFont))
         nvgBeginPath(vg)
