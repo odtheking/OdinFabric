@@ -44,7 +44,7 @@ object BuildHelper : Module(
 
         if (unfinishedWaypoints)
             KuudraUtils.buildingPiles.forEach {
-                event.context.drawCustomBeacon(it.name.asOrderedText(), it.blockPos, Colors.MINECRAFT_DARK_RED, false)
+                event.context.drawCustomBeacon(it.name.asOrderedText(), it.blockPos, Colors.MINECRAFT_DARK_RED, increase = false, distance = false)
                 if (hideDefaultTag) it.isCustomNameVisible = false
             }
     }

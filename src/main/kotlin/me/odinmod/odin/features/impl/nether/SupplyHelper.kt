@@ -56,7 +56,7 @@ object SupplyHelper : Module(
         if (supplyDropWaypoints) {
             Supply.entries.forEach { type ->
                 if (type.equalsOneOf(Supply.None, Supply.Square) || !type.isActive) return@forEach
-                event.context.drawCustomBeacon(Text.of("§ePlace Here!").asOrderedText(), type.dropOffSpot, if (NoPre.missing == type) Colors.MINECRAFT_GREEN else Colors.MINECRAFT_RED, increase = false)
+                event.context.drawCustomBeacon(Text.of("§ePlace Here!").asOrderedText(), type.dropOffSpot, if (NoPre.missing == type) Colors.MINECRAFT_GREEN else Colors.MINECRAFT_RED, increase = false, distance = false)
             }
         }
 

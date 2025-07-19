@@ -19,10 +19,8 @@ import net.minecraft.text.Text
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Box
 import net.minecraft.util.math.Vec3d
-import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.pow
-import kotlin.math.sin
 
 private val ALLOCATOR = BufferAllocator(1536)
 
@@ -91,82 +89,14 @@ fun WorldRenderContext.drawText(text: OrderedText?, pos: Vec3d, scale: Float, de
     stack.pop()
 }
 
-fun WorldRenderContext.drawSphere(
-    center: Vec3d,
-    radius: Double,
-    segments: Int,
-    color: Color
-) {
-    val matrixStack = matrixStack() ?: return
-    val bufferSource = consumers() as? VertexConsumerProvider.Immediate ?: return
-    val buffer = bufferSource.getBuffer(CustomRenderLayer.LINE_LIST)
-    val camPos = camera().pos
-
-    matrixStack.push()
-    matrixStack.translate(-camPos.x, -camPos.y, -camPos.z)
-
-    val matrix = matrixStack.peek().positionMatrix
-
-    // Draw latitude lines
-    for (i in 0..segments) {
-        val theta = Math.PI * i / segments
-        val sinTheta = sin(theta)
-        val cosTheta = cos(theta)
-
-        for (j in 0 until segments) {
-            val phi1 = 2 * Math.PI * j / segments
-            val phi2 = 2 * Math.PI * (j + 1) / segments
-
-            val x1 = center.x + radius * sinTheta * cos(phi1)
-            val y1 = center.y + radius * cosTheta
-            val z1 = center.z + radius * sinTheta * sin(phi1)
-
-            val x2 = center.x + radius * sinTheta * cos(phi2)
-            val z2 = center.z + radius * sinTheta * sin(phi2)
-
-            buffer.vertex(matrix, x1.toFloat(), y1.toFloat(), z1.toFloat()).color(color.red, color.green, color.blue, color.alpha).normal(1f, 1f, 1f)
-            buffer.vertex(matrix, x2.toFloat(), y1.toFloat(), z2.toFloat()).color(color.red, color.green, color.blue, color.alpha).normal(1f, 1f, 1f)
-        }
-    }
-
-    // Draw longitude lines
-    for (j in 0..segments) {
-        val phi = 2 * Math.PI * j / segments
-
-        for (i in 0 until segments) {
-            val theta1 = Math.PI * i / segments
-            val theta2 = Math.PI * (i + 1) / segments
-
-            val x1 = center.x + radius * sin(theta1) * cos(phi)
-            val y1 = center.y + radius * cos(theta1)
-            val z1 = center.z + radius * sin(theta1) * sin(phi)
-
-            val x2 = center.x + radius * sin(theta2) * cos(phi)
-            val y2 = center.y + radius * cos(theta2)
-            val z2 = center.z + radius * sin(theta2) * sin(phi)
-
-            buffer.vertex(matrix, x1.toFloat(), y1.toFloat(), z1.toFloat()).color(color.red, color.green, color.blue, color.alpha).normal(1f, 1f, 1f)
-            buffer.vertex(matrix, x2.toFloat(), y2.toFloat(), z2.toFloat()).color(color.red, color.green, color.blue, color.alpha).normal(1f, 1f, 1f)
-        }
-    }
-
-    matrixStack.pop()
-    bufferSource.draw(CustomRenderLayer.LINE_LIST)
-}
-
-fun WorldRenderContext.drawCustomBeacon(
-    title: OrderedText,
-    position: BlockPos,
-    color: Color,
-    increase: Boolean = true
-) {
+fun WorldRenderContext.drawCustomBeacon(title: OrderedText, position: BlockPos, color: Color, increase: Boolean = true, distance: Boolean = true) {
     val dist = mc.player?.blockPos?.getManhattanDistance(position) ?: return
 
     drawWireFrameBox(Box(position), color, depth = false)
     drawBeaconBeam(position, color)
 
     drawText(
-        concat(title, Text.of(" §r§f(§3${dist}m§f)").asOrderedText()),
+        (if (distance) concat(title, Text.of(" §r§f(§3${dist}m§f)").asOrderedText()) else title),
         position.toCenterPos().addVec(y = 1.7),
         if (increase) max(1f, (dist / 20.0).toFloat()) else 2f,
         false
