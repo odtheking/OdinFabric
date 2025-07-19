@@ -32,7 +32,7 @@ object NVGRenderer {
     private val nvgColor = NVGColor.malloc()
     private val nvgColor2: NVGColor = NVGColor.malloc()
 
-    val defaultFont = Font("Inter", mc.resourceManager.getResource(Identifier.of("odin:font.ttf")).get().inputStream)
+    val defaultFont = Font("Default", mc.resourceManager.getResource(Identifier.of("odin:font.ttf")).get().inputStream)
 
     private val fontMap = HashMap<Font, NVGFont>()
     private val fontBounds = FloatArray(4)
