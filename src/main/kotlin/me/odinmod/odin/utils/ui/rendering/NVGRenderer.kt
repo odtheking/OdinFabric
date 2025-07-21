@@ -16,7 +16,6 @@ import org.lwjgl.nanovg.NVGPaint
 import org.lwjgl.nanovg.NanoSVG.*
 import org.lwjgl.nanovg.NanoVG.*
 import org.lwjgl.nanovg.NanoVGGL3.*
-import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL30
 import org.lwjgl.stb.STBImage.stbi_load_from_memory
 import org.lwjgl.system.MemoryUtil.memAlloc
@@ -57,7 +56,6 @@ object NVGRenderer {
         if (drawing) throw IllegalStateException("[NVGRenderer] Already drawing, but called beginFrame")
 
         previousTexture = GlStateManager._getActiveTexture()
-        textureBinding = GlStateManager._getInteger(GL11.GL_TEXTURE_BINDING_2D)
         previousProgram = ((RenderSystem.getDevice() as GlBackend).createCommandEncoder() as GlResourceManagerAccessor).currentProgram().glRef
 
         val framebuffer = mc.framebuffer
@@ -79,13 +77,8 @@ object NVGRenderer {
         GlStateManager._enableBlend()
         GlStateManager._blendFuncSeparate(770, 771, 1, 0)
 
-        if (previousTexture != -1) { // prevents issues with gui background rendering
-            GlStateManager._activeTexture(previousTexture)
-            if (textureBinding != -1) GlStateManager._bindTexture(textureBinding)
-        }
         if (previousProgram != -1) GlStateManager._glUseProgram(previousProgram) // fixes invalid program errors when using NVG
         GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0) // fixes macos issues
-        GlStateManager._glBindVertexArray(0) // fixes glitches when updating font atlas
 
         drawing = false
     }
