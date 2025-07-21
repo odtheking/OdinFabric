@@ -7,6 +7,7 @@ import me.odinmod.odin.utils.Color.Companion.alpha
 import me.odinmod.odin.utils.Color.Companion.blue
 import me.odinmod.odin.utils.Color.Companion.green
 import me.odinmod.odin.utils.Color.Companion.red
+import mixins.GlResourceManagerAccessor
 import net.minecraft.client.gl.GlBackend
 import net.minecraft.client.texture.GlTexture
 import net.minecraft.util.Identifier
@@ -16,7 +17,6 @@ import org.lwjgl.nanovg.NanoSVG.*
 import org.lwjgl.nanovg.NanoVG.*
 import org.lwjgl.nanovg.NanoVGGL3.*
 import org.lwjgl.opengl.GL11
-import org.lwjgl.opengl.GL20
 import org.lwjgl.opengl.GL30
 import org.lwjgl.stb.STBImage.stbi_load_from_memory
 import org.lwjgl.system.MemoryUtil.memAlloc
@@ -51,12 +51,6 @@ object NVGRenderer {
     init {
         vg = nvgCreate(NVG_ANTIALIAS or NVG_STENCIL_STROKES)
         require(vg != -1L) { "Failed to initialize NanoVG" }
-        nvgFontSize(vg, 16f)
-        nvgFontFaceId(vg, getFontID(defaultFont))
-        nvgBeginPath(vg)
-        nvgText(vg, -1000f, -1000f, "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#\\\$%^&*()-_=+[]{};:'\\\",.<>?/|\\\\`~")
-        nvgClosePath(vg)
-        pop()
     }
 
     fun beginFrame(width: Float, height: Float) {
@@ -64,7 +58,7 @@ object NVGRenderer {
 
         previousTexture = GlStateManager._getActiveTexture()
         textureBinding = GlStateManager._getInteger(GL11.GL_TEXTURE_BINDING_2D)
-        previousProgram = GlStateManager._getInteger(GL20.GL_CURRENT_PROGRAM)
+        previousProgram = ((RenderSystem.getDevice() as GlBackend).createCommandEncoder() as GlResourceManagerAccessor).currentProgram().glRef
 
         val framebuffer = mc.framebuffer
         val glFramebuffer = (framebuffer.colorAttachment as GlTexture).getOrCreateFramebuffer((RenderSystem.getDevice() as GlBackend).framebufferManager, null)

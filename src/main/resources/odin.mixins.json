@@ -13,6 +13,7 @@
     "ClientPlayNetworkHandlerMixin",
     "DrawContextAccessor",
     "EntityRendererMixin",
+    "GlResourceManagerAccessor",
     "HandledScreenAccessor",
     "HandledScreenMixin",
     "InGameHudMixin",
