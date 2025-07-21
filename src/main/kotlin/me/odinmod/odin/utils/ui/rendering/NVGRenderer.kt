@@ -16,7 +16,6 @@ import org.lwjgl.nanovg.NanoSVG.*
 import org.lwjgl.nanovg.NanoVG.*
 import org.lwjgl.nanovg.NanoVGGL3.*
 import org.lwjgl.opengl.GL11
-import org.lwjgl.opengl.GL13
 import org.lwjgl.opengl.GL20
 import org.lwjgl.opengl.GL30
 import org.lwjgl.stb.STBImage.stbi_load_from_memory
@@ -44,7 +43,6 @@ object NVGRenderer {
     private var previousTexture = -1
     private var textureBinding = -1
     private var previousProgram = -1
-    private var previousBuffer = -1
 
     private var vg = -1L
 
@@ -64,16 +62,15 @@ object NVGRenderer {
     fun beginFrame(width: Float, height: Float) {
         if (drawing) throw IllegalStateException("[NVGRenderer] Already drawing, but called beginFrame")
 
-        previousTexture = GL11.glGetInteger(GL13.GL_ACTIVE_TEXTURE)
-        textureBinding = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D)
-        previousProgram = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM)
-        previousBuffer = GlStateManager.getFrameBuffer(GL30.GL_FRAMEBUFFER)
+        previousTexture = GlStateManager._getActiveTexture()
+        textureBinding = GlStateManager._getInteger(GL11.GL_TEXTURE_BINDING_2D)
+        previousProgram = GlStateManager._getInteger(GL20.GL_CURRENT_PROGRAM)
 
         val framebuffer = mc.framebuffer
         val glFramebuffer = (framebuffer.colorAttachment as GlTexture).getOrCreateFramebuffer((RenderSystem.getDevice() as GlBackend).framebufferManager, null)
         GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, glFramebuffer)
         GlStateManager._viewport(0, 0, framebuffer.viewportWidth, framebuffer.viewportHeight)
-        GlStateManager._activeTexture(GL30.GL_TEXTURE0);
+        GlStateManager._activeTexture(GL30.GL_TEXTURE0)
 
         nvgBeginFrame(vg, width, height, 1f)
         nvgTextAlign(vg, NVG_ALIGN_LEFT or NVG_ALIGN_TOP)
@@ -92,9 +89,8 @@ object NVGRenderer {
             GlStateManager._activeTexture(previousTexture)
             if (textureBinding != -1) GlStateManager._bindTexture(textureBinding)
         }
-
         if (previousProgram != -1) GlStateManager._glUseProgram(previousProgram) // fixes invalid program errors when using NVG
-        if (previousBuffer != -1) GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, previousBuffer) // fixes macos issues
+        GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0) // fixes macos issues
         GlStateManager._glBindVertexArray(0) // fixes glitches when updating font atlas
 
         drawing = false
