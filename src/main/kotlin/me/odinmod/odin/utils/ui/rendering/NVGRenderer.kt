@@ -73,6 +73,7 @@ object NVGRenderer {
         val glFramebuffer = (framebuffer.colorAttachment as GlTexture).getOrCreateFramebuffer((RenderSystem.getDevice() as GlBackend).framebufferManager, null)
         GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, glFramebuffer)
         GlStateManager._viewport(0, 0, framebuffer.viewportWidth, framebuffer.viewportHeight)
+        GlStateManager._activeTexture(GL30.GL_TEXTURE0);
 
         nvgBeginFrame(vg, width, height, 1f)
         nvgTextAlign(vg, NVG_ALIGN_LEFT or NVG_ALIGN_TOP)
@@ -93,8 +94,8 @@ object NVGRenderer {
         }
 
         if (previousProgram != -1) GlStateManager._glUseProgram(previousProgram) // fixes invalid program errors when using NVG
+        if (previousBuffer != -1) GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, previousBuffer) // fixes macos issues
         GlStateManager._glBindVertexArray(0) // fixes glitches when updating font atlas
-        GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, previousBuffer)
 
         drawing = false
     }
