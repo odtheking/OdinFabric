@@ -54,7 +54,7 @@ object WardrobeKeybinds : Module(
 
         val index = when (keyCode) {
             nextPageKeybind.code -> if (current < total) 53 else return false
-            previousPageKeybind.code -> if (current > total) 53 else return false
+            previousPageKeybind.code ->if (current > 1) 45 else return false
             unequipKeybind.code -> equippedIndex ?: return false
             else -> {
                 val keyIndex = arrayOf(wardrobe1, wardrobe2, wardrobe3, wardrobe4, wardrobe5, wardrobe6, wardrobe7, wardrobe8, wardrobe9)
