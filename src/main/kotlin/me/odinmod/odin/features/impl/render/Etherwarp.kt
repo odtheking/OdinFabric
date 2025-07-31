@@ -54,13 +54,12 @@ object Etherwarp : Module(
     fun onRenderLast(event: RenderEvent.Last) {
         if (mc.player?.isSneaking == false || mc.currentScreen != null) return
 
-        etherPos = getEtherPos(if (useServerPosition) mc.player?.lastPos else mc.player?.pos, 56.0 + (isEtherwarpItem()?.getInt("tuned_transmission", 0) ?: return))
+        etherPos = getEtherPos(if (useServerPosition) mc.player?.lastPos else mc.player?.pos, 56.0 + (isEtherwarpItem()?.getInt("tuned_transmission", 0) ?: return), etherWarp = true)
         if (etherPos?.succeeded != true && !renderFail) return
         val color = if (etherPos?.succeeded == true) color else failColor
         etherPos?.pos?.let { pos ->
-            val box = if (fullBlock) Box(pos) else {
+            val box = if (fullBlock) Box(pos) else
                 mc.world?.getBlockState(pos)?.getOutlineShape(mc.world, pos)?.asCuboid()?.takeIf { !it.isEmpty }?.boundingBox?.offset(pos) ?: Box(pos)
-            }
 
             when (renderStyle) {
                 0 -> event.context.drawWireFrameBox(box, color)
@@ -148,6 +147,7 @@ object Etherwarp : Module(
             val blockPos = BlockPos(x.toInt(), y.toInt(), z.toInt())
             val chunk = mc.world?.getChunk(ChunkSectionPos.getSectionCoord(blockPos.x), ChunkSectionPos.getSectionCoord(blockPos.z)) ?: return EtherPos.NONE
             val currentBlock = chunk.getBlockState(blockPos).takeIf { it.block is Block } ?: return EtherPos.NONE
+
             val currentBlockId = Block.getRawIdFromState(currentBlock.block.defaultState)
 
             if ((!validEtherwarpFeetIds.get(currentBlockId) && etherWarp) || (currentBlockId != 0 && !etherWarp)) {
@@ -193,8 +193,10 @@ object Etherwarp : Module(
         TallFlowerBlock::class, ShortPlantBlock::class, BushBlock::class,
         SeagrassBlock::class, TallSeagrassBlock::class, SugarCaneBlock::class,
         FluidBlock::class, VineBlock::class, MushroomPlantBlock::class,
-        PistonHeadBlock::class, DyedCarpetBlock::class,
-        DryVegetationBlock::class, SmallDripleafBlock::class,
+        PistonHeadBlock::class, DyedCarpetBlock::class, CobwebBlock::class,
+        DryVegetationBlock::class, SmallDripleafBlock::class, LeverBlock::class,
+        NetherWartBlock::class, NetherPortalBlock::class, RedstoneWireBlock::class,
+        ComparatorBlock::class, RedstoneTorchBlock::class, RepeaterBlock::class
     )
 
     private val validEtherwarpFeetIds = BitSet(0).apply {

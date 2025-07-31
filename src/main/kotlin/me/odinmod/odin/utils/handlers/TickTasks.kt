@@ -17,7 +17,7 @@ open class TickTask(
         else TickTasks.registerClientTask(this)
     }
 
-    private var ticks = 0
+    var ticks = 0
 
     open fun run() {
         if (++ticks < ticksPerCycle) return
@@ -36,8 +36,10 @@ class LimitedTickTask(
     private var cycleCount = 0
 
     override fun run() {
-        if (cycleCount++ >= maxCycles) return
+        if (cycleCount >= maxCycles) return
         super.run()
+
+        if ((ticks == 0)) cycleCount++
         if (cycleCount >= maxCycles) TickTasks.unregister(this)
     }
 }

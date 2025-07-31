@@ -9,6 +9,7 @@ import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.text.Text
 import org.lwjgl.glfw.GLFW
+import kotlin.math.floor
 import kotlin.math.sign
 import me.odinmod.odin.utils.ui.mouseX as odinMouseX
 import me.odinmod.odin.utils.ui.mouseY as odinMouseY
@@ -24,8 +25,8 @@ object HudManager : Screen(Text.of("HUD Manager")) {
         super.render(context, mouseX, mouseY, deltaTicks)
 
         dragging?.let {
-            it.x = (odinMouseX + deltaX).coerceIn(0f, mc.window.width - (it.width * it.scale))
-            it.y = (odinMouseY + deltaY).coerceIn(0f, mc.window.height - (it.height * it.scale))
+            it.x = floor((odinMouseX + deltaX).coerceIn(0f, mc.window.width - (it.width * it.scale)))
+            it.y = floor((odinMouseY + deltaY).coerceIn(0f, mc.window.height - (it.height * it.scale)))
         }
 
         context?.matrices?.push()

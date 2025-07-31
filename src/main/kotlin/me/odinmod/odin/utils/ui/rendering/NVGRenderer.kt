@@ -39,8 +39,6 @@ object NVGRenderer {
 
     private var scissor: Scissor? = null
 
-    private var previousTexture = -1
-    private var textureBinding = -1
     private var previousProgram = -1
 
     private var vg = -1L
@@ -55,7 +53,6 @@ object NVGRenderer {
     fun beginFrame(width: Float, height: Float) {
         if (drawing) throw IllegalStateException("[NVGRenderer] Already drawing, but called beginFrame")
 
-        previousTexture = GlStateManager._getActiveTexture()
         previousProgram = ((RenderSystem.getDevice() as GlBackend).createCommandEncoder() as GlResourceManagerAccessor).currentProgram().glRef
 
         val framebuffer = mc.framebuffer

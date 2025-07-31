@@ -66,6 +66,7 @@ object ChatCommands : Module(
 
         val ign = result.groups[2]?.value ?: result.groups[5]?.value ?: result.groups[9]?.value ?: return
         val msg = result.groups[3]?.value ?: result.groups[7]?.value ?: result.groups[10]?.value ?: return
+
         if (!msg.startsWith("!")) return
 
         LimitedTickTask(4, 1) {
