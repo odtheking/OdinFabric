@@ -107,17 +107,17 @@ object Etherwarp : Module(
         }
     }
 
-    fun getEtherPos(position: Vec3d?, distance: Double, returnEnd: Boolean = false): EtherPos {
+    fun getEtherPos(position: Vec3d?, distance: Double, returnEnd: Boolean = false, etherWarp: Boolean = false): EtherPos {
         val startPos = position?.addVec(y = 1.54) ?: return EtherPos.NONE
         val endPos = mc.player?.rotationVector?.multiply(distance)?.add(startPos) ?: return EtherPos.NONE
-        return traverseVoxels(startPos, endPos).takeUnless { it == EtherPos.NONE && returnEnd } ?: EtherPos(true, endPos.toBlockPos(), null)
+        return traverseVoxels(startPos, endPos, etherWarp).takeUnless { it == EtherPos.NONE && returnEnd } ?: EtherPos(true, endPos.toBlockPos(), null)
     }
 
     /**
      * Traverses voxels from start to end and returns the first non-air block it hits.
      * @author Bloom
      */
-    private fun traverseVoxels(start: Vec3d, end: Vec3d): EtherPos {
+    private fun traverseVoxels(start: Vec3d, end: Vec3d, etherWarp: Boolean): EtherPos {
         val (x0, y0, z0) = start
         val (x1, y1, z1) = end
 
@@ -150,8 +150,8 @@ object Etherwarp : Module(
             val currentBlock = chunk.getBlockState(blockPos).takeIf { it.block is Block } ?: return EtherPos.NONE
             val currentBlockId = Block.getRawIdFromState(currentBlock.block.defaultState)
 
-            if (currentBlockId != 0) {
-                if (validEtherwarpFeetIds.get(currentBlockId)) return EtherPos(false, blockPos, currentBlock)
+            if ((!validEtherwarpFeetIds.get(currentBlockId) && etherWarp) || (currentBlockId != 0 && !etherWarp)) {
+                if (!etherWarp && validEtherwarpFeetIds.get(currentBlockId)) return EtherPos(false, blockPos, currentBlock.block.defaultState)
 
                 val footBlockId = Block.getRawIdFromState(chunk.getBlockState(BlockPos(blockPos.x, blockPos.y + 1, blockPos.z)).block.defaultState)
                 if (!validEtherwarpFeetIds.get(footBlockId)) return EtherPos(false, blockPos, currentBlock)
