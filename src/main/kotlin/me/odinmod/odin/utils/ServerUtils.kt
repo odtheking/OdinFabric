@@ -1,11 +1,11 @@
 package me.odinmod.odin.utils
 
+import me.odinmod.odin.OdinMod.mc
 import me.odinmod.odin.events.PacketEvent
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket
 import net.minecraft.network.packet.s2c.query.PingResultS2CPacket
 import net.minecraft.util.Util
-import java.util.*
 
 object ServerUtils {
     private var prevTime = 0L
@@ -18,8 +18,6 @@ object ServerUtils {
     var averagePing: Int = 0
         private set
 
-    private val pingHistory = LinkedList<Int>()
-    private const val PING_HISTORY_SIZE = 10
 
     @EventHandler
     fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
@@ -34,12 +32,10 @@ object ServerUtils {
             is PingResultS2CPacket -> {
                 currentPing = (Util.getMeasuringTimeMs() - startTime()).toInt().coerceAtLeast(0)
 
-                synchronized(pingHistory) {
-                    pingHistory.add(currentPing)
-                    if (pingHistory.size > PING_HISTORY_SIZE) pingHistory.removeFirst()
+                val log = ArrayList<Long>()
+                for (i in 0 until minOf(mc.debugHud.pingLog.dimension, 5)) log.add(mc.debugHud.pingLog.get(i))
 
-                    averagePing = if (pingHistory.isNotEmpty()) pingHistory.sum() / pingHistory.size else currentPing
-                }
+                averagePing = log.average().toInt().coerceAtLeast(0)
             }
         }
     }
