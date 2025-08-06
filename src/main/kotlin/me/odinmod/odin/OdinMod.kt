@@ -13,6 +13,9 @@ import me.odinmod.odin.utils.sendDataToServer
 import me.odinmod.odin.utils.skyblock.KuudraUtils
 import me.odinmod.odin.utils.skyblock.LocationUtils
 import me.odinmod.odin.utils.skyblock.SkyblockPlayer
+import me.odinmod.odin.utils.skyblock.dungeon.DungeonListener
+import me.odinmod.odin.utils.skyblock.dungeon.DungeonUtils
+import me.odinmod.odin.utils.skyblock.dungeon.ScanUtils
 import meteordevelopment.orbit.EventBus
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
@@ -54,7 +57,8 @@ object OdinMod : ModInitializer {
         listOf(
             this, LocationUtils, TickTasks, KuudraUtils,
             SkyblockPlayer, MobCaches, ServerUtils,
-            EventDispatcher, ModuleManager
+            EventDispatcher, ModuleManager, DungeonListener,
+            ScanUtils, DungeonUtils
         ).forEach { EVENT_BUS.subscribe(it) }
 
         Config.load()

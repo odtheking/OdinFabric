@@ -5,6 +5,8 @@ import net.minecraft.util.math.Vec3d
 import org.joml.Matrix4f
 import kotlin.math.floor
 
+data class Vec2(val x: Int, val z: Int)
+
 operator fun Vec3d.component1(): Double = x
 operator fun Vec3d.component2(): Double = y
 operator fun Vec3d.component3(): Double = z

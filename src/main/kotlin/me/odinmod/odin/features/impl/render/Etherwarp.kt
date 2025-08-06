@@ -187,7 +187,7 @@ object Etherwarp : Module(
         ButtonBlock::class, CarpetBlock::class, SkullBlock::class,
         WallSkullBlock::class, LadderBlock::class, SaplingBlock::class,
         FlowerBlock::class, StemBlock::class, CropBlock::class,
-        RailBlock::class, SnowBlock::class, RedstoneBlock::class,
+        RailBlock::class, SnowBlock::class,
         TripwireBlock::class, TripwireHookBlock::class, FireBlock::class,
         AirBlock::class, TorchBlock::class, FlowerPotBlock::class,
         TallFlowerBlock::class, ShortPlantBlock::class, BushBlock::class,
