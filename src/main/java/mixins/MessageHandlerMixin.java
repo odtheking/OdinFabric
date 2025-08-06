@@ -1,6 +1,6 @@
 package mixins;
 
-import me.odinmod.odin.features.impl.skyblock.PlayerDisplay;
+import io.github.odtheking.odin.features.impl.skyblock.PlayerDisplay;
 import net.minecraft.client.network.message.MessageHandler;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;

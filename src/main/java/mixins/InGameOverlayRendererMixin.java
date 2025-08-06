@@ -1,6 +1,6 @@
 package mixins;
 
-import me.odinmod.odin.features.impl.render.RenderOptimizer;
+import io.github.odtheking.odin.features.impl.render.RenderOptimizer;
 import net.minecraft.client.gui.hud.InGameOverlayRenderer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;

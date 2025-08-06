@@ -12,6 +12,6 @@ public class YggdrasilSignatureIgnoreMixin {
 
     @Inject(method = "validateProperty", at = @At("HEAD"), cancellable = true, remap = false)
     public void validate(Property property, CallbackInfoReturnable<Boolean> cir) {
-       cir.setReturnValue(true);
+        cir.setReturnValue(true);
     }
 }

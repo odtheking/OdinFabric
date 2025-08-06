@@ -1,6 +1,6 @@
 package mixins;
 
-import me.odinmod.odin.events.InputEvent;
+import io.github.odtheking.odin.events.InputEvent;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import org.spongepowered.asm.mixin.Mixin;
@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(KeyBinding.class)
-public class KeyBindingMixin  {
+public class KeyBindingMixin {
 
     @Inject(method = "onKeyPressed", at = @At("HEAD"), cancellable = true)
     private static void onKeyPressed(InputUtil.Key key, CallbackInfo ci) {

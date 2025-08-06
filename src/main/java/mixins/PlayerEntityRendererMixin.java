@@ -1,6 +1,6 @@
 package mixins;
 
-import me.odinmod.odin.features.impl.render.PlayerSize;
+import io.github.odtheking.odin.features.impl.render.PlayerSize;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
 import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;

@@ -9,21 +9,20 @@
   ],
   "client": [
     "ChatScreenMixin",
-    "ClientCommonNetworkHandlerMixin",
     "ClientPlayNetworkHandlerMixin",
-    "DrawContextAccessor",
     "EntityRendererMixin",
-    "GlResourceManagerAccessor",
-    "HandledScreenAccessor",
     "HandledScreenMixin",
     "InGameHudMixin",
     "InGameOverlayRendererMixin",
-    "KeyBindingAccessor",
     "KeyBindingMixin",
     "MessageHandlerMixin",
     "MixinGameRenderer",
     "MouseMixin",
-    "PlayerEntityRendererMixin"
+    "PlayerEntityRendererMixin",
+    "accessors.DrawContextAccessor",
+    "accessors.GlResourceManagerAccessor",
+    "accessors.HandledScreenAccessor",
+    "accessors.KeyBindingAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -1,12 +1,12 @@
 name: build
-on: [pull_request, push]
+on: [ pull_request, push ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [21]
+        java: [ 21 ]
     steps:
       - name: checkout repository
         uses: actions/checkout@v3

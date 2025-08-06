@@ -1,6 +1,6 @@
 package mixins;
 
-import me.odinmod.odin.events.MessageSentEvent;
+import io.github.odtheking.odin.events.MessageSentEvent;
 import net.minecraft.client.gui.screen.ChatScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

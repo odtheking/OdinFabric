@@ -1,9 +1,9 @@
 package mixins;
 
-import me.odinmod.odin.features.impl.skyblock.NoCursorReset;
+import io.github.odtheking.odin.OdinMod;
+import io.github.odtheking.odin.features.impl.skyblock.NoCursorReset;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -11,12 +11,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static me.odinmod.odin.OdinMod.mc;
-
 @Mixin(Mouse.class)
 public class MouseMixin {
-    @Shadow private double x;
-    @Shadow private double y;
+    @Shadow
+    private double x;
+    @Shadow
+    private double y;
+
     @Unique
     private double beforeX;
     @Unique
@@ -30,10 +31,9 @@ public class MouseMixin {
 
     @Inject(method = {"unlockCursor", "lockCursor"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/InputUtil;setCursorParameters(JIDD)V", ordinal = 0, shift = At.Shift.AFTER))
     private void odin$correctCursorPosition(CallbackInfo ci) {
-        if (mc.currentScreen instanceof GenericContainerScreen && NoCursorReset.shouldHookMouse()) {
+        if (OdinMod.INSTANCE.getMc().currentScreen instanceof GenericContainerScreen && NoCursorReset.shouldHookMouse()) {
             this.x = this.beforeX;
             this.y = this.beforeY;
-            GLFW.glfwSetCursorPos(mc.getWindow().getHandle(), this.beforeX, this.beforeY);
         }
     }
 }

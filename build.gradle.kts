@@ -1,10 +1,9 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    kotlin("jvm")
     id("fabric-loom")
+    kotlin("jvm")
     `maven-publish`
-    java
 }
 
 group = property("maven_group")!!
@@ -22,49 +21,78 @@ dependencies {
     minecraft("com.mojang:minecraft:${property("minecraft_version")}")
     mappings("net.fabricmc:yarn:${property("yarn_mappings")}:v2")
     modImplementation("net.fabricmc:fabric-loader:${property("loader_version")}")
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}")
     modImplementation("net.fabricmc:fabric-language-kotlin:${property("fabric_kotlin_version")}")
-    modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.1")
+    modImplementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}")
 
-    implementation("meteordevelopment:orbit:0.2.3")
-    include("meteordevelopment:orbit:0.2.3")
+    modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:${property("devauth_version")}")
 
-    implementation("com.github.stivais:Commodore:1.0.1")
-    include("com.github.stivais:Commodore:1.0.1")
+    property("orbit_version").let {
+        modImplementation("meteordevelopment:orbit:${it}")
+        include("meteordevelopment:orbit:${it}")
+    }
+
+    property("commodore_version").let {
+        implementation("com.github.stivais:Commodore:${it}")
+        include("com.github.stivais:Commodore:${it}")
+    }
 
     modCompileOnly("com.terraformersmc:modmenu:${property("modmenu_version")}")
 
-    val lwjglVersion = property("minecraft_lwjgl_version")
+    property("minecraft_lwjgl_version").let {
+        modImplementation("org.lwjgl:lwjgl-nanovg:$it")
+        include("org.lwjgl:lwjgl-nanovg:$it")
 
-    modImplementation("org.lwjgl:lwjgl-nanovg:$lwjglVersion")
-    include("org.lwjgl:lwjgl-nanovg:$lwjglVersion")
+        listOf("windows", "linux", "macos", "macos-arm64").forEach { v ->
+            modImplementation("org.lwjgl:lwjgl-nanovg:$it:natives-$v")
+            include("org.lwjgl:lwjgl-nanovg:$it:natives-$v")
+        }
+    }
+}
 
-    listOf("windows", "linux", "macos", "macos-arm64").forEach {
-        modImplementation("org.lwjgl:lwjgl-nanovg:$lwjglVersion:natives-$it")
-        include("org.lwjgl:lwjgl-nanovg:$lwjglVersion:natives-$it")
+loom {
+    runConfigs.named("client") {
+        isIdeConfigGenerated = true
+        vmArgs.addAll(
+            arrayOf(
+                "-Dmixin.debug.export=true",
+                "-Ddevauth.enabled=true",
+                "-Ddevauth.account=main",
+                "-XX:+AllowEnhancedClassRedefinition"
+            )
+        )
+    }
+
+    runConfigs.named("server") {
+        isIdeConfigGenerated = false
+    }
+}
+
+afterEvaluate {
+    loom.runs.named("client") {
+        vmArg("-javaagent:${configurations.compileClasspath.get().find { it.name.contains("sponge-mixin") }}")
     }
 }
 
 tasks {
     processResources {
-        inputs.property("version", project.version)
         filesMatching("fabric.mod.json") {
             expand(getProperties())
-            expand(mutableMapOf("version" to project.version))
         }
-    }
-
-    jar {
-        from("LICENSE")
     }
 
     compileKotlin {
         compilerOptions {
             jvmTarget = JvmTarget.JVM_21
-            freeCompilerArgs.add("-Xlambdas=class")
+            freeCompilerArgs.add("-Xlambdas=class") //Commodore
         }
     }
 
+    compileJava {
+        sourceCompatibility = "21"
+        targetCompatibility = "21"
+        options.encoding = "UTF-8"
+        options.compilerArgs.addAll(listOf("-Xlint:deprecation", "-Xlint:unchecked"))
+    }
 }
 
 java {
