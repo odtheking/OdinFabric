@@ -27,13 +27,13 @@ dependencies {
     modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:${property("devauth_version")}")
 
     property("orbit_version").let {
-        modImplementation("meteordevelopment:orbit:${it}")
-        include("meteordevelopment:orbit:${it}")
+        modImplementation("meteordevelopment:orbit:$it")
+        include("meteordevelopment:orbit:$it")
     }
 
     property("commodore_version").let {
-        implementation("com.github.stivais:Commodore:${it}")
-        include("com.github.stivais:Commodore:${it}")
+        implementation("com.github.stivais:Commodore:$it")
+        include("com.github.stivais:Commodore:$it")
     }
 
     modCompileOnly("com.terraformersmc:modmenu:${property("modmenu_version")}")
