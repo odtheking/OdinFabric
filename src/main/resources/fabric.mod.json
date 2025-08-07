@@ -1,26 +1,32 @@
 {
   "schemaVersion": 1,
-  "id": "odining",
-  "version": "${version}",
-
-  "name": "Odin",
-  "description": "no way",
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
   "authors": [
-    "Odtheking"
+    "Odtheking",
+    "Cezar",
+    "Stivais",
+    "Bonsai",
+    "IlmarsXd"
   ],
-
-  "license": "BSD 3-Clause",
+  "contact": {
+    "homepage": "https://modrinth.com/mod/odin",
+    "sources": "https://github.com/odtheking/OdinFabric",
+    "issues": "https://github.com/odtheking/OdinFabric/issues"
+  },
   "icon": "assets/odin/icon.png",
-
-  "environment": "*",
+  "license": "BSD 3-Clause",
+  "environment": "client",
   "entrypoints": {
     "modmenu": [
-      "me.odinmod.odin.clickgui.ModMenuIntegration"
+      "com.odtheking.odin.clickgui.ModMenuIntegration"
     ],
     "main": [
       {
         "adapter": "kotlin",
-        "value": "me.odinmod.odin.OdinMod"
+        "value": "com.odtheking.odin.OdinMod"
       }
     ]
   },
@@ -29,17 +35,10 @@
   ],
   "depends": {
     "fabricloader": ">=${loader_version}",
-    "fabric-api": "*",
+    "fabric-api": ">=${fabric_api_version}",
     "minecraft": "~${minecraft_version}",
-    "java": ">=21",
     "fabric-language-kotlin": ">=${fabric_kotlin_version}"
   },
-
-  "contact": {
-    "homepage": "https://modrinth.com/mod/odin",
-    "sources": "https://github.com/odtheking/OdinFabric"
-  },
-
   "custom": {
     "modmenu": {
       "links": {

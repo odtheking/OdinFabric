@@ -1,31 +1,30 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "mixins",
+  "package": "com.odtheking.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": [
-    "ClientConnectionMixin",
-    "YggdrasilSignatureIgnoreMixin"
-  ],
-  "client": [
-    "ChatScreenMixin",
-    "ClientCommonNetworkHandlerMixin",
-    "ClientPlayNetworkHandlerMixin",
-    "DrawContextAccessor",
-    "EntityRendererMixin",
-    "GlResourceManagerAccessor",
-    "HandledScreenAccessor",
-    "HandledScreenMixin",
-    "InGameHudMixin",
-    "InGameOverlayRendererMixin",
-    "KeyBindingAccessor",
-    "KeyBindingMixin",
-    "MessageHandlerMixin",
-    "MixinGameRenderer",
-    "MouseMixin",
-    "PlayerEntityRendererMixin"
-  ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "client": [
+    "accessors.DrawContextAccessor",
+    "accessors.GlResourceManagerAccessor",
+    "accessors.HandledScreenAccessor",
+    "accessors.KeyBindingAccessor",
+    "mixins.ChatScreenMixin",
+    "mixins.ClientPlayNetworkHandlerMixin",
+    "mixins.EntityRendererMixin",
+    "mixins.HandledScreenMixin",
+    "mixins.InGameHudMixin",
+    "mixins.InGameOverlayRendererMixin",
+    "mixins.KeyBindingMixin",
+    "mixins.MessageHandlerMixin",
+    "mixins.MixinGameRenderer",
+    "mixins.MouseMixin",
+    "mixins.PlayerEntityRendererMixin"
+  ],
+  "mixins": [
+    "mixins.ClientConnectionMixin",
+    "mixins.YggdrasilSignatureIgnoreMixin"
+  ]
 }
