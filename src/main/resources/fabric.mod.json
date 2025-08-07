@@ -21,12 +21,12 @@
   "environment": "client",
   "entrypoints": {
     "modmenu": [
-      "io.github.odtheking.odin.clickgui.ModMenuIntegration"
+      "com.odtheking.odin.clickgui.ModMenuIntegration"
     ],
     "main": [
       {
         "adapter": "kotlin",
-        "value": "io.github.odtheking.odin.OdinMod"
+        "value": "com.odtheking.odin.OdinMod"
       }
     ]
   },
