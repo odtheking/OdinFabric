@@ -30,19 +30,9 @@ object SearchBar {
 
         val textY = y + 10f
 
-        if (currentSearch.isEmpty()) NVGRenderer.text(
-            "Search here...",
-            x + 175f - placeHolderWidth / 2,
-            textY,
-            20f,
-            Colors.WHITE.rgba,
-            NVGRenderer.defaultFont
-        )
-        textInputHandler.x =
-            (x + 175f - searchWidth / 2 - if (currentSearch.isEmpty()) placeHolderWidth / 2 + 2f else 0f).coerceAtLeast(
-                x
-            )
-        textInputHandler.y = textY
+        if (currentSearch.isEmpty()) NVGRenderer.text("Search here...", x + 175f - placeHolderWidth / 2, textY, 20f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
+        textInputHandler.x = (x + 175f - searchWidth / 2 - if (currentSearch.isEmpty()) placeHolderWidth / 2 + 2f else 0f).coerceAtLeast(x)
+        textInputHandler.y = textY - 1
         textInputHandler.width = 250f
         textInputHandler.height = 22f
         textInputHandler.draw(mouseX, mouseY)

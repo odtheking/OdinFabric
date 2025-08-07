@@ -19,27 +19,15 @@ object CommandKeybinds : Module(
         if (!enabled || !LocationUtils.isInSkyblock) return@onPress
         sendCommand("storage")
     }
-    private val wardrobe by KeybindSetting(
-        "Wardrobe",
-        GLFW.GLFW_KEY_UNKNOWN,
-        desc = "Opens the wardrobe menu."
-    ).onPress {
+    private val wardrobe by KeybindSetting("Wardrobe", GLFW.GLFW_KEY_UNKNOWN, desc = "Opens the wardrobe menu.").onPress {
         if (!enabled || !LocationUtils.isInSkyblock) return@onPress
         sendCommand("wardrobe")
     }
-    private val equipment by KeybindSetting(
-        "Equipment",
-        GLFW.GLFW_KEY_UNKNOWN,
-        desc = "Opens the equipment menu."
-    ).onPress {
+    private val equipment by KeybindSetting("Equipment", GLFW.GLFW_KEY_UNKNOWN, desc = "Opens the equipment menu.").onPress {
         if (!enabled || !LocationUtils.isInSkyblock) return@onPress
         sendCommand("equipment")
     }
-    private val dhub by KeybindSetting(
-        "Dungeon Hub",
-        GLFW.GLFW_KEY_UNKNOWN,
-        desc = "Warps to the dungeon hub."
-    ).onPress {
+    private val dhub by KeybindSetting("Dungeon Hub", GLFW.GLFW_KEY_UNKNOWN, desc = "Warps to the dungeon hub.").onPress {
         if (!enabled || !LocationUtils.isInSkyblock) return@onPress
         sendCommand("warp dungeon_hub")
     }

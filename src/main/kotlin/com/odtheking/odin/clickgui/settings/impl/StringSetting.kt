@@ -36,15 +36,7 @@ class StringSetting(
         NVGRenderer.text(name, rectStartX, y + 5f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
 
         NVGRenderer.rect(rectStartX, y + getHeight() - 35f, width - 12f, 30f, gray38.rgba, 4f)
-        NVGRenderer.hollowRect(
-            rectStartX,
-            y + getHeight() - 35f,
-            width - 12f,
-            30f,
-            2f,
-            ClickGUIModule.clickGUIColor.rgba,
-            4f
-        )
+        NVGRenderer.hollowRect(rectStartX, y + getHeight() - 35f, width - 12f, 30f, 2f, ClickGUIModule.clickGUIColor.rgba, 4f)
 
         textInputHandler.x = rectStartX
         textInputHandler.y = y + getHeight() - 30f

@@ -21,16 +21,8 @@ object PetKeybinds : Module(
 ) {
     private val unequipKeybind by KeybindSetting("Unequip", GLFW.GLFW_KEY_UNKNOWN, "Unequips the current Pet.")
     private val nextPageKeybind by KeybindSetting("Next Page", GLFW.GLFW_KEY_UNKNOWN, "Goes to the next page.")
-    private val previousPageKeybind by KeybindSetting(
-        "Previous Page",
-        GLFW.GLFW_KEY_UNKNOWN,
-        "Goes to the previous page."
-    )
-    private val nounequip by BooleanSetting(
-        "Disable Unequip",
-        false,
-        desc = "Prevents using a pets keybind to unequip a pet. Does not prevent unequip keybind or normal clicking."
-    )
+    private val previousPageKeybind by KeybindSetting("Previous Page", GLFW.GLFW_KEY_UNKNOWN, "Goes to the previous page.")
+    private val nounequip by BooleanSetting("Disable Unequip", false, desc = "Prevents using a pets keybind to unequip a pet. Does not prevent unequip keybind or normal clicking.")
     private val advanced by DropdownSetting("Show Settings", false)
 
     private val pet1 by KeybindSetting("Pet 1", GLFW.GLFW_KEY_1, "Pet 1 on the list.").withDependency { advanced }
@@ -81,16 +73,10 @@ object PetKeybinds : Module(
             }
         }
 
-        if (nounequip && screen.screenHandler.slots.subList(10, 43)
-                .indexOfFirst { it.stack?.loreString?.contains("§7§cClick to despawn!") == true } == index && unequipKeybind.code != keyCode
-        ) return modMessage("§cThat pet is already equipped!").let { false }
-        mc.interactionManager?.clickSlot(
-            screen.screenHandler.syncId,
-            index,
-            GLFW.GLFW_MOUSE_BUTTON_1,
-            SlotActionType.PICKUP,
-            mc.player
-        )
+        if (nounequip && screen.screenHandler.slots.subList(10, 43).indexOfFirst { it.stack?.loreString?.contains("§7§cClick to despawn!") == true } == index
+            && unequipKeybind.code != keyCode) return modMessage("§cThat pet is already equipped!").let { false }
+
+        mc.interactionManager?.clickSlot(screen.screenHandler.syncId, index, GLFW.GLFW_MOUSE_BUTTON_1, SlotActionType.PICKUP, mc.player)
         return true
     }
 }

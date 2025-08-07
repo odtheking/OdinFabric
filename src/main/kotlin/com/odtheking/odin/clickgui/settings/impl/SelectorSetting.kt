@@ -58,33 +58,11 @@ class SelectorSetting(
         val currentWidth = elementWidths[index]
 
         hover.handle(x + width - 20f - currentWidth, y + defaultHeight / 2f - 10f, currentWidth + 12f, 22f)
-        NVGRenderer.rect(
-            x + width - 20f - currentWidth,
-            y + defaultHeight / 2f - 10f,
-            currentWidth + 12f,
-            20f,
-            color.rgba,
-            5f
-        )
-        NVGRenderer.hollowRect(
-            x + width - 20f - currentWidth,
-            y + defaultHeight / 2f - 10f,
-            currentWidth + 12f,
-            20f,
-            1.5f,
-            ClickGUIModule.clickGUIColor.rgba,
-            5f
-        )
+        NVGRenderer.rect(x + width - 20f - currentWidth, y + defaultHeight / 2f - 10f, currentWidth + 12f, 20f, color.rgba, 5f)
+        NVGRenderer.hollowRect(x + width - 20f - currentWidth, y + defaultHeight / 2f - 10f, currentWidth + 12f, 20f, 1.5f, ClickGUIModule.clickGUIColor.rgba, 5f)
 
         NVGRenderer.text(name, x + 6f, y + defaultHeight / 2f - 8f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
-        NVGRenderer.text(
-            selected,
-            x + width - 14f - currentWidth,
-            y + defaultHeight / 2f - 8f,
-            16f,
-            Colors.WHITE.rgba,
-            NVGRenderer.defaultFont
-        )
+        NVGRenderer.text(selected, x + width - 14f - currentWidth, y + defaultHeight / 2f - 8f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
 
         if (!extended && !settingAnim.isAnimating()) return defaultHeight
 
@@ -95,31 +73,9 @@ class SelectorSetting(
 
         for (i in options.indices) {
             val optionY = y + 38 + 32 * i
-            if (i != options.size - 1) NVGRenderer.line(
-                x + 18f,
-                optionY + 32,
-                x + width - 12f,
-                optionY + 32,
-                1.5f,
-                Colors.MINECRAFT_DARK_GRAY.rgba
-            )
-            NVGRenderer.text(
-                options[i],
-                x + width / 2f - elementWidths[i] / 2,
-                optionY + 8f,
-                16f,
-                Colors.WHITE.rgba,
-                NVGRenderer.defaultFont
-            )
-            if (isSettingHovered(i)) NVGRenderer.hollowRect(
-                x + 6,
-                optionY,
-                width - 12f,
-                32f,
-                1.5f,
-                ClickGUIModule.clickGUIColor.rgba,
-                4f
-            )
+            if (i != options.size - 1) NVGRenderer.line(x + 18f, optionY + 32, x + width - 12f, optionY + 32, 1.5f, Colors.MINECRAFT_DARK_GRAY.rgba)
+            NVGRenderer.text(options[i], x + width / 2f - elementWidths[i] / 2, optionY + 8f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
+            if (isSettingHovered(i)) NVGRenderer.hollowRect(x + 6, optionY, width - 12f, 32f, 1.5f, ClickGUIModule.clickGUIColor.rgba, 4f)
         }
         if (settingAnim.isAnimating()) NVGRenderer.popScissor()
 

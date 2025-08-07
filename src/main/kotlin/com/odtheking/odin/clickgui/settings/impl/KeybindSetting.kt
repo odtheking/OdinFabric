@@ -19,11 +19,7 @@ class KeybindSetting(
     desc: String
 ) : RenderableSetting<InputUtil.Key>(name, desc), Saving {
 
-    constructor(name: String, defaultKeyCode: Int, desc: String = "", hidden: Boolean = false) : this(
-        name,
-        InputUtil.Type.KEYSYM.createFromCode(defaultKeyCode),
-        desc
-    )
+    constructor(name: String, defaultKeyCode: Int, desc: String = "") : this(name, InputUtil.Type.KEYSYM.createFromCode(defaultKeyCode), desc)
 
     override var value: InputUtil.Key = default
     var onPress: (() -> Unit)? = null
@@ -39,8 +35,7 @@ class KeybindSetting(
 
     override fun render(x: Float, y: Float, mouseX: Float, mouseY: Float): Float {
         super.render(x, y, mouseX, mouseY)
-        if (keyNameWidth < 0) keyNameWidth =
-            NVGRenderer.textWidth(value.localizedText.string, 16f, NVGRenderer.defaultFont)
+        if (keyNameWidth < 0) keyNameWidth = NVGRenderer.textWidth(value.localizedText.string, 16f, NVGRenderer.defaultFont)
         val height = getHeight()
 
         val rectX = x + width - 20 - keyNameWidth
@@ -49,25 +44,10 @@ class KeybindSetting(
         val rectHeight = 20f
 
         NVGRenderer.rect(rectX, rectY, rectWidth, rectHeight, gray38.rgba, 5f)
-        NVGRenderer.hollowRect(
-            rectX - 1,
-            rectY - 1,
-            rectWidth + 2f,
-            rectHeight + 2f,
-            1.5f,
-            ClickGUIModule.clickGUIColor.rgba,
-            4f
-        )
+        NVGRenderer.hollowRect(rectX - 1, rectY - 1, rectWidth + 2f, rectHeight + 2f, 1.5f, ClickGUIModule.clickGUIColor.rgba, 4f)
 
         NVGRenderer.text(name, x + 6f, y + height / 2f - 8f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
-        NVGRenderer.text(
-            value.localizedText.string,
-            rectX + (rectWidth - keyNameWidth) / 2,
-            rectY + rectHeight / 2 - 8f,
-            16f,
-            if (listening) Colors.MINECRAFT_YELLOW.rgba else Colors.WHITE.rgba,
-            NVGRenderer.defaultFont
-        )
+        NVGRenderer.text(value.localizedText.string, rectX + (rectWidth - keyNameWidth) / 2, rectY + rectHeight / 2 - 8f, 16f, if (listening) Colors.MINECRAFT_YELLOW.rgba else Colors.WHITE.rgba, NVGRenderer.defaultFont)
 
         return height
     }

@@ -16,27 +16,18 @@ object RemovePerks : Module(
 
     @EventHandler
     fun renderSlot(event: GuiEvent.DrawSlot) = with(event.screen) {
-        if (this is HandledScreen<*> && title.string == "Perk Menu" && slotCheck(
-                event.slot.stack?.name?.string ?: return
-            )
-        ) event.cancel()
+        if (this is HandledScreen<*> && title.string == "Perk Menu" && slotCheck(event.slot.stack?.name?.string ?: return))
+            event.cancel()
     }
 
     @EventHandler
     fun guiMouseClick(event: GuiEvent.SlotClick) = with(event.screen) {
-        if (this is HandledScreen<*> && title.string == "Perk Menu" && slotCheck(
-                screenHandler?.getSlot(event.slotId)?.stack?.name?.string ?: return
-            )
-        )
+        if (this is HandledScreen<*> && title.string == "Perk Menu" && slotCheck(screenHandler?.getSlot(event.slotId)?.stack?.name?.string ?: return))
             event.cancel()
     }
 
-    private fun slotCheck(slot: String): Boolean {
-        return slot.containsOneOf("Steady Hands", "Bomberman", "Mining Frenzy") || slot.equalsOneOf(
-            "Elle's Lava Rod",
-            "Elle's Pickaxe",
-            "Auto Revive"
-        ) ||
-                (!renderStun && slot.containsOneOf("Human Cannonball"))
-    }
+    private fun slotCheck(slot: String): Boolean =
+        slot.containsOneOf("Steady Hands", "Bomberman", "Mining Frenzy") ||
+        slot.equalsOneOf("Elle's Lava Rod", "Elle's Pickaxe", "Auto Revive") ||
+        (!renderStun && slot.containsOneOf("Human Cannonball"))
 }

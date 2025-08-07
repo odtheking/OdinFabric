@@ -29,6 +29,7 @@ object SpringBoots : Module(
         width to mc.textRenderer.fontHeight
     }
 
+    private val pitchSet = setOf(0.82539684f, 0.8888889f, 0.93650794f, 1.0476191f, 1.1746032f, 1.3174603f, 1.7777778f)
     private var blockAmount = 0.0
     private var highCount = 0
     private var lowCount = 0
@@ -42,15 +43,7 @@ object SpringBoots : Module(
             SoundEvents.BLOCK_NOTE_BLOCK_PLING.matchesId(id) && mc.player?.isSneaking == true && EquipmentSlot.FEET isItem "SPRING_BOOTS" ->
                 when (pitch) {
                     0.6984127f -> lowCount = (lowCount + 1).coerceAtMost(2)
-                    in setOf(
-                        0.82539684f,
-                        0.8888889f,
-                        0.93650794f,
-                        1.0476191f,
-                        1.1746032f,
-                        1.3174603f,
-                        1.7777778f
-                    ) -> highCount++
+                    in pitchSet -> highCount++
                 }
 
             SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH.id == id && pitch.equalsOneOf(0.0952381f, 1.6984127f) -> {
@@ -65,8 +58,7 @@ object SpringBoots : Module(
     @EventHandler
     fun onRenderWorld(event: RenderEvent.Last) {
         if (!LocationUtils.isInSkyblock || blockAmount == 0.0) return
-        mc.player?.pos?.addVec(y = blockAmount)
-            ?.let { event.context.drawWireFrameBox(Box.from(it), Colors.MINECRAFT_RED) }
+        mc.player?.pos?.addVec(y = blockAmount)?.let { event.context.drawWireFrameBox(Box.from(it), Colors.MINECRAFT_RED) }
     }
 
     @EventHandler

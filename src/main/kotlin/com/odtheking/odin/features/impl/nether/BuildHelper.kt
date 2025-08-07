@@ -19,21 +19,9 @@ object BuildHelper : Module(
     name = "Build Helper",
     description = "Displays various information about the current state of the ballista build."
 ) {
-    private val buildHelperDraw by BooleanSetting(
-        "Render on Ballista",
-        false,
-        desc = "Draws the build information on the ballista."
-    )
-    private val unfinishedWaypoints by BooleanSetting(
-        "Unfinished Waypoints",
-        true,
-        desc = "Draws waypoints over the unfinished piles."
-    )
-    private val hideDefaultTag by BooleanSetting(
-        "Hide Default Tag",
-        true,
-        desc = "Hides the default tag for unfinished piles."
-    ).withDependency { unfinishedWaypoints }
+    private val buildHelperDraw by BooleanSetting("Render on Ballista", false, desc = "Draws the build information on the ballista.")
+    private val unfinishedWaypoints by BooleanSetting("Unfinished Waypoints", true, desc = "Draws waypoints over the unfinished piles.")
+    private val hideDefaultTag by BooleanSetting("Hide Default Tag", true, desc = "Hides the default tag for unfinished piles.").withDependency { unfinishedWaypoints }
     private val hud by HUD("Build helper", "Shows information about the build progress.") { example ->
         if (!example && (!KuudraUtils.inKuudra || KuudraUtils.phase != 2)) return@HUD 0f to 0f
         drawString("§bFreshers: ${colorBuilders(KuudraUtils.freshers.size)}", 1f, 1f)
@@ -42,22 +30,12 @@ object BuildHelper : Module(
         mc.textRenderer.getWidth("Freshers: 0") + 2f to mc.textRenderer.fontHeight * 3
     }
 
-    private val stunNotificationNumber by NumberSetting(
-        "Stun Percent",
-        93,
-        0.0,
-        100.0,
-        desc = "The build % to notify at (set to 0 to disable).",
-        unit = "%"
-    )
+    private val stunNotificationNumber by NumberSetting("Stun Percent", 93f, 0, 100, desc = "The build % to notify at (set to 0 to disable).", unit = "%")
 
     @EventHandler
     fun renderWorldEvent(event: RenderEvent.Last) {
         if (!KuudraUtils.inKuudra || KuudraUtils.phase != 2) return
-        if (stunNotificationNumber != 0 && KuudraUtils.buildDonePercentage >= stunNotificationNumber) alert(
-            "§l§3Go to stun",
-            false
-        )
+        if (stunNotificationNumber != 0f && KuudraUtils.buildDonePercentage >= stunNotificationNumber) alert("§l§3Go to stun", false)
         if (buildHelperDraw)
             event.context.drawText(
                 Text.of("§bBuild §c${colorBuild(KuudraUtils.buildDonePercentage)}%").asOrderedText(),

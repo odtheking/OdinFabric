@@ -15,11 +15,7 @@ object FreshTools : Module(
     name = "Fresh Tools",
     description = "Tracks your party's fresh tools time.",
 ) {
-    private val notifyFresh by BooleanSetting(
-        "Notify Fresh",
-        true,
-        desc = "Notifies your party when you get fresh timer."
-    )
+    private val notifyFresh by BooleanSetting("Notify Fresh", true, desc = "Notifies your party when you get fresh timer.")
     private val hud by HUD("Fresh timer", "Displays how long players have fresh for.") { example ->
         if (!example && (!KuudraUtils.inKuudra || KuudraUtils.phase != 2 || KuudraUtils.freshers.isEmpty())) return@HUD 0f to 0f
 
@@ -46,15 +42,11 @@ object FreshTools : Module(
         maxWidth to yOffset
     }
 
-    private val ownFreshRegex =
-        Regex("^Your Fresh Tools Perk bonus doubles your building speed for the next 10 seconds!\$")
+    private val ownFreshRegex = Regex("^Your Fresh Tools Perk bonus doubles your building speed for the next 10 seconds!$")
 
     @EventHandler
     fun onChat(event: PacketEvent.Receive) = with(event.packet) {
-        if (this is GameMessageS2CPacket && !overlay && notifyFresh && KuudraUtils.inKuudra && ownFreshRegex.matches(
-                content.string.noControlCodes
-            )
-        )
+        if (this is GameMessageS2CPacket && !overlay && notifyFresh && KuudraUtils.inKuudra && ownFreshRegex.matches(content.string.noControlCodes))
             sendCommand("pc FRESH")
     }
 }

@@ -36,56 +36,17 @@ object Etherwarp : Module(
     description = "Provides configurable visual feedback for etherwarp."
 ) {
     private val render by BooleanSetting("Show Guess", true, desc = "Shows where etherwarp will take you.")
-    private val color by ColorSetting(
-        "Color",
-        Colors.MINECRAFT_GOLD.withAlpha(.5f),
-        allowAlpha = true,
-        desc = "Color of the box."
-    ).withDependency { render }
-    private val renderFail by BooleanSetting(
-        "Show when failed",
-        true,
-        desc = "Shows the box even when the guess failed."
-    ).withDependency { render }
-    private val failColor by ColorSetting(
-        "Fail Color",
-        Colors.MINECRAFT_RED.withAlpha(.5f),
-        allowAlpha = true,
-        desc = "Color of the box if guess failed."
-    ).withDependency { renderFail }
-    private val renderStyle by SelectorSetting(
-        "Render Style",
-        "Outline",
-        listOf("Outline", "Filled", "Filled Outline"),
-        desc = "Style of the box."
-    ).withDependency { render }
-    private val useServerPosition by BooleanSetting(
-        "Use Server Position",
-        false,
-        desc = "Uses the server position for etherwarp instead of the client position."
-    ).withDependency { render }
-    private val fullBlock by BooleanSetting(
-        "Full Block",
-        false,
-        desc = "Renders the the 1x1x1 block instead of it's actual size."
-    ).withDependency { render }
+    private val color by ColorSetting("Color", Colors.MINECRAFT_GOLD.withAlpha(.5f), allowAlpha = true, desc = "Color of the box.").withDependency { render }
+    private val renderFail by BooleanSetting("Show when failed", true, desc = "Shows the box even when the guess failed.").withDependency { render }
+    private val failColor by ColorSetting("Fail Color", Colors.MINECRAFT_RED.withAlpha(.5f), allowAlpha = true, desc = "Color of the box if guess failed.").withDependency { renderFail }
+    private val renderStyle by SelectorSetting("Render Style", "Outline", listOf("Outline", "Filled", "Filled Outline"), desc = "Style of the box.").withDependency { render }
+    private val useServerPosition by BooleanSetting("Use Server Position", false, desc = "Uses the server position for etherwarp instead of the client position.").withDependency { render }
+    private val fullBlock by BooleanSetting("Full Block", false, desc = "Renders the the 1x1x1 block instead of it's actual size.").withDependency { render }
 
     private val dropdown by DropdownSetting("Sounds", false)
-    private val sounds by BooleanSetting(
-        "Custom Sounds",
-        false,
-        desc = "Plays the selected custom sound when you etherwarp."
-    ).withDependency { dropdown }
-    private val customSound by StringSetting(
-        "Custom Sound",
-        "entity.experience_orb.pickup",
-        desc = "Name of a custom sound to play.",
-        length = 64
-    ).withDependency { sounds && dropdown }
-    private val reset by ActionSetting(
-        "Play sound",
-        desc = "Plays the selected sound."
-    ) { playSoundAtPlayer(SoundEvent.of(Identifier.of(customSound))) }.withDependency { sounds && dropdown }
+    private val sounds by BooleanSetting("Custom Sounds", false, desc = "Plays the selected custom sound when you etherwarp.").withDependency { dropdown }
+    private val customSound by StringSetting("Custom Sound", "entity.experience_orb.pickup", desc = "Name of a custom sound to play.", length = 64).withDependency { sounds && dropdown }
+    private val reset by ActionSetting("Play sound", desc = "Plays the selected sound.") { playSoundAtPlayer(SoundEvent.of(Identifier.of(customSound))) }.withDependency { sounds && dropdown }
 
     private var etherPos: EtherPos? = null
 
@@ -150,10 +111,7 @@ object Etherwarp : Module(
 
     private fun isEtherwarpItem(): NbtCompound? =
         mc.player?.mainHandStack?.customData?.takeIf {
-            it.getInt(
-                "ethermerge",
-                0
-            ) == 1 || it.itemId == "ETHERWARP_CONDUIT"
+            it.getInt("ethermerge", 0) == 1 || it.itemId == "ETHERWARP_CONDUIT"
         }
 
     data class EtherPos(val succeeded: Boolean, val pos: BlockPos?, val state: BlockState?) {
@@ -172,11 +130,7 @@ object Etherwarp : Module(
     ): EtherPos {
         val startPos = position?.addVec(y = 1.54) ?: return EtherPos.NONE
         val endPos = mc.player?.rotationVector?.multiply(distance)?.add(startPos) ?: return EtherPos.NONE
-        return traverseVoxels(startPos, endPos, etherWarp).takeUnless { it == EtherPos.NONE && returnEnd } ?: EtherPos(
-            true,
-            endPos.toBlockPos(),
-            null
-        )
+        return traverseVoxels(startPos, endPos, etherWarp).takeUnless { it == EtherPos.NONE && returnEnd } ?: EtherPos(true, endPos.toBlockPos(), null)
     }
 
     /**

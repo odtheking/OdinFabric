@@ -88,33 +88,14 @@ class NumberSetting<E>(
         }
 
         NVGRenderer.text(name, x + 6f, y + height / 2f - 15f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
-        NVGRenderer.text(
-            displayValue,
-            x + width - valueWidth - 4f,
-            y + height / 2f - 15f,
-            16f,
-            Colors.WHITE.rgba,
-            NVGRenderer.defaultFont
-        )
+        NVGRenderer.text(displayValue, x + width - valueWidth - 4f, y + height / 2f - 15f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
 
         NVGRenderer.rect(x + 6f, y + 24f, width - 12f, 8f, gray38.rgba, 3f)
 
         if (x + sliderPercentage * (width - 12f) > x + 6)
-            NVGRenderer.rect(
-                x + 6f,
-                y + 24f,
-                sliderAnim.get(prevLocation, sliderPercentage, false) * (width - 12f),
-                8f,
-                ClickGUIModule.clickGUIColor.rgba,
-                3f
-            )
+            NVGRenderer.rect(x + 6f, y + 24f, sliderAnim.get(prevLocation, sliderPercentage, false) * (width - 12f), 8f, ClickGUIModule.clickGUIColor.rgba, 3f)
 
-        NVGRenderer.circle(
-            x + 6f + sliderAnim.get(prevLocation, sliderPercentage, false) * (width - 12f),
-            y + 28f,
-            handler.anim.get(7f, 9f, !isHovered),
-            Colors.WHITE.rgba
-        )
+        NVGRenderer.circle(x + 6f + sliderAnim.get(prevLocation, sliderPercentage, false) * (width - 12f), y + 28f, handler.anim.get(7f, 9f, !isHovered), Colors.WHITE.rgba)
 
         return height
     }

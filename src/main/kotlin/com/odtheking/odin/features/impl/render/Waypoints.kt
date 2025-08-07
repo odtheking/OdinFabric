@@ -29,44 +29,17 @@ object Waypoints : Module(
     private val fromAll by BooleanSetting("From All Chat", false, desc = "Adds waypoints from all chat.")
 
     private val pingLocationDropDown by DropdownSetting("Ping Location Dropdown", false)
-    private val pingLocationToggle by BooleanSetting(
-        "Ping Location",
-        false,
-        desc = "Adds a waypoint at the location you are looking at."
-    ).withDependency { pingLocationDropDown }
-    private val pingLocation by KeybindSetting(
-        "Ping Location",
-        GLFW.GLFW_KEY_UNKNOWN,
-        desc = "Sends the location you are looking at as coords in chat for waypoints."
-    ).onPress {
+    private val pingLocationToggle by BooleanSetting("Ping Location", false, desc = "Adds a waypoint at the location you are looking at.").withDependency { pingLocationDropDown }
+    private val pingLocation by KeybindSetting("Ping Location", GLFW.GLFW_KEY_UNKNOWN, desc = "Sends the location you are looking at as coords in chat for waypoints.").onPress {
         if (!pingLocationToggle) return@onPress
         Etherwarp.getEtherPos(mc.player?.pos, pingDistance).pos?.let { pos ->
             addTempWaypoint("§fWaypoint", pos.x, pos.y, pos.z, pingWaypointTime)
             if (sendPingedLocation) sendCommand("odinwaypoint share ${pos.x} ${pos.y} ${pos.z}")
         }
     }.withDependency { pingLocationToggle && pingLocationDropDown }
-    private val sendPingedLocation by BooleanSetting(
-        "Send Pinged Location",
-        false,
-        desc = "Sends the location you are looking at as coords in chat for waypoints."
-    ).withDependency { pingLocationToggle && pingLocationDropDown }
-    private val pingWaypointTime by NumberSetting(
-        "Ping Waypoint Time",
-        15000L,
-        0L,
-        128000L,
-        1000L,
-        unit = "ms",
-        desc = "Time to wait before sending the waypoint command."
-    ).withDependency { pingLocationToggle && pingLocationDropDown }
-    private val pingDistance by NumberSetting(
-        "Ping Distance",
-        64.0,
-        1,
-        128,
-        1,
-        desc = "Distance to ping location."
-    ).withDependency { pingLocationToggle && pingLocationDropDown }
+    private val sendPingedLocation by BooleanSetting("Send Pinged Location", false, desc = "Sends the location you are looking at as coords in chat for waypoints.").withDependency { pingLocationToggle && pingLocationDropDown }
+    private val pingWaypointTime by NumberSetting("Ping Waypoint Time", 15000L, 0L, 128000L, 1000L, unit = "ms", desc = "Time to wait before sending the waypoint command.").withDependency { pingLocationToggle && pingLocationDropDown }
+    private val pingDistance by NumberSetting("Ping Distance", 64.0, 1, 128, 1, desc = "Distance to ping location.").withDependency { pingLocationToggle && pingLocationDropDown }
 
     private val partyRegex =
         Regex("^Party > (?:\\[[^]]*?])? ?(\\w{1,16})(?: [ቾ⚒])?: x: (-?\\d+), y: (-?\\d+), z: (-?\\d+).*") // https://regex101.com/r/8K26A1/1
@@ -112,19 +85,12 @@ object Waypoints : Module(
     }
 
     private val colors = listOf(
-        Colors.MINECRAFT_GOLD,
-        Colors.MINECRAFT_GREEN,
-        Colors.MINECRAFT_LIGHT_PURPLE,
-        Colors.MINECRAFT_DARK_AQUA,
-        Colors.MINECRAFT_YELLOW,
-        Colors.MINECRAFT_DARK_RED,
-        Colors.WHITE,
-        Colors.MINECRAFT_DARK_PURPLE,
-        Colors.MINECRAFT_YELLOW,
-        Colors.MINECRAFT_RED,
-        Colors.MINECRAFT_LIGHT_PURPLE,
-        Colors.MINECRAFT_DARK_GREEN,
-        Colors.MINECRAFT_BLUE
+        Colors.MINECRAFT_GOLD, Colors.MINECRAFT_GREEN,
+        Colors.MINECRAFT_LIGHT_PURPLE, Colors.MINECRAFT_DARK_AQUA,
+        Colors.MINECRAFT_YELLOW, Colors.MINECRAFT_DARK_RED,
+        Colors.WHITE, Colors.MINECRAFT_DARK_PURPLE,  Colors.MINECRAFT_BLUE,
+        Colors.MINECRAFT_YELLOW, Colors.MINECRAFT_RED,
+        Colors.MINECRAFT_LIGHT_PURPLE, Colors.MINECRAFT_DARK_GREEN,
     )
 
     data class Waypoint(
@@ -134,5 +100,4 @@ object Waypoints : Module(
         val duration: Long,
         val timeAdded: Long = System.currentTimeMillis()
     )
-
 }

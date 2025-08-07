@@ -1,5 +1,6 @@
 package com.odtheking.odin.features.impl.skyblock
 
+import com.odtheking.mixin.accessors.HandledScreenAccessor
 import com.odtheking.odin.clickgui.settings.impl.ColorSetting
 import com.odtheking.odin.clickgui.settings.impl.KeybindSetting
 import com.odtheking.odin.clickgui.settings.impl.MapSetting
@@ -11,7 +12,6 @@ import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.render.drawLine
 import meteordevelopment.orbit.EventHandler
 import meteordevelopment.orbit.EventPriority
-import com.odtheking.mixin.accessors.HandledScreenAccessor
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.screen.ingame.InventoryScreen
 import net.minecraft.screen.slot.SlotActionType
@@ -22,16 +22,8 @@ object SlotBinds : Module(
     description = "Bind slots together for quick access.",
     key = null
 ) {
-    private val setNewSlotbind by KeybindSetting(
-        "Bind set key",
-        GLFW.GLFW_KEY_UNKNOWN,
-        desc = "Key to set new bindings."
-    )
-    private val lineColor by ColorSetting(
-        "Line Color",
-        Colors.MINECRAFT_GOLD,
-        desc = "Color of the line drawn between slots."
-    )
+    private val setNewSlotbind by KeybindSetting("Bind set key", GLFW.GLFW_KEY_UNKNOWN, desc = "Key to set new bindings.")
+    private val lineColor by ColorSetting("Line Color", Colors.MINECRAFT_GOLD, desc = "Color of the line drawn between slots.")
     private val slotBinds by MapSetting("SlotBinds", mutableMapOf<Int, Int>())
 
     private var previousSlot: Int? = null
@@ -97,7 +89,7 @@ object SlotBinds : Module(
             screen.screenHandler.getSlot(slot)?.let { it.x + screen.x + 8 to it.y + screen.y + 8 }
         } ?: return
 
-        if (previousSlot == null && !(Screen.hasShiftDown() && boundSlot != null)) return
+        if (previousSlot == null && !(Screen.hasShiftDown())) return
 
         event.drawContext.matrices.push()
         event.drawContext.matrices.translate(0f, 0f, 999f)

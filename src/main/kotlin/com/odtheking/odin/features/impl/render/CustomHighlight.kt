@@ -21,26 +21,9 @@ object CustomHighlight : Module(
     name = "Custom Highlight",
     description = "Allows you to highlight selected mobs. (/highlight)"
 ) {
-    private val color by ColorSetting(
-        "Color",
-        Colors.WHITE.withAlpha(0.75f),
-        true,
-        desc = "The color of the highlight."
-    )
-    private val renderStyle by SelectorSetting(
-        "Render Style",
-        "Outline",
-        listOf("Outline", "Filled", "Filled Outline"),
-        desc = "Style of the box."
-    )
-    private val entityIDOffset by NumberSetting(
-        "Entity ID Offset",
-        0,
-        -10,
-        10,
-        1,
-        desc = "Offset to apply to entity IDs different mobs require different entity ID offsets."
-    )
+    private val color by ColorSetting("Color", Colors.WHITE.withAlpha(0.75f), true, desc = "The color of the highlight.")
+    private val renderStyle by SelectorSetting("Render Style", "Outline", listOf("Outline", "Filled", "Filled Outline"), desc = "Style of the box.")
+    private val entityIDOffset by NumberSetting("Entity ID Offset", 0, -10, 10, 1, desc = "Offset to apply to entity IDs different mobs require different entity ID offsets.")
     val highlightMap by MapSetting("highlightMap", mutableMapOf<String, Color>())
 
     val entities = MobCache(entityOffset = { entityIDOffset }) { entity ->

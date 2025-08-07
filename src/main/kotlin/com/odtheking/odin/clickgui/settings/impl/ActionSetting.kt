@@ -24,23 +24,8 @@ class ActionSetting(
         val height = getHeight()
 
         NVGRenderer.rect(x + 4f, y + height / 2f - 13f, width - 8f, 26f, gray38.rgba, 6f)
-        NVGRenderer.hollowRect(
-            x + 4f,
-            y + height / 2f - 13f,
-            width - 8f,
-            26f,
-            2f,
-            ClickGUIModule.clickGUIColor.rgba,
-            6f
-        )
-        NVGRenderer.text(
-            name,
-            x + width / 2f - textWidth / 2,
-            y + height / 2f - 8f,
-            16f,
-            if (isHovered) Colors.WHITE.darker().rgba else Colors.WHITE.rgba,
-            NVGRenderer.defaultFont
-        )
+        NVGRenderer.hollowRect(x + 4f, y + height / 2f - 13f, width - 8f, 26f, 2f, ClickGUIModule.clickGUIColor.rgba, 6f)
+        NVGRenderer.text(name, x + width / 2f - textWidth / 2, y + height / 2f - 8f, 16f, if (isHovered) Colors.WHITE.darker().rgba else Colors.WHITE.rgba, NVGRenderer.defaultFont)
         return height
     }
 

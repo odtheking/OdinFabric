@@ -34,8 +34,7 @@ class HUDSetting(
         description: String,
         module: Module,
         draw: DrawContext.(Boolean) -> Pair<Number, Number>
-    )
-            : this(name, HudElement(x, y, scale, toggleable, draw), toggleable, description, module)
+    ) : this(name, HudElement(x, y, scale, toggleable, draw), toggleable, description, module)
 
     override val default: HudElement = hud
     override var value: HudElement = default
@@ -63,30 +62,10 @@ class HUDSetting(
             NVGRenderer.rect(x + width - 70f, y + height / 2f - 10f, 34f, 20f, gray38.rgba, 9f)
 
             if (value.enabled || toggleAnimation.isAnimating())
-                NVGRenderer.rect(
-                    x + width - 70f,
-                    y + height / 2f - 10f,
-                    toggleAnimation.get(34f, 9f, value.enabled),
-                    20f,
-                    ClickGUIModule.clickGUIColor.rgba,
-                    9f
-                )
+                NVGRenderer.rect(x + width - 70f, y + height / 2f - 10f, toggleAnimation.get(34f, 9f, value.enabled), 20f, ClickGUIModule.clickGUIColor.rgba, 9f)
 
-            NVGRenderer.hollowRect(
-                x + width - 70f,
-                y + height / 2f - 10f,
-                34f,
-                20f,
-                2f,
-                ClickGUIModule.clickGUIColor.rgba,
-                9f
-            )
-            NVGRenderer.circle(
-                x + width - toggleAnimation.get(30f, 14f, !value.enabled) - 30f,
-                y + height / 2f,
-                6f,
-                Colors.WHITE.rgba
-            )
+            NVGRenderer.hollowRect(x + width - 70f, y + height / 2f - 10f, 34f, 20f, 2f, ClickGUIModule.clickGUIColor.rgba, 9f)
+            NVGRenderer.circle(x + width - toggleAnimation.get(30f, 14f, !value.enabled) - 30f, y + height / 2f, 6f, Colors.WHITE.rgba)
         }
         return height
     }

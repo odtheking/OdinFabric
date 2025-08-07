@@ -20,11 +20,7 @@ object NoPre : Module(
     description = "Alerts the party if a pre spot is missing."
 ) {
     private val showCratePriority by BooleanSetting("Show Crate Priority", false, desc = "Shows the crate priority.")
-    private val advanced by BooleanSetting(
-        "Advanced Mode",
-        false,
-        desc = "Provides harder crate priority in certain situations."
-    ).withDependency { showCratePriority }
+    private val advanced by BooleanSetting("Advanced Mode", false, desc = "Provides harder crate priority in certain situations.").withDependency { showCratePriority }
 
     private val partyRegex =
         Regex("^Party > (\\[[^]]*?])? ?(\\w{1,16}): No ?(Triangle|X|Equals|Slash|xCannon|Square|Shop)!$")
@@ -61,18 +57,9 @@ object NoPre : Module(
                     val supplyLoc = Vec3d(supply.x, 76.0, supply.z)
                     when {
                         preSpot.pickUpSpot.isWithinDistance(supplyLoc, 18.0) -> pre = true
-                        preSpot == Supply.Triangle && Supply.Shop.pickUpSpot.isWithinDistance(
-                            supplyLoc,
-                            18.0
-                        ) -> second = true
-
-                        preSpot == Supply.X && Supply.xCannon.pickUpSpot.isWithinDistance(supplyLoc, 16.0) -> second =
-                            true
-
-                        preSpot == Supply.Slash && Supply.Square.pickUpSpot.isWithinDistance(
-                            supplyLoc,
-                            20.0
-                        ) -> second = true
+                        preSpot == Supply.Triangle && Supply.Shop.pickUpSpot.isWithinDistance(supplyLoc, 18.0) -> second = true
+                        preSpot == Supply.X && Supply.xCannon.pickUpSpot.isWithinDistance(supplyLoc, 16.0) -> second = true
+                        preSpot == Supply.Slash && Supply.Square.pickUpSpot.isWithinDistance(supplyLoc, 20.0) -> second = true
                     }
                 }
                 if (second && pre) return

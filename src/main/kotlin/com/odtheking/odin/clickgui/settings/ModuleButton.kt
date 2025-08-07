@@ -47,14 +47,7 @@ class ModuleButton(val module: Module, val panel: Panel) {
             ClickGUI.setDescription(module.description, x + Panel.WIDTH + 10f, y, hoverHandler)
 
         NVGRenderer.rect(x, y, Panel.WIDTH, Panel.HEIGHT, color.rgba)
-        NVGRenderer.text(
-            module.name,
-            x + Panel.WIDTH / 2 - nameWidth / 2,
-            y + Panel.HEIGHT / 2 - 9f,
-            18f,
-            Colors.WHITE.rgba,
-            NVGRenderer.defaultFont
-        )
+        NVGRenderer.text(module.name, x + Panel.WIDTH / 2 - nameWidth / 2, y + Panel.HEIGHT / 2 - 9f, 18f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
 
         if (module.settings.isEmpty()) return Panel.HEIGHT
 
@@ -65,12 +58,7 @@ class ModuleButton(val module: Module, val panel: Panel) {
 
         if (extendAnim.isAnimating() || extended) {
             for (setting in module.settings) {
-                if (setting is RenderableSetting<*> && setting.isVisible) drawY += setting.render(
-                    x,
-                    y + drawY,
-                    mouseX,
-                    mouseY
-                )
+                if (setting is RenderableSetting<*> && setting.isVisible) drawY += setting.render(x, y + drawY, mouseX, mouseY)
             }
         }
 

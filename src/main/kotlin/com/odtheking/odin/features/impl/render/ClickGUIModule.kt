@@ -16,17 +16,9 @@ object ClickGUIModule : Module(
     description = "Allows you to customize the UI.",
     key = GLFW.GLFW_KEY_RIGHT_SHIFT
 ) {
-    val enableNotification by BooleanSetting(
-        "Chat notifications",
-        true,
-        desc = "Sends a message when you toggle a module with a keybind"
-    )
+    val enableNotification by BooleanSetting("Chat notifications", true, desc = "Sends a message when you toggle a module with a keybind")
     val clickGUIColor by ColorSetting("Color", Color(50, 150, 220), desc = "The color of the Click GUI.")
-    private val action by ActionSetting("Open HUD Editor", desc = "Opens the HUD editor when clicked.") {
-        mc.setScreen(
-            HudManager
-        )
-    }
+    private val action by ActionSetting("Open HUD Editor", desc = "Opens the HUD editor when clicked.") { mc.setScreen(HudManager) }
 
     override fun onKeybind() {
         toggle()

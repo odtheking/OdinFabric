@@ -79,40 +79,14 @@ class ColorSetting(
 
         NVGRenderer.text(name, x + 6f, y + defaultHeight / 2f - 8f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
         NVGRenderer.rect(x + width - 40f, y + defaultHeight / 2f - 10f, 34f, 20f, value.rgba, 5f)
-        NVGRenderer.hollowRect(
-            x + width - 40f,
-            y + defaultHeight / 2f - 10f,
-            34f,
-            20f,
-            2f,
-            value.withAlpha(1f).darker().rgba,
-            5f
-        )
+        NVGRenderer.hollowRect(x + width - 40f, y + defaultHeight / 2f - 10f, 34f, 20f, 2f, value.withAlpha(1f).darker().rgba, 5f)
 
         if (!extended && !expandAnim.isAnimating()) return defaultHeight
 
         if (expandAnim.isAnimating()) NVGRenderer.pushScissor(x, y + defaultHeight, width, getHeight() - defaultHeight)
         // SATURATION AND BRIGHTNESS
-        NVGRenderer.gradientRect(
-            x + 6f,
-            y + defaultHeight + 4f,
-            width - 12f,
-            169f,
-            Colors.WHITE.rgba,
-            value.hsbMax().rgba,
-            Gradient.LeftToRight,
-            5f
-        )
-        NVGRenderer.gradientRect(
-            x + 6f,
-            y + defaultHeight + 4f,
-            width - 12f,
-            170f,
-            Colors.TRANSPARENT.rgba,
-            Colors.BLACK.rgba,
-            Gradient.TopToBottom,
-            5f
-        )
+        NVGRenderer.gradientRect(x + 6f, y + defaultHeight + 4f, width - 12f, 169f, Colors.WHITE.rgba, value.hsbMax().rgba, Gradient.LeftToRight, 5f)
+        NVGRenderer.gradientRect(x + 6f, y + defaultHeight + 4f, width - 12f, 170f, Colors.TRANSPARENT.rgba, Colors.BLACK.rgba, Gradient.TopToBottom, 5f)
 
         val animatedSat = mainSliderAnim.get(mainSliderPrevSat, value.saturation, false)
         val animatedBright = mainSliderAnim.get(mainSliderPrevBright, value.brightness, false)
@@ -132,19 +106,9 @@ class ColorSetting(
 
         // ALPHA
         if (allowAlpha) {
-            NVGRenderer.gradientRect(
-                x + 6f,
-                y + 232f,
-                width - 12f,
-                15f,
-                Colors.TRANSPARENT.rgba,
-                value.withAlpha(1f).rgba,
-                Gradient.LeftToRight,
-                5f
-            )
+            NVGRenderer.gradientRect(x + 6f, y + 232f, width - 12f, 15f, Colors.TRANSPARENT.rgba, value.withAlpha(1f).rgba, Gradient.LeftToRight, 5f)
 
-            val alphaPos =
-                Pair((x + 6f + alphaSliderAnim.get(alphaSliderPrev, value.alphaFloat, false) * 217f), y + 240f)
+            val alphaPos = Pair((x + 6f + alphaSliderAnim.get(alphaSliderPrev, value.alphaFloat, false) * 217f), y + 240f)
             NVGRenderer.dropShadow(alphaPos.first - 8.5f, alphaPos.second - 8.5f, 17f, 17f, 2.5f, 2.5f, 9f)
             NVGRenderer.circle(alphaPos.first, alphaPos.second, 8f, Colors.WHITE.darker(.5f).rgba)
             NVGRenderer.circle(alphaPos.first, alphaPos.second, 7f, Colors.WHITE.rgba)
@@ -256,5 +220,4 @@ class ColorSetting(
             }
         }
     }
-
 }
