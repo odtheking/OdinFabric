@@ -4,6 +4,7 @@ package com.odtheking.odin.utils
 
 import com.odtheking.odin.OdinMod
 import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.clickgui.settings.impl.MapSetting
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EquipmentSlot
 import net.minecraft.text.ClickEvent
@@ -145,3 +146,6 @@ fun romanToInt(s: String): Int {
         result + (romanMap[s.last()] ?: 0)
     }
 }
+
+inline fun Module.PersonalBest(count: Int) =
+     MapSetting(name, mutableMapOf<Int, Float>())

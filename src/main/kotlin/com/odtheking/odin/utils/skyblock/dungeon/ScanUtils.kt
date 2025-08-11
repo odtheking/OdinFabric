@@ -1,9 +1,8 @@
 package com.odtheking.odin.utils.skyblock.dungeon
 
 import com.google.gson.GsonBuilder
-import com.google.gson.JsonIOException
-import com.google.gson.JsonSyntaxException
 import com.google.gson.reflect.TypeToken
+import com.odtheking.odin.OdinMod.logger
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.events.TickEvent
@@ -16,13 +15,10 @@ import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonListener.inBoss
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.*
 import meteordevelopment.orbit.EventHandler
-import net.minecraft.block.Block
 import net.minecraft.block.Blocks
 import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.ChunkSectionPos
 import net.minecraft.util.math.Direction
 import net.minecraft.util.math.Direction.Axis
-import net.minecraft.world.Heightmap
 import java.io.FileNotFoundException
 
 object ScanUtils {
@@ -44,32 +40,21 @@ object ScanUtils {
                     RoomDataDeserializer()
                 )
                 .create().fromJson(
-                    (ScanUtils::class.java.getResourceAsStream("/rooms.json")
+                    (ScanUtils::class.java.getResourceAsStream("/assets/odin/rooms.json")
                         ?: throw FileNotFoundException()).bufferedReader(),
                     object : TypeToken<Set<RoomData>>() {}.type
                 )
         } catch (e: Exception) {
-            handleRoomDataError(e)
+            logger.error("Error reading room data", e)
+            println(e.message)
             setOf()
-        }
-    }
-
-    private fun handleRoomDataError(e: Exception) {
-        when (e) {
-            is JsonSyntaxException -> println("Error parsing room data.")
-            is JsonIOException -> println("Error reading room data.")
-            is FileNotFoundException -> println("Room data not found, something went wrong! Please report this!")
-            else -> {
-                println("Unknown error while reading room data.")
-//                logger.error("Error reading room data", e)
-                println(e.message)
-            }
         }
     }
 
     @EventHandler
     fun onTick(event: TickEvent.End) {
         if (mc.world == null || mc.player == null) return
+
         if ((!DungeonUtils.inDungeons && !LocationUtils.currentArea.isArea(Island.SinglePlayer)) || inBoss) {
             currentRoom?.let { RoomEnterEvent(null).postAndCatch() }
             return
@@ -92,8 +77,7 @@ object ScanUtils {
     private fun updateRotation(room: Room) {
         val roomHeight = getTopLayerOfRoom(room.roomComponents.first().vec2)
         if (room.data.name == "Fairy") { // Fairy room doesn't have a clay block so we need to set it manually
-            room.clayPos =
-                room.roomComponents.firstOrNull()?.let { BlockPos(it.x - 15, roomHeight, it.z - 15) } ?: return
+            room.clayPos = room.roomComponents.firstOrNull()?.let { BlockPos(it.x - 15, roomHeight, it.z - 15) } ?: return
             room.rotation = Rotations.SOUTH
             return
         }
@@ -102,11 +86,7 @@ object ScanUtils {
                 BlockPos(component.x + rotation.x, roomHeight, component.z + rotation.z).let { blockPos ->
                     mc.world?.getBlockState(blockPos)?.block == Blocks.BLUE_TERRACOTTA && (room.roomComponents.size == 1 || horizontals.all { facing ->
                         mc.world?.getBlockState(
-                            blockPos.add(
-                                (if (facing.axis == Axis.X) facing.offsetX else 0),
-                                0,
-                                (if (facing.axis == Axis.Z) facing.offsetZ else 0)
-                            )
+                            blockPos.add((if (facing.axis == Axis.X) facing.offsetX else 0), 0, (if (facing.axis == Axis.Z) facing.offsetZ else 0))
                         )?.block?.equalsOneOf(Blocks.AIR, Blocks.BLUE_TERRACOTTA) == true
                     }).also { isCorrectClay -> if (isCorrectClay) room.clayPos = blockPos }
                 }
@@ -117,25 +97,13 @@ object ScanUtils {
     private fun scanRoom(vec2: Vec2): Room? =
         getCore(vec2).let { core ->
             getRoomData(core)?.let {
-                Room(
-                    data = it,
-                    roomComponents = findRoomComponentsRecursively(vec2, it.cores)
-                )
+                Room(data = it, roomComponents = findRoomComponentsRecursively(vec2, it.cores))
             }?.apply { updateRotation(this) }
         }
 
-    private fun findRoomComponentsRecursively(
-        vec2: Vec2,
-        cores: List<Int>,
-        visited: MutableSet<Vec2> = mutableSetOf(),
-        tiles: MutableSet<RoomComponent> = mutableSetOf()
-    ): MutableSet<RoomComponent> {
+    private fun findRoomComponentsRecursively(vec2: Vec2, cores: List<Int>, visited: MutableSet<Vec2> = mutableSetOf(), tiles: MutableSet<RoomComponent> = mutableSetOf()): MutableSet<RoomComponent> {
         if (vec2 in visited) return tiles else visited.add(vec2)
-        tiles.add(
-            RoomComponent(
-                vec2.x,
-                vec2.z,
-                getCore(vec2).takeIf { it in cores } ?: return tiles))
+        tiles.add(RoomComponent(vec2.x, vec2.z, getCore(vec2).takeIf { it in cores } ?: return tiles))
         horizontals.forEach { facing ->
             findRoomComponentsRecursively(
                 Vec2(
@@ -147,7 +115,7 @@ object ScanUtils {
         return tiles
     }
 
-    private fun getRoomData(hash: Int): RoomData? =
+    fun getRoomData(hash: Int): RoomData? =
         roomList.find { hash in it.cores }
 
     fun getRoomCenter(posX: Int, posZ: Int): Vec2 {
@@ -158,41 +126,40 @@ object ScanUtils {
 
     fun getCore(vec2: Vec2): Int {
         val sb = StringBuilder(150)
-        val chunk = mc.world?.getChunk(ChunkSectionPos.getSectionCoord(vec2.x), ChunkSectionPos.getSectionCoord(vec2.z))
-            ?: return 0
-        val height =
-            chunk.getHeightmap(Heightmap.Type.WORLD_SURFACE).get(vec2.x and 15, vec2.z and 15).coerceIn(11..140)
+        val height = getTopLayerOfRoom(vec2)
         sb.append(CharArray(140 - height) { '0' })
         var bedrock = 0
         for (y in height downTo 12) {
-            val id = Block.getRawIdFromState(mc.world?.getBlockState(BlockPos(vec2.x, y, vec2.z)))
-            if (id == 0 && bedrock >= 2 && y < 69) {
+            val id = mc.world?.getBlockState(BlockPos(vec2.x, y, vec2.z))?.block
+            if (id == Blocks.AIR && bedrock >= 2 && y < 69) {
                 sb.append(CharArray(y - 11) { '0' })
                 break
             }
 
-            if (id == 7) bedrock++
+            if (id == Blocks.BEDROCK) bedrock++
             else {
                 bedrock = 0
-                if (id.equalsOneOf(5, 54, 146)) continue
+                if (id.equalsOneOf(Blocks.OAK_PLANKS, Blocks.TRAPPED_CHEST, Blocks.CHEST)) continue
             }
             sb.append(id)
         }
         return sb.toString().hashCode()
     }
 
-    private fun getTopLayerOfRoom(vec2: Vec2): Int {
-        val chunk = mc.world?.getChunk(vec2.x shr 4, vec2.z shr 4) ?: return 0
-        val height = chunk.getHeightmap(Heightmap.Type.WORLD_SURFACE).get(vec2.x and 15, vec2.z and 15) - 1
-        return if (mc.world?.getBlockState(
-                BlockPos(
-                    vec2.x,
-                    height,
-                    vec2.z
-                )
-            )?.block == Blocks.GOLD_BLOCK
-        ) height - 1 else height
+    fun getTopLayerOfRoom(vec2: Vec2): Int {
+        for (y in 140 downTo 12) {
+            val block = mc.world?.getBlockState(BlockPos(vec2.x, y, vec2.z))?.block
+            if (block != Blocks.AIR) return if (block == Blocks.GOLD_BLOCK) y - 1 else y
+        }
+        return 0
     }
+
+        /*
+        if (false) HeightMap.getHeight(vec2.x and 15, vec2.z and 15)
+        else {
+            val chunk = mc.world?.getChunk(ChunkSectionPos.getSectionCoord(vec2.x), ChunkSectionPos.getSectionCoord(vec2.z)) ?: return 0
+            chunk.getHeightmap(Heightmap.Type.WORLD_SURFACE).get(vec2.x and 15, vec2.z and 15).coerceIn(11..140) - 1
+        }*/
 
     @EventHandler
     fun onRoomEnter(event: RoomEnterEvent) {

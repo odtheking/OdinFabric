@@ -3,6 +3,7 @@ package com.odtheking.odin.utils.render
 import com.mojang.blaze3d.systems.RenderSystem
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.utils.Color
+import com.odtheking.odin.utils.Color.Companion.multiplyAlpha
 import com.odtheking.odin.utils.addVec
 import com.odtheking.odin.utils.translate
 import com.odtheking.odin.utils.unaryMinus
@@ -19,10 +20,40 @@ import net.minecraft.text.Text
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Box
 import net.minecraft.util.math.Vec3d
+import org.joml.Vector3f
 import kotlin.math.max
 import kotlin.math.pow
 
 private val ALLOCATOR = BufferAllocator(1536)
+
+fun WorldRenderContext.drawLine(points: Collection<Vec3d>, color: Color, depth: Boolean, thickness: Float = 3f) {
+    if (points.size < 2) return
+    val matrix = matrixStack() ?: return
+    val bufferSource = consumers() as? VertexConsumerProvider.Immediate ?: return
+    val layer = if (depth) CustomRenderLayer.LINE_LIST else CustomRenderLayer.LINE_LIST_ESP
+    RenderSystem.lineWidth(thickness)
+
+    matrix.push()
+    with(camera().pos) { matrix.translate(-x, -y, -z) }
+
+    val pointList = points.toList()
+    for (i in 0 until pointList.size - 1) {
+        val start = pointList[i]
+        val end = pointList[i + 1]
+        val startOffset = Vector3f(start.x.toFloat(), start.y.toFloat(), start.z.toFloat())
+        val direction = end.subtract(start)
+        VertexRendering.drawVector(
+            matrix,
+            bufferSource.getBuffer(layer),
+            startOffset,
+            direction,
+            color.rgba
+        )
+    }
+
+    matrix.pop()
+    bufferSource.draw(layer)
+}
 
 fun WorldRenderContext.drawWireFrameBox(box: Box, color: Color, thickness: Float = 5f, depth: Boolean = false) {
     val matrix = matrixStack() ?: return
@@ -71,6 +102,22 @@ fun WorldRenderContext.drawFilledBox(box: Box, color: Color, depth: Boolean = fa
     matrix.pop()
 
     bufferSource.draw(layer)
+}
+
+fun WorldRenderContext.drawStyledBox(
+    box: Box,
+    color: Color,
+    style: Int = 0,
+    depth: Boolean = true
+) {
+    when (style) {
+        0 -> drawFilledBox(box, color, depth = depth)
+        1 -> drawWireFrameBox(box, color, depth = depth)
+        2 -> {
+            drawWireFrameBox(box, color, thickness = 2f, depth = depth)
+            drawFilledBox(box, color.multiplyAlpha(0.5f), depth = depth)
+        }
+    }
 }
 
 fun WorldRenderContext.drawBeaconBeam(position: BlockPos, color: Color) {

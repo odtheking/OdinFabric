@@ -31,18 +31,8 @@ object LocationUtils {
     fun onPacket(event: PacketEvent.Receive) = with(event.packet) {
         when (this) {
             is PlayerListS2CPacket -> {
-                if (!currentArea.isArea(Island.Unknown) || actions.none {
-                        it.equalsOneOf(
-                            PlayerListS2CPacket.Action.UPDATE_DISPLAY_NAME,
-                            PlayerListS2CPacket.Action.ADD_PLAYER
-                        )
-                    }) return
-                val area = entries?.find {
-                    it?.displayName?.string?.startsWithOneOf(
-                        "Area: ",
-                        "Dungeon: "
-                    ) == true
-                }?.displayName?.string ?: return
+                if (!currentArea.isArea(Island.Unknown) || actions.none { it.equalsOneOf(PlayerListS2CPacket.Action.UPDATE_DISPLAY_NAME,) }) return
+                val area = entries?.find { it?.displayName?.string?.startsWithOneOf("Area: ", "Dungeon: ") == true }?.displayName?.string ?: return
                 currentArea = Island.entries.firstOrNull { area.contains(it.displayName, true) } ?: Island.Unknown
             }
 

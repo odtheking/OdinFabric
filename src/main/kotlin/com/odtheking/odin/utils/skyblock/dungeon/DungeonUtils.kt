@@ -3,6 +3,8 @@ package com.odtheking.odin.utils.skyblock.dungeon
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.utils.equalsOneOf
 import com.odtheking.odin.utils.romanToInt
+import com.odtheking.odin.utils.rotateAroundNorth
+import com.odtheking.odin.utils.rotateToNorth
 import com.odtheking.odin.utils.skyblock.Island
 import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.Room
@@ -232,12 +234,8 @@ object DungeonUtils {
         }
     }
 
-//    fun Room.getRelativeCoords(pos: Vec3d) = pos.subtract(x = clayPos.x, z = clayPos.z).rotateToNorth(rotation)
-//    fun Room.getRealCoords(pos: Vec3d) = pos.rotateAroundNorth(rotation).addVec(x = clayPos.x, z = clayPos.z)
-//    fun Room.getRelativeCoords(pos: BlockPos) = getRelativeCoords(Vec3(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble())).toBlockPos()
-//    fun Room.getRealCoords(pos: BlockPos) = getRealCoords(Vec3(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble())).toBlockPos()
-//    fun Room.getRelativeCoords(x: Int, y: Int, z: Int) = getRelativeCoords(Vec3(x.toDouble(), y.toDouble(), z.toDouble())).toBlockPos()
-//    fun Room.getRealCoords(x: Int, y: Int, z: Int) = getRealCoords(Vec3(x.toDouble(), y.toDouble(), z.toDouble())).toBlockPos()
+    fun Room.getRelativeCoords(pos: BlockPos) = pos.subtract(clayPos).rotateToNorth(rotation)
+    fun Room.getRealCoords(pos: BlockPos) = pos.rotateAroundNorth(rotation).add(clayPos.x, 0, clayPos.z)
 
     val dungeonItemDrops = listOf(
         "Health Potion VIII Splash Potion",

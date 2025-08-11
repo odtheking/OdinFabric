@@ -4,13 +4,7 @@
   "version": "${mod_version}",
   "name": "${mod_name}",
   "description": "${mod_description}",
-  "authors": [
-    "Odtheking",
-    "Cezar",
-    "Stivais",
-    "Bonsai",
-    "IlmarsXd"
-  ],
+  "authors": ["Odtheking"],
   "contact": {
     "homepage": "https://modrinth.com/mod/odin",
     "sources": "https://github.com/odtheking/OdinFabric",

@@ -25,6 +25,7 @@
   ],
   "mixins": [
     "mixins.ClientConnectionMixin",
+    "mixins.WorldChunkMixin",
     "mixins.YggdrasilSignatureIgnoreMixin"
   ]
 }
