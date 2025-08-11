@@ -120,7 +120,7 @@ object PuzzleSolvers : Module(
                 if (quizSolver && anyRegex.matches(content.string.noControlCodes)) QuizSolver.onMessage(content.string.noControlCodes)
             }
             is BlockEventS2CPacket -> {
-                if (block == Blocks.CHERRY_LOG) return
+                if (block != Blocks.CHERRY_LOG) return
                 val room = DungeonUtils.currentRoom?.takeIf { room -> room.data.type == RoomType.PUZZLE } ?: return
 
                 when (room.data.name) {
