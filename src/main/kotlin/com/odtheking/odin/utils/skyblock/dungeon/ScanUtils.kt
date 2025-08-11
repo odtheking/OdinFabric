@@ -8,8 +8,8 @@ import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.utils.Vec2
+import com.odtheking.odin.utils.devMessage
 import com.odtheking.odin.utils.equalsOneOf
-import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.skyblock.Island
 import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonListener.inBoss
@@ -165,7 +165,7 @@ object ScanUtils {
     fun onRoomEnter(event: RoomEnterEvent) {
         currentRoom = event.room
         if (passedRooms.none { it.data.name == currentRoom?.data?.name }) passedRooms.add(currentRoom ?: return)
-        modMessage("${event.room?.data?.name} - ${event.room?.rotation} || clay: ${event.room?.clayPos}")
+        devMessage("${event.room?.data?.name} - ${event.room?.rotation} || clay: ${event.room?.clayPos}")
     }
 
     @EventHandler

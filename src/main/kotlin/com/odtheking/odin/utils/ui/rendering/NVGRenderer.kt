@@ -64,7 +64,6 @@ object NVGRenderer {
         GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, glFramebuffer)
         GlStateManager._viewport(0, 0, framebuffer.viewportWidth, framebuffer.viewportHeight)
         GlStateManager._activeTexture(GL30.GL_TEXTURE0)
-        GlStateManager._bindTexture(GL30.GL_TEXTURE_2D)
 
         nvgBeginFrame(vg, width, height, 1f)
         nvgTextAlign(vg, NVG_ALIGN_LEFT or NVG_ALIGN_TOP)

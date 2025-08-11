@@ -95,6 +95,7 @@
     "name": "Black Flag",
     "type": "NORMAL",
     "cores": [
+      -1779299819
     ],
     "crypts": 1,
     "secrets": 3
@@ -199,6 +200,7 @@
     "name": "Cell",
     "type": "NORMAL",
     "cores": [
+      1560740373
     ],
     "secrets": 1
   },
@@ -225,6 +227,7 @@
     "name": "Cobble Wall Pillar",
     "type": "NORMAL",
     "cores": [
+      -170648742
     ],
     "crypts": 1,
     "secrets": 2
@@ -448,7 +451,6 @@
     "cores": [
       -1049958927,
       438605094
-      
     ],
     "crypts": 4,
     "secrets": 3
@@ -757,7 +759,7 @@
     "name": "Painting",
     "type": "NORMAL",
     "cores": [
-      -1092023380
+      -725718835
     ],
     "secrets": 2
   },
@@ -1207,6 +1209,7 @@
     "name": "Water",
     "type": "NORMAL",
     "cores": [
+      -333637832
     ],
     "secrets": 2
   },

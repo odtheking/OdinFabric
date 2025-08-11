@@ -21,7 +21,7 @@ object WeirdosSolver {
         if (solutions.none { it.matches(msg) } && wrong.none { it.matches(msg) }) return
         val correctNPC = mc.world?.entities?.find { it is ArmorStandEntity && it.name.string == npc } ?: return
         val room = DungeonUtils.currentRoom ?: return
-        val pos = BlockPos(correctNPC.x.toInt(), 69, correctNPC.z.toInt()).addRotationCoords(room.rotation, 0, -1)
+        val pos = BlockPos(correctNPC.x.toInt() - 1, 69, correctNPC.z.toInt() -1).addRotationCoords(room.rotation, -1, 0)
 
         if (solutions.any { it.matches(msg) }) {
             correctPos = pos

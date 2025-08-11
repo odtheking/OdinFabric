@@ -27,8 +27,8 @@ object TPMazeSolver {
 
     fun tpPacket(event: PlayerPositionLookS2CPacket) = with (event.change.position) {
         if (DungeonUtils.currentRoomName != "Teleport Maze" || x % 0.5 != 0.0 || y != 69.5 || z % 0.5 != 0.0 || tpPads.isEmpty()) return
-        visited.addAll(tpPads.filter { Box.from(Vec3d(x, y, z)).expand(0.5, 0.0, 0.5).intersects(Box(it)) ||
-                mc.player?.boundingBox?.expand(0.5, 0.0, 0.5)?.intersects(Box(it)) == true })
+        visited.addAll(tpPads.filter { Box.from(Vec3d(x, y, z)).expand(1.0, 0.0, 1.0).intersects(Box(it)) ||
+                mc.player?.boundingBox?.expand(1.0, 0.0, 1.0)?.intersects(Box(it)) == true })
         getCorrectPortals(Vec3d(x, y, z), event.change.yaw, event.change.pitch)
     }
 

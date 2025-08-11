@@ -11,7 +11,7 @@ import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.RoomType
 import meteordevelopment.orbit.EventHandler
-import net.minecraft.block.ChestBlock
+import net.minecraft.block.Blocks
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket
 import net.minecraft.network.packet.s2c.play.BlockEventS2CPacket
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
@@ -120,7 +120,7 @@ object PuzzleSolvers : Module(
                 if (quizSolver && anyRegex.matches(content.string.noControlCodes)) QuizSolver.onMessage(content.string.noControlCodes)
             }
             is BlockEventS2CPacket -> {
-                if (block !is ChestBlock) return
+                if (block == Blocks.CHERRY_LOG) return
                 val room = DungeonUtils.currentRoom?.takeIf { room -> room.data.type == RoomType.PUZZLE } ?: return
 
                 when (room.data.name) {

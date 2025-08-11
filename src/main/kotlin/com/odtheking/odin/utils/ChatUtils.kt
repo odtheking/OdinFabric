@@ -1,6 +1,7 @@
 package com.odtheking.odin.utils
 
 import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.features.impl.render.ClickGUIModule
 import net.minecraft.text.ClickEvent
 import net.minecraft.text.HoverEvent
 import net.minecraft.text.Style
@@ -25,6 +26,11 @@ fun modMessage(message: Text, prefix: String = "§3Odin §8»§r ", chatStyle: S
     val text = Text.literal(prefix).append(message)
     chatStyle?.let { text.setStyle(chatStyle) }
     mc.inGameHud?.chatHud?.addMessage(text)
+}
+
+fun devMessage(message: Any?) {
+    if (!ClickGUIModule.devMessage) return
+    modMessage(message, "§3Odin§bDev §8»§r ")
 }
 
 /**

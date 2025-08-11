@@ -114,14 +114,14 @@ enum class Floor(val secretPercentage: Float = 1f) {
     F4(0.6f),
     F5(0.7f),
     F6(0.85f),
-    F7(10f),
-    M1(6f),
-    M2(6f),
-    M3(8f),
-    M4(5f),
-    M5(5f),
-    M6(7f),
-    M7(10f),
+    F7,
+    M1,
+    M2,
+    M3,
+    M4,
+    M5,
+    M6,
+    M7,
     None;
 
     /**
