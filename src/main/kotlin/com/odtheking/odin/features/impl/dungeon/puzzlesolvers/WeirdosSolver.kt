@@ -25,7 +25,7 @@ object WeirdosSolver {
 
         if (solutions.any { it.matches(msg) }) {
             correctPos = pos
-            playSoundAtPlayer(SoundEvents.ENTITY_FIREWORK_ROCKET_BLAST, 2f, 1f)
+            playSoundAtPlayer(SoundEvents.ENTITY_FIREWORK_ROCKET_LARGE_BLAST, 2f, 1f)
         } else wrongPositions.add(pos)
     }
 

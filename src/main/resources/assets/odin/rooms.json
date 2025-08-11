@@ -450,7 +450,8 @@
     "type": "NORMAL",
     "cores": [
       -1049958927,
-      438605094
+      438605094,
+      2015882449
     ],
     "crypts": 4,
     "secrets": 3
@@ -498,7 +499,8 @@
     "name": "Ice Fill",
     "type": "PUZZLE",
     "cores": [
-      -1871216735
+      -1871216735,
+      -1404774853
     ]
   },
   {
@@ -1092,6 +1094,7 @@
     "name": "Spikes",
     "type": "NORMAL",
     "cores": [
+      1484939648
     ],
     "crypts": 2,
     "secrets": 3
