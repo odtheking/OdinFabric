@@ -128,8 +128,14 @@ object Etherwarp : Module(
         returnEnd: Boolean = false,
         etherWarp: Boolean = false
     ): EtherPos {
-        val startPos = position?.addVec(y = 1.54) ?: return EtherPos.NONE
-        val endPos = mc.player?.rotationVector?.multiply(distance)?.add(startPos) ?: return EtherPos.NONE
+        val player = mc.player ?: return EtherPos.NONE
+        if (position == null) return EtherPos.NONE
+        val eyeHeight = if (player.isSneaking) {
+            if (LocationUtils.currentArea.isArea(Island.Galatea)) 1.27 else 1.54 // Use modern sneak height in Galatea
+        } else 1.62
+
+        val startPos = position.addVec(y = eyeHeight)
+        val endPos = player.rotationVector?.multiply(distance)?.add(startPos) ?: return EtherPos.NONE
         return traverseVoxels(startPos, endPos, etherWarp).takeUnless { it == EtherPos.NONE && returnEnd } ?: EtherPos(true, endPos.toBlockPos(), null)
     }
 
