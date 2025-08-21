@@ -5,6 +5,8 @@ import com.odtheking.odin.OdinMod.scope
 import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.features.impl.dungeon.LeapMenu
+import com.odtheking.odin.features.impl.dungeon.LeapMenu.odinSorting
 import com.odtheking.odin.utils.equalsOneOf
 import com.odtheking.odin.utils.hasBonusPaulScore
 import com.odtheking.odin.utils.noControlCodes
@@ -172,14 +174,14 @@ object DungeonListener {
         dungeonTeammates = getDungeonTeammates(dungeonTeammates, tabList)
         dungeonTeammatesNoSelf = dungeonTeammates.filter { it.entity != mc.player }
 
-//        leapTeammates =
-//            when (LeapMenu.type) {
-//                0 -> odinSorting(dungeonTeammatesNoSelf.sortedBy { it.clazz.priority }).toList()
-//                1 -> dungeonTeammatesNoSelf.sortedWith(compareBy({ it.clazz.ordinal }, { it.name }))
-//                2 -> dungeonTeammatesNoSelf.sortedBy { it.name }
-//                3 -> dungeonTeammatesNoSelf.sortedBy { DungeonUtils.customLeapOrder.indexOf(it.name.lowercase()).takeIf { index -> index != -1 } ?: Int.MAX_VALUE }
-//                else -> dungeonTeammatesNoSelf
-//            }
+        leapTeammates =
+            when (LeapMenu.type) {
+                0 -> odinSorting(dungeonTeammatesNoSelf.sortedBy { it.clazz.priority }).toList()
+                1 -> dungeonTeammatesNoSelf.sortedWith(compareBy({ it.clazz.ordinal }, { it.name }))
+                2 -> dungeonTeammatesNoSelf.sortedBy { it.name }
+                3 -> dungeonTeammatesNoSelf.sortedBy { DungeonUtils.customLeapOrder.indexOf(it.name.lowercase()).takeIf { index -> index != -1 } ?: Int.MAX_VALUE }
+                else -> dungeonTeammatesNoSelf
+            }
     }
 
     private val puzzleRegex = Regex("^ (\\w+(?: \\w+)*|\\?\\?\\?): \\[([✖✔✦])] ?(?:\\((\\w+)\\))?$")

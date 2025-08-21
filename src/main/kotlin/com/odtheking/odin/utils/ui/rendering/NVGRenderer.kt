@@ -286,6 +286,29 @@ object NVGRenderer {
         return bounds // [minX, minY, maxX, maxY]
     }
 
+    fun createNVGImage(textureId: Int, textureWidth: Int, textureHeight: Int): Int =
+        nvglCreateImageFromHandle(vg, textureId, textureWidth, textureHeight, NVG_IMAGE_NEAREST or NVG_IMAGE_NODELETE)
+
+    fun image(image: Int, textureWidth: Int, textureHeight: Int, subX: Int, subY: Int, subW: Int, subH: Int, x: Float, y: Float, w: Float, h: Float, radius: Float) {
+        if (image == -1) return
+
+        val sx = subX.toFloat() / textureWidth
+        val sy = subY.toFloat() / textureHeight
+        val sw = subW.toFloat() / textureWidth
+        val sh = subH.toFloat() / textureHeight
+
+        val iw = w / sw
+        val ih = h / sh
+        val ix = x - iw * sx
+        val iy = y - ih * sy
+
+        nvgImagePattern(vg, ix, iy, iw, ih, 0f, image, 1f, nvgPaint)
+        nvgBeginPath(vg)
+        nvgRoundedRect(vg, x, y, w, h + .5f, radius)
+        nvgFillPaint(vg, nvgPaint)
+        nvgFill(vg)
+    }
+
     fun image(image: Image, x: Float, y: Float, w: Float, h: Float, radius: Float) {
         nvgImagePattern(vg, x, y, w, h, 0f, getImage(image), 1f, nvgPaint)
         nvgBeginPath(vg)
