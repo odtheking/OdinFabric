@@ -2,7 +2,7 @@ package com.odtheking.odin.features.impl.floor7.termsim
 
 import com.odtheking.odin.events.TerminalEvent
 import com.odtheking.odin.features.impl.floor7.TerminalSolver
-import com.odtheking.odin.features.impl.floor7.TerminalTypes
+import com.odtheking.odin.features.impl.floor7.terminalhandler.TerminalTypes
 import net.minecraft.component.DataComponentTypes
 import net.minecraft.item.ItemStack
 import net.minecraft.item.Items

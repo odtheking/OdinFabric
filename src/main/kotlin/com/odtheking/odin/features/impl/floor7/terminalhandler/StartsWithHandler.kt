@@ -1,6 +1,5 @@
 package com.odtheking.odin.features.impl.floor7.terminalhandler
 
-import com.odtheking.odin.features.impl.floor7.TerminalTypes
 import net.minecraft.item.ItemStack
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket
 

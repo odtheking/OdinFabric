@@ -4,7 +4,6 @@ import com.odtheking.odin.OdinMod.EVENT_BUS
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.events.TerminalEvent
-import com.odtheking.odin.features.impl.floor7.TerminalTypes
 import com.odtheking.odin.utils.equalsOneOf
 import meteordevelopment.orbit.EventHandler
 import meteordevelopment.orbit.EventPriority

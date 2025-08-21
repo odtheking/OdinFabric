@@ -10,6 +10,7 @@ import com.odtheking.odin.features.impl.dungeon.BlessingDisplay
 import com.odtheking.odin.features.impl.dungeon.puzzlesolvers.PuzzleSolvers
 import com.odtheking.odin.features.impl.floor7.TerminalSimulator
 import com.odtheking.odin.features.impl.floor7.TerminalSolver
+import com.odtheking.odin.features.impl.floor7.TerminalTimes
 import com.odtheking.odin.features.impl.nether.*
 import com.odtheking.odin.features.impl.render.*
 import com.odtheking.odin.features.impl.skyblock.*
@@ -35,7 +36,10 @@ object ModuleManager {
 
     val modules: ArrayList<Module> = arrayListOf(
         // dungeon
-        PuzzleSolvers, TerminalSolver, BlessingDisplay, TerminalSimulator,
+        PuzzleSolvers, BlessingDisplay,
+
+        // floor 7
+        TerminalSimulator, TerminalSolver, TerminalTimes,
 
         // render
         ClickGUIModule,

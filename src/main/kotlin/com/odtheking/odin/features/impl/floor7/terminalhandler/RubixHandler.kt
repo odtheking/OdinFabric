@@ -1,6 +1,5 @@
 package com.odtheking.odin.features.impl.floor7.terminalhandler
 
-import com.odtheking.odin.features.impl.floor7.TerminalTypes
 import net.minecraft.block.StainedGlassPaneBlock
 import net.minecraft.item.BlockItem
 import net.minecraft.item.ItemStack

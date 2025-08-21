@@ -1,7 +1,7 @@
 package com.odtheking.odin.commands
 
 import com.github.stivais.commodore.Commodore
-import com.odtheking.odin.features.impl.floor7.TerminalTypes
+import com.odtheking.odin.features.impl.floor7.terminalhandler.TerminalTypes
 import com.odtheking.odin.features.impl.floor7.termsim.StartGUI
 
 val termSimCommand = Commodore("termsim") {

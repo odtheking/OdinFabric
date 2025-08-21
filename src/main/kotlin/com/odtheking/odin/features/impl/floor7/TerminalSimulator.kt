@@ -3,6 +3,7 @@ package com.odtheking.odin.features.impl.floor7
 import com.odtheking.odin.clickgui.settings.impl.MapSetting
 import com.odtheking.odin.clickgui.settings.impl.NumberSetting
 import com.odtheking.odin.features.Module
+import com.odtheking.odin.features.impl.floor7.terminalhandler.TerminalTypes
 import com.odtheking.odin.features.impl.floor7.termsim.*
 import com.odtheking.odin.utils.PersonalBest
 import com.odtheking.odin.utils.sendCommand

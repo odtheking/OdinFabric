@@ -1,4 +1,4 @@
-package com.odtheking.odin.features.impl.floor7
+package com.odtheking.odin.features.impl.floor7.terminalhandler
 
 import com.github.stivais.commodore.parsers.CommandParsable
 import com.odtheking.odin.features.impl.floor7.termGUI.*
