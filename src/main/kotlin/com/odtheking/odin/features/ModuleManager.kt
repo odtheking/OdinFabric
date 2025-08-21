@@ -6,7 +6,10 @@ import com.odtheking.odin.clickgui.HudManager
 import com.odtheking.odin.clickgui.settings.impl.HUDSetting
 import com.odtheking.odin.clickgui.settings.impl.KeybindSetting
 import com.odtheking.odin.events.InputEvent
+import com.odtheking.odin.features.impl.dungeon.BlessingDisplay
 import com.odtheking.odin.features.impl.dungeon.puzzlesolvers.PuzzleSolvers
+import com.odtheking.odin.features.impl.floor7.TerminalSimulator
+import com.odtheking.odin.features.impl.floor7.TerminalSolver
 import com.odtheking.odin.features.impl.nether.*
 import com.odtheking.odin.features.impl.render.*
 import com.odtheking.odin.features.impl.skyblock.*
@@ -32,7 +35,7 @@ object ModuleManager {
 
     val modules: ArrayList<Module> = arrayListOf(
         // dungeon
-        PuzzleSolvers,
+        PuzzleSolvers, TerminalSolver, BlessingDisplay, TerminalSimulator,
 
         // render
         ClickGUIModule,

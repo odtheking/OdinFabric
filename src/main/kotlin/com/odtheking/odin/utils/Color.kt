@@ -9,7 +9,7 @@ class Color(hue: Float, saturation: Float, brightness: Float, alpha: Float = 1f)
     constructor(rgba: Int) : this(rgba.red, rgba.green, rgba.blue, alpha = rgba.alpha / 255f)
     constructor(rgba: Int, alpha: Float) : this(rgba.red, rgba.green, rgba.blue, alpha)
     constructor(hex: String) : this(
-        hex.substring(0, 2).toInt(16),
+        hex.take(2).toInt(16),
         hex.substring(2, 4).toInt(16),
         hex.substring(4, 6).toInt(16),
         hex.substring(6, 8).toInt(16) / 255f
@@ -75,7 +75,7 @@ class Color(hue: Float, saturation: Float, brightness: Float, alpha: Float = 1f)
     @OptIn(ExperimentalStdlibApi::class)
     fun hex(includeAlpha: Boolean = true): String {
         val hexString = rgba.toHexString(HexFormat.UpperCase)
-        return if (includeAlpha) hexString.substring(2) + hexString.substring(0, 2)
+        return if (includeAlpha) hexString.substring(2) + hexString.take(2)
         else hexString.substring(2)
     }
 
@@ -143,38 +143,24 @@ class Color(hue: Float, saturation: Float, brightness: Float, alpha: Float = 1f)
 
 object Colors {
 
-    @JvmField
-    val MINECRAFT_DARK_BLUE: Color = Color(0, 0, 170)
-    @JvmField
-    val MINECRAFT_DARK_GREEN: Color = Color(0, 170, 0)
-    @JvmField
-    val MINECRAFT_DARK_AQUA: Color = Color(0, 170, 170)
-    @JvmField
-    val MINECRAFT_DARK_RED: Color = Color(170, 0, 0)
-    @JvmField
-    val MINECRAFT_DARK_PURPLE: Color = Color(170, 0, 170)
-    @JvmField
-    val MINECRAFT_GOLD: Color = Color(255, 170, 0)
-    @JvmField
-    val MINECRAFT_GRAY: Color = Color(170, 170, 170)
-    @JvmField
-    val MINECRAFT_DARK_GRAY: Color = Color(85, 85, 85)
-    @JvmField
-    val MINECRAFT_BLUE: Color = Color(85, 85, 255)
-    @JvmField
-    val MINECRAFT_GREEN: Color = Color(85, 255, 85)
-    @JvmField
-    val MINECRAFT_AQUA: Color = Color(85, 255, 255)
-    @JvmField
-    val MINECRAFT_RED: Color = Color(255, 85, 85)
-    @JvmField
-    val MINECRAFT_LIGHT_PURPLE: Color = Color(255, 85, 255)
-    @JvmField
-    val MINECRAFT_YELLOW: Color = Color(255, 255, 85)
-    @JvmField
-    val WHITE: Color = Color(255, 255, 255)
-    @JvmField
-    val BLACK: Color = Color(0, 0, 0)
-    @JvmField
-    val TRANSPARENT: Color = Color(0, 0, 0, 0f)
+    @JvmField val MINECRAFT_DARK_BLUE = Color(0, 0, 170)
+    @JvmField val MINECRAFT_DARK_GREEN = Color(0, 170, 0)
+    @JvmField val MINECRAFT_DARK_AQUA = Color(0, 170, 170)
+    @JvmField val MINECRAFT_DARK_RED = Color(170, 0, 0)
+    @JvmField val MINECRAFT_DARK_PURPLE = Color(170, 0, 170)
+    @JvmField val MINECRAFT_GOLD = Color(255, 170, 0)
+    @JvmField val MINECRAFT_GRAY = Color(170, 170, 170)
+    @JvmField val MINECRAFT_DARK_GRAY = Color(85, 85, 85)
+    @JvmField val MINECRAFT_BLUE = Color(85, 85, 255)
+    @JvmField val MINECRAFT_GREEN = Color(85, 255, 85)
+    @JvmField val MINECRAFT_AQUA = Color(85, 255, 255)
+    @JvmField val MINECRAFT_RED = Color(255, 85, 85)
+    @JvmField val MINECRAFT_LIGHT_PURPLE = Color(255, 85, 255)
+    @JvmField val MINECRAFT_YELLOW = Color(255, 255, 85)
+    @JvmField val WHITE = Color(255, 255, 255)
+    @JvmField val BLACK = Color(0, 0, 0)
+    @JvmField val TRANSPARENT = Color(0, 0, 0, 0f)
+
+    @JvmField val gray38 = Color(38, 38, 38)
+    @JvmField val gray26 = Color(26, 26, 26)
 }

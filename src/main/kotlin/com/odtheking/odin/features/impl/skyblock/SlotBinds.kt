@@ -76,7 +76,7 @@ object SlotBinds : Module(
     }
 
     @EventHandler
-    fun onRenderScreen(event: GuiEvent.Render) {
+    fun onRenderScreen(event: GuiEvent.Draw) {
         val screen = event.screen as? InventoryScreen ?: return
         val hoveredSlot = (screen as HandledScreenAccessor).focusedSlot?.id?.takeIf { it in 5 until 45 } ?: return
         val boundSlot = slotBinds[hoveredSlot]

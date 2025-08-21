@@ -25,4 +25,9 @@ class PersonalBest(private val mapSetting: MapSetting<Int, Float, MutableMap<Int
             if (sendMessage) modMessage(msg)
         } else if (!sendOnlyPB && sendMessage) modMessage("$msg ${if (alwaysSendPB) "(§8$oldPB§7)" else ""}")
     }
+
+    fun set(index: Int, time: Float) {
+        mapSetting.value[index] = time
+        Config.save()
+    }
 }

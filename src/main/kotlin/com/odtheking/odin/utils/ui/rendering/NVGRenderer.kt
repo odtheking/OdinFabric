@@ -23,6 +23,7 @@ import org.lwjgl.system.MemoryUtil.memFree
 import java.nio.ByteBuffer
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.round
 
 object NVGRenderer {
 
@@ -232,6 +233,18 @@ object NVGRenderer {
         color(color)
         nvgFillColor(vg, nvgColor)
         nvgText(vg, x, y + .5f, text)
+    }
+
+    fun textShadow(text: String, x: Float, y: Float, size: Float, color: Int, font: Font) {
+        nvgFontFaceId(vg, getFontID(font))
+        nvgFontSize(vg, size)
+        color(-16777216)
+        nvgFillColor(vg, nvgColor)
+        nvgText(vg, round(x + 3f), round(y + 3f), text)
+
+        color(color)
+        nvgFillColor(vg, nvgColor)
+        nvgText(vg, round(x), round(y), text)
     }
 
     fun textWidth(text: String, size: Float, font: Font): Float {

@@ -1,7 +1,5 @@
 package com.odtheking.mixin.mixins;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.odtheking.odin.events.GuiEvent;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -29,13 +27,12 @@ public class HandledScreenMixin {
 
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
     protected void onRender(DrawContext context, int mouseX, int mouseY, float deltaTicks, CallbackInfo ci) {
-        if (new GuiEvent.Render((Screen) (Object) this, context, mouseX, mouseY).postAndCatch()) ci.cancel();
+        if (new GuiEvent.Draw((Screen) (Object) this, context, mouseX, mouseY).postAndCatch()) ci.cancel();
     }
 
-    @WrapOperation(method = "drawSlots", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/HandledScreen;drawSlot(Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/screen/slot/Slot;)V"))
-    private void onDrawSlot(HandledScreen<?> instance, DrawContext context, Slot slot, Operation<Void> original) {
-        if (!new GuiEvent.DrawSlot((Screen) (Object) this, context, slot).postAndCatch())
-            original.call(instance, context, slot);
+    @Inject(method = "drawSlot", at = @At("HEAD"), cancellable = true)
+    private void onDrawSlot(DrawContext context, Slot slot, CallbackInfo ci) {
+        if (new GuiEvent.DrawSlot((Screen) (Object) this, context, slot).postAndCatch()) ci.cancel();
     }
 
     @Inject(method = "onMouseClick(Lnet/minecraft/screen/slot/Slot;IILnet/minecraft/screen/slot/SlotActionType;)V", at = @At("HEAD"), cancellable = true)
@@ -52,5 +49,12 @@ public class HandledScreenMixin {
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
     public void onKeyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
         if (new GuiEvent.KeyPress((Screen) (Object) this, keyCode, scanCode, modifiers).postAndCatch()) cir.cancel();
+    }
+
+    @Inject(method = "drawMouseoverTooltip", at = @At("HEAD"), cancellable = true)
+    public void onDrawMouseoverTooltip(DrawContext context, int mouseX, int mouseY, CallbackInfo ci) {
+        if (new GuiEvent.DrawTooltip((Screen) (Object) this, context, mouseX, mouseY).postAndCatch()) {
+            ci.cancel();
+        }
     }
 }

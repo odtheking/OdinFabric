@@ -50,7 +50,7 @@ object OdinMod : ModInitializer {
         }
 
         ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
-            arrayOf(mainCommand, petCommand, devCommand, waypointCommand, highlightCommand).forEach { commodore ->
+            arrayOf(mainCommand, petCommand, devCommand, waypointCommand, highlightCommand, termSimCommand).forEach { commodore ->
                 commodore.register(dispatcher)
             }
         }
