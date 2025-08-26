@@ -106,7 +106,7 @@ object PuzzleSolvers : Module(
     }
 
     @EventHandler
-    fun onServerTick(event: PacketEvent.Receive) = with (event.packet) {
+    fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
         if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return
         when (this) {
             is PlayerPositionLookS2CPacket -> if (tpMaze) TPMazeSolver.tpPacket(this)

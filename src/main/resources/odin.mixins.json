@@ -13,6 +13,7 @@
     "accessors.KeyBindingAccessor",
     "mixins.ChatScreenMixin",
     "mixins.ClientPlayNetworkHandlerMixin",
+    "mixins.ClientWorldMixin",
     "mixins.EntityRendererMixin",
     "mixins.GenericContainerScreenMixin",
     "mixins.HandledScreenMixin",
