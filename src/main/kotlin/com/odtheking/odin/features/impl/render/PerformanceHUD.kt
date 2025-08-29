@@ -27,12 +27,12 @@ object PerformanceHUD : Module(
     private val hud by HUD("Performance HUD", "Shows performance information on the screen.") {
         if (!showFPS && !showTPS && !showPing) return@HUD 0f to 0f
 
-        var width = 1f
-        var height = 1f
+        var width = 1
+        var height = 1
         val lineHeight = mc.textRenderer.fontHeight
 
         fun renderMetric(label: String, value: String) {
-            val w = drawText(this, label, value, if (direction == HORIZONTAL) width else 1f, height)
+            val w = drawText(this, label, value, if (direction == HORIZONTAL) width else 1, height)
             if (direction == HORIZONTAL) width += w
             else {
                 width = maxOf(width, w)
@@ -47,9 +47,9 @@ object PerformanceHUD : Module(
         width to if (direction == HORIZONTAL) lineHeight else height
     }
 
-    private fun drawText(context: DrawContext, name: String, value: String, x: Float, y: Float): Float {
-        var width = 0f
-        width += context.drawStringWidth(name, x + width, y, nameColor, true)
+    private fun drawText(context: DrawContext, name: String, value: String, x: Int, y: Int): Int {
+        var width = 0
+        width += context.drawStringWidth(name, x, y, nameColor, true)
         width += context.drawStringWidth(value, x + width, y, valueColor, true)
         return width
     }

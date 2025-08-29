@@ -7,6 +7,7 @@ import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.features.impl.dungeon.LeapMenu
 import com.odtheking.odin.features.impl.dungeon.LeapMenu.odinSorting
+import com.odtheking.odin.features.impl.dungeon.Mimic
 import com.odtheking.odin.utils.equalsOneOf
 import com.odtheking.odin.utils.hasBonusPaulScore
 import com.odtheking.odin.utils.noControlCodes
@@ -49,14 +50,13 @@ object DungeonListener {
     }
 
     @EventHandler
-    fun onWorldUnload(event: WorldLoadEvent) {
+    fun onWorldLoad(event: WorldLoadEvent) {
         Blessing.entries.forEach { it.reset() }
         dungeonTeammatesNoSelf = emptyList()
         dungeonStats = DungeonStats()
         expectingBloodUpdate = false
         leapTeammates = emptyList()
         dungeonTeammates.clear()
-        //  shownTitle = false
         puzzles.clear()
         floor = null
         paul = false
@@ -121,10 +121,10 @@ object DungeonListener {
                 }
 
                 when (partyMessageRegex.find(message)?.groupValues?.get(1)?.lowercase() ?: return) {
-                    "mimic killed", "mimic slain", "mimic killed!", "mimic dead", "mimic dead!", "\$skytils-dungeon-score-mimic\$"/*, Mimic.mimicMessage*/ ->
+                    "mimic killed", "mimic slain", "mimic killed!", "mimic dead", "mimic dead!", "\$skytils-dungeon-score-mimic\$", Mimic.mimicMessage ->
                         dungeonStats.mimicKilled = true
 
-                    "prince killed", "prince slain", "prince killed!", "prince dead", "prince dead!", "\$skytils-dungeon-score-prince\$"/*, Mimic.princeMessage*/ ->
+                    "prince killed", "prince slain", "prince killed!", "prince dead", "prince dead!", "\$skytils-dungeon-score-prince\$", Mimic.princeMessage ->
                         dungeonStats.princeKilled = true
 
                     "blaze done!", "blaze done", "blaze puzzle solved!" ->

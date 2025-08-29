@@ -31,7 +31,7 @@ object TerminalSolver : Module(
     name = "Terminal Solver",
     description = "Renders solution for terminals in floor 7."
 ) {
-    val renderType by SelectorSetting("Mode", "Odin", arrayListOf("Normal", "Custom GUI"), desc = "How the terminal solver should render.")
+    val renderType by SelectorSetting("Mode", "Normal", arrayListOf("Normal", "Custom GUI"), desc = "How the terminal solver should render.")
     private val cancelToolTip by BooleanSetting("Stop Tooltips", true, desc = "Stops rendering tooltips in terminals.").withDependency { renderType != 1 }
     val hideClicked by BooleanSetting("Hide Clicked", false, desc = "Visually hides your first click before a gui updates instantly to improve perceived response time. Does not affect actual click time.")
     private val middleClickGUI by BooleanSetting("Middle Click GUI", true, desc = "Replaces right click with middle click in terminals.").withDependency { renderType != 1 }

@@ -6,9 +6,7 @@ import com.odtheking.odin.clickgui.HudManager
 import com.odtheking.odin.clickgui.settings.impl.HUDSetting
 import com.odtheking.odin.clickgui.settings.impl.KeybindSetting
 import com.odtheking.odin.events.InputEvent
-import com.odtheking.odin.features.impl.dungeon.BlessingDisplay
-import com.odtheking.odin.features.impl.dungeon.LeapMenu
-import com.odtheking.odin.features.impl.dungeon.SecretClicked
+import com.odtheking.odin.features.impl.dungeon.*
 import com.odtheking.odin.features.impl.dungeon.puzzlesolvers.PuzzleSolvers
 import com.odtheking.odin.features.impl.floor7.TerminalSimulator
 import com.odtheking.odin.features.impl.floor7.TerminalSolver
@@ -38,7 +36,7 @@ object ModuleManager {
 
     val modules: ArrayList<Module> = arrayListOf(
         // dungeon
-        PuzzleSolvers, BlessingDisplay, LeapMenu, SecretClicked,
+        PuzzleSolvers, BlessingDisplay, LeapMenu, SecretClicked, MapInfo, Mimic,
 
         // floor 7
         TerminalSimulator, TerminalSolver, TerminalTimes,

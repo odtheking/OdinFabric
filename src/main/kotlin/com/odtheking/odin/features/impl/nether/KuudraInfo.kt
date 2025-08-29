@@ -29,7 +29,7 @@ object KuudraInfo : Module(
         if (!example && !KuudraUtils.inKuudra) return@HUD 0f to 0f
         val string = if (example) "§a99.975M/240M§c❤" else getCurrentHealthDisplay(KuudraUtils.kuudraEntity?.health ?: return@HUD 0 to 0)
 
-        drawString(string, 1f, 1f)
+        drawString(string, 1, 1)
 
         mc.textRenderer.getWidth(string) + 2f to mc.textRenderer.fontHeight
     }

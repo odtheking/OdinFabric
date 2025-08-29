@@ -24,9 +24,9 @@ object BuildHelper : Module(
     private val hideDefaultTag by BooleanSetting("Hide Default Tag", true, desc = "Hides the default tag for unfinished piles.").withDependency { unfinishedWaypoints }
     private val hud by HUD("Build helper", "Shows information about the build progress.") { example ->
         if (!example && (!KuudraUtils.inKuudra || KuudraUtils.phase != 2)) return@HUD 0f to 0f
-        drawString("§bFreshers: ${colorBuilders(KuudraUtils.freshers.size)}", 1f, 1f)
-        drawString("§bBuilders: ${colorBuilders(KuudraUtils.playersBuildingAmount)}", 1f, 10f)
-        drawString("§bBuild: ${colorBuild(KuudraUtils.buildDonePercentage)}%", 1f, 19f)
+        drawString("§bFreshers: ${colorBuilders(KuudraUtils.freshers.size)}", 1, 1)
+        drawString("§bBuilders: ${colorBuilders(KuudraUtils.playersBuildingAmount)}", 1, 10)
+        drawString("§bBuild: ${colorBuild(KuudraUtils.buildDonePercentage)}%", 1, 19)
         mc.textRenderer.getWidth("Freshers: 0") + 2f to mc.textRenderer.fontHeight * 3
     }
 

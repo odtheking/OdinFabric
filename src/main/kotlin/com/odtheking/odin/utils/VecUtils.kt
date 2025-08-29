@@ -119,5 +119,3 @@ private fun Vec3d.intermediateWithZValue(goal: Vec3d, z: Double): Vec3d? {
         this.z + dz * t
     ) else null
 }
-
-

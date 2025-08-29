@@ -22,15 +22,15 @@ object SpringBoots : Module(
     description = "Shows the current jump height of your spring boots."
 ) {
     private val hud by HUD("Spring Boots", "Shows the how high you will jump.") {
-        if (blockAmount == 0.0 && !it) return@HUD 0f to 0f
-        var width = 1f
-        width += drawStringWidth("Height: ", width, 1f, Colors.MINECRAFT_LIGHT_PURPLE, true)
-        width += drawStringWidth(getColor(blockAmount), width, 1f, Colors.WHITE, true)
+        if (blockAmount == 0f && !it) return@HUD 0f to 0f
+        var width = 1
+        width += drawStringWidth("Height: ", width, 1, Colors.MINECRAFT_LIGHT_PURPLE, true)
+        width += drawStringWidth(getColor(blockAmount), width, 1, Colors.WHITE, true)
         width to mc.textRenderer.fontHeight
     }
 
     private val pitchSet = setOf(0.82539684f, 0.8888889f, 0.93650794f, 1.0476191f, 1.1746032f, 1.3174603f, 1.7777778f)
-    private var blockAmount = 0.0
+    private var blockAmount = 0f
     private var highCount = 0
     private var lowCount = 0
 
@@ -57,18 +57,18 @@ object SpringBoots : Module(
 
     @EventHandler
     fun onRenderWorld(event: RenderEvent.Last) {
-        if (!LocationUtils.isInSkyblock || blockAmount == 0.0) return
+        if (!LocationUtils.isInSkyblock || blockAmount == 0f) return
         mc.player?.pos?.addVec(y = blockAmount)?.let { event.context.drawWireFrameBox(Box.from(it), Colors.MINECRAFT_RED) }
     }
 
     @EventHandler
     fun onTick(event: TickEvent.End) {
-        if (!LocationUtils.isInSkyblock || !(mc.player?.isSneaking == false || EquipmentSlot.FEET isItem "SPRING_BOOTS")) return
+        if (!LocationUtils.isInSkyblock || !(mc.player?.isSneaking == false || !(EquipmentSlot.FEET isItem "SPRING_BOOTS"))) return
         highCount = 0
         lowCount = 0
     }
 
-    private fun getColor(blocks: Double): String {
+    private fun getColor(blocks: Float): String {
         return when {
             blocks <= 13.5 -> "§c"
             blocks <= 22.5 -> "§e"
@@ -79,10 +79,10 @@ object SpringBoots : Module(
     }
 
     private val blocksList = listOf(
-        0.0, 3.0, 6.5, 9.0, 11.5, 13.5, 16.0, 18.0, 19.0,
-        20.5, 22.5, 25.0, 26.5, 28.0, 29.0, 30.0, 31.0, 33.0,
-        34.0, 35.5, 37.0, 38.0, 39.5, 40.0, 41.0, 42.5, 43.5,
-        44.0, 45.0, 46.0, 47.0, 48.0, 49.0, 50.0, 51.0, 52.0,
-        53.0, 54.0, 55.0, 56.0, 57.0, 58.0, 59.0, 60.0, 61.0
+        0.0f, 3.0f, 6.5f, 9.0f, 11.5f, 13.5f, 16.0f, 18.0f, 19.0f,
+        20.5f, 22.5f, 25.0f, 26.5f, 28.0f, 29.0f, 30.0f, 31.0f, 33.0f,
+        34.0f, 35.5f, 37.0f, 38.0f, 39.5f, 40.0f, 41.0f, 42.5f, 43.5f,
+        44.0f, 45.0f, 46.0f, 47.0f, 48.0f, 49.0f, 50.0f, 51.0f, 52.0f,
+        53.0f, 54.0f, 55.0f, 56.0f, 57.0f, 58.0f, 59.0f, 60.0f, 61.0f
     )
 }

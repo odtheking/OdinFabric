@@ -1,9 +1,9 @@
 package com.odtheking.odin.utils.render
 
+import com.odtheking.mixin.accessors.DrawContextAccessor
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Colors
-import com.odtheking.mixin.accessors.DrawContextAccessor
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.render.RenderLayer
@@ -11,11 +11,11 @@ import net.minecraft.util.math.RotationAxis
 import kotlin.math.atan2
 import kotlin.math.sqrt
 
-fun DrawContext.drawString(text: String, x: Float, y: Float, color: Int = 0xFFFFFF, shadow: Boolean = true) {
+fun DrawContext.drawString(text: String, x: Int, y: Int, color: Int = 0xFFFFFF, shadow: Boolean = true) {
     mc.textRenderer.draw(
         text,
-        x,
-        y,
+        x.toFloat(),
+        y.toFloat(),
         color,
         shadow,
         matrices.peek().positionMatrix,
@@ -28,14 +28,16 @@ fun DrawContext.drawString(text: String, x: Float, y: Float, color: Int = 0xFFFF
 
 fun DrawContext.drawStringWidth(
     text: String,
-    x: Float,
-    y: Float,
+    x: Int,
+    y: Int,
     color: Color = Colors.WHITE,
     shadow: Boolean = true
-): Float {
+): Int {
     drawString(text, x, y, color.rgba, shadow)
-    return mc.textRenderer.getWidth(text).toFloat()
+    return mc.textRenderer.getWidth(text)
 }
+
+fun getStringWidth(text: String): Int = mc.textRenderer.getWidth(text)
 
 fun DrawContext.fill(x1: Float, y1: Float, x2: Float, y2: Float, color: Color) {
     val matrix = matrices.peek().positionMatrix
