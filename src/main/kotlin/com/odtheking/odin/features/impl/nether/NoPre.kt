@@ -84,7 +84,6 @@ object NoPre : Module(
                 modMessage("Crate Priority: $cratePriority")
             }
         }
-        Unit
     }
 
     @EventHandler

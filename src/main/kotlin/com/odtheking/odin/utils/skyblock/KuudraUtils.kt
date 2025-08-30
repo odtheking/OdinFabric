@@ -44,14 +44,13 @@ object KuudraUtils {
 
     @EventHandler
     fun onChat(event: PacketEvent.Receive) = with(event.packet) {
-        if (this !is GameMessageS2CPacket || overlay || !inKuudra) return
+        if (this !is GameMessageS2CPacket || overlay || !inKuudra) return@with
         val message = content.string.noControlCodes
 
         when (message) {
             "[NPC] Elle: Okay adventurers, I will go and fish up Kuudra!" -> phase = 1
             "[NPC] Elle: OMG! Great work collecting my supplies!" -> phase = 2
-            "[NPC] Elle: Phew! The Ballista is finally ready! It should be strong enough to tank Kuudra's blows now!" -> phase =
-                3
+            "[NPC] Elle: Phew! The Ballista is finally ready! It should be strong enough to tank Kuudra's blows now!" -> phase = 3
 
             "[NPC] Elle: POW! SURELY THAT'S IT! I don't think he has any more in him!" -> phase = 4
         }
@@ -69,7 +68,6 @@ object KuudraUtils {
                 freshers[mc.player?.name?.string ?: "self"] = null
             }
         }
-        Unit
     }
 
     init {
@@ -126,7 +124,6 @@ object KuudraUtils {
                 tierRegex.find(text)?.groupValues?.get(1)?.let { kuudraTier = it.toInt() }
             }
         }
-        Unit
     }
 
     @EventHandler

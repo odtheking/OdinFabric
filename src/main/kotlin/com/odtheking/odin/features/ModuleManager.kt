@@ -8,10 +8,7 @@ import com.odtheking.odin.clickgui.settings.impl.KeybindSetting
 import com.odtheking.odin.events.InputEvent
 import com.odtheking.odin.features.impl.dungeon.*
 import com.odtheking.odin.features.impl.dungeon.puzzlesolvers.PuzzleSolvers
-import com.odtheking.odin.features.impl.floor7.TerminalSimulator
-import com.odtheking.odin.features.impl.floor7.TerminalSolver
-import com.odtheking.odin.features.impl.floor7.TerminalSounds
-import com.odtheking.odin.features.impl.floor7.TerminalTimes
+import com.odtheking.odin.features.impl.floor7.*
 import com.odtheking.odin.features.impl.nether.*
 import com.odtheking.odin.features.impl.render.*
 import com.odtheking.odin.features.impl.skyblock.*
@@ -40,7 +37,7 @@ object ModuleManager {
         PuzzleSolvers, BlessingDisplay, LeapMenu, SecretClicked, MapInfo, Mimic, WarpCooldown,
 
         // floor 7
-        TerminalSimulator, TerminalSolver, TerminalTimes, TerminalSounds,
+        TerminalSimulator, TerminalSolver, TerminalTimes, TerminalSounds, TickTimers,
 
         // render
         ClickGUIModule, Camera, Etherwarp, PlayerSize, PerformanceHUD, RenderOptimizer,
