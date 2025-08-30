@@ -36,7 +36,7 @@ object ModuleManager {
 
     val modules: ArrayList<Module> = arrayListOf(
         // dungeon
-        PuzzleSolvers, BlessingDisplay, LeapMenu, SecretClicked, MapInfo, Mimic,
+        PuzzleSolvers, BlessingDisplay, LeapMenu, SecretClicked, MapInfo, Mimic, WarpCooldown,
 
         // floor 7
         TerminalSimulator, TerminalSolver, TerminalTimes,
@@ -63,6 +63,7 @@ object ModuleManager {
         AutoSprint,
         CommandKeybinds,
         SlotBinds,
+        Splits,
 
         // nether
         SupplyHelper,

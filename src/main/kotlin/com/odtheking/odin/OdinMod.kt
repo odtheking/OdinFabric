@@ -11,6 +11,7 @@ import com.odtheking.odin.utils.sendDataToServer
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.odtheking.odin.utils.skyblock.SkyblockPlayer
+import com.odtheking.odin.utils.skyblock.SplitsManager
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonListener
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils
@@ -59,7 +60,7 @@ object OdinMod : ModInitializer {
             this, LocationUtils, TickTasks, KuudraUtils,
             SkyblockPlayer, MobCaches, ServerUtils,
             EventDispatcher, ModuleManager, DungeonListener,
-            ScanUtils, DungeonUtils
+            ScanUtils, DungeonUtils, SplitsManager
         ).forEach { EVENT_BUS.subscribe(it) }
 
         Config.load()

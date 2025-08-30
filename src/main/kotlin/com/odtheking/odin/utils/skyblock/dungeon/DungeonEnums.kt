@@ -103,7 +103,6 @@ enum class Blessing(
  *
  * @property floorNumber The numerical representation of the floor, where E represents the entrance floor.
  * @property isMM Indicates whether the floor is a master mode floor (M1 to M7).
- * @property personalBest The personal best time for the floor.
  * @property secretPercentage The percentage of secrets required.
  */
 enum class Floor(val secretPercentage: Float = 1f) {
