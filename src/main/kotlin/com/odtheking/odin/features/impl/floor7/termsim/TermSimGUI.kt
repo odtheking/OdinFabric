@@ -4,6 +4,7 @@ import com.odtheking.odin.OdinMod.EVENT_BUS
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.events.TerminalEvent
+import com.odtheking.odin.features.impl.floor7.TerminalSounds
 import com.odtheking.odin.utils.handlers.LimitedTickTask
 import meteordevelopment.orbit.EventHandler
 import meteordevelopment.orbit.EventPriority
@@ -121,7 +122,7 @@ open class TermSimGUI(
     }
 
     protected fun playTermSimSound() {
-        /*if (!TerminalSounds.enabled || !clickSounds)*/ mc.player?.playSound(
+        if (!TerminalSounds.enabled || !TerminalSounds.clickSounds) mc.player?.playSound(
             SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP,
             1f, 1f
         )

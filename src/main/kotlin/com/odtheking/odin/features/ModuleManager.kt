@@ -10,6 +10,7 @@ import com.odtheking.odin.features.impl.dungeon.*
 import com.odtheking.odin.features.impl.dungeon.puzzlesolvers.PuzzleSolvers
 import com.odtheking.odin.features.impl.floor7.TerminalSimulator
 import com.odtheking.odin.features.impl.floor7.TerminalSolver
+import com.odtheking.odin.features.impl.floor7.TerminalSounds
 import com.odtheking.odin.features.impl.floor7.TerminalTimes
 import com.odtheking.odin.features.impl.nether.*
 import com.odtheking.odin.features.impl.render.*
@@ -39,41 +40,18 @@ object ModuleManager {
         PuzzleSolvers, BlessingDisplay, LeapMenu, SecretClicked, MapInfo, Mimic, WarpCooldown,
 
         // floor 7
-        TerminalSimulator, TerminalSolver, TerminalTimes,
+        TerminalSimulator, TerminalSolver, TerminalTimes, TerminalSounds,
 
         // render
-        ClickGUIModule,
-        Camera,
-        Etherwarp,
-        PlayerSize,
-        PerformanceHUD,
-        RenderOptimizer,
-        PlayerDisplay,
-        Waypoints,
-        HidePlayers,
-        CustomHighlight,
+        ClickGUIModule, Camera, Etherwarp, PlayerSize, PerformanceHUD, RenderOptimizer,
+        PlayerDisplay, Waypoints, HidePlayers, CustomHighlight,
 
         //skyblock
-        ChatCommands,
-        NoCursorReset,
-        Ragnarock,
-        SpringBoots,
-        WardrobeKeybinds,
-        PetKeybinds,
-        AutoSprint,
-        CommandKeybinds,
-        SlotBinds,
-        Splits,
+        ChatCommands, NoCursorReset, Ragnarock, SpringBoots, WardrobeKeybinds, PetKeybinds, AutoSprint,
+        CommandKeybinds, SlotBinds, Splits,
 
         // nether
-        SupplyHelper,
-        BuildHelper,
-        RemovePerks,
-        NoPre,
-        PearlWaypoints,
-        FreshTools,
-        KuudraInfo,
-        Misc
+        SupplyHelper, BuildHelper, RemovePerks, NoPre, PearlWaypoints, FreshTools, KuudraInfo, Misc
     )
 
     init {

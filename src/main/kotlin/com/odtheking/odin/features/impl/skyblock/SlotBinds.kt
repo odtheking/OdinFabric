@@ -41,13 +41,7 @@ object SlotBinds : Module(
             else -> return
         }
 
-        mc.interactionManager?.clickSlot(
-            event.screen.screenHandler.syncId,
-            from,
-            to % 36,
-            SlotActionType.SWAP,
-            mc.player
-        )
+        mc.interactionManager?.clickSlot(event.screen.screenHandler.syncId, from, to % 36, SlotActionType.SWAP, mc.player)
         event.cancel()
     }
 
