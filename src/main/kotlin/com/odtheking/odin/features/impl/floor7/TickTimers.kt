@@ -8,6 +8,7 @@ import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.render.drawStringWidth
+import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.toFixed
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.network.packet.s2c.common.CommonPingS2CPacket
@@ -57,7 +58,7 @@ object TickTimers : Module(
 
     @EventHandler
     fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
-       // if (!DungeonUtils.inBoss) return@with
+        if (!DungeonUtils.inBoss) return@with
         if (this is CommonPingS2CPacket) {
             if (goldorTickTime == 0 && goldorStartTime <= 0 && goldorHud.enabled) goldorTickTime = 60
             if (goldorStartTime >= 0 && goldorHud.enabled) goldorStartTime--

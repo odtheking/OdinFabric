@@ -19,7 +19,6 @@ object ServerUtils {
     var averagePing: Int = 0
         private set
 
-
     @EventHandler
     fun onPacketReceive(event: PacketEvent.Receive) = with(event.packet) {
         when (this) {
