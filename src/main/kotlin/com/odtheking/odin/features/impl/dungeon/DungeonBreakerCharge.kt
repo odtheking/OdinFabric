@@ -27,14 +27,12 @@ object DungeonBreakerCharge : Module(
     @EventHandler
     fun onPacketReceive(event: PacketEvent.Receive) {
         if (event.packet !is ScreenHandlerSlotUpdateS2CPacket || !DungeonUtils.inDungeons) return
-        mc.player?.inventory
-            ?.find { it.itemId.equals("DUNGEONBREAKER", true) }
-            ?.lore?.firstOrNull { regex.containsMatchIn(it.string.noControlCodes) }
-            ?.let { lore ->
-                regex.find(lore.string.noControlCodes)?.let { match ->
-                    charges = match.groupValues[1].toInt()
-                    max = match.groupValues[2].toInt()
-                }
-            }
+        val stack = event.packet.stack ?: return
+        if (!stack.itemId.equals("DUNGEONBREAKER", true)) return
+
+        stack.lore.firstNotNullOfOrNull { regex.find(it.string.noControlCodes) }?.let { match ->
+            charges = match.groupValues[1].toIntOrNull() ?: 0
+            max = match.groupValues[2].toIntOrNull() ?: 0
+        }
     }
 }
