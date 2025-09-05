@@ -25,7 +25,7 @@ object DungeonBreakerCharge : Module(
     }
 
     @EventHandler
-    fun handleTabListPacket(event: PacketEvent.Receive) {
+    fun onPacketReceive(event: PacketEvent.Receive) {
         if (event.packet !is ScreenHandlerSlotUpdateS2CPacket || !DungeonUtils.inDungeons) return
         mc.player?.inventory
             ?.find { it.itemId.equals("DUNGEONBREAKER", true) }
