@@ -21,7 +21,7 @@ open class TerminalHandler(val type: TerminalTypes) {
     var isClicked = false
 
     @EventHandler(priority = EventPriority.LOW)
-    fun onPacketReceived(event: PacketEvent.Receive) = with (event.packet) {
+    fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
         when (this) {
             is ScreenHandlerSlotUpdateS2CPacket -> {
                 if (slot !in 0 until type.windowSize) return@with

@@ -89,7 +89,7 @@ open class TermSimGUI(
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    fun onPacketReceived(event: PacketEvent.Receive) {
+    fun onPacketReceive(event: PacketEvent.Receive) {
 //        val packet = event.packet as? ScreenHandlerSlotUpdateS2CPacket ?: return
 //        if (OdinMain.mc.currentScreen !== this || packet.func_149175_c() == -2 || event.packet.func_149173_d() !in 0 until size) return
 //        packet.func_149174_e()?.let { mc.thePlayer?.inventoryContainer?.putStackInSlot(packet.func_149173_d(), it) }
