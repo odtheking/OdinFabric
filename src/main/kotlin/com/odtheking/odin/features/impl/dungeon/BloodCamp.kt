@@ -5,18 +5,20 @@ import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.ColorSetting
 import com.odtheking.odin.clickgui.settings.impl.DropdownSetting
 import com.odtheking.odin.clickgui.settings.impl.NumberSetting
-import com.odtheking.odin.events.PacketEvent
-import com.odtheking.odin.events.RenderEvent
-import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.*
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.handlers.LimitedTickTask
 import com.odtheking.odin.utils.render.*
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import meteordevelopment.orbit.EventHandler
+import net.minecraft.entity.EquipmentSlot
 import net.minecraft.entity.decoration.ArmorStandEntity
+import net.minecraft.entity.mob.ZombieEntity
+import net.minecraft.item.Items
 import net.minecraft.network.packet.s2c.common.CommonPingS2CPacket
-import net.minecraft.network.packet.s2c.play.EntityPositionS2CPacket
+import net.minecraft.network.packet.s2c.play.EntityS2CPacket
+import net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 import net.minecraft.text.Text
 import net.minecraft.util.math.Box
@@ -24,6 +26,7 @@ import net.minecraft.util.math.Vec3d
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.ceil
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 object BloodCamp : Module(
     name = "Blood Camp",
@@ -50,7 +53,7 @@ object BloodCamp : Module(
             drawString("2.15s", 1, 12, Colors.MINECRAFT_GREEN.rgba)
         } else {
             renderDataMap.entries.sortedBy { it.value.time }.fold(0) { acc, data ->
-                val time = data.takeUnless { it.key.isDead }?.value?.time ?: return@fold acc
+                val time = data.takeUnless { !it.key.isAlive }?.value?.time ?: return@fold acc
                 val color = when {
                     time > 1.5f -> Colors.MINECRAFT_GREEN
                     time in 0.5f..1.5f -> Colors.MINECRAFT_GOLD
@@ -77,28 +80,24 @@ object BloodCamp : Module(
     private val pingOffset by BooleanSetting("Ping Offset", true, desc = "Offsets the mob box by your ping.").withDependency { advanced && bloodAssist && assistDropdown }
     private val manualOffset by NumberSetting("Mob Box Offset", 0f, 0.0, 300, 1, desc = "Manually offsets the mob box.").withDependency { advanced && bloodAssist && assistDropdown && !pingOffset}
     private val watcherBar by BooleanSetting("Watcher Bar", true, desc = "Shows the watcher's health.")
-    private val watcherHighlight by BooleanSetting("Watcher Highlight", false, desc = "Highlights the watcher.")
 
-    private val regexOne = Regex("^\\[BOSS] The Watcher: Let's see how you can handle this.$")
     private val regexTwo = Regex("^\\[BOSS] The Watcher: Things feel a little more roomy now, eh\\?$")
-    private val regexThree = Regex("^\\[BOSS] The Watcher: Let's see how you can handle this\\.$")
+    private val regexOne = Regex("^\\[BOSS] The Watcher: Let's see how you can handle this\\.$")
+    private var currentWatcherEntity: ZombieEntity? = null
 
     @EventHandler
-    fun onPacketReceive(event: PacketEvent.Receive) {
-       // modMessage(event.packet)
-        when (event.packet) {
-            is EntityPositionS2CPacket -> {
-                modMessage("AAA")
+    fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
+        when (this) {
+            is EntityS2CPacket.RotateAndMoveRelative -> {
                 if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return
 
-                val entity = mc.world?.getEntityById(event.packet.entityId) as? ArmorStandEntity ?: return
-                modMessage(entity.name)
-               // if (currentWatcherEntity?.let { it.getDistanceToEntity(entity) <= 20 } != true || entity.getEquipmentInSlot(4)?.item != Items.skull || getSkullValue(entity) !in allowedMobSkulls) return@onPacket
+                val entity = getEntity(mc.world) as? ArmorStandEntity ?: return
+                if (currentWatcherEntity?.let { it.distanceTo(entity) <= 20 } != true || entity.getEquippedStack(EquipmentSlot.HEAD).item != Items.PLAYER_HEAD || entity.getEquippedStack(EquipmentSlot.HEAD)?.texture !in allowedMobSkulls) return
 
                 val packetVector = Vec3d(
-                    (entity.lastX + entity.x) / 32.0,
-                    (entity.lastY + entity.y) / 32.0,
-                    (entity.lastZ + entity.z) / 32.0,
+                    entity.x + (deltaX / 4096.0),
+                    entity.y + (deltaY / 4096.0),
+                    entity.z + (deltaZ / 4096.0),
                 )
 
                 if (!entityDataMap.containsKey(entity)) entityDataMap[entity] = EntityData(startVector = packetVector, started = currentTickTime, firstSpawns = firstSpawns)
@@ -121,7 +120,7 @@ object BloodCamp : Module(
 
                 if (!renderDataMap.containsKey(entity)) renderDataMap[entity] = RenderEData(packetVector, endpoint, currentTickTime, speedVectors)
                 else renderDataMap[entity]?.let {
-                    it.lastEndVector = it.endVector//.clone()
+                    it.lastEndVector = it.endVector
                     it.endVecUpdated = currentTickTime
                     it.speedVectors = speedVectors
                     it.currVector = packetVector
@@ -129,12 +128,10 @@ object BloodCamp : Module(
                 }
             }
             is GameMessageS2CPacket -> {
-                if (event.packet.overlay) return
-                if (regexOne.matches(event.packet.content.string)) {
+                if (overlay) return
+                if (regexTwo.matches(content.string)) startTime = System.currentTimeMillis() to normalTickTime
+                else if (regexOne.matches(content.string)) {
                     firstSpawns = false
-                } else if (regexTwo.matches(event.packet.content.string)) {
-                    startTime = System.currentTimeMillis() to normalTickTime
-                } else if (regexThree.matches(event.packet.content.string)) {
                     val (startTime, startTick) = startTime ?: return
                     val moveTicks = ((normalTickTime - startTick) * 0.05f + 0.1f)
 
@@ -162,12 +159,18 @@ object BloodCamp : Module(
                     }
                 }
             }
+            is EntityTrackerUpdateS2CPacket -> {
+                if (!bloodAssist || currentWatcherEntity != null) return
+                currentWatcherEntity = (mc.world?.getEntityById(id) as? ZombieEntity)?.takeIf { it.getEquippedStack(EquipmentSlot.HEAD)?.texture in watcherSkulls } ?: return
+                devMessage("Watcher found at ${currentWatcherEntity?.pos}")
+            }
             is CommonPingS2CPacket -> currentTickTime += 50
         }
     }
 
     @EventHandler
     fun onWorldLoad(event: WorldLoadEvent) {
+        currentWatcherEntity = null
         entityDataMap.clear()
         renderDataMap.clear()
         currentTickTime = 0
@@ -176,12 +179,12 @@ object BloodCamp : Module(
         startTime = null
     }
 
-//    @SubscribeEvent
-//    fun onRenderBossHealth(event: RenderGameOverlayEvent.Pre) {
-//        if (!watcherBar || !inDungeons || inBoss || event.type != RenderGameOverlayEvent.ElementType.BOSSHEALTH || BossStatus.bossName.noControlCodes != "The Watcher") return
-//        val amount = 12 + (DungeonUtils.floor?.floorNumber ?: 0)
-//        BossStatus.bossName += BossStatus.healthScale.takeIf { it >= 0.05 }?.let { " ${(amount * it).roundToInt()}/$amount" } ?: ""
-//    }
+    @EventHandler
+    fun onRenderBossHealth(event: RenderBossBarEvent) {
+        if (!watcherBar || !DungeonUtils.inDungeons || DungeonUtils.inBoss || event.bossBar.name.string.noControlCodes != "The Watcher") return
+        val amount = 12 + (DungeonUtils.floor?.floorNumber ?: 0)
+        event.bossBar.name = Text.of(event.bossBar.percent.takeIf { it >= 0.05 }?.let { "${event.bossBar.name.string} ${(amount * it).roundToInt()}/$amount" } ?: return)
+    }
 
     private var startTime: Pair<Long, Long>? = null
     private var finalTime: Long? = null
@@ -200,17 +203,10 @@ object BloodCamp : Module(
 
     private var firstSpawns = true
 
-//    @SubscribeEvent
-//    fun onPostMetadata(event: PostEntityMetadata) {
-//        if ((!bloodAssist && !watcherHighlight) || currentWatcherEntity != null) return
-//        currentWatcherEntity = (mc.theWorld?.getEntityByID(event.packet.entityId) as? EntityZombie)?.takeIf { getSkullValue(it) in watcherSkulls } ?: return
-//        devMessage("Watcher found at ${currentWatcherEntity?.positionVector}")
-//    }
-//
-//    @EventHandler
-//    fun onEntityLeaveWorld(event: EntityLeaveWorldEvent) {
-//        if (event.entity == currentWatcherEntity) currentWatcherEntity = null
-//    }
+    @EventHandler
+    fun onEntityLeaveWorld(event: EntityLeaveWorldEvent) {
+        if (event.entity == currentWatcherEntity) currentWatcherEntity = null
+    }
 
     @EventHandler
     fun onRenderWorld(event: RenderEvent.Last) {
@@ -219,7 +215,7 @@ object BloodCamp : Module(
         if (!bloodAssist) return
 
         renderDataMap.forEach { (entity, renderData) ->
-            val (_, started, firstSpawn) = entityDataMap[entity]?.takeUnless { entity.isDead } ?: return@forEach
+            val (_, started, firstSpawn) = entityDataMap[entity]?.takeUnless { !entity.isAlive } ?: return@forEach
 
             val (currVector, endVector, endVecUpdated, speedVectors) = renderData
             val endPoint = calcEndVector(endVector, renderData.lastEndVector, min(currentTickTime - endVecUpdated, 100) / 100f)
@@ -250,12 +246,12 @@ object BloodCamp : Module(
 
             val timeDisplay = ((time.toFloat() - offset) / 1000).also { renderData.time = it }
             val colorTime = when {
-                timeDisplay > 1.5 -> Colors.MINECRAFT_GREEN
-                timeDisplay in 0.5..1.5 -> Colors.MINECRAFT_GOLD
-                timeDisplay in 0.0..0.5 -> Colors.MINECRAFT_RED
-                else -> Colors.MINECRAFT_BLUE
+                timeDisplay > 1.5 -> 'a'
+                timeDisplay in 0.5..1.5 -> '6'
+                timeDisplay in 0.0..0.5 -> 'c'
+                else -> 'b'
             }
-            if (drawTime)  event.context.drawText(Text.of("${timeDisplay.toFixed()}s").asOrderedText(), endPoint.addVec(y = 2.0), scale = 1f, depth = true)
+            if (drawTime)  event.context.drawText(Text.of("§$colorTime${timeDisplay.toFixed()}s").asOrderedText(), endPoint.addVec(y = 2.0), scale = 1f, depth = true)
         }
     }
 
