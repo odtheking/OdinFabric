@@ -31,7 +31,8 @@ object Mimic : Module(
     private val princeRegex = Regex("^A Prince falls\\. \\+1 Bonus Score$")
 
     @EventHandler
-    fun onPacketReceived(event: PacketEvent.Receive) = with (event.packet) {
+    fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
+        if (this is GameMessageS2CPacket && !overlay && DungeonUtils.inDungeons && content.string.matches(princeRegex)) princeKilled()
         if (this !is EntityStatusS2CPacket || status != EntityStatuses.PLAY_DEATH_SOUND_OR_ADD_PROJECTILE_HIT_PARTICLES ||
             !DungeonUtils.inDungeons || DungeonUtils.inBoss || DungeonUtils.mimicKilled) return@with
         val entity = getEntity(mc.world) ?: return@with
@@ -48,11 +49,5 @@ object Mimic : Module(
         if (DungeonUtils.princeKilled || DungeonUtils.inBoss) return
         if (princeMessageToggle) sendCommand("pc $princeMessage")
         DungeonListener.dungeonStats.princeKilled = true
-    }
-
-    @EventHandler
-    fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
-        if (this !is GameMessageS2CPacket || overlay || !DungeonUtils.inDungeons) return
-        if (content.string.matches(princeRegex)) princeKilled()
     }
 }

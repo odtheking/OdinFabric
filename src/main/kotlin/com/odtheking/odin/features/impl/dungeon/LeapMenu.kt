@@ -130,7 +130,7 @@ object LeapMenu : Module(
     }
 
     @EventHandler
-    fun onPacketReceived(event: PacketEvent.Receive) {
+    fun onPacketReceive(event: PacketEvent.Receive) {
         if (event.packet is GameMessageS2CPacket && !event.packet.overlay && leapAnnounce)
             leapedRegex.find(event.packet.content.string)?.groupValues?.let { sendCommand("pc Leaped to ${it[1]}!") }
     }

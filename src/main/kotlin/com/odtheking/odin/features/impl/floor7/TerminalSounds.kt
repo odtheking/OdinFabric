@@ -39,12 +39,6 @@ object TerminalSounds : Module(
     private var lastPlayed = System.currentTimeMillis()
 
     @EventHandler
-    fun onPacketReceived(event: PacketEvent.Receive) = with(event.packet) {
-        if (this is PlaySoundS2CPacket && sound.value() == SoundEvents.BLOCK_NOTE_BLOCK_PLING.value() && volume == 8f && pitch == 4.047619f && shouldReplaceSounds)
-            event.cancel()
-    }
-
-    @EventHandler
     fun onTermComplete(event: TerminalEvent.Solved) {
         if (shouldReplaceSounds && (!completeSounds && !clickSounds)) mc.player?.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), 8f, 4f)
         else if (shouldReplaceSounds && completeSounds && !clickSounds) playCompleteSound()
@@ -63,6 +57,8 @@ object TerminalSounds : Module(
 
     @EventHandler
     fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
+        if (this is PlaySoundS2CPacket && sound.value() == SoundEvents.BLOCK_NOTE_BLOCK_PLING.value() && volume == 8f && pitch == 4.047619f && shouldReplaceSounds)
+            event.cancel()
         if (this !is GameMessageS2CPacket || overlay || !DungeonUtils.inDungeons || !shouldReplaceSounds) return
         when {
             content.string.matches(gateRegex) -> playSoundAtPlayer(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value())

@@ -10,6 +10,7 @@ import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.events.TerminalEvent
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.features.impl.floor7.terminalhandler.*
+import com.odtheking.odin.features.impl.floor7.termsim.TermSimGUI
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.Color.Companion.darker
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
@@ -76,10 +77,10 @@ object TerminalSolver : Module(
     private var lastClickTime = 0L
 
     @EventHandler
-    fun onPacketReceived(event: PacketEvent.Receive) = with (event.packet) {
+    fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
         when (this) {
             is OpenScreenS2CPacket -> {
-               // currentTerm?.let { if (!it.isClicked && mc.currentScreen !is TermSimGUI) leftTerm() }
+                currentTerm?.let { if (!it.isClicked && mc.currentScreen !is TermSimGUI) leftTerm() }
                 val windowName = name?.string ?: return
                 val newTermType = TerminalTypes.entries.find { terminal -> windowName.startsWith(terminal.windowName) }?.takeIf { it != currentTerm?.type } ?: return
 

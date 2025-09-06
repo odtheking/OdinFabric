@@ -34,6 +34,10 @@ inline val ItemStack.loreString: List<String>
     get() =
         lore.map { it.string }
 
+val ItemStack.texture: String?
+    get() =
+        get(DataComponentTypes.PROFILE)?.gameProfile()?.properties?.get("textures")?.firstOrNull()?.value
+
 enum class ItemRarity(
     val loreName: String,
     val colorCode: String,
