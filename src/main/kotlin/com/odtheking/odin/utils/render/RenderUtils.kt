@@ -176,3 +176,43 @@ fun WorldRenderContext.drawCustomBeacon(
         false
     )
 }
+
+fun WorldRenderContext.drawCylinder(
+    center: Vec3d,
+    radius: Float,
+    height: Float,
+    color: Color,
+    segments: Int = 32,
+    thickness: Float = 5f,
+    depth: Boolean = false
+) {
+    val matrix = matrixStack() ?: return
+    val bufferSource = consumers() as? VertexConsumerProvider.Immediate ?: return
+    val layer = if (depth) CustomRenderLayer.LINE_LIST else CustomRenderLayer.LINE_LIST_ESP
+    val camera = camera()?.pos ?: return
+
+    matrix.push()
+    matrix.translate(center.x - camera.x, center.y - camera.y, center.z - camera.z)
+    RenderSystem.lineWidth((thickness / camera.squaredDistanceTo(center).pow(0.15)).toFloat())
+
+    val angleStep = 2.0 * Math.PI / segments
+    val buffer = bufferSource.getBuffer(layer)
+
+    for (i in 0 until segments) {
+        val angle1 = i * angleStep
+        val angle2 = (i + 1) * angleStep
+
+        val x1 = (radius * kotlin.math.cos(angle1)).toFloat()
+        val z1 = (radius * kotlin.math.sin(angle1)).toFloat()
+        val x2 = (radius * kotlin.math.cos(angle2)).toFloat()
+        val z2 = (radius * kotlin.math.sin(angle2)).toFloat()
+
+        VertexRendering.drawVector(matrix, buffer, Vector3f(x1, height, z1), Vec3d((x2 - x1).toDouble(), 0.0, (z2 - z1).toDouble()), color.rgba)
+        VertexRendering.drawVector(matrix, buffer, Vector3f(x1, 0f, z1), Vec3d((x2 - x1).toDouble(), 0.0, (z2 - z1).toDouble()), color.rgba)
+        VertexRendering.drawVector(matrix, buffer, Vector3f(x1, 0f, z1), Vec3d(0.0, height.toDouble(), 0.0), color.rgba)
+    }
+
+
+    matrix.pop()
+    bufferSource.draw()
+}
