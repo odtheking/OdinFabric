@@ -20,7 +20,7 @@ object WarpCooldown : Module(
     private val kickText by StringSetting("Kick Text", "Kicked!", desc = "The text sent in party chat when you get kicked from skyblock.").withDependency { announceKick }
     private val hud by HUD("Warp Timer Hud", "Displays the warp timer in the HUD.") {
         if (warpTimer - System.currentTimeMillis() <= 0 && !it) return@HUD 0f to 0f
-        drawStringWidth("§eWarp: §a${if (it) "30" else (warpTimer - System.currentTimeMillis() / 1000f).toFixed()}s", 1, 1, Colors.WHITE) + 2f to 10f
+        drawStringWidth("§eWarp: §a${if (it) "30" else ((warpTimer - System.currentTimeMillis()) / 1000f).toFixed()}s", 1, 1, Colors.WHITE) + 2f to 10f
     }
 
     private val enterRegex = Regex("^-*\\n\\[[^]]+] (\\w+) entered (?:MM )?\\w+ Catacombs, Floor (\\w+)!\\n-*$")
