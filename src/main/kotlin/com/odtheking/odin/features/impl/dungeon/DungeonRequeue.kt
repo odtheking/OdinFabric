@@ -6,7 +6,6 @@ import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.handlers.LimitedTickTask
-import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.noControlCodes
 import com.odtheking.odin.utils.sendCommand
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
@@ -34,7 +33,7 @@ object DungeonRequeue : Module(
     @EventHandler
     fun onPacketReceive(event: PacketEvent.Receive) = with(event.packet) {
         if (this !is GameMessageS2CPacket || overlay) return@with
-        modMessage(content.string)
+
         when {
             content.string.noControlCodes.matches(extraStatsRegex) -> {
                 if (disableRequeue) {

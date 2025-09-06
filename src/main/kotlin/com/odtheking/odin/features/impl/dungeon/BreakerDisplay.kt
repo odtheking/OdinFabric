@@ -19,18 +19,17 @@ object BreakerDisplay : Module(
     private var charges = 0
     private var max = 0
 
-    private val hud by HUD("Display", "Shows the amount of charges left in your Dungeon Breaker.") {
-        if (it || (max != 0 && DungeonUtils.inDungeons)) drawStringWidth("§cCharges: §e${if (it) 17 else charges}§7/§e${if (it) 20 else max}§c⸕", 1, 1, Colors.WHITE, false) + 2f to 10f
+    private val hud by HUD("Breaker Display", "Shows the amount of charges left in your Dungeon Breaker.") {
+        if (it || (max != 0 && DungeonUtils.inDungeons)) drawStringWidth("§cCharges: §e${if (it) 17 else charges}§7/§e${if (it) 20 else max}§c⸕", 1, 1, Colors.WHITE) + 2f to 10f
         else 0f to 0f
     }
 
     @EventHandler
     fun onPacketReceive(event: PacketEvent.Receive) {
         if (event.packet !is ScreenHandlerSlotUpdateS2CPacket || !DungeonUtils.inDungeons) return
-        val stack = event.packet.stack ?: return
-        if (stack.itemId != "DUNGEONBREAKER") return
+        if (event.packet.stack?.itemId != "DUNGEONBREAKER") return
 
-        stack.lore.firstNotNullOfOrNull { chargesRegex.find(it.string.noControlCodes) }?.let { match ->
+        event.packet.stack?.lore?.firstNotNullOfOrNull { chargesRegex.find(it.string.noControlCodes) }?.let { match ->
             charges = match.groupValues[1].toIntOrNull() ?: 0
             max = match.groupValues[2].toIntOrNull() ?: 0
         }
