@@ -11,11 +11,11 @@ import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket
 
-object DungeonBreakerCharge : Module(
-    name = "Stonk Charge Display",
+object BreakerDisplay : Module(
+    name = "Breaker Display",
     description = "Displays the amount of charges left in your Dungeon Breaker"
 ) {
-    private val regex = "Charges: (\\d+)/(\\d+)⸕".toRegex()
+    private val chargesRegex = Regex("Charges: (\\d+)/(\\d+)⸕")
     private var charges = 0
     private var max = 0
 
@@ -28,9 +28,9 @@ object DungeonBreakerCharge : Module(
     fun onPacketReceive(event: PacketEvent.Receive) {
         if (event.packet !is ScreenHandlerSlotUpdateS2CPacket || !DungeonUtils.inDungeons) return
         val stack = event.packet.stack ?: return
-        if (!stack.itemId.equals("DUNGEONBREAKER", true)) return
+        if (stack.itemId != "DUNGEONBREAKER") return
 
-        stack.lore.firstNotNullOfOrNull { regex.find(it.string.noControlCodes) }?.let { match ->
+        stack.lore.firstNotNullOfOrNull { chargesRegex.find(it.string.noControlCodes) }?.let { match ->
             charges = match.groupValues[1].toIntOrNull() ?: 0
             max = match.groupValues[2].toIntOrNull() ?: 0
         }
