@@ -7,8 +7,6 @@
     "defaultRequire": 1
   },
   "client": [
-    "accessors.DrawContextAccessor",
-    "accessors.GlResourceManagerAccessor",
     "accessors.HandledScreenAccessor",
     "accessors.KeyBindingAccessor",
     "mixins.BossBarHudMixin",

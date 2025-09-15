@@ -1,6 +1,7 @@
 package com.odtheking.mixin.mixins;
 
 import com.odtheking.odin.events.PacketEvent;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketCallbacks;
@@ -19,8 +20,8 @@ public abstract class ClientConnectionMixin {
         if (new PacketEvent.Receive(packet).postAndCatch()) ci.cancel();
     }
 
-    @Inject(method = "sendImmediately(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/PacketCallbacks;Z)V", at = @At("HEAD"))
-    private void sendImmediately(Packet<?> packet, @Nullable PacketCallbacks callbacks, boolean flush, CallbackInfo ci) {
+    @Inject(method = "sendImmediately", at = @At("HEAD"))
+    private void sendImmediately(Packet<?> packet, ChannelFutureListener channelFutureListener, boolean flush, CallbackInfo ci) {
         new PacketEvent.Send(packet).postAndCatch();
     }
 }

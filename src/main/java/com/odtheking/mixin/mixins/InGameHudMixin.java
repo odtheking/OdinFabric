@@ -28,15 +28,5 @@ public class InGameHudMixin {
     private void cancelFoodBar(DrawContext context, PlayerEntity player, int top, int right, CallbackInfo ci) {
         if (PlayerDisplay.shouldCancelOverlay(OverlayType.FOOD)) ci.cancel();
     }
-
-    @Inject(method = "renderExperienceBar", at = @At("HEAD"), cancellable = true)
-    private void cancelXPBar(DrawContext context, int x, CallbackInfo ci) {
-        if (PlayerDisplay.shouldCancelOverlay(OverlayType.XP)) ci.cancel();
-    }
-
-    @Inject(method = "renderExperienceLevel", at = @At("HEAD"), cancellable = true)
-    private void cancelXPLevel(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
-        if (PlayerDisplay.shouldCancelOverlay(OverlayType.XP)) ci.cancel();
-    }
 }
 

@@ -101,9 +101,9 @@ abstract class Module(
         name: String,
         desc: String,
         toggleable: Boolean = true,
-        x: Float = 10f,
-        y: Float = 10f,
-        scale: Float = 2f,
+        x: Int = 10,
+        y: Int = 10,
+        scale: Int = 2,
         block: DrawContext.(example: Boolean) -> Pair<Number, Number>
     ): HUDSetting = HUDSetting(name, x, y, scale, toggleable, desc, this, block)
 

@@ -2,7 +2,6 @@ package com.odtheking.odin.utils.ui.rendering
 
 import com.mojang.blaze3d.opengl.GlStateManager
 import com.mojang.blaze3d.systems.RenderSystem
-import com.odtheking.mixin.accessors.GlResourceManagerAccessor
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.utils.Color.Companion.alpha
 import com.odtheking.odin.utils.Color.Companion.blue
@@ -53,9 +52,6 @@ object NVGRenderer {
 
     fun beginFrame(width: Float, height: Float) {
         if (drawing) throw IllegalStateException("[NVGRenderer] Already drawing, but called beginFrame")
-
-        previousProgram =
-            ((RenderSystem.getDevice() as GlBackend).createCommandEncoder() as GlResourceManagerAccessor).currentProgram().glRef
 
         val framebuffer = mc.framebuffer
         val glFramebuffer = (framebuffer.colorAttachment as GlTexture).getOrCreateFramebuffer(

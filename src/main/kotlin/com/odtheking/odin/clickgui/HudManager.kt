@@ -25,8 +25,8 @@ object HudManager : Screen(Text.of("HUD Manager")) {
         super.render(context, mouseX, mouseY, deltaTicks)
 
         dragging?.let {
-            it.x = floor((odinMouseX + deltaX).coerceIn(0f, mc.window.width - (it.width * it.scale)))
-            it.y = floor((odinMouseY + deltaY).coerceIn(0f, mc.window.height - (it.height * it.scale)))
+            it.x = floor((odinMouseX + deltaX).coerceIn(0f, (mc.window.width - (it.width * it.scale)).toFloat())).toInt()
+            it.y = floor((odinMouseY + deltaY).coerceIn(0f, (mc.window.height - (it.height * it.scale)).toFloat())).toInt()
         }
 
         context?.matrices?.pushMatrix()
@@ -39,7 +39,7 @@ object HudManager : Screen(Text.of("HUD Manager")) {
             context?.matrices?.pushMatrix()
             context?.matrices?.translate(
                 (hud.value.x + hud.value.width * hud.value.scale + 10.0).toFloat(),
-                hud.value.y,
+                hud.value.y.toFloat(),
             )
             context?.matrices?.scale(2f, 2f)
             context?.drawTextWithShadow(mc.textRenderer, Text.of(hud.name), 0, 0, Colors.WHITE.rgba)
@@ -58,7 +58,7 @@ object HudManager : Screen(Text.of("HUD Manager")) {
         val actualAmount = verticalAmount.sign.toFloat() * 0.2f
         for (hud in hudSettingsCache) {
             if (hud.isEnabled && hud.value.isHovered()) {
-                hud.value.scale = (hud.value.scale + actualAmount).coerceIn(1f, 10f)
+                hud.value.scale = (hud.value.scale + actualAmount).coerceIn(1f, 10f).toInt()
                 return true
             }
         }
@@ -88,7 +88,7 @@ object HudManager : Screen(Text.of("HUD Manager")) {
             GLFW.GLFW_KEY_EQUAL -> {
                 for (hud in hudSettingsCache) {
                     if (hud.isEnabled && hud.value.isHovered()) {
-                        hud.value.scale = (hud.value.scale + 0.1f).coerceIn(1f, 10f)
+                        hud.value.scale = (hud.value.scale + 0.1f).coerceIn(1f, 10f).toInt()
                         return true
                     }
                 }
@@ -97,7 +97,7 @@ object HudManager : Screen(Text.of("HUD Manager")) {
             GLFW.GLFW_KEY_MINUS -> {
                 for (hud in hudSettingsCache) {
                     if (hud.isEnabled && hud.value.isHovered()) {
-                        hud.value.scale = (hud.value.scale - 0.1f).coerceIn(1f, 10f)
+                        hud.value.scale = (hud.value.scale - 0.1f).coerceIn(1f, 10f).toInt()
                         return true
                     }
                 }
@@ -106,7 +106,7 @@ object HudManager : Screen(Text.of("HUD Manager")) {
             GLFW.GLFW_KEY_RIGHT -> {
                 for (hud in hudSettingsCache) {
                     if (hud.isEnabled && hud.value.isHovered()) {
-                        hud.value.x += 10f
+                        hud.value.x += 10
                         return true
                     }
                 }
@@ -115,7 +115,7 @@ object HudManager : Screen(Text.of("HUD Manager")) {
             GLFW.GLFW_KEY_LEFT -> {
                 for (hud in hudSettingsCache) {
                     if (hud.isEnabled && hud.value.isHovered()) {
-                        hud.value.x -= 10f
+                        hud.value.x -= 10
                         return true
                     }
                 }
@@ -124,7 +124,7 @@ object HudManager : Screen(Text.of("HUD Manager")) {
             GLFW.GLFW_KEY_UP -> {
                 for (hud in hudSettingsCache) {
                     if (hud.isEnabled && hud.value.isHovered()) {
-                        hud.value.y -= 10f
+                        hud.value.y -= 10
                         return true
                     }
                 }
@@ -133,7 +133,7 @@ object HudManager : Screen(Text.of("HUD Manager")) {
             GLFW.GLFW_KEY_DOWN -> {
                 for (hud in hudSettingsCache) {
                     if (hud.isEnabled && hud.value.isHovered()) {
-                        hud.value.y += 10f
+                        hud.value.y += 10
                         return true
                     }
                 }
@@ -149,9 +149,9 @@ object HudManager : Screen(Text.of("HUD Manager")) {
 
     fun resetHUDS() {
         hudSettingsCache.forEach {
-            it.value.x = 10f
-            it.value.y = 10f
-            it.value.scale = 2f
+            it.value.x = 10
+            it.value.y = 10
+            it.value.scale = 2
         }
     }
 

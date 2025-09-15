@@ -6,30 +6,30 @@ import com.odtheking.odin.utils.ui.isAreaHovered
 import net.minecraft.client.gui.DrawContext
 
 open class HudElement(
-    var x: Float,
-    var y: Float,
-    var scale: Float,
+    var x: Int,
+    var y: Int,
+    var scale: Int,
     var enabled: Boolean = true,
     val render: DrawContext.(Boolean) -> Pair<Number, Number> = { _ -> 0f to 0f }
 ) {
-    var width = 0f
+    var width: Int = 0
         private set
-    var height = 0f
+    var height: Int = 0
         private set
 
     fun draw(context: DrawContext, example: Boolean) {
         context.matrices.pushMatrix()
-        context.matrices.translate(x, y)
-        context.matrices.scale(scale, scale)
-        val (width, height) = context.render(example).let { (w, h) -> w.toFloat() to h.toFloat() }
+        context.matrices.translate(x.toFloat(), y.toFloat())
+        context.matrices.scale(scale.toFloat(), scale.toFloat())
+        val (width, height) = context.render(example).let { (w, h) -> w to h }
 
-        if (example) context.hollowFill(0f, 0f, width, height, 1 / scale + if (isHovered()) 0.5f else 0f, Colors.WHITE)
+        if (example) context.hollowFill(0, 0, width.toInt(), height.toInt(), 1 / scale, Colors.WHITE)
 
         context.matrices.popMatrix()
 
-        this.width = width
-        this.height = height
+        this.width = width.toInt()
+        this.height = height.toInt()
     }
 
-    fun isHovered(): Boolean = isAreaHovered(x, y, width * scale, height * scale)
+    fun isHovered(): Boolean = isAreaHovered(x.toFloat(), y.toFloat(), (width * scale).toFloat(), (height * scale).toFloat())
 }
