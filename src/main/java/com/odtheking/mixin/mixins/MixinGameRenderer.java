@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(GameRenderer.class)
 public class MixinGameRenderer {
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/toast/ToastManager;draw(Lnet/minecraft/client/gui/DrawContext;)V", shift = At.Shift.AFTER), cancellable = true)
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/render/GuiRenderer;incrementFrame()V", shift = At.Shift.AFTER), cancellable = true)
     public void hookRender(RenderTickCounter tickCounter, boolean tick, CallbackInfo ci) {
         if (OdinMod.INSTANCE.getMc().currentScreen != null && new GuiEvent.NVGRender(OdinMod.INSTANCE.getMc().currentScreen).postAndCatch())
             ci.cancel();
