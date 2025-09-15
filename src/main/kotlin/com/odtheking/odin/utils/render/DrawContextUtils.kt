@@ -9,7 +9,7 @@ import kotlin.math.atan2
 import kotlin.math.sqrt
 
 fun DrawContext.drawString(text: String, x: Int, y: Int, color: Int = 0xFFFFFF, shadow: Boolean = true) {
-    this.drawString(text, x, y, color, shadow)
+    this.drawText(mc.textRenderer, text, x, y, color, shadow)
 }
 
 fun DrawContext.drawStringWidth(
