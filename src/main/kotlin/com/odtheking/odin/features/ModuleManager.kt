@@ -14,9 +14,8 @@ import com.odtheking.odin.features.impl.render.*
 import com.odtheking.odin.features.impl.skyblock.*
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
 import meteordevelopment.orbit.EventHandler
-import net.fabricmc.fabric.api.client.rendering.v1.HudLayerRegistrationCallback
-import net.fabricmc.fabric.api.client.rendering.v1.IdentifiedLayer
-import net.fabricmc.fabric.api.client.rendering.v1.LayeredDrawerWrapper
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
+import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.render.RenderTickCounter
 import net.minecraft.util.Identifier
@@ -65,20 +64,18 @@ object ModuleManager {
             }
         }
 
-        HudLayerRegistrationCallback.EVENT.register(HudLayerRegistrationCallback { drawer: LayeredDrawerWrapper ->
-            drawer.attachLayerBefore(IdentifiedLayer.SLEEP, HUD_LAYER, ModuleManager::render)
-        })
+        HudElementRegistry.attachElementBefore(VanillaHudElements.SLEEP, HUD_LAYER, ModuleManager::render)
     }
 
     fun render(context: DrawContext, tickCounter: RenderTickCounter) {
         if (mc.world == null || mc.player == null || mc.currentScreen == HudManager) return
-        context.matrices.push()
+        context.matrices.pushMatrix()
         val sf = mc.window.scaleFactor.toFloat()
-        context.matrices?.scale(1f / sf, 1f / sf, 1f)
+        context.matrices?.scale(1f / sf, 1f / sf)
         for (hudSettings in hudSettingsCache) {
             if (hudSettings.isEnabled) hudSettings.value.draw(context, false)
         }
-        context.matrices?.pop()
+        context.matrices?.popMatrix()
     }
 
     @EventHandler

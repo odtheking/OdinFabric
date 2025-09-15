@@ -18,14 +18,14 @@ open class HudElement(
         private set
 
     fun draw(context: DrawContext, example: Boolean) {
-        context.matrices.push()
-        context.matrices.translate(x.toDouble(), y.toDouble(), 1.0)
-        context.matrices.scale(scale, scale, 1f)
+        context.matrices.pushMatrix()
+        context.matrices.translate(x, y)
+        context.matrices.scale(scale, scale)
         val (width, height) = context.render(example).let { (w, h) -> w.toFloat() to h.toFloat() }
 
         if (example) context.hollowFill(0f, 0f, width, height, 1 / scale + if (isHovered()) 0.5f else 0f, Colors.WHITE)
 
-        context.matrices.pop()
+        context.matrices.popMatrix()
 
         this.width = width
         this.height = height

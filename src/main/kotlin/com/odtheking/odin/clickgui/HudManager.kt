@@ -29,25 +29,24 @@ object HudManager : Screen(Text.of("HUD Manager")) {
             it.y = floor((odinMouseY + deltaY).coerceIn(0f, mc.window.height - (it.height * it.scale)))
         }
 
-        context?.matrices?.push()
+        context?.matrices?.pushMatrix()
         val sf = mc.window.scaleFactor.toFloat()
-        context?.matrices?.scale(1f / sf, 1f / sf, 1f)
+        context?.matrices?.scale(1f / sf, 1f / sf)
 
         for (hud in hudSettingsCache) {
             if (hud.isEnabled) hud.value.draw(context!!, true)
             if (!hud.value.isHovered()) continue
-            context?.matrices?.push()
+            context?.matrices?.pushMatrix()
             context?.matrices?.translate(
-                hud.value.x + hud.value.width * hud.value.scale + 10.0,
-                hud.value.y.toDouble(),
-                1.0
+                (hud.value.x + hud.value.width * hud.value.scale + 10.0).toFloat(),
+                hud.value.y,
             )
-            context?.matrices?.scale(2f, 2f, 1f)
+            context?.matrices?.scale(2f, 2f)
             context?.drawTextWithShadow(mc.textRenderer, Text.of(hud.name), 0, 0, Colors.WHITE.rgba)
             context?.drawWrappedTextWithShadow(mc.textRenderer, Text.of(hud.description), 0, 10, 150, Colors.WHITE.rgba)
-            context?.matrices?.pop()
+            context?.matrices?.popMatrix()
         }
-        context?.matrices?.pop()
+        context?.matrices?.popMatrix()
     }
 
     override fun mouseScrolled(

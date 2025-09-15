@@ -59,7 +59,7 @@ object NVGRenderer {
 
         val framebuffer = mc.framebuffer
         val glFramebuffer = (framebuffer.colorAttachment as GlTexture).getOrCreateFramebuffer(
-            (RenderSystem.getDevice() as GlBackend).framebufferManager,
+            (RenderSystem.getDevice() as GlBackend).bufferManager,
             null
         )
         GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, glFramebuffer)
