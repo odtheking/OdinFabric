@@ -35,10 +35,10 @@ object ModuleManager {
     val modules: ArrayList<Module> = arrayListOf(
         // dungeon
         PuzzleSolvers, BlessingDisplay, LeapMenu, SecretClicked, MapInfo, Mimic, WarpCooldown, KeyHighlight, BloodCamp,
-        PositionalMessages, TerracottaTimer, DungeonRequeue, BreakerDisplay, LividSolver, InactiveWaypoints,
+        PositionalMessages, TerracottaTimer, DungeonRequeue, BreakerDisplay, LividSolver,
 
         // floor 7
-        TerminalSimulator, TerminalSolver, TerminalTimes, TerminalSounds, TickTimers,
+        TerminalSimulator, TerminalSolver, TerminalTimes, TerminalSounds, TickTimers, ArrowAlign, InactiveWaypoints,
 
         // render
         ClickGUIModule, Camera, Etherwarp, PlayerSize, PerformanceHUD, RenderOptimizer,

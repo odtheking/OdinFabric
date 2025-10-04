@@ -27,6 +27,7 @@
     "mixins.PlayerEntityRendererMixin"
   ],
   "mixins": [
+    "accessors.PlayerInteractEntityC2SPacketAccessor",
     "mixins.ClientConnectionMixin",
     "mixins.WorldChunkMixin",
     "mixins.YggdrasilSignatureIgnoreMixin"
