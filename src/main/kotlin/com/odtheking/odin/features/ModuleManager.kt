@@ -37,7 +37,7 @@ object ModuleManager {
         PositionalMessages, TerracottaTimer, DungeonRequeue, BreakerDisplay, LividSolver,
 
         // floor 7
-        TerminalSimulator, TerminalSolver, TerminalTimes, TerminalSounds, TickTimers, InactiveWaypoints,
+        TerminalSimulator, TerminalSolver, TerminalTimes, TerminalSounds, TickTimers, ArrowAlign, InactiveWaypoints,
 
         // render
         ClickGUIModule, Camera, Etherwarp, PlayerSize, PerformanceHUD, RenderOptimizer,
