@@ -6,7 +6,10 @@ import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.features.Module
-import com.odtheking.odin.utils.*
+import com.odtheking.odin.utils.addVec
+import com.odtheking.odin.utils.component1
+import com.odtheking.odin.utils.component2
+import com.odtheking.odin.utils.component3
 import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
@@ -85,14 +88,14 @@ object ArrowAlign : Module(
     fun onRenderWorld(event: RenderEvent.Last) {
         if (clicksRemaining.isEmpty() || DungeonUtils.getF7Phase() != M7Phases.P3) return
         clicksRemaining.forEach { (index, clickNeeded) ->
-            when {
+            val colorCode = when {
                 clickNeeded == 0 -> return@forEach
-                clickNeeded < 3 -> Colors.MINECRAFT_DARK_GREEN
-                clickNeeded < 5 -> Colors.MINECRAFT_GOLD
-                else -> Colors.MINECRAFT_RED
+                clickNeeded < 3 -> 'a'
+                clickNeeded < 5 -> '6'
+                else -> 'c'
             }
             event.context.drawText(
-                Text.of(clickNeeded.toString()).asOrderedText(),
+                Text.of("§$colorCode$clickNeeded").asOrderedText(),
                 getFramePositionFromIndex(index).toCenterPos().addVec(y = 0.1, x = -0.3),
                 1f,
                 false

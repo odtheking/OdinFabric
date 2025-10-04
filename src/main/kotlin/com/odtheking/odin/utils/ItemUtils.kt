@@ -1,11 +1,16 @@
 package com.odtheking.odin.utils
 
+import com.mojang.authlib.properties.Property
+import com.mojang.authlib.properties.PropertyMap
 import net.minecraft.component.DataComponentTypes
 import net.minecraft.component.type.LoreComponent
 import net.minecraft.component.type.NbtComponent
+import net.minecraft.component.type.ProfileComponent
 import net.minecraft.item.ItemStack
+import net.minecraft.item.Items
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.text.Text
+import java.util.*
 
 const val ID = "id"
 const val UUID = "uuid"
@@ -63,4 +68,25 @@ fun ItemStack.getSkyblockRarity(): ItemRarity? {
         return ItemRarity.entries.find { it.loreName == rarity }
     }
     return null
+}
+
+fun createSkullStack(textureHash: String): ItemStack {
+    val stack = ItemStack(Items.PLAYER_HEAD)
+    val properties = PropertyMap()
+    properties.put(
+        "textures",
+        Property(
+            "textures",
+            Base64.getEncoder().encodeToString(
+                "{\"textures\":{\"SKIN\":{\"url\":\"http://textures.minecraft.net/texture/$textureHash\"}}}".toByteArray()
+            )
+        )
+    )
+    val profile = ProfileComponent(
+        Optional.empty(),
+        Optional.empty(),
+        properties
+    )
+    stack.set(DataComponentTypes.PROFILE, profile)
+    return stack
 }
