@@ -29,19 +29,19 @@ object TickTimers : Module(
     private val stormPadRegex = Regex("^\\[BOSS] Storm: Pathetic Maxor, just like expected\\.$")
 
     private val necronHud by HUD("Necron Hud", "Displays a timer for Necron's drop.") {
-        if (it)                   drawStringWidth(formatTimer(35, 60, "§4Necron dropping in"), 1, 1, Colors.MINECRAFT_DARK_RED) + 2f to 10f
-        else if (necronTime >= 0) drawStringWidth(formatTimer(necronTime.toInt(), 60, "§4Necron dropping in"), 1, 1, Colors.MINECRAFT_DARK_RED) + 2f to 10f
-        else 0f to 0f
+        if (it)                   drawStringWidth(formatTimer(35, 60, "§4Necron dropping in"), 1, 1, Colors.MINECRAFT_DARK_RED) + 2 to 10
+        else if (necronTime >= 0) drawStringWidth(formatTimer(necronTime.toInt(), 60, "§4Necron dropping in"), 1, 1, Colors.MINECRAFT_DARK_RED) + 2 to 10
+        else 0 to 0
     }
 
     private var necronTime: Byte = -1
 
     private val goldorHud: HudElement by HUD("Goldor Hud", "Displays a timer for Goldor's Core entrance opening.") {
-        if (it) drawStringWidth(formatTimer(35, 60, "§7Tick:"), 1, 1, Colors.MINECRAFT_DARK_RED) + 2f to 10f
+        if (it) drawStringWidth(formatTimer(35, 60, "§7Tick:"), 1, 1, Colors.MINECRAFT_DARK_RED) + 2 to 10
         else if ((goldorStartTime >= 0 && startTimer) || goldorTickTime >= 0) {
             val (prefix: String, time: Int, max: Int) = if (goldorStartTime >= 0 && startTimer) Triple("§aStart:", goldorStartTime, 104) else Triple("§7Tick:", goldorTickTime, 60)
-            drawStringWidth(formatTimer(time, max, prefix), 1, 1, Colors.MINECRAFT_DARK_RED) + 2f to 10f
-        } else 0f to 0f
+            drawStringWidth(formatTimer(time, max, prefix), 1, 1, Colors.MINECRAFT_DARK_RED) + 2 to 10
+        } else 0 to 0
     }
     private val startTimer by BooleanSetting("Start timer", false, desc = "Displays a timer counting down until devices/terms are able to be activated/completed.").withDependency { goldorHud.enabled }
 
@@ -49,9 +49,9 @@ object TickTimers : Module(
     private var goldorStartTime: Int = -1
 
     private val stormHud by HUD("Storm Pad Hud", "Displays a timer for Storm's Pad.") {
-        if (it)                    drawStringWidth(formatTimer(15, 20, "§bPad:"), 1, 1, Colors.MINECRAFT_DARK_RED) + 2f to 10f
-        else if (padTickTime >= 0) drawStringWidth(formatTimer(padTickTime, 20, "§bPad:"), 1, 1, Colors.MINECRAFT_DARK_RED) + 2f to 10f
-        else 0f to 0f
+        if (it)                    drawStringWidth(formatTimer(15, 20, "§bPad:"), 1, 1, Colors.MINECRAFT_DARK_RED) + 2 to 10
+        else if (padTickTime >= 0) drawStringWidth(formatTimer(padTickTime, 20, "§bPad:"), 1, 1, Colors.MINECRAFT_DARK_RED) + 2 to 10
+        else 0 to 0
     }
 
     private var padTickTime: Int = -1

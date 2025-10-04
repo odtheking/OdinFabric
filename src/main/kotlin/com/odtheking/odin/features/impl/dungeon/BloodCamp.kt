@@ -39,15 +39,15 @@ object BloodCamp : Module(
     private val killTitle by BooleanSetting("Kill Title", true, desc = "Shows a title for when to kill the initial spawns.").withDependency { movePrediction && predictionDropdown }
 
     private val moveTimer by HUD("Move Hud", "Displays the time until the watcher moves.") { example ->
-        if (example) return@HUD drawStringWidth("Move Timer: 0.50s", 1, 1, Colors.MINECRAFT_RED) + 2f to 10f
-        finalTime?.let { drawStringWidth("Move Timer: ${((it - normalTickTime) * 0.05).toFixed()}s", 1, 1, Colors.MINECRAFT_RED) to 10f } ?: return@HUD 0f to 0f
+        if (example) return@HUD drawStringWidth("Move Timer: 0.50s", 1, 1, Colors.MINECRAFT_RED) + 2 to 10
+        finalTime?.let { drawStringWidth("Move Timer: ${((it - normalTickTime) * 0.05).toFixed()}s", 1, 1, Colors.MINECRAFT_RED) to 10 } ?: return@HUD 0 to 0
     }.withDependency { movePrediction && predictionDropdown }
 
     private val assistDropdown by DropdownSetting("Blood Assist Dropdown", true)
     private val bloodAssist by BooleanSetting("Blood Camp Assist", true, desc = "Draws boxes to spawning mobs in the blood room. WARNING: not perfectly accurate. Mobs spawn randomly between 37 - 41 ticks, adjust offset to adjust between ticks.").withDependency { assistDropdown }
 
     private val timerHud by HUD("Timer Hud", "Displays the time left for each mob to spawn.") { example ->
-        if ((!bloodAssist || (!DungeonUtils.inDungeons || DungeonUtils.inBoss)) && !example) return@HUD 0f to 0f
+        if ((!bloodAssist || (!DungeonUtils.inDungeons || DungeonUtils.inBoss)) && !example) return@HUD 0 to 0
         if (example) {
             drawString("1.15s", 1, 1, Colors.MINECRAFT_RED.rgba)
             drawString("2.15s", 1, 12, Colors.MINECRAFT_GREEN.rgba)
@@ -64,7 +64,7 @@ object BloodCamp : Module(
                 acc + 1
             }
         }
-        getStringWidth("2.15s") to 20f
+        getStringWidth("2.15s") to 20
     }.withDependency { bloodAssist && assistDropdown }
 
     private val pboxColor by ColorSetting("Spawn Color", Colors.MINECRAFT_RED, true, desc = "Color for Spawn render box. Set alpha to 0 to disable.").withDependency { bloodAssist && assistDropdown}

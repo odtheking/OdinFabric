@@ -28,8 +28,8 @@ object Waypoints : Module(
     private val fromParty by BooleanSetting("From Party Chat", true, desc = "Adds waypoints from party chat.")
     private val fromAll by BooleanSetting("From All Chat", false, desc = "Adds waypoints from all chat.")
 
-    private val pingLocationDropDown by DropdownSetting("Ping Location Dropdown", false)
-    private val pingLocationToggle by BooleanSetting("Ping Location", false, desc = "Adds a waypoint at the location you are looking at.").withDependency { pingLocationDropDown }
+    private val pingLocationDropDown by DropdownSetting("Ping Waypoint Dropdown", false)
+    private val pingLocationToggle by BooleanSetting("Ping Waypoint", false, desc = "Adds a waypoint at the location you are looking at.").withDependency { pingLocationDropDown }
     private val pingLocation by KeybindSetting("Ping Location", GLFW.GLFW_KEY_UNKNOWN, desc = "Sends the location you are looking at as coords in chat for waypoints.").onPress {
         if (!pingLocationToggle) return@onPress
         Etherwarp.getEtherPos(mc.player?.pos, pingDistance).pos?.let { pos ->

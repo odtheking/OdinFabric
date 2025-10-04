@@ -39,7 +39,6 @@ object NVGRenderer {
 
     private var scissor: Scissor? = null
 
-    private var previousProgram = -1
 
     private var vg = -1L
 
@@ -55,9 +54,7 @@ object NVGRenderer {
 
         val framebuffer = mc.framebuffer
         val glFramebuffer = (framebuffer.colorAttachment as GlTexture).getOrCreateFramebuffer(
-            (RenderSystem.getDevice() as GlBackend).bufferManager,
-            null
-        )
+            (RenderSystem.getDevice() as GlBackend).bufferManager, null)
         GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, glFramebuffer)
         GlStateManager._viewport(0, 0, framebuffer.viewportWidth, framebuffer.viewportHeight)
         GlStateManager._activeTexture(GL30.GL_TEXTURE0)
@@ -75,7 +72,7 @@ object NVGRenderer {
         GlStateManager._enableBlend()
         GlStateManager._blendFuncSeparate(770, 771, 1, 0)
 
-        if (previousProgram != -1) GlStateManager._glUseProgram(previousProgram) // fixes invalid program errors when using NVG
+        GlStateManager._glUseProgram(0) // fixes invalid program errors when using NVG
         GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0) // fixes macos issues
 
         drawing = false

@@ -26,7 +26,7 @@ object MapInfo : Module(
     val togglePaul by SelectorSetting("Paul Settings", "Automatic", arrayListOf("Automatic", "Force Disable", "Force Enable"), desc = "Toggle Paul's settings.")
 
     private val fullHud: HudElement by HUD("Full Hud", "Displays a full hud with score, secrets, crypts, and mimic info.") {
-        if ((!DungeonUtils.inDungeons || (disableInBoss && DungeonUtils.inBoss)) && !it) return@HUD 0f to 0f
+        if ((!DungeonUtils.inDungeons || (disableInBoss && DungeonUtils.inBoss)) && !it) return@HUD 0 to 0
 
         val scoreText = "§7Score: ${colorizeScore(DungeonUtils.score)}"
         val secretText = "§7Secrets: §b${DungeonUtils.secretCount}" +
@@ -49,7 +49,7 @@ object MapInfo : Module(
         val centerX = (unknownWidth + 1 + (fullWidth - 1 - unknownWidth - brWidth) / 2) - getStringWidth(mimicText) / 2
         drawString(mimicText, centerX, 10, Colors.WHITE.rgba)
         drawString(brText, fullWidth - 1 - brWidth, 10, Colors.WHITE.rgba)
-        fullWidth to 19f
+        fullWidth to 19
     }
 
     private val alternate by BooleanSetting("Flip Crypts and Score", false, desc = "Flips crypts and score.").withDependency { fullHud.enabled }
@@ -62,7 +62,7 @@ object MapInfo : Module(
     private val fullColor by ColorSetting("Hud Background Color", Colors.MINECRAFT_DARK_GRAY.withAlpha(0.5f), true, desc = "The color of the background.").withDependency { fullBackground && fullHud.enabled }
 
     private val compactSecrets: HudElement by HUD("Compact Secrets", "Displays a compact secrets hud with score and secrets.") {
-        if ((!DungeonUtils.inDungeons || (disableInBoss && DungeonUtils.inBoss)) && !it) return@HUD 0f to 0f
+        if ((!DungeonUtils.inDungeons || (disableInBoss && DungeonUtils.inBoss)) && !it) return@HUD 0 to 0
         val secretText = "§7Secrets: §b${DungeonUtils.secretCount}" +
                 (if (compactAddRemaining) "§7-§d${(DungeonUtils.neededSecretsAmount - DungeonUtils.secretCount).coerceAtLeast(0)}" else "") +
                 "§7-§e${if (compactRemaining == 0 || fullAddRemaining) DungeonUtils.neededSecretsAmount else (DungeonUtils.neededSecretsAmount - DungeonUtils.secretCount).coerceAtLeast(0)}"+
@@ -71,7 +71,7 @@ object MapInfo : Module(
 
         if (compactSecretBackground) fill((-compactSecretMargin).toInt(), 0, (width + 2 + (compactSecretMargin * 2)).toInt(), 9, compactSecretColor.rgba)
         drawString(secretText, 1, 1, Colors.WHITE.rgba)
-        width + 2f to 10f
+        width + 2 to 10
     }
 
     private val compactAddRemaining by BooleanSetting("Compact Include remaining", false, desc = "Adds remaining to the secrets display.").withDependency { compactSecrets.enabled }
@@ -81,13 +81,13 @@ object MapInfo : Module(
     private val compactSecretColor by ColorSetting("Secret Background Color", Colors.MINECRAFT_DARK_GRAY.withAlpha(0.5f), true, desc = "The color of the background.").withDependency { compactSecretBackground && compactSecrets.enabled }
 
     private val compactScore: HudElement by HUD("Compact Score", "Displays a compact score hud with score info.") {
-        if ((!DungeonUtils.inDungeons || (disableInBoss && DungeonUtils.inBoss)) && !it) return@HUD 0f to 0f
+        if ((!DungeonUtils.inDungeons || (disableInBoss && DungeonUtils.inBoss)) && !it) return@HUD 0 to 0
         val missing = (if (DungeonUtils.mimicKilled) 0 else 2) + (if (DungeonUtils.princeKilled) 0 else 1)
         val scoreText = "§7Score: ${colorizeScore(DungeonUtils.score)}" + if (missing > 0) " §7(§6+${missing}?§7)" else ""
         val width = getStringWidth(scoreText)
         if (compactScoreBackground) fill((-compactScoreMargin).toInt(), 0, (width + 2 + (compactScoreMargin * 2)).toInt(), 9, compactScoreColor.rgba)
         drawString(scoreText, 1, 1, Colors.WHITE.rgba)
-        width + 2f to 10f
+        width + 2 to 10
     }
 
     private val compactScoreBackground by BooleanSetting("Score Background", false, desc = "Render a background behind the score info.").withDependency { compactScore.enabled }

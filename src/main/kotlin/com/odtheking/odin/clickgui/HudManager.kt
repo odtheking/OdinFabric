@@ -9,7 +9,6 @@ import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.text.Text
 import org.lwjgl.glfw.GLFW
-import kotlin.math.floor
 import kotlin.math.sign
 import com.odtheking.odin.utils.ui.mouseX as odinMouseX
 import com.odtheking.odin.utils.ui.mouseY as odinMouseY
@@ -25,8 +24,8 @@ object HudManager : Screen(Text.of("HUD Manager")) {
         super.render(context, mouseX, mouseY, deltaTicks)
 
         dragging?.let {
-            it.x = floor((odinMouseX + deltaX).coerceIn(0f, (mc.window.width - (it.width * it.scale)).toFloat())).toInt()
-            it.y = floor((odinMouseY + deltaY).coerceIn(0f, (mc.window.height - (it.height * it.scale)).toFloat())).toInt()
+            it.x = (odinMouseX + deltaX).coerceIn(0f, (mc.window.width - (it.width * it.scale))).toInt()
+            it.y = (odinMouseY + deltaY).coerceIn(0f, (mc.window.height - (it.height * it.scale))).toInt()
         }
 
         context?.matrices?.pushMatrix()
@@ -58,7 +57,7 @@ object HudManager : Screen(Text.of("HUD Manager")) {
         val actualAmount = verticalAmount.sign.toFloat() * 0.2f
         for (hud in hudSettingsCache) {
             if (hud.isEnabled && hud.value.isHovered()) {
-                hud.value.scale = (hud.value.scale + actualAmount).coerceIn(1f, 10f).toInt()
+                hud.value.scale = (hud.value.scale + actualAmount).coerceIn(1f, 10f)
                 return true
             }
         }
@@ -88,7 +87,7 @@ object HudManager : Screen(Text.of("HUD Manager")) {
             GLFW.GLFW_KEY_EQUAL -> {
                 for (hud in hudSettingsCache) {
                     if (hud.isEnabled && hud.value.isHovered()) {
-                        hud.value.scale = (hud.value.scale + 0.1f).coerceIn(1f, 10f).toInt()
+                        hud.value.scale = (hud.value.scale + 0.1f).coerceIn(1f, 10f)
                         return true
                     }
                 }
@@ -97,7 +96,7 @@ object HudManager : Screen(Text.of("HUD Manager")) {
             GLFW.GLFW_KEY_MINUS -> {
                 for (hud in hudSettingsCache) {
                     if (hud.isEnabled && hud.value.isHovered()) {
-                        hud.value.scale = (hud.value.scale - 0.1f).coerceIn(1f, 10f).toInt()
+                        hud.value.scale = (hud.value.scale - 0.1f).coerceIn(1f, 10f)
                         return true
                     }
                 }
@@ -151,7 +150,7 @@ object HudManager : Screen(Text.of("HUD Manager")) {
         hudSettingsCache.forEach {
             it.value.x = 10
             it.value.y = 10
-            it.value.scale = 2
+            it.value.scale = 2f
         }
     }
 

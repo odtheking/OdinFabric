@@ -25,7 +25,7 @@ object PerformanceHUD : Module(
     private const val HORIZONTAL = 0
 
     private val hud by HUD("Performance HUD", "Shows performance information on the screen.") {
-        if (!showFPS && !showTPS && !showPing) return@HUD 0f to 0f
+        if (!showFPS && !showTPS && !showPing) return@HUD 0 to 0
 
         var width = 1
         var height = 1

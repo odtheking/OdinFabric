@@ -9,16 +9,11 @@ import kotlin.math.atan2
 import kotlin.math.sqrt
 
 fun DrawContext.drawString(text: String, x: Int, y: Int, color: Int = 0xFFFFFF, shadow: Boolean = true) {
+   // modMessage(text)
     this.drawText(mc.textRenderer, text, x, y, color, shadow)
 }
 
-fun DrawContext.drawStringWidth(
-    text: String,
-    x: Int,
-    y: Int,
-    color: Color = Colors.WHITE,
-    shadow: Boolean = true
-): Int {
+fun DrawContext.drawStringWidth(text: String, x: Int, y: Int, color: Color = Colors.WHITE, shadow: Boolean = true): Int {
     drawString(text, x, y, color.rgba, shadow)
     return mc.textRenderer.getWidth(text)
 }

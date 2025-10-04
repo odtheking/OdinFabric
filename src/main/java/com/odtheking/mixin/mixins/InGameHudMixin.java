@@ -1,10 +1,10 @@
 package com.odtheking.mixin.mixins;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.odtheking.odin.features.impl.skyblock.OverlayType;
 import com.odtheking.odin.features.impl.skyblock.PlayerDisplay;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
-import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -27,6 +27,12 @@ public class InGameHudMixin {
     @Inject(method = "renderFood", at = @At("HEAD"), cancellable = true)
     private void cancelFoodBar(DrawContext context, PlayerEntity player, int top, int right, CallbackInfo ci) {
         if (PlayerDisplay.shouldCancelOverlay(OverlayType.FOOD)) ci.cancel();
+    }
+
+    @ModifyExpressionValue(method = "renderMainHud", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;hasExperienceBar()Z"))
+    private boolean cancelXPLevelRender(boolean original) {
+        if (PlayerDisplay.shouldCancelOverlay(OverlayType.XP)) return false;
+        return original;
     }
 }
 

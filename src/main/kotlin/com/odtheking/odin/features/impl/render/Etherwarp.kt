@@ -86,8 +86,7 @@ object Etherwarp : Module(
 
     @EventHandler
     fun onPacketReceive(event: PacketEvent.Receive) = with(event.packet) {
-        if (this !is PlayerInteractItemC2SPacket || !LocationUtils.currentArea.isArea(Island.SinglePlayer) || mc.player?.isSneaking == false || mc.currentScreen != null || isEtherwarpItem() == null) return@with
-
+        if (this !is PlayerInteractItemC2SPacket || !LocationUtils.currentArea.isArea(Island.SinglePlayer) || mc.player?.isSneaking == false || mc.currentScreen != null || isEtherwarpItem() == null) return
         etherPos?.pos?.let {
             if (etherPos?.succeeded == false) return@let
             mc.executeSync {
@@ -106,6 +105,7 @@ object Etherwarp : Module(
                 mc.player?.setVelocity(0.0, 0.0, 0.0)
             }
         }
+        Unit
     }
 
     private fun isEtherwarpItem(): NbtCompound? =
