@@ -8,8 +8,7 @@ import org.joml.Matrix3x2f
 import kotlin.math.atan2
 import kotlin.math.sqrt
 
-fun DrawContext.drawString(text: String, x: Int, y: Int, color: Int = 0xFFFFFF, shadow: Boolean = true) {
-   // modMessage(text)
+fun DrawContext.drawString(text: String, x: Int, y: Int, color: Int = Colors.WHITE.rgba, shadow: Boolean = true) {
     this.drawText(mc.textRenderer, text, x, y, color, shadow)
 }
 
