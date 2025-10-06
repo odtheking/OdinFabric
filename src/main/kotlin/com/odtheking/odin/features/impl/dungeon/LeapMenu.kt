@@ -8,7 +8,6 @@ import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonClass
-import com.odtheking.odin.utils.skyblock.dungeon.DungeonListener.leapTeammates
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonPlayer
 import com.odtheking.odin.utils.ui.HoverHandler
 import com.odtheking.odin.utils.ui.getQuadrant
@@ -90,6 +89,13 @@ object LeapMenu : Module(
     }
 
     @EventHandler
+    fun onDrawBackground(event: GuiEvent.DrawBackground) {
+        val chest = (event.screen as? HandledScreen<*>) ?: return
+        if (!chest.title.string.equalsOneOf("Spirit Leap", "Teleport to Player") || leapTeammates.isEmpty() || leapTeammates.all { it == EMPTY }) return
+        event.cancel()
+    }
+
+    @EventHandler
     fun mouseClicked(event: GuiEvent.MouseClick) {
         val chest = (event.screen as? HandledScreen<*>) ?: return
         if (chest.title?.string?.equalsOneOf("Spirit Leap", "Teleport to Player") == false || leapTeammates.isEmpty())  return
@@ -135,12 +141,12 @@ object LeapMenu : Module(
             leapedRegex.find(event.packet.content.string)?.groupValues?.let { sendCommand("pc Leaped to ${it[1]}!") }
     }
 
-    /*private val leapTeammates: MutableList<DungeonPlayer> = mutableListOf(
+    private val leapTeammates: MutableList<DungeonPlayer> = mutableListOf(
         DungeonPlayer("Stiviaisd", DungeonClass.Healer, 50),
         DungeonPlayer("Odtheking", DungeonClass.Archer, 50),
         DungeonPlayer("Bonzi", DungeonClass.Mage, 47),
         DungeonPlayer("Cezar", DungeonClass.Tank, 38)
-    )*/
+    )
 
     /**
      * Sorts the list of players based on their default quadrant and class priority.
