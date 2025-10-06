@@ -41,6 +41,7 @@ object NVGRenderer {
     private var scissor: Scissor? = null
 
     private var previousProgram = -1
+    private var previousTexture = -1
 
     private var vg = -1L
 
@@ -56,6 +57,7 @@ object NVGRenderer {
 
         previousProgram =
             ((RenderSystem.getDevice() as GlBackend).createCommandEncoder() as GlResourceManagerAccessor).currentProgram().glRef
+        previousTexture = GlStateManager._getActiveTexture()
 
         val framebuffer = mc.framebuffer
         val glFramebuffer = (framebuffer.colorAttachment as GlTexture).getOrCreateFramebuffer(
@@ -78,6 +80,11 @@ object NVGRenderer {
         GlStateManager._disableDepthTest()
         GlStateManager._enableBlend()
         GlStateManager._blendFuncSeparate(770, 771, 1, 0)
+
+        if (previousTexture != -1) { // prevents issues with gui background rendering
+            GlStateManager._activeTexture(previousTexture)
+            if (TextureTracker.previousBoundTexture != -1) GlStateManager._bindTexture(TextureTracker.previousBoundTexture)
+        }
 
         if (previousProgram != -1) GlStateManager._glUseProgram(previousProgram) // fixes invalid program errors when using NVG
         GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0) // fixes macos issues
@@ -419,4 +426,9 @@ object NVGRenderer {
 
     private data class NVGImage(var count: Int, val nvg: Int)
     private data class NVGFont(val id: Int, val buffer: ByteBuffer)
+}
+
+object TextureTracker {
+    @JvmStatic
+    var previousBoundTexture = -1
 }

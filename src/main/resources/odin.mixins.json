@@ -17,6 +17,7 @@
     "mixins.ClientWorldMixin",
     "mixins.EntityRendererMixin",
     "mixins.GenericContainerScreenMixin",
+    "mixins.GlStateManagerMixin",
     "mixins.HandledScreenMixin",
     "mixins.InGameHudMixin",
     "mixins.InGameOverlayRendererMixin",

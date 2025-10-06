@@ -96,8 +96,7 @@ class Panel(private val category: Category) {
 
     fun handleScroll(amount: Int): Boolean {
         if (!isMouseOverExtended) return false
-        val minScroll = (-previousHeight + HEIGHT + 10f).coerceAtMost(0f)
-        scrollOffset = (scrollOffset + amount).coerceIn(minScroll, 0f)
+        scrollOffset = (scrollOffset + amount).coerceIn((-previousHeight + scrollOffset + 72f).coerceAtMost(0f), 0f)
         return true
     }
 
