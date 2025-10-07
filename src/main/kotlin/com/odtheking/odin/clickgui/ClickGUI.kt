@@ -52,8 +52,8 @@ object ClickGUI : Screen(Text.of("Click GUI")) {
             NVGRenderer.globalAlpha(openAnim.get(0f, 1f))
         }
 
-        for (i in 0 until panels.size) {
-            panels[i].draw(odinMouseX, odinMouseY)
+        for (element in panels) {
+            element.draw(odinMouseX, odinMouseY)
         }
         SearchBar.draw(mc.window.width / 2f - 175f, mc.window.height - 110f, odinMouseX, odinMouseY)
         desc.render()

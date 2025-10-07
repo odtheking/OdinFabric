@@ -169,20 +169,22 @@ object TerminalSolver : Module(
     }
 
     @EventHandler
-    fun onGuiRender(event: GuiEvent.Draw) {
+    fun onDrawBackground(event: GuiEvent.DrawBackground) {
         if (!enabled || currentTerm == null || (currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver) || renderType != 1) return
 
-        if (renderType == 1) {
-            NVGRenderer.beginFrame(mc.window.width.toFloat(), mc.window.height.toFloat())
-            currentTerm?.type?.getGUI()?.render()
-            NVGRenderer.endFrame()
-            event.cancel()
-        }
+        NVGRenderer.beginFrame(mc.window.width.toFloat(), mc.window.height.toFloat())
+        currentTerm?.type?.getGUI()?.render()
+        NVGRenderer.endFrame()
+        event.cancel()
     }
 
     @EventHandler
-    fun onDrawBackground(event: GuiEvent.DrawBackground) {
-        if (!enabled || currentTerm == null || (currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver) || renderType != 0) return
+    fun onDrawGui(event: GuiEvent.Draw) {
+        if (!enabled || currentTerm == null || (currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver)) return
+        if (renderType == 1) {
+            event.cancel()
+            return
+        }
         val screen = (event.screen as? HandledScreen<*>) as? HandledScreenAccessor ?: return
         event.drawContext.fill(screen.x + 7, screen.y + 16, screen.x + screen.width - 7, screen.y + screen.height - 96, backgroundColor.rgba)
     }

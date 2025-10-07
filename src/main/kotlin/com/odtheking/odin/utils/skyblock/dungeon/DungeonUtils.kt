@@ -230,7 +230,7 @@ object DungeonUtils {
         return when {
             state.block.equalsOneOf(Blocks.CHEST, Blocks.TRAPPED_CHEST, Blocks.LEVER) -> true
             state.block is SkullBlock ->
-                (mc.world?.getBlockEntity(pos) as? SkullBlockEntity)?.owner?.id?.getOrNull()
+                (mc.world?.getBlockEntity(pos) as? SkullBlockEntity)?.owner?.uuid?.getOrNull()
                     ?.toString()?.equalsOneOf(WITHER_ESSENCE_ID, REDSTONE_KEY) ?: false
 
             else -> false

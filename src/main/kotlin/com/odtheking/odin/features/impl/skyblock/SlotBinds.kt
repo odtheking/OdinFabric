@@ -85,10 +85,10 @@ object SlotBinds : Module(
 
         if (previousSlot == null && !(Screen.hasShiftDown())) return
 
-        event.drawContext.matrices.push()
-        event.drawContext.matrices.translate(0f, 0f, 999f)
+        event.drawContext.matrices.pushMatrix()
+        event.drawContext.matrices.translate(0f, 0f)
         event.drawContext.drawLine(startX.toFloat(), startY.toFloat(), endX.toFloat(), endY.toFloat(), lineColor, 1f)
-        event.drawContext.matrices.pop()
+        event.drawContext.matrices.popMatrix()
     }
 
     @EventHandler

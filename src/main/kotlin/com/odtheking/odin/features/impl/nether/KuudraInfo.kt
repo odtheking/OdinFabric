@@ -11,6 +11,7 @@ import com.odtheking.odin.utils.addVec
 import com.odtheking.odin.utils.render.drawString
 import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.render.drawWireFrameBox
+import com.odtheking.odin.utils.render.getStringWidth
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.toFixed
 import meteordevelopment.orbit.EventHandler
@@ -26,12 +27,12 @@ object KuudraInfo : Module(
     private val healthSize by NumberSetting("Health Size", 4f, 3f, 8.0f, 0.1, desc = "Size of the health display.").withDependency { kuudraHPDisplay }
     private val scaledHealth by BooleanSetting("Use Scaled", true, desc = "Use scaled health for the display meaning the health will update in tier 5 when below 25,000.").withDependency { kuudraHPDisplay }
     private val hud by HUD("Health Display", "Displays the current health of Kuudra.") { example ->
-        if (!example && !KuudraUtils.inKuudra) return@HUD 0f to 0f
+        if (!example && !KuudraUtils.inKuudra) return@HUD 0 to 0
         val string = if (example) "§a99.975M/240M§c❤" else getCurrentHealthDisplay(KuudraUtils.kuudraEntity?.health ?: return@HUD 0 to 0)
 
         drawString(string, 1, 1)
 
-        mc.textRenderer.getWidth(string) + 2f to mc.textRenderer.fontHeight
+        getStringWidth(string) + 2 to mc.textRenderer.fontHeight
     }
 
     @EventHandler

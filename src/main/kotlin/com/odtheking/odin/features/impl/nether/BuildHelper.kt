@@ -10,6 +10,7 @@ import com.odtheking.odin.utils.alert
 import com.odtheking.odin.utils.render.drawCustomBeacon
 import com.odtheking.odin.utils.render.drawString
 import com.odtheking.odin.utils.render.drawText
+import com.odtheking.odin.utils.render.getStringWidth
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.text.Text
@@ -23,11 +24,11 @@ object BuildHelper : Module(
     private val unfinishedWaypoints by BooleanSetting("Unfinished Waypoints", true, desc = "Draws waypoints over the unfinished piles.")
     private val hideDefaultTag by BooleanSetting("Hide Default Tag", true, desc = "Hides the default tag for unfinished piles.").withDependency { unfinishedWaypoints }
     private val hud by HUD("Build helper", "Shows information about the build progress.") { example ->
-        if (!example && (!KuudraUtils.inKuudra || KuudraUtils.phase != 2)) return@HUD 0f to 0f
+        if (!example && (!KuudraUtils.inKuudra || KuudraUtils.phase != 2)) return@HUD 0 to 0
         drawString("§bFreshers: ${colorBuilders(KuudraUtils.freshers.size)}", 1, 1)
         drawString("§bBuilders: ${colorBuilders(KuudraUtils.playersBuildingAmount)}", 1, 10)
         drawString("§bBuild: ${colorBuild(KuudraUtils.buildDonePercentage)}%", 1, 19)
-        mc.textRenderer.getWidth("Freshers: 0") + 2f to mc.textRenderer.fontHeight * 3
+        getStringWidth("Freshers: 0") + 2 to mc.textRenderer.fontHeight * 3
     }
 
     private val stunNotificationNumber by NumberSetting("Stun Percent", 93f, 0, 100, desc = "The build % to notify at (set to 0 to disable).", unit = "%")

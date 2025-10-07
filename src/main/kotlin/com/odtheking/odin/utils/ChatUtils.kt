@@ -13,7 +13,7 @@ fun sendChatMessage(message: Any) {
 }
 
 fun sendCommand(command: String) {
-    mc.player?.networkHandler?.sendCommand(command)
+    mc.player?.networkHandler?.sendChatCommand(command)
 }
 
 fun modMessage(message: Any?, prefix: String = "§3Odin §8»§r ", chatStyle: Style? = null) {

@@ -22,11 +22,11 @@ object Splits : Module(
             repeat(5) { i ->
                 drawString("Split $i: 0h 00m 00s" + if (showTickTime) " §7(§80s§7)" else "", 1, 1 + i * 9, Colors.WHITE.rgba)
             }
-            return@HUD getStringWidth("Split 0: 0h 00m 00s" + if (showTickTime) " (0s)" else "") + 2f to 9f * 5
+            return@HUD getStringWidth("Split 0: 0h 00m 00s" + if (showTickTime) " (0s)" else "") + 2 to 9 * 5
         }
 
         val (times, tickTimes, current) = getAndUpdateSplitsTimes(currentSplits)
-        if (currentSplits.splits.isEmpty()) return@HUD 0f to 0f
+        if (currentSplits.splits.isEmpty()) return@HUD 0 to 0
 
         val maxWidth = currentSplits.splits.dropLast(1).maxOf { getStringWidth(it.name) }
 
@@ -48,7 +48,7 @@ object Splits : Module(
             drawString(displayText, maxWidth + 5, 1 + (currentSplits.splits.size - 1) * 9, Colors.WHITE.rgba)
         }
 
-        getStringWidth("Split 0: 0h 00m 00s" + if (showTickTime) " (0h 00m 00s)" else "") + 2f to 9f * (currentSplits.splits.size + (if (bossEntrySplit) 1 else 0))
+        getStringWidth("Split 0: 0h 00m 00s" + if (showTickTime) " (0h 00m 00s)" else "") + 2 to 9 * (currentSplits.splits.size + (if (bossEntrySplit) 1 else 0))
     }
 
     private val bossEntrySplit by BooleanSetting("Boss Entry Split", true, desc = "Split for boss entry.")

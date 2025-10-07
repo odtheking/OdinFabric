@@ -22,7 +22,7 @@ object SpringBoots : Module(
     description = "Shows the current jump height of your spring boots."
 ) {
     private val hud by HUD("Spring Boots", "Shows the how high you will jump.") {
-        if (blockAmount == 0f && !it) return@HUD 0f to 0f
+        if (blockAmount == 0f && !it) return@HUD 0 to 0
         var width = 1
         width += drawStringWidth("Height: ", width, 1, Colors.MINECRAFT_LIGHT_PURPLE, true)
         width += drawStringWidth(getColor(blockAmount), width, 1, Colors.WHITE, true)

@@ -28,7 +28,7 @@ object InvincibilityTimer : Module(
     private val showPhoenix by BooleanSetting("Show Phoenix Pet", true, desc = "Shows the Phoenix Pet in the HUD.")
 
     private val hud by HUD("Invincibility HUD", "Shows the invincibility time in the HUD.") { example ->
-        if ((!DungeonUtils.inDungeons && !example) || (showOnlyInBoss && !DungeonUtils.inBoss)) return@HUD 0f to 0f
+        if ((!DungeonUtils.inDungeons && !example) || (showOnlyInBoss && !DungeonUtils.inBoss)) return@HUD 0 to 0
         var width = 0
 
         val visibleTypes = InvincibilityType.entries.filter { type ->
@@ -43,7 +43,7 @@ object InvincibilityTimer : Module(
                 3 -> type.currentCooldown > 0
                 else -> true
             } || example)
-        }.ifEmpty { return@HUD 0f to 0f }
+        }.ifEmpty { return@HUD 0 to 0 }
 
         visibleTypes.forEachIndexed { index, type ->
             this.drawItem(type.itemStack, 0, -1 + index * 14)

@@ -27,13 +27,13 @@ class HUDSetting(
 
     constructor(
         name: String,
-        x: Float,
-        y: Float,
+        x: Int,
+        y: Int,
         scale: Float,
         toggleable: Boolean,
         description: String,
         module: Module,
-        draw: DrawContext.(Boolean) -> Pair<Number, Number>
+        draw: DrawContext.(Boolean) -> Pair<Int, Int>
     ) : this(name, HudElement(x, y, scale, toggleable, draw), toggleable, description, module)
 
     override val default: HudElement = hud
@@ -95,8 +95,8 @@ class HUDSetting(
 
     override fun read(element: JsonElement?) {
         if (element !is JsonObject) return
-        value.x = element.get("x")?.asFloat ?: value.x
-        value.y = element.get("y")?.asFloat ?: value.y
+        value.x = element.get("x")?.asInt ?: value.x
+        value.y = element.get("y")?.asInt ?: value.y
         value.scale = element.get("scale")?.asFloat ?: value.scale
         value.enabled = if (toggleable) element.get("enabled")?.asBoolean ?: value.enabled else true
     }

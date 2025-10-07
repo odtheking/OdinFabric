@@ -5,6 +5,7 @@ import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.noControlCodes
 import com.odtheking.odin.utils.render.drawString
+import com.odtheking.odin.utils.render.drawStringWidth
 import com.odtheking.odin.utils.sendCommand
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.toFixed
@@ -17,24 +18,23 @@ object FreshTools : Module(
 ) {
     private val notifyFresh by BooleanSetting("Notify Fresh", true, desc = "Notifies your party when you get fresh timer.")
     private val hud by HUD("Fresh timer", "Displays how long players have fresh for.") { example ->
-        if (!example && (!KuudraUtils.inKuudra || KuudraUtils.phase != 2 || KuudraUtils.freshers.isEmpty())) return@HUD 0f to 0f
+        if (!example && (!KuudraUtils.inKuudra || KuudraUtils.phase != 2 || KuudraUtils.freshers.isEmpty())) return@HUD 0 to 0
 
         var yOffset = 1
-        var maxWidth = 0f
+        var maxWidth = 0
 
         if (example) {
             drawString("§6Player1§f: 9s", 1, yOffset)
             yOffset += mc.textRenderer.fontHeight
-            drawString("§6Player2§f: 5s", 1, yOffset)
-            maxWidth = mc.textRenderer.getWidth("Player2: 5s") + 2f
+            maxWidth = drawStringWidth("§6Player2§f: 5s", 1, yOffset)
             yOffset += mc.textRenderer.fontHeight
         } else {
             KuudraUtils.freshers.forEach { fresher ->
                 val timeLeft = fresher.value?.let { (10000L - (System.currentTimeMillis() - it)) }?.takeIf { it > 0 }
                     ?: return@forEach
                 val text = "§6${fresher.key}§f: ${(timeLeft / 1000f).toFixed()}s"
-                drawString(text, 1, yOffset)
-                maxWidth = maxOf(maxWidth, mc.textRenderer.getWidth(text) + 2f)
+                val width = drawStringWidth(text, 1, yOffset)
+                maxWidth = maxOf(maxWidth, width + 2)
                 yOffset += mc.textRenderer.fontHeight
             }
         }

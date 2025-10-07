@@ -30,6 +30,11 @@ public class HandledScreenMixin {
         if (new GuiEvent.Draw((Screen) (Object) this, context, mouseX, mouseY).postAndCatch()) ci.cancel();
     }
 
+    @Inject(method = "renderBackground", at = @At("HEAD"), cancellable = true)
+    protected void onRender1(DrawContext context, int mouseX, int mouseY, float deltaTicks, CallbackInfo ci) {
+        if (new GuiEvent.DrawBackground((Screen) (Object) this, context).postAndCatch()) ci.cancel();
+    }
+
     @Inject(method = "drawSlot", at = @At("HEAD"), cancellable = true)
     private void onDrawSlot(DrawContext context, Slot slot, CallbackInfo ci) {
         if (new GuiEvent.DrawSlot((Screen) (Object) this, context, slot).postAndCatch()) ci.cancel();

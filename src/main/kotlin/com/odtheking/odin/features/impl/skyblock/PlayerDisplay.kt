@@ -42,11 +42,11 @@ object PlayerDisplay : Module(
     private val healthHud by HUD("Health HUD", "Displays the player's health.") { example ->
         val text = when {
             example -> 3000 to 4000
-            !LocationUtils.isInSkyblock -> return@HUD 0f to 0f
+            !LocationUtils.isInSkyblock -> return@HUD 0 to 0
             SkyblockPlayer.currentHealth != 0 && SkyblockPlayer.maxHealth != 0 -> SkyblockPlayer.currentHealth to SkyblockPlayer.maxHealth
-            else -> return@HUD 0f to 0f
+            else -> return@HUD 0 to 0
         }
-        return@HUD drawStringWidth(generateText(text.first, text.second, "❤"), 1, 1, healthColor) + 2f to mc.textRenderer.fontHeight
+        return@HUD drawStringWidth(generateText(text.first, text.second, "❤"), 1, 1, healthColor) + 2 to mc.textRenderer.fontHeight
     }
     private val healthColor by ColorSetting("Health Color", Colors.MINECRAFT_RED, true, "The color of the health text.")
 
@@ -54,49 +54,49 @@ object PlayerDisplay : Module(
         val text = when {
             example -> generateText(2000, 20000, "✎") + (if (!separateOverflow) " ${generateText(SkyblockPlayer.overflowMana, "ʬ", hideZeroSF)}" else "")
 
-            !LocationUtils.isInSkyblock -> return@HUD 0f to 0f
+            !LocationUtils.isInSkyblock -> return@HUD 0 to 0
             SkyblockPlayer.maxMana != 0 -> when {
-                SkyblockPlayer.currentMana == 0 && separateOverflow -> return@HUD 0f to 0f
+                SkyblockPlayer.currentMana == 0 && separateOverflow -> return@HUD 0 to 0
                 else -> generateText(SkyblockPlayer.currentMana, SkyblockPlayer.maxMana, "✎") +
                         (if (!separateOverflow && overflowManaHud.enabled) " ${generateText(SkyblockPlayer.overflowMana, "ʬ", hideZeroSF)}" else "")
             }
 
-            else -> return@HUD 0f to 0f
+            else -> return@HUD 0 to 0
         }
-        return@HUD drawStringWidth(text, 1, 1, manaColor) + 2f to mc.textRenderer.fontHeight
+        return@HUD drawStringWidth(text, 1, 1, manaColor) + 2 to mc.textRenderer.fontHeight
     }
     private val manaColor by ColorSetting("Mana Color", Colors.MINECRAFT_AQUA, true, "The color of the mana text.")
 
     private val overflowManaHud by HUD("Overflow Mana HUD", "Displays the player's overflow mana.") { example ->
         val text = when {
             example -> 333
-            !LocationUtils.isInSkyblock -> return@HUD 0f to 0f
+            !LocationUtils.isInSkyblock -> return@HUD 0 to 0
             separateOverflow -> SkyblockPlayer.overflowMana
-            else -> return@HUD 0f to 0f
+            else -> return@HUD 0 to 0
         }
-        return@HUD drawStringWidth(generateText(text, "ʬ", hideZeroSF), 1, 1, overflowManaColor) + 2f to mc.textRenderer.fontHeight
+        return@HUD drawStringWidth(generateText(text, "ʬ", hideZeroSF), 1, 1, overflowManaColor) + 2 to mc.textRenderer.fontHeight
     }
     private val overflowManaColor by ColorSetting("Overflow Mana Color", Colors.MINECRAFT_DARK_AQUA, true, desc = "The color of the overflow mana text.")
 
     private val defenseHud by HUD("Defense HUD", "Displays the player's defense.") { example ->
         val text = when {
             example -> 1000
-            !LocationUtils.isInSkyblock -> return@HUD 0f to 0f
+            !LocationUtils.isInSkyblock -> return@HUD 0 to 0
             SkyblockPlayer.currentDefense != 0 -> SkyblockPlayer.currentDefense
-            else -> return@HUD 0f to 0f
+            else -> return@HUD 0 to 0
         }
-        return@HUD drawStringWidth(generateText(text, "❈", true), 1, 1, defenseColor) + 2f to mc.textRenderer.fontHeight
+        return@HUD drawStringWidth(generateText(text, "❈", true), 1, 1, defenseColor) + 2 to mc.textRenderer.fontHeight
     }
     private val defenseColor by ColorSetting("Defense Color", Colors.MINECRAFT_GREEN, true, desc = "The color of the defense text.")
 
     private val eHPHud by HUD("EHP HUD", "Displays the player's effective health (EHP).") { example ->
         val text = when {
             example -> 1000000
-            !LocationUtils.isInSkyblock -> return@HUD 0f to 0f
+            !LocationUtils.isInSkyblock -> return@HUD 0 to 0
             SkyblockPlayer.effectiveHP != 0 -> SkyblockPlayer.effectiveHP
-            else -> return@HUD 0f to 0f
+            else -> return@HUD 0 to 0
         }
-        return@HUD drawStringWidth(generateText(text, "", true), 1, 1, ehpColor) + 2f to mc.textRenderer.fontHeight
+        return@HUD drawStringWidth(generateText(text, "", true), 1, 1, ehpColor) + 2 to mc.textRenderer.fontHeight
     }
     private val ehpColor by ColorSetting("EHP", Colors.MINECRAFT_DARK_GREEN, true, "The color of the effective health text.")
 

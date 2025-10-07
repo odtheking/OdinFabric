@@ -7,6 +7,7 @@ import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.render.drawString
+import com.odtheking.odin.utils.render.getStringWidth
 import com.odtheking.odin.utils.skyblock.dungeon.Blessing
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 
@@ -35,12 +36,12 @@ object BlessingDisplay : Module(
     )
 
     private val hud by HUD("Blessing HUD", "Displays the current active blessings of the dungeon.") { example ->
-        if (!DungeonUtils.inDungeons && !example) return@HUD 0f to 0f
+        if (!DungeonUtils.inDungeons && !example) return@HUD 0 to 0
         (0..5).reduce { acc, index ->
             val blessing = blessings[index - 1].takeIf { it.enabled.invoke() } ?: return@reduce acc
             val level = if (example) 19 else if (blessing.type.current > 0) blessing.type.current else return@reduce acc
             drawString("${blessing.type.displayString} §a$level§r", 1, 1 + 10 * acc, blessing.color.invoke().rgba)
             acc + 1
-        }.let { mc.textRenderer.getWidth("Power: 19") to 1 + 10f * it }
+        }.let { getStringWidth("Power: 19") to 1 + 10 * it }
     }
 }

@@ -20,8 +20,8 @@ object BreakerDisplay : Module(
     private var max = 0
 
     private val hud by HUD("Breaker Display", "Shows the amount of charges left in your Dungeon Breaker.") {
-        if (it || (max != 0 && DungeonUtils.inDungeons)) drawStringWidth("§cCharges: §e${if (it) 17 else charges}§7/§e${if (it) 20 else max}§c⸕", 1, 1, Colors.WHITE) + 2f to 10f
-        else 0f to 0f
+        if (it || (max != 0 && DungeonUtils.inDungeons)) drawStringWidth("§cCharges: §e${if (it) 17 else charges}§7/§e${if (it) 20 else max}§c⸕", 1, 1, Colors.WHITE) + 2 to 10
+        else 0 to 0
     }
 
     @EventHandler
