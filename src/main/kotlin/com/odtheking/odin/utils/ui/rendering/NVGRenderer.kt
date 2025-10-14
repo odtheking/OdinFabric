@@ -39,6 +39,7 @@ object NVGRenderer {
 
     private var scissor: Scissor? = null
 
+    private var previousTexture = -1
 
     private var vg = -1L
 
@@ -52,6 +53,8 @@ object NVGRenderer {
     fun beginFrame(width: Float, height: Float) {
         if (drawing) throw IllegalStateException("[NVGRenderer] Already drawing, but called beginFrame")
 
+
+        previousTexture = GlStateManager._getActiveTexture()
         val framebuffer = mc.framebuffer
         val glFramebuffer = (framebuffer.colorAttachment as GlTexture).getOrCreateFramebuffer(
             (RenderSystem.getDevice() as GlBackend).bufferManager, null)
@@ -73,6 +76,12 @@ object NVGRenderer {
         GlStateManager._blendFuncSeparate(770, 771, 1, 0)
 
         GlStateManager._glUseProgram(0) // fixes invalid program errors when using NVG
+
+        if (previousTexture != -1) { // prevents issues with gui background rendering
+            GlStateManager._activeTexture(previousTexture)
+            if (TextureTracker.previousBoundTexture != -1) GlStateManager._bindTexture(TextureTracker.previousBoundTexture)
+        }
+
         GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0) // fixes macos issues
 
         drawing = false
@@ -412,4 +421,9 @@ object NVGRenderer {
 
     private data class NVGImage(var count: Int, val nvg: Int)
     private data class NVGFont(val id: Int, val buffer: ByteBuffer)
+}
+
+object TextureTracker {
+    @JvmStatic
+    var previousBoundTexture = -1
 }

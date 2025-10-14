@@ -46,7 +46,7 @@ object LeapMenu : Module(
     @EventHandler
     fun onDrawScreen(event: GuiEvent.Draw) {
         val chest = (event.screen as? HandledScreen<*>) ?: return
-        if (!chest.title.string.equalsOneOf("Spirit Leap", "Teleport to Player") || leapTeammates.isEmpty() || leapTeammates.all { it == EMPTY }) return
+        if (chest.title?.string?.equalsOneOf("Spirit Leap", "Teleport to Player") == false || leapTeammates.isEmpty() || leapTeammates.all { it == EMPTY }) return
 
         val halfWidth = mc.window.width / 2f
         val halfHeight = mc.window.height / 2f
@@ -74,7 +74,6 @@ object LeapMenu : Module(
             }
 
             val expandValue = hoverHandler[index].anim.get(0f, 15f, !hoverHandler[index].hasStarted)
-            NVGRenderer.dropShadow(x - expandValue, y - expandValue, boxWidth + expandValue * 2, boxHeight + expandValue * 2, 2f, 2f, 12f)
             NVGRenderer.rect(x - expandValue ,y - expandValue, boxWidth + expandValue * 2, boxHeight + expandValue * 2, (if (colorStyle) player.clazz.color else backgroundColor).rgba, 12f)
             imageCacheMap.getOrPut(player.locationSkin.path) {
                 NVGRenderer.createNVGImage((mc.textureManager?.getTexture(player.locationSkin)?.glTexture as? GlTexture)?.glId ?: 0, 64, 64)
