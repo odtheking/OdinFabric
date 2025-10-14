@@ -9,6 +9,7 @@ import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonClass
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonPlayer
+import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.leapTeammates
 import com.odtheking.odin.utils.ui.HoverHandler
 import com.odtheking.odin.utils.ui.getQuadrant
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
@@ -141,12 +142,12 @@ object LeapMenu : Module(
             leapedRegex.find(event.packet.content.string)?.groupValues?.let { sendCommand("pc Leaped to ${it[1]}!") }
     }
 
-    private val leapTeammates: MutableList<DungeonPlayer> = mutableListOf(
+    /*private val leapTeammates: MutableList<DungeonPlayer> = mutableListOf(
         DungeonPlayer("Stiviaisd", DungeonClass.Healer, 50),
         DungeonPlayer("Odtheking", DungeonClass.Archer, 50),
         DungeonPlayer("Bonzi", DungeonClass.Mage, 47),
         DungeonPlayer("Cezar", DungeonClass.Tank, 38)
-    )
+    )*/
 
     /**
      * Sorts the list of players based on their default quadrant and class priority.
