@@ -15,7 +15,6 @@
     "mixins.ClientWorldMixin",
     "mixins.EntityRendererMixin",
     "mixins.ExperienceBarMixin",
-    "mixins.GenericContainerScreenMixin",
     "mixins.GlStateManagerMixin",
     "mixins.HandledScreenMixin",
     "mixins.InGameHudMixin",
@@ -24,8 +23,7 @@
     "mixins.MessageHandlerMixin",
     "mixins.MixinGameRenderer",
     "mixins.MouseMixin",
-    "mixins.PlayerEntityRendererMixin",
-    "mixins.ScreenMixin"
+    "mixins.PlayerEntityRendererMixin"
   ],
   "mixins": [
     "accessors.PlayerInteractEntityC2SPacketAccessor",
