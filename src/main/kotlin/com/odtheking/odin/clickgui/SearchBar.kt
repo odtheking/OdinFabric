@@ -5,6 +5,7 @@ import com.odtheking.odin.features.impl.render.ClickGUIModule
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.ui.TextInputHandler
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
+import net.minecraft.client.input.KeyInput
 
 object SearchBar {
 
@@ -46,8 +47,8 @@ object SearchBar {
         textInputHandler.mouseReleased()
     }
 
-    fun keyPressed(keyCode: Int): Boolean {
-        return textInputHandler.keyPressed(keyCode)
+    fun keyPressed(input: KeyInput): Boolean {
+        return textInputHandler.keyPressed(input)
     }
 
     fun keyTyped(typedChar: Char): Boolean {

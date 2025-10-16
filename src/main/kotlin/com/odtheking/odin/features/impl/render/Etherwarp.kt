@@ -67,11 +67,11 @@ object Etherwarp : Module(
                     ?.takeIf { !it.isEmpty }?.boundingBox?.offset(pos) ?: Box(pos)
 
             when (renderStyle) {
-                0 -> event.context.drawWireFrameBox(box, color)
-                1 -> event.context.drawFilledBox(box, color)
+                0 -> event.drawWireFrameBox(box, color)
+                1 -> event.drawFilledBox(box, color)
                 2 -> {
-                    event.context.drawWireFrameBox(box, color)
-                    event.context.drawFilledBox(box, color.multiplyAlpha(0.5f))
+                    event.drawWireFrameBox(box, color)
+                    event.drawFilledBox(box, color.multiplyAlpha(0.5f))
                 }
             }
         }

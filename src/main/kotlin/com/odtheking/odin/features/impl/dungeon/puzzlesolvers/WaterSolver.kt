@@ -3,6 +3,7 @@ package com.odtheking.odin.features.impl.dungeon.puzzlesolvers
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.render.drawLine
@@ -11,7 +12,6 @@ import com.odtheking.odin.utils.renderPos
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import com.odtheking.odin.utils.toFixed
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.block.Blocks
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket
 import net.minecraft.text.Text
@@ -66,7 +66,7 @@ object WaterSolver {
         }
     }
 
-    fun onRenderWorld(context: WorldRenderContext, showTracer: Boolean, tracerColorFirst: Color, tracerColorSecond: Color) {
+    fun onRenderWorld(event: RenderEvent, showTracer: Boolean, tracerColorFirst: Color, tracerColorSecond: Color) {
         if (patternIdentifier == -1 || solutions.isEmpty() || DungeonUtils.currentRoomName != "Water Board") return
 
         val solutionList = solutions
@@ -75,10 +75,10 @@ object WaterSolver {
 
         if (showTracer) {
             val firstSolution = solutionList.firstOrNull()?.first ?: return
-            mc.player?.let { context.drawLine(listOf(it.renderPos, Vec3d(firstSolution.leverPos).add(.5, .5, .5)), color = tracerColorFirst, depth = true) }
+            mc.player?.let { event.drawLine(listOf(it.renderPos, Vec3d(firstSolution.leverPos).add(.5, .5, .5)), color = tracerColorFirst, depth = true) }
 
             if (solutionList.size > 1 && firstSolution.leverPos != solutionList[1].first.leverPos) {
-                context.drawLine(
+                event.drawLine(
                     listOf(Vec3d(firstSolution.leverPos).add(.5, .5, .5), Vec3d(solutionList[1].first.leverPos).add(.5, .5, .5)),
                     color = tracerColorSecond, depth = true
                 )
@@ -88,7 +88,7 @@ object WaterSolver {
         solutions.forEach { (lever, times) ->
             times.drop(lever.i).forEachIndexed { index, time ->
                 val timeInTicks = (time * 20).toInt()
-                context.drawText(
+                event.drawText(
                     Text.of(when (openedWaterTicks) {
                         -1 if timeInTicks == 0 -> "§a§lCLICK ME!"
                         -1 -> "§e${time}s"

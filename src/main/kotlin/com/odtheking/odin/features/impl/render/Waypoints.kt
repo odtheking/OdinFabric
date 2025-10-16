@@ -12,6 +12,7 @@ import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.modMessage
+import com.odtheking.odin.utils.pos
 import com.odtheking.odin.utils.render.drawCustomBeacon
 import com.odtheking.odin.utils.sendCommand
 import meteordevelopment.orbit.EventHandler
@@ -65,7 +66,7 @@ object Waypoints : Module(
     @EventHandler
     fun onRenderWorld(event: RenderEvent.Last) {
         temporaryWaypoints.removeAll {
-            event.context.drawCustomBeacon(Text.of(it.name).asOrderedText(), it.blockPos, it.color)
+            event.drawCustomBeacon(Text.of(it.name).asOrderedText(), it.blockPos, it.color)
             System.currentTimeMillis() > it.timeAdded + it.duration
         }
     }
@@ -76,7 +77,7 @@ object Waypoints : Module(
     }
 
     fun addTempWaypoint(name: String = "Waypoint", x: Int, y: Int, z: Int, duration: Long = 60_000) {
-        if (!Waypoints.enabled) return
+        if (!enabled) return
         if (listOf(x, y, z).any { abs(it) > 5000 }) return modMessage("§cWaypoint out of bounds.")
         if (temporaryWaypoints.any { it.blockPos.x == x && it.blockPos.y == y && it.blockPos.z == z }) return modMessage(
             "§cWaypoint already exists at $x, $y, $z."

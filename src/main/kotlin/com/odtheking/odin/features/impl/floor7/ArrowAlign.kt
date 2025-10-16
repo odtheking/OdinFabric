@@ -11,6 +11,7 @@ import com.odtheking.odin.utils.component1
 import com.odtheking.odin.utils.component2
 import com.odtheking.odin.utils.component3
 import com.odtheking.odin.utils.handlers.TickTask
+import com.odtheking.odin.utils.pos
 import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
@@ -94,7 +95,7 @@ object ArrowAlign : Module(
                 clickNeeded < 5 -> '6'
                 else -> 'c'
             }
-            event.context.drawText(
+            event.drawText(
                 Text.of("§$colorCode$clickNeeded").asOrderedText(),
                 getFramePositionFromIndex(index).toCenterPos().addVec(y = 0.1, x = -0.3),
                 1f,

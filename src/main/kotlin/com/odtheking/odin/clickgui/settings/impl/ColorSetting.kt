@@ -19,6 +19,7 @@ import com.odtheking.odin.utils.ui.animations.LinearAnimation
 import com.odtheking.odin.utils.ui.isAreaHovered
 import com.odtheking.odin.utils.ui.rendering.Gradient
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
+import net.minecraft.client.input.KeyInput
 
 class ColorSetting(
     name: String,
@@ -158,8 +159,8 @@ class ColorSetting(
         section = null
     }
 
-    override fun keyPressed(keyCode: Int, scanCode: Int): Boolean {
-        return if (extended) textInputHandler.keyPressed(keyCode)
+    override fun keyPressed(input: KeyInput): Boolean {
+        return if (extended) textInputHandler.keyPressed(input)
         else false
     }
 

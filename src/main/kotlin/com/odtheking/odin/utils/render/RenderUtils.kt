@@ -13,7 +13,6 @@ import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.render.LightmapTextureManager
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.render.VertexRendering
-import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer
 import net.minecraft.client.util.BufferAllocator
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.text.OrderedText
@@ -130,7 +129,6 @@ fun RenderEvent.drawBeaconBeam(position: BlockPos, color: Color) {
     if (mc.world == null) return
 
     val matrix = matrixStack
-    val bufferSource = buffer as? VertexConsumerProvider.Immediate ?: return
     val camera = cameraPosition
 
     matrix.push()
@@ -140,7 +138,7 @@ fun RenderEvent.drawBeaconBeam(position: BlockPos, color: Color) {
 
     BeaconBeamAccessor.invokeRenderBeam(
         matrix,
-        bufferSource,
+        mc.gameRenderer.entityRenderDispatcher.queue,
         BEAM_TEXTURE,
         1f,
         mc.world!!.time.toFloat(),

@@ -62,13 +62,13 @@ object PlayerSize : Module(
 
     @JvmStatic
     fun preRenderCallbackScaleHook(entityRenderer: PlayerEntityRenderState, matrix: MatrixStack) {
-        if (enabled && entityRenderer.name == mc.player?.name?.string && !randoms.containsKey(entityRenderer.name)) {
+        if (enabled && entityRenderer.playerName.toString() == mc.player?.name?.string && !randoms.containsKey(entityRenderer.playerName.toString())) {
             if (devSizeY < 0) matrix.translate(0f, devSizeY * 2, 0f)
             matrix.scale(devSizeX, devSizeY, devSizeZ)
         }
-        if (!randoms.containsKey(entityRenderer.name)) return
-        if (!devSize && entityRenderer.name == mc.player?.name?.string) return
-        val random = randoms[entityRenderer.name] ?: return
+        if (!randoms.containsKey(entityRenderer.playerName.toString())) return
+        if (!devSize && entityRenderer.playerName.toString() == mc.player?.name?.string) return
+        val random = randoms[entityRenderer.playerName.toString()] ?: return
         if (random.scale.second < 0) matrix.translate(0f, random.scale.second * 2, 1f)
         matrix.scale(random.scale.first, random.scale.second, random.scale.third)
     }

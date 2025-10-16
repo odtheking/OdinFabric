@@ -10,6 +10,7 @@ import com.odtheking.odin.features.impl.render.ClickGUIModule
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.ui.TextInputHandler
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
+import net.minecraft.client.input.KeyInput
 
 class StringSetting(
     name: String,
@@ -55,8 +56,8 @@ class StringSetting(
         if (state == 0) textInputHandler.mouseReleased()
     }
 
-    override fun keyPressed(keyCode: Int, scanCode: Int): Boolean {
-        return textInputHandler.keyPressed(keyCode)
+    override fun keyPressed(input: KeyInput): Boolean {
+        return textInputHandler.keyPressed(input)
     }
 
     override fun keyTyped(typedChar: Char): Boolean {

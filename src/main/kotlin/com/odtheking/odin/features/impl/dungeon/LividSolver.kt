@@ -47,7 +47,7 @@ object LividSolver : Module(
     fun onRenderEvent(event: RenderEvent.Last) {
         if (!DungeonUtils.inBoss || !DungeonUtils.isFloor(5) || mc.player?.getStatusEffect(StatusEffects.BLINDNESS) != null) return
         currentLivid.entity?.let { entity ->
-            event.context.drawWireFrameBox(entity.boundingBox, currentLivid.color, depth = true)
+            event.drawWireFrameBox(entity.boundingBox, currentLivid.color, depth = true)
         }
     }
 

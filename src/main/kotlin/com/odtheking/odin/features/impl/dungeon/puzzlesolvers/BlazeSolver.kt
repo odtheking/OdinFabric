@@ -1,6 +1,7 @@
 package com.odtheking.odin.features.impl.dungeon.puzzlesolvers
 
 import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.features.impl.dungeon.puzzlesolvers.PuzzleSolvers.onPuzzleComplete
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.render.drawLine
@@ -9,7 +10,6 @@ import com.odtheking.odin.utils.skyblock.dungeon.DungeonListener
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.Puzzle
 import com.odtheking.odin.utils.skyblock.dungeon.PuzzleStatus
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.entity.decoration.ArmorStandEntity
 import net.minecraft.util.math.Box
 
@@ -33,7 +33,7 @@ object BlazeSolver {
         else blazes.sortBy { hpMap[it] }
     }
 
-    fun onRenderWorld(context: WorldRenderContext, blazeLineNext: Boolean, blazeLineAmount: Int, blazeStyle: Int, blazeFirstColor: Color, blazeSecondColor: Color, blazeAllColor: Color, blazeWidth: Float, blazeHeight: Float, blazeSendComplete: Boolean, blazeLineWidth: Float) {
+    fun onRenderWorld(event: RenderEvent, blazeLineNext: Boolean, blazeLineAmount: Int, blazeStyle: Int, blazeFirstColor: Color, blazeSecondColor: Color, blazeAllColor: Color, blazeWidth: Float, blazeHeight: Float, blazeSendComplete: Boolean, blazeLineWidth: Float) {
         if (!DungeonUtils.currentRoomName.equalsOneOf("Lower Blaze", "Higher Blaze")) return
         if (blazes.isEmpty()) return
         blazes.removeAll { mc.world?.getEntityById(it.id) == null }
@@ -53,10 +53,10 @@ object BlazeSolver {
             }
             val aabb = Box(-blazeWidth / 2.0, -1 - (blazeHeight / 2.0), -blazeWidth / 2.0, blazeWidth / 2.0, (blazeHeight / 2.0) - 1, blazeWidth / 2.0).offset(entity.pos)
 
-            context.drawStyledBox(aabb, color, blazeStyle, depth = true)
+            event.drawStyledBox(aabb, color, blazeStyle, depth = true)
 
             if (blazeLineNext && index > 0 && index <= blazeLineAmount)
-                context.drawLine(listOf(blazes[index - 1].renderPos, entity.renderBoundingBox.center), color = color, thickness = blazeLineWidth, depth = true)
+                event.drawLine(listOf(blazes[index - 1].renderPos, entity.renderBoundingBox.center), color = color, thickness = blazeLineWidth, depth = true)
         }
     }
 

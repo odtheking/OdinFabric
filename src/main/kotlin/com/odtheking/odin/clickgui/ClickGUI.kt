@@ -102,7 +102,7 @@ object ClickGUI : Screen(Text.of("Click GUI")) {
     }
 
     override fun keyPressed(input: KeyInput): Boolean {
-        SearchBar.keyPressed(input.keycode)
+        SearchBar.keyPressed(input)
         for (i in panels.size - 1 downTo 0) {
             if (panels[i].keyPressed(input)) return true
         }

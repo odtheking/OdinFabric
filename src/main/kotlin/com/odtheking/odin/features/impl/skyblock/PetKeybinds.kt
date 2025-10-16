@@ -41,12 +41,12 @@ object PetKeybinds : Module(
 
     @EventHandler
     fun onGuiEvent(event: GuiEvent.MouseClick) {
-        if (onClick((event.screen as? HandledScreen<*>) ?: return, event.button)) event.cancel()
+        if (onClick((event.screen as? HandledScreen<*>) ?: return, event.click.button())) event.cancel()
     }
 
     @EventHandler
     fun onGuiEvent(event: GuiEvent.KeyPress) {
-        if (onClick((event.screen as? HandledScreen<*>) ?: return, event.keyCode)) event.cancel()
+        if (onClick((event.screen as? HandledScreen<*>) ?: return, event.input.keycode)) event.cancel()
     }
 
     private fun onClick(screen: HandledScreen<*>, keyCode: Int): Boolean {

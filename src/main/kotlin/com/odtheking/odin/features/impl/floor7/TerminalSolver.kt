@@ -144,26 +144,26 @@ object TerminalSolver : Module(
         if (!enabled || this == null) return
 
         if (renderType == 1 && !(type == TerminalTypes.MELODY && cancelMelodySolver)) {
-            currentTerm?.type?.getGUI()?.mouseClicked(event.screen, event.button)
+            currentTerm?.type?.getGUI()?.mouseClicked(event.screen, event.click.button())
             event.cancel()
             return
         }
 
         val slotIndex = (event.screen as HandledScreenAccessor).focusedSlot?.id ?: return
 
-        if (blockIncorrectClicks && !canClick(slotIndex, event.button)) {
+        if (blockIncorrectClicks && !canClick(slotIndex, event.click.button())) {
             event.cancel()
             return
         }
 
         if (middleClickGUI) {
-            click(slotIndex, event.button, hideClicked && !isClicked)
+            click(slotIndex, event.click.button(), hideClicked && !isClicked)
             event.cancel()
             return
         }
 
         if (hideClicked && !isClicked) {
-            simulateClick(slotIndex, event.button)
+            simulateClick(slotIndex, event.click.button())
             isClicked = true
         }
     }
