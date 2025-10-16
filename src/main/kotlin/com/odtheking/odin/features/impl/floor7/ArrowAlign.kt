@@ -11,7 +11,6 @@ import com.odtheking.odin.utils.component1
 import com.odtheking.odin.utils.component2
 import com.odtheking.odin.utils.component3
 import com.odtheking.odin.utils.handlers.TickTask
-import com.odtheking.odin.utils.pos
 import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
@@ -40,7 +39,7 @@ object ArrowAlign : Module(
         TickTask(1) {
             if (DungeonUtils.getF7Phase() != M7Phases.P3) return@TickTask
             clicksRemaining.clear()
-            if ((mc.player?.pos?.distanceTo(Vec3d(0.0, 120.0, 77.0)) ?: return@TickTask) > 200) {
+            if ((mc.player?.entityPos?.distanceTo(Vec3d(0.0, 120.0, 77.0)) ?: return@TickTask) > 200) {
                 currentFrameRotations = null
                 targetSolution = null
                 return@TickTask

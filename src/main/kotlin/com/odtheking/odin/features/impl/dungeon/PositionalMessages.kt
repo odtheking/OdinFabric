@@ -9,7 +9,6 @@ import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color
-import com.odtheking.odin.utils.pos
 import com.odtheking.odin.utils.render.drawCylinder
 import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.render.drawWireFrameBox
@@ -86,9 +85,9 @@ object PositionalMessages : Module(
 
     private fun handleInString(posMessage: PosMessage) {
         val msgSent = sentMessages.getOrDefault(posMessage, false)
-        if (mc.player != null && Box(posMessage.x, posMessage.y, posMessage.z, posMessage.x2 ?: return, posMessage.y2 ?: return, posMessage.z2 ?: return).contains(mc.player?.pos)) {
+        if (mc.player != null && Box(posMessage.x, posMessage.y, posMessage.z, posMessage.x2 ?: return, posMessage.y2 ?: return, posMessage.z2 ?: return).contains(mc.player?.entityPos)) {
             if (!msgSent) Timer().schedule(posMessage.delay) {
-                if (Box(posMessage.x, posMessage.y, posMessage.z, posMessage.x2, posMessage.y2, posMessage.z2).contains(mc.player?.pos))
+                if (Box(posMessage.x, posMessage.y, posMessage.z, posMessage.x2, posMessage.y2, posMessage.z2).contains(mc.player?.entityPos))
                     sendCommand("pc ${posMessage.message}")
             }
             sentMessages[posMessage] = true

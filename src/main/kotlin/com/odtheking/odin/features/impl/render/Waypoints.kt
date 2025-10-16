@@ -12,7 +12,6 @@ import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.modMessage
-import com.odtheking.odin.utils.pos
 import com.odtheking.odin.utils.render.drawCustomBeacon
 import com.odtheking.odin.utils.sendCommand
 import meteordevelopment.orbit.EventHandler
@@ -34,7 +33,7 @@ object Waypoints : Module(
     private val pingLocationToggle by BooleanSetting("Ping Waypoint", false, desc = "Adds a waypoint at the location you are looking at.").withDependency { pingLocationDropDown }
     private val pingLocation by KeybindSetting("Ping Keybind", GLFW.GLFW_KEY_UNKNOWN, desc = "Sends the location you are looking at as coords in chat for waypoints.").onPress {
         if (!pingLocationToggle) return@onPress
-        Etherwarp.getEtherPos(mc.player?.pos, pingDistance).pos?.let { pos ->
+        Etherwarp.getEtherPos(mc.player?.entityPos, pingDistance).pos?.let { pos ->
             addTempWaypoint("§fWaypoint", pos.x, pos.y, pos.z, pingWaypointTime)
             if (sendPingedLocation) sendCommand("odinwaypoint share ${pos.x} ${pos.y} ${pos.z}")
         }

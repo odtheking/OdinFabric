@@ -8,7 +8,6 @@ import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.addVec
-import com.odtheking.odin.utils.pos
 import com.odtheking.odin.utils.render.drawString
 import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.render.drawWireFrameBox
@@ -47,7 +46,7 @@ object KuudraInfo : Module(
             if (kuudraHPDisplay) {
                 event.drawText(
                     Text.of(getCurrentHealthDisplay(it.health)).asOrderedText(),
-                    it.pos.add(it.rotationVector.multiply(13.0).addVec(y = 10.0)), healthSize, depth = true
+                    it.entityPos.add(it.rotationVector.multiply(13.0).addVec(y = 10.0)), healthSize, depth = true
                 )
             }
         }

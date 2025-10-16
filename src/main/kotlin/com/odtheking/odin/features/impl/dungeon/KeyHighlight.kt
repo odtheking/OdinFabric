@@ -10,7 +10,6 @@ import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.alert
-import com.odtheking.odin.utils.pos
 import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import meteordevelopment.orbit.EventHandler
@@ -47,7 +46,7 @@ object KeyHighlight : Module(
                 currentKey = null
                 return
             }
-            event.drawWireFrameBox(Box.from(keyType.entity?.pos?.add(-0.5, 1.0, -0.5)), keyType.color(), depth = true)
+            event.drawWireFrameBox(Box.from(keyType.entity?.entityPos?.add(-0.5, 1.0, -0.5)), keyType.color(), depth = true)
         }
     }
 

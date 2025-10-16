@@ -51,7 +51,7 @@ object BlazeSolver {
                 1 -> blazeSecondColor
                 else -> blazeAllColor
             }
-            val aabb = Box(-blazeWidth / 2.0, -1 - (blazeHeight / 2.0), -blazeWidth / 2.0, blazeWidth / 2.0, (blazeHeight / 2.0) - 1, blazeWidth / 2.0).offset(entity.pos)
+            val aabb = Box(-blazeWidth / 2.0, -1 - (blazeHeight / 2.0), -blazeWidth / 2.0, blazeWidth / 2.0, (blazeHeight / 2.0) - 1, blazeWidth / 2.0).offset(entity.entityPos)
 
             event.drawStyledBox(aabb, color, blazeStyle, depth = true)
 

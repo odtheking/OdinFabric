@@ -55,7 +55,7 @@ object Etherwarp : Module(
         if (mc.player?.isSneaking == false || mc.currentScreen != null) return
 
         etherPos = getEtherPos(
-            if (useServerPosition) mc.player?.lastPos else mc.player?.pos,
+            if (useServerPosition) mc.player?.lastPos else mc.player?.entityPos,
             56.0 + (isEtherwarpItem()?.getInt("tuned_transmission", 0) ?: return),
             etherWarp = true
         )

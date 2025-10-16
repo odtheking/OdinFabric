@@ -8,7 +8,6 @@ import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.addVec
 import com.odtheking.odin.utils.equalsOneOf
 import com.odtheking.odin.utils.isItem
-import com.odtheking.odin.utils.pos
 import com.odtheking.odin.utils.render.drawStringWidth
 import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.skyblock.LocationUtils
@@ -59,7 +58,7 @@ object SpringBoots : Module(
     @EventHandler
     fun onRenderWorld(event: RenderEvent.Last) {
         if (!LocationUtils.isInSkyblock || blockAmount == 0f) return
-        mc.player?.pos?.addVec(y = blockAmount)?.let { event.drawWireFrameBox(Box.from(it), Colors.MINECRAFT_RED) }
+        mc.player?.entityPos?.addVec(y = blockAmount)?.let { event.drawWireFrameBox(Box.from(it), Colors.MINECRAFT_RED) }
     }
 
     @EventHandler
