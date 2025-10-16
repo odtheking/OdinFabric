@@ -10,6 +10,7 @@ import com.odtheking.odin.features.impl.render.ClickGUIModule
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.ui.isAreaHovered
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
+import net.minecraft.client.input.KeyInput
 import net.minecraft.client.util.InputUtil
 import org.lwjgl.glfw.GLFW
 
@@ -64,13 +65,13 @@ class KeybindSetting(
         return false
     }
 
-    override fun keyPressed(keyCode: Int, scanCode: Int): Boolean {
+    override fun keyPressed(input: KeyInput): Boolean {
         if (!listening) return false
 
-        when (keyCode) {
+        when (input.keycode) {
             GLFW.GLFW_KEY_ESCAPE, GLFW.GLFW_KEY_BACKSPACE -> key = InputUtil.UNKNOWN_KEY
             GLFW.GLFW_KEY_ENTER -> listening = false
-            else -> key = InputUtil.fromKeyCode(keyCode, scanCode)
+            else -> key = InputUtil.fromKeyCode(input)
         }
 
         listening = false
@@ -83,7 +84,7 @@ class KeybindSetting(
     }
 
     fun isDown(): Boolean =
-        value != InputUtil.UNKNOWN_KEY && InputUtil.isKeyPressed(mc.window.handle, value.code)
+        value != InputUtil.UNKNOWN_KEY && InputUtil.isKeyPressed(mc.window, value.code)
 
     override val isHovered: Boolean
         get() =

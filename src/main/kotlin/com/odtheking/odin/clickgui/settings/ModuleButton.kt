@@ -14,6 +14,7 @@ import com.odtheking.odin.utils.ui.animations.EaseInOutAnimation
 import com.odtheking.odin.utils.ui.mouseX
 import com.odtheking.odin.utils.ui.mouseY
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
+import net.minecraft.client.input.KeyInput
 import kotlin.math.floor
 
 /**
@@ -102,10 +103,10 @@ class ModuleButton(val module: Module, val panel: Panel) {
         return false
     }
 
-    fun keyPressed(keyCode: Int, scanCode: Int): Boolean {
+    fun keyPressed(input: KeyInput): Boolean {
         if (!extended) return false
         for (setting in representableSettings) {
-            if (setting.isVisible && setting.keyPressed(keyCode, scanCode)) return true
+            if (setting.isVisible && setting.keyPressed(input)) return true
         }
         return false
     }

@@ -4,6 +4,7 @@ import com.odtheking.odin.clickgui.ClickGUI
 import com.odtheking.odin.clickgui.Panel
 import com.odtheking.odin.utils.ui.HoverHandler
 import com.odtheking.odin.utils.ui.isAreaHovered
+import net.minecraft.client.input.KeyInput
 
 abstract class RenderableSetting<T>(
     name: String,
@@ -30,7 +31,7 @@ abstract class RenderableSetting<T>(
     open fun mouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int): Boolean = false
     open fun mouseReleased(state: Int) {}
     open fun keyTyped(typedChar: Char): Boolean = false
-    open fun keyPressed(keyCode: Int, scanCode: Int): Boolean = false
+    open fun keyPressed(input: KeyInput): Boolean = false
     open fun getHeight(): Float = Panel.HEIGHT
 
     open val isHovered get() = isAreaHovered(lastX, lastY, width, getHeight())

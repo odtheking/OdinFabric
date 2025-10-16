@@ -5,8 +5,10 @@ import com.odtheking.odin.clickgui.settings.impl.HudElement
 import com.odtheking.odin.config.Config
 import com.odtheking.odin.features.ModuleManager.hudSettingsCache
 import com.odtheking.odin.utils.Colors
+import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
+import net.minecraft.client.input.KeyInput
 import net.minecraft.text.Text
 import org.lwjgl.glfw.GLFW
 import kotlin.math.sign
@@ -64,7 +66,7 @@ object HudManager : Screen(Text.of("HUD Manager")) {
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)
     }
 
-    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+    override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
         for (hud in hudSettingsCache) {
             if (hud.isEnabled && hud.value.isHovered()) {
                 dragging = hud.value
@@ -74,16 +76,16 @@ object HudManager : Screen(Text.of("HUD Manager")) {
                 return true
             }
         }
-        return super.mouseClicked(mouseX, mouseY, button)
+        return super.mouseClicked(click, doubled)
     }
 
-    override fun mouseReleased(mouseX: Double, mouseY: Double, state: Int): Boolean {
+    override fun mouseReleased(click: Click): Boolean {
         dragging = null
-        return super.mouseReleased(mouseX, mouseY, state)
+        return super.mouseReleased(click)
     }
 
-    override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
-        when (keyCode) {
+    override fun keyPressed(input: KeyInput): Boolean {
+        when (input.keycode) {
             GLFW.GLFW_KEY_EQUAL -> {
                 for (hud in hudSettingsCache) {
                     if (hud.isEnabled && hud.value.isHovered()) {
@@ -138,7 +140,7 @@ object HudManager : Screen(Text.of("HUD Manager")) {
                 }
             }
         }
-        return super.keyPressed(keyCode, scanCode, modifiers)
+        return super.keyPressed(input)
     }
 
     override fun close() {

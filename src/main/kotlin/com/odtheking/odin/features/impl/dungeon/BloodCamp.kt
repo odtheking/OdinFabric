@@ -162,7 +162,7 @@ object BloodCamp : Module(
             is EntityTrackerUpdateS2CPacket -> {
                 if (!bloodAssist || currentWatcherEntity != null) return
                 currentWatcherEntity = (mc.world?.getEntityById(id) as? ZombieEntity)?.takeIf { it.getEquippedStack(EquipmentSlot.HEAD)?.texture in watcherSkulls } ?: return
-                devMessage("Watcher found at ${currentWatcherEntity?.pos}")
+                devMessage("Watcher found at ${currentWatcherEntity?.x}, ${currentWatcherEntity?.y}, ${currentWatcherEntity?.z}")
             }
             is CommonPingS2CPacket -> currentTickTime += 50
         }
@@ -231,18 +231,18 @@ object BloodCamp : Module(
             renderData.lastPingPoint = pingPoint
 
             val boxOffset = Vec3d(boxSize / -2.0, 1.5, boxSize / -2.0)
-            val pingAABB = Box(boxSize, boxSize, boxSize, 0.0, 0.0, 0.0).offset(boxOffset.add(calcEndVector(pingPoint, renderData.lastPingPoint, event.context.tickCounter().dynamicDeltaTicks, !interpolation)))
-            val endAABB = Box(boxSize, boxSize, boxSize, 0.0, 0.0, 0.0).offset(boxOffset.add(calcEndVector(endPoint, renderData.lastEndPoint, event.context.tickCounter().dynamicDeltaTicks, !interpolation)))
+            val pingAABB = Box(boxSize, boxSize, boxSize, 0.0, 0.0, 0.0).offset(boxOffset.add(calcEndVector(pingPoint, renderData.lastPingPoint, event.partialTicks, !interpolation)))
+            val endAABB = Box(boxSize, boxSize, boxSize, 0.0, 0.0, 0.0).offset(boxOffset.add(calcEndVector(endPoint, renderData.lastEndPoint, event.partialTicks, !interpolation)))
 
             val time = getTime(firstSpawn,  currentTickTime - started)
 
             if (mobOffset < time) {
-                event.context.drawWireFrameBox(pingAABB, mboxColor, depth = true)
-                event.context.drawWireFrameBox(endAABB, pboxColor, depth = true)
-            } else event.context.drawWireFrameBox(endAABB, fboxColor, depth = true)
+                event.buffer
+                event.drawWireFrameBox(endAABB, pboxColor, depth = true)
+            } else event.drawWireFrameBox(endAABB, fboxColor, depth = true)
 
             if (drawLine)
-                event.context.drawLine(listOf(currVector.addVec(y = 2.0), endPoint.addVec(y = 2.0)), Colors.MINECRAFT_RED, depth = true)
+                event.drawLine(listOf(currVector.addVec(y = 2.0), endPoint.addVec(y = 2.0)), Colors.MINECRAFT_RED, depth = true)
 
             val timeDisplay = ((time.toFloat() - offset) / 1000).also { renderData.time = it }
             val colorTime = when {
@@ -251,7 +251,7 @@ object BloodCamp : Module(
                 timeDisplay in 0.0..0.5 -> 'c'
                 else -> 'b'
             }
-            if (drawTime)  event.context.drawText(Text.of("§$colorTime${timeDisplay.toFixed()}s").asOrderedText(), endPoint.addVec(y = 2.0), scale = 1f, depth = true)
+            if (drawTime)  event.drawText(Text.of("§$colorTime${timeDisplay.toFixed()}s").asOrderedText(), endPoint.addVec(y = 2.0), scale = 1f, depth = true)
         }
     }
 

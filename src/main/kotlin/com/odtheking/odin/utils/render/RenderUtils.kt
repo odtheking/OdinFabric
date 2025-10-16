@@ -1,22 +1,25 @@
 package com.odtheking.odin.utils.render
 
 import com.mojang.blaze3d.systems.RenderSystem
+import com.odtheking.mixin.accessors.BeaconBeamAccessor
 import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Color.Companion.multiplyAlpha
 import com.odtheking.odin.utils.addVec
 import com.odtheking.odin.utils.translate
 import com.odtheking.odin.utils.unaryMinus
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.render.LightmapTextureManager
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.render.VertexRendering
 import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer
 import net.minecraft.client.util.BufferAllocator
+import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.text.OrderedText
 import net.minecraft.text.OrderedText.concat
 import net.minecraft.text.Text
+import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Box
 import net.minecraft.util.math.Vec3d
@@ -26,15 +29,17 @@ import kotlin.math.pow
 
 private val ALLOCATOR = BufferAllocator(1536)
 
-fun WorldRenderContext.drawLine(points: Collection<Vec3d>, color: Color, depth: Boolean, thickness: Float = 3f) {
+private val BEAM_TEXTURE = Identifier.ofVanilla("textures/entity/beacon_beam.png")
+
+fun RenderEvent.drawLine(points: Collection<Vec3d>, color: Color, depth: Boolean, thickness: Float = 3f) {
     if (points.size < 2) return
-    val matrix = matrixStack() ?: return
-    val bufferSource = consumers() as? VertexConsumerProvider.Immediate ?: return
+    val matrix = matrixStack
+    val bufferSource = buffer as? VertexConsumerProvider.Immediate ?: return
     val layer = if (depth) CustomRenderLayer.LINE_LIST else CustomRenderLayer.LINE_LIST_ESP
     RenderSystem.lineWidth(thickness)
 
     matrix.push()
-    with(camera().pos) { matrix.translate(-x, -y, -z) }
+    with(cameraPosition) { matrix.translate(-x, -y, -z) }
 
     val pointList = points.toList()
     for (i in 0 until pointList.size - 1) {
@@ -55,17 +60,18 @@ fun WorldRenderContext.drawLine(points: Collection<Vec3d>, color: Color, depth: 
     bufferSource.draw(layer)
 }
 
-fun WorldRenderContext.drawWireFrameBox(box: Box, color: Color, thickness: Float = 5f, depth: Boolean = false) {
-    val matrix = matrixStack() ?: return
-    val bufferSource = consumers() as? VertexConsumerProvider.Immediate ?: return
+fun RenderEvent.drawWireFrameBox(box: Box, color: Color, thickness: Float = 5f, depth: Boolean = false) {
+    val matrix = matrixStack
+    val bufferSource = buffer as? VertexConsumerProvider.Immediate ?: return
     val layer = if (depth) CustomRenderLayer.LINE_LIST else CustomRenderLayer.LINE_LIST_ESP
-    val camera = camera() ?: return
-    RenderSystem.lineWidth((thickness / camera.pos.squaredDistanceTo(box.center).pow(0.15)).toFloat())
+    RenderSystem.lineWidth((thickness / cameraPosition.squaredDistanceTo(box.center).pow(0.15)).toFloat())
+
+    val entry: MatrixStack.Entry = matrixStack.peek()
 
     matrix.push()
-    with(camera.pos) { matrix.translate(-x, -y, -z) }
+    with(cameraPosition) { matrix.translate(-x, -y, -z) }
     VertexRendering.drawBox(
-        matrix,
+        entry,
         bufferSource.getBuffer(layer),
         box,
         color.redFloat,
@@ -78,13 +84,13 @@ fun WorldRenderContext.drawWireFrameBox(box: Box, color: Color, thickness: Float
     bufferSource.draw(layer)
 }
 
-fun WorldRenderContext.drawFilledBox(box: Box, color: Color, depth: Boolean = false) {
-    val matrix = matrixStack() ?: return
-    val bufferSource = consumers() as? VertexConsumerProvider.Immediate ?: return
+fun RenderEvent.drawFilledBox(box: Box, color: Color, depth: Boolean = false) {
+    val matrix = matrixStack
+    val bufferSource = buffer as? VertexConsumerProvider.Immediate ?: return
     val layer = if (depth) CustomRenderLayer.TRIANGLE_STRIP else CustomRenderLayer.TRIANGLE_STRIP_ESP
 
     matrix.push()
-    with(camera().pos) { matrix.translate(-x, -y, -z) }
+    with(cameraPosition) { matrix.translate(-x, -y, -z) }
     VertexRendering.drawFilledBox(
         matrix,
         bufferSource.getBuffer(layer),
@@ -104,7 +110,7 @@ fun WorldRenderContext.drawFilledBox(box: Box, color: Color, depth: Boolean = fa
     bufferSource.draw(layer)
 }
 
-fun WorldRenderContext.drawStyledBox(
+fun RenderEvent.drawStyledBox(
     box: Box,
     color: Color,
     style: Int = 0,
@@ -120,30 +126,40 @@ fun WorldRenderContext.drawStyledBox(
     }
 }
 
-fun WorldRenderContext.drawBeaconBeam(position: BlockPos, color: Color) {
-    val matrix = matrixStack() ?: return
-    val bufferSource = consumers() as? VertexConsumerProvider.Immediate ?: return
-    val camera = camera()?.pos ?: return
+fun RenderEvent.drawBeaconBeam(position: BlockPos, color: Color) {
+    if (mc.world == null) return
+
+    val matrix = matrixStack
+    val bufferSource = buffer as? VertexConsumerProvider.Immediate ?: return
+    val camera = cameraPosition
 
     matrix.push()
     matrix.translate(position.x - camera.x, position.y - camera.y, position.z - camera.z)
     val length = camera.subtract(position.toCenterPos()).horizontalLength().toFloat()
     val scale = if (mc.player != null && mc.player?.isUsingSpyglass == true) 1.0f else maxOf(1.0f, length / 96.0f)
 
-    BeaconBlockEntityRenderer.renderBeam(
-        matrix, bufferSource, BeaconBlockEntityRenderer.BEAM_TEXTURE,
-        tickCounter().getTickProgress(true), scale, world().time, 0, 319, color.rgba, 0.2f * scale, 0.25f * scale
+    BeaconBeamAccessor.invokeRenderBeam(
+        matrix,
+        bufferSource,
+        BEAM_TEXTURE,
+        1f,
+        mc.world!!.time.toFloat(),
+        0,
+        319,
+        color.rgba,
+        0.2f * scale,
+        0.25f * scale
     )
     matrix.pop()
 }
 
-fun WorldRenderContext.drawText(text: OrderedText?, pos: Vec3d, scale: Float, depth: Boolean) {
-    val stack = matrixStack() ?: return
+fun RenderEvent.drawText(text: OrderedText?, pos: Vec3d, scale: Float, depth: Boolean) {
+    val stack = matrixStack
 
     stack.push()
     val matrix = stack.peek().positionMatrix
     with(scale * 0.025f) {
-        matrix.translate(pos).translate(-camera().pos).rotate(camera().rotation).scale(this, -this, this)
+        matrix.translate(pos).translate(-cameraPosition).rotate(cameraRotation).scale(this, -this, this)
     }
 
     val consumers = VertexConsumerProvider.immediate(ALLOCATOR)
@@ -157,7 +173,7 @@ fun WorldRenderContext.drawText(text: OrderedText?, pos: Vec3d, scale: Float, de
     stack.pop()
 }
 
-fun WorldRenderContext.drawCustomBeacon(
+fun RenderEvent.drawCustomBeacon(
     title: OrderedText,
     position: BlockPos,
     color: Color,
@@ -177,7 +193,7 @@ fun WorldRenderContext.drawCustomBeacon(
     )
 }
 
-fun WorldRenderContext.drawCylinder(
+fun RenderEvent.drawCylinder(
     center: Vec3d,
     radius: Float,
     height: Float,
@@ -186,10 +202,10 @@ fun WorldRenderContext.drawCylinder(
     thickness: Float = 5f,
     depth: Boolean = false
 ) {
-    val matrix = matrixStack() ?: return
-    val bufferSource = consumers() as? VertexConsumerProvider.Immediate ?: return
+    val matrix = matrixStack
+    val bufferSource = buffer as? VertexConsumerProvider.Immediate ?: return
     val layer = if (depth) CustomRenderLayer.LINE_LIST else CustomRenderLayer.LINE_LIST_ESP
-    val camera = camera()?.pos ?: return
+    val camera = cameraPosition
 
     matrix.push()
     matrix.translate(center.x - camera.x, center.y - camera.y, center.z - camera.z)

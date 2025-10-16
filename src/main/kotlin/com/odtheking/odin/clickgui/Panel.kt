@@ -9,6 +9,7 @@ import com.odtheking.odin.features.impl.render.PlayerSize
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.ui.isAreaHovered
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
+import net.minecraft.client.input.KeyInput
 import kotlin.math.floor
 
 /**
@@ -139,12 +140,12 @@ class Panel(private val category: Category) {
         }
     }
 
-    fun keyPressed(keyCode: Int, scanCode: Int): Boolean {
+    fun keyPressed(input: KeyInput): Boolean {
         if (!panelSetting.extended) return false
 
         return moduleButtons.reversed().any {
             if (!it.module.name.contains(SearchBar.currentSearch, true)) return@any false
-            it.keyPressed(keyCode, scanCode)
+            it.keyPressed(input)
         }
     }
 
