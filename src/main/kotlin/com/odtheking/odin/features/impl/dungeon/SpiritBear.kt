@@ -25,8 +25,8 @@ object SpiritBear : Module(
             timer > 0 -> "§e${(timer / 20f).toFixed()}s"
             else -> "§aAlive!"
         }?.let { text ->
-            drawStringWidth("§6Spirit Bear: $text", 1, 1, Colors.WHITE) + 2f to 10f
-        } ?: (0f to 0f)
+            drawStringWidth("§6Spirit Bear: $text", 1, 1, Colors.WHITE) + 2 to 10
+        } ?: (0 to 0)
     }
 
     private val f4BlockLocations = hashSetOf(

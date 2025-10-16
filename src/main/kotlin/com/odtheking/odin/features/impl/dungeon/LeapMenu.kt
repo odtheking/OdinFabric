@@ -8,8 +8,8 @@ import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonClass
-import com.odtheking.odin.utils.skyblock.dungeon.DungeonListener.leapTeammates
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonPlayer
+import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.leapTeammates
 import com.odtheking.odin.utils.ui.HoverHandler
 import com.odtheking.odin.utils.ui.getQuadrant
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
@@ -85,6 +85,13 @@ object LeapMenu : Module(
             if (!onlyClass || player.isDead) NVGRenderer.textShadow(if (player.isDead) "DEAD" else player.clazz.name, x + 275f, y + 180f, 40f, if (player.isDead) Colors.MINECRAFT_RED.rgba else Colors.WHITE.rgba, NVGRenderer.defaultFont)
         }
         NVGRenderer.endFrame()
+        event.cancel()
+    }
+
+    @EventHandler
+    fun onDrawBackground(event: GuiEvent.DrawBackground) {
+        val chest = (event.screen as? HandledScreen<*>) ?: return
+        if (!chest.title.string.equalsOneOf("Spirit Leap", "Teleport to Player") || leapTeammates.isEmpty() || leapTeammates.all { it == EMPTY }) return
         event.cancel()
     }
 

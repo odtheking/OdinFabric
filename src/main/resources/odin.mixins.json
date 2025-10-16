@@ -7,8 +7,6 @@
     "defaultRequire": 1
   },
   "client": [
-    "accessors.DrawContextAccessor",
-    "accessors.GlResourceManagerAccessor",
     "accessors.HandledScreenAccessor",
     "accessors.KeyBindingAccessor",
     "mixins.BossBarHudMixin",
@@ -16,7 +14,7 @@
     "mixins.ClientPlayNetworkHandlerMixin",
     "mixins.ClientWorldMixin",
     "mixins.EntityRendererMixin",
-    "mixins.GenericContainerScreenMixin",
+    "mixins.ExperienceBarMixin",
     "mixins.GlStateManagerMixin",
     "mixins.HandledScreenMixin",
     "mixins.InGameHudMixin",

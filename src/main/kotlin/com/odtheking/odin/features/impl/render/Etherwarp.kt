@@ -88,7 +88,7 @@ object Etherwarp : Module(
     fun onPacketReceive(event: PacketEvent.Receive) = with(event.packet) {
         if (this !is PlayerInteractItemC2SPacket || !LocationUtils.currentArea.isArea(Island.SinglePlayer) || mc.player?.isSneaking == false || mc.currentScreen != null || isEtherwarpItem() == null) return
 
-        etherPos?.pos?.let {
+      etherPos?.pos?.let {
             if (etherPos?.succeeded == false) return@let
             mc.executeSync {
                 mc.player?.networkHandler?.sendPacket(

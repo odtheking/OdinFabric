@@ -9,7 +9,6 @@ import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.text.Text
 import org.lwjgl.glfw.GLFW
-import kotlin.math.floor
 import kotlin.math.sign
 import com.odtheking.odin.utils.ui.mouseX as odinMouseX
 import com.odtheking.odin.utils.ui.mouseY as odinMouseY
@@ -25,29 +24,28 @@ object HudManager : Screen(Text.of("HUD Manager")) {
         super.render(context, mouseX, mouseY, deltaTicks)
 
         dragging?.let {
-            it.x = floor((odinMouseX + deltaX).coerceIn(0f, mc.window.width - (it.width * it.scale)))
-            it.y = floor((odinMouseY + deltaY).coerceIn(0f, mc.window.height - (it.height * it.scale)))
+            it.x = (odinMouseX + deltaX).coerceIn(0f, (mc.window.width - (it.width * it.scale))).toInt()
+            it.y = (odinMouseY + deltaY).coerceIn(0f, (mc.window.height - (it.height * it.scale))).toInt()
         }
 
-        context?.matrices?.push()
+        context?.matrices?.pushMatrix()
         val sf = mc.window.scaleFactor.toFloat()
-        context?.matrices?.scale(1f / sf, 1f / sf, 1f)
+        context?.matrices?.scale(1f / sf, 1f / sf)
 
         for (hud in hudSettingsCache) {
             if (hud.isEnabled) hud.value.draw(context!!, true)
             if (!hud.value.isHovered()) continue
-            context?.matrices?.push()
+            context?.matrices?.pushMatrix()
             context?.matrices?.translate(
-                hud.value.x + hud.value.width * hud.value.scale + 10.0,
-                hud.value.y.toDouble(),
-                1.0
+                (hud.value.x + hud.value.width * hud.value.scale + 10.0).toFloat(),
+                hud.value.y.toFloat(),
             )
-            context?.matrices?.scale(2f, 2f, 1f)
+            context?.matrices?.scale(2f, 2f)
             context?.drawTextWithShadow(mc.textRenderer, Text.of(hud.name), 0, 0, Colors.WHITE.rgba)
             context?.drawWrappedTextWithShadow(mc.textRenderer, Text.of(hud.description), 0, 10, 150, Colors.WHITE.rgba)
-            context?.matrices?.pop()
+            context?.matrices?.popMatrix()
         }
-        context?.matrices?.pop()
+        context?.matrices?.popMatrix()
     }
 
     override fun mouseScrolled(
@@ -107,7 +105,7 @@ object HudManager : Screen(Text.of("HUD Manager")) {
             GLFW.GLFW_KEY_RIGHT -> {
                 for (hud in hudSettingsCache) {
                     if (hud.isEnabled && hud.value.isHovered()) {
-                        hud.value.x += 10f
+                        hud.value.x += 10
                         return true
                     }
                 }
@@ -116,7 +114,7 @@ object HudManager : Screen(Text.of("HUD Manager")) {
             GLFW.GLFW_KEY_LEFT -> {
                 for (hud in hudSettingsCache) {
                     if (hud.isEnabled && hud.value.isHovered()) {
-                        hud.value.x -= 10f
+                        hud.value.x -= 10
                         return true
                     }
                 }
@@ -125,7 +123,7 @@ object HudManager : Screen(Text.of("HUD Manager")) {
             GLFW.GLFW_KEY_UP -> {
                 for (hud in hudSettingsCache) {
                     if (hud.isEnabled && hud.value.isHovered()) {
-                        hud.value.y -= 10f
+                        hud.value.y -= 10
                         return true
                     }
                 }
@@ -134,7 +132,7 @@ object HudManager : Screen(Text.of("HUD Manager")) {
             GLFW.GLFW_KEY_DOWN -> {
                 for (hud in hudSettingsCache) {
                     if (hud.isEnabled && hud.value.isHovered()) {
-                        hud.value.y += 10f
+                        hud.value.y += 10
                         return true
                     }
                 }
@@ -150,8 +148,8 @@ object HudManager : Screen(Text.of("HUD Manager")) {
 
     fun resetHUDS() {
         hudSettingsCache.forEach {
-            it.value.x = 10f
-            it.value.y = 10f
+            it.value.x = 10
+            it.value.y = 10
             it.value.scale = 2f
         }
     }
