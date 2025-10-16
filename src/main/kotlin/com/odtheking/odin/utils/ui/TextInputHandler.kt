@@ -3,6 +3,8 @@ package com.odtheking.odin.utils.ui
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
+import net.minecraft.client.gui.Click
+import net.minecraft.client.input.CharInput
 import net.minecraft.client.input.KeyInput
 import net.minecraft.util.StringHelper
 import org.lwjgl.glfw.GLFW
@@ -84,12 +86,12 @@ class TextInputHandler(
         NVGRenderer.popScissor()
     }
 
-    fun mouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int): Boolean {
+    fun mouseClicked(mouseX: Float, mouseY: Float, click: Click): Boolean {
         if (!isAreaHovered(x, y, width, height)) {
             resetState()
             return false
         }
-        if (mouseButton != 0) return false
+        if (click.button() != 0) return false
 
         listening = true
         dragging = true
@@ -236,10 +238,10 @@ class TextInputHandler(
         return returnValue
     }
 
-    fun keyTyped(typedChar: Char): Boolean {
+    fun keyTyped(input: CharInput): Boolean {
         if (!listening) return false
 
-        insert(StringHelper.stripInvalidChars(typedChar.toString()))
+        insert(StringHelper.stripInvalidChars(input.toString()))
         return true
     }
 

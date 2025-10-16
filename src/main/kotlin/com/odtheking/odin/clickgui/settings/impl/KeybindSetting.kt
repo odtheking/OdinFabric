@@ -10,6 +10,7 @@ import com.odtheking.odin.features.impl.render.ClickGUIModule
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.ui.isAreaHovered
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
+import net.minecraft.client.gui.Click
 import net.minecraft.client.input.KeyInput
 import net.minecraft.client.util.InputUtil
 import org.lwjgl.glfw.GLFW
@@ -53,12 +54,12 @@ class KeybindSetting(
         return height
     }
 
-    override fun mouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int): Boolean {
+    override fun mouseClicked(mouseX: Float, mouseY: Float, click: Click): Boolean {
         if (listening) {
-            key = InputUtil.Type.MOUSE.createFromCode(mouseButton)
+            key = InputUtil.Type.MOUSE.createFromCode(click.button())
             listening = false
             return true
-        } else if (mouseButton == 0 && isHovered) {
+        } else if (click.button() == 0 && isHovered) {
             listening = true
             return true
         }

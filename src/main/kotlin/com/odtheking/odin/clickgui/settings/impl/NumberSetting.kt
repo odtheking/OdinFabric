@@ -12,6 +12,7 @@ import com.odtheking.odin.utils.ui.HoverHandler
 import com.odtheking.odin.utils.ui.animations.LinearAnimation
 import com.odtheking.odin.utils.ui.isAreaHovered
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
+import net.minecraft.client.gui.Click
 import net.minecraft.client.input.KeyInput
 import org.lwjgl.glfw.GLFW
 import kotlin.math.floor
@@ -101,15 +102,15 @@ class NumberSetting<E>(
         return height
     }
 
-    override fun mouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int): Boolean {
-        return if (mouseButton != 0 || !isHovered) false
+    override fun mouseClicked(mouseX: Float, mouseY: Float, click: Click): Boolean {
+        return if (click.button() != 0 || !isHovered) false
         else {
             listening = true
             true
         }
     }
 
-    override fun mouseReleased(state: Int) {
+    override fun mouseReleased(click: Click) {
         listening = false
     }
 

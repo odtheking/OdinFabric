@@ -4,6 +4,8 @@ import com.odtheking.odin.clickgui.ClickGUI
 import com.odtheking.odin.clickgui.Panel
 import com.odtheking.odin.utils.ui.HoverHandler
 import com.odtheking.odin.utils.ui.isAreaHovered
+import net.minecraft.client.gui.Click
+import net.minecraft.client.input.CharInput
 import net.minecraft.client.input.KeyInput
 
 abstract class RenderableSetting<T>(
@@ -28,9 +30,9 @@ abstract class RenderableSetting<T>(
         return height
     }
 
-    open fun mouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int): Boolean = false
-    open fun mouseReleased(state: Int) {}
-    open fun keyTyped(typedChar: Char): Boolean = false
+    open fun mouseClicked(mouseX: Float, mouseY: Float, click: Click): Boolean = false
+    open fun mouseReleased(click: Click) {}
+    open fun keyTyped(input: CharInput): Boolean = false
     open fun keyPressed(input: KeyInput): Boolean = false
     open fun getHeight(): Float = Panel.HEIGHT
 

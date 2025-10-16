@@ -19,6 +19,8 @@ import com.odtheking.odin.utils.ui.animations.LinearAnimation
 import com.odtheking.odin.utils.ui.isAreaHovered
 import com.odtheking.odin.utils.ui.rendering.Gradient
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
+import net.minecraft.client.gui.Click
+import net.minecraft.client.input.CharInput
 import net.minecraft.client.input.KeyInput
 
 class ColorSetting(
@@ -134,7 +136,7 @@ class ColorSetting(
         return getHeight()
     }
 
-    override fun mouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int): Boolean {
+    override fun mouseClicked(mouseX: Float, mouseY: Float, click: Click): Boolean {
         if (isHovered) {
             expandAnim.start()
             extended = !extended
@@ -142,7 +144,7 @@ class ColorSetting(
         }
 
         if (!extended) return false
-        textInputHandler.mouseClicked(mouseX, mouseY, mouseButton)
+        textInputHandler.mouseClicked(mouseX, mouseY, click)
 
         section = when {
             isAreaHovered(lastX + 6f, lastY + 38f, width - 12f, 170f) -> 0 // sat & brightness
@@ -154,8 +156,8 @@ class ColorSetting(
         return section != null
     }
 
-    override fun mouseReleased(state: Int) {
-        if (state == 0) textInputHandler.mouseReleased()
+    override fun mouseReleased(click: Click) {
+        textInputHandler.mouseReleased()
         section = null
     }
 
@@ -164,8 +166,8 @@ class ColorSetting(
         else false
     }
 
-    override fun keyTyped(typedChar: Char): Boolean {
-        return if (extended) textInputHandler.keyTyped(typedChar)
+    override fun keyTyped(input: CharInput): Boolean {
+        return if (extended) textInputHandler.keyTyped(input)
         else false
     }
 

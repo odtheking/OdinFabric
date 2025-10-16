@@ -78,9 +78,9 @@ object ClickGUI : Screen(Text.of("Click GUI")) {
     }
 
     override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
-        SearchBar.mouseClicked(odinMouseX, odinMouseY, click.keycode)
+        SearchBar.mouseClicked(odinMouseX, odinMouseY, click)
         for (i in panels.size - 1 downTo 0) {
-            if (panels[i].mouseClicked(odinMouseX, odinMouseY, click.keycode)) return true
+            if (panels[i].mouseClicked(odinMouseX, odinMouseY, click)) return true
         }
         return super.mouseClicked(click, doubled)
     }
@@ -88,15 +88,15 @@ object ClickGUI : Screen(Text.of("Click GUI")) {
     override fun mouseReleased(click: Click): Boolean {
         SearchBar.mouseReleased()
         for (i in panels.size - 1 downTo 0) {
-            panels[i].mouseReleased(click.keycode)
+            panels[i].mouseReleased(click)
         }
         return super.mouseReleased(click)
     }
 
     override fun charTyped(input: CharInput): Boolean {
-        SearchBar.keyTyped(input.toString().first())
+        SearchBar.keyTyped(input)
         for (i in panels.size - 1 downTo 0) {
-            if (panels[i].keyTyped(input.toString().first())) return true
+            if (panels[i].keyTyped(input)) return true
         }
         return super.charTyped(input)
     }
