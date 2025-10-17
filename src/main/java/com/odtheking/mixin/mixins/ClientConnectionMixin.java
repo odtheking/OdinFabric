@@ -4,9 +4,7 @@ import com.odtheking.odin.events.PacketEvent;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import net.minecraft.network.ClientConnection;
-import net.minecraft.network.PacketCallbacks;
 import net.minecraft.network.packet.Packet;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -20,8 +18,8 @@ public abstract class ClientConnectionMixin {
         if (new PacketEvent.Receive(packet).postAndCatch()) ci.cancel();
     }
 
-    @Inject(method = "sendImmediately", at = @At("HEAD"))
+    @Inject(method = "sendImmediately", at = @At("HEAD"), cancellable = true)
     private void sendImmediately(Packet<?> packet, ChannelFutureListener channelFutureListener, boolean flush, CallbackInfo ci) {
-        new PacketEvent.Send(packet).postAndCatch();
+        if (new PacketEvent.Send(packet).postAndCatch()) ci.cancel();
     }
 }

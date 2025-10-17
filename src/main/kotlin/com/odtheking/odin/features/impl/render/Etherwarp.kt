@@ -248,7 +248,7 @@ object Etherwarp : Module(
         PistonHeadBlock::class, DyedCarpetBlock::class, CobwebBlock::class,
         DryVegetationBlock::class, SmallDripleafBlock::class, LeverBlock::class,
         NetherWartBlock::class, NetherPortalBlock::class, RedstoneWireBlock::class,
-        ComparatorBlock::class, RedstoneTorchBlock::class, RepeaterBlock::class
+        ComparatorBlock::class, RedstoneTorchBlock::class, RepeaterBlock::class, VineBlock::class
     )
 
     private val validEtherwarpFeetIds = BitSet(0).apply {

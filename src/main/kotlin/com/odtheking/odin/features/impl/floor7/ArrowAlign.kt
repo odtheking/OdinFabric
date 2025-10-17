@@ -19,6 +19,7 @@ import net.minecraft.entity.decoration.ItemFrameEntity
 import net.minecraft.item.Items
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket
 import net.minecraft.text.Text
+import net.minecraft.util.Hand
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 
@@ -66,22 +67,28 @@ object ArrowAlign : Module(
         val packet = event.packet as? PlayerInteractEntityC2SPacket ?: return
         if (DungeonUtils.getF7Phase() != M7Phases.P3) return
 
-        val entity = mc.world?.getEntityById((packet as PlayerInteractEntityC2SPacketAccessor).entityId) as? ItemFrameEntity ?: return
-        if (entity.heldItemStack?.item != Items.ARROW) return
-        val (x, y, z) = entity.blockPos
+        packet.handle(object : PlayerInteractEntityC2SPacket.Handler {
+            override fun interact(hand: Hand) {
+                val entity = mc.world?.getEntityById((packet as PlayerInteractEntityC2SPacketAccessor).entityId) as? ItemFrameEntity ?: return
+                if (entity.heldItemStack?.item != Items.ARROW) return
+                val (x, y, z) = entity.blockPos
 
-        val frameIndex = ((y - frameGridCorner.y) + (z - frameGridCorner.z) * 5)
-        if (x != frameGridCorner.x || currentFrameRotations?.get(frameIndex) == -1 || frameIndex !in 0..24) return
+                val frameIndex = ((y - frameGridCorner.y) + (z - frameGridCorner.z) * 5)
+                if (x != frameGridCorner.x || currentFrameRotations?.get(frameIndex) == -1 || frameIndex !in 0..24) return
 
-        if (!clicksRemaining.containsKey(frameIndex) && mc.player?.isSneaking == invertSneak && blockWrong) {
-            event.cancel()
-            return
-        }
+                if (!clicksRemaining.containsKey(frameIndex) && mc.player?.isSneaking == invertSneak && blockWrong) {
+                    event.cancel()
+                    return
+                }
 
-        recentClickTimestamps[frameIndex] = System.currentTimeMillis()
-        currentFrameRotations = currentFrameRotations?.toMutableList()?.apply { this[frameIndex] = (this[frameIndex] + 1) % 8 }
+                recentClickTimestamps[frameIndex] = System.currentTimeMillis()
+                currentFrameRotations = currentFrameRotations?.toMutableList()?.apply { this[frameIndex] = (this[frameIndex] + 1) % 8 }
 
-        if (calculateClicksNeeded(currentFrameRotations?.get(frameIndex) ?: return, targetSolution?.get(frameIndex) ?: return) == 0) clicksRemaining.remove(frameIndex)
+                if (calculateClicksNeeded(currentFrameRotations?.get(frameIndex) ?: return, targetSolution?.get(frameIndex) ?: return) == 0) clicksRemaining.remove(frameIndex)
+            }
+            override fun interactAt(hand: Hand, pos: Vec3d) {}
+            override fun attack() {}
+        })
     }
 
     @EventHandler
