@@ -18,7 +18,6 @@ public class WorldRendererMixin {
     @Unique
     private final ThreadLocal<RenderTickCounter> renderTickCounter = new ThreadLocal<>();
 
-
     @Inject(method = "renderMain", at = @At("HEAD"))
     public void saveRenderTickCounter(CallbackInfo ci, @Local(argsOnly = true) RenderTickCounter renderTickCounter) {
         this.renderTickCounter.set(renderTickCounter);
@@ -32,9 +31,7 @@ public class WorldRendererMixin {
             @Local(argsOnly = true) WorldRenderState worldRenderState
     ) {
         var renderTickCounter = this.renderTickCounter.get();
-        if (renderTickCounter == null) {
-            return;
-        }
+        if (renderTickCounter == null) return;
         new RenderEvent.Last(
                 matrixStack,
                 provider,

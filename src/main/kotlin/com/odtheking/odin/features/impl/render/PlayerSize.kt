@@ -14,26 +14,14 @@ object PlayerSize : Module(
     name = "Player Size",
     description = "Changes the size of the player."
 ) {
-    private val devSize by BooleanSetting(
-        "Dev Size",
-        true,
-        desc = "Toggles client side dev size for your own player."
-    ).withDependency { isRandom }
+    private val devSize by BooleanSetting("Dev Size", true, desc = "Toggles client side dev size for your own player.").withDependency { isRandom }
     private val devSizeX by NumberSetting("Size X", 1f, -1, 3f, 0.1, desc = "X scale of the dev size.")
     private val devSizeY by NumberSetting("Size Y", 1f, -1, 3f, 0.1, desc = "Y scale of the dev size.")
     private val devSizeZ by NumberSetting("Size Z", 1f, -1, 3f, 0.1, desc = "Z scale of the dev size.")
     private val devWings by BooleanSetting("Wings", false, desc = "Toggles dragon wings.").withDependency { isRandom }
-    private val devWingsColor by ColorSetting(
-        "Wings Color",
-        Colors.WHITE,
-        desc = "Color of the dev wings."
-    ).withDependency { devWings && isRandom }
+    private val devWingsColor by ColorSetting("Wings Color", Colors.WHITE, desc = "Color of the dev wings.").withDependency { devWings && isRandom }
     private var showHidden by DropdownSetting("Show Hidden", false).withDependency { isRandom }
-    private val passcode by StringSetting(
-        "Passcode",
-        "odin",
-        desc = "Passcode for dev features."
-    ).withDependency { showHidden && isRandom }
+    private val passcode by StringSetting("Passcode", "odin", desc = "Passcode for dev features.").withDependency { showHidden && isRandom }
 
     private val sendDevData by ActionSetting("Send Dev Data", desc = "Sends dev data to the server.") {
         showHidden = false
@@ -62,13 +50,13 @@ object PlayerSize : Module(
 
     @JvmStatic
     fun preRenderCallbackScaleHook(entityRenderer: PlayerEntityRenderState, matrix: MatrixStack) {
-        if (enabled && entityRenderer.playerName.toString() == mc.player?.name?.string && !randoms.containsKey(entityRenderer.playerName.toString())) {
+        if (enabled && entityRenderer.playerName?.string == mc.player?.name?.string && !randoms.containsKey(entityRenderer.playerName?.string)) {
             if (devSizeY < 0) matrix.translate(0f, devSizeY * 2, 0f)
             matrix.scale(devSizeX, devSizeY, devSizeZ)
         }
-        if (!randoms.containsKey(entityRenderer.playerName.toString())) return
-        if (!devSize && entityRenderer.playerName.toString() == mc.player?.name?.string) return
-        val random = randoms[entityRenderer.playerName.toString()] ?: return
+        if (!randoms.containsKey(entityRenderer.playerName?.string)) return
+        if (!devSize && entityRenderer.playerName?.string == mc.player?.name?.string) return
+        val random = randoms[entityRenderer.playerName?.string] ?: return
         if (random.scale.second < 0) matrix.translate(0f, random.scale.second * 2, 1f)
         matrix.scale(random.scale.first, random.scale.second, random.scale.third)
     }

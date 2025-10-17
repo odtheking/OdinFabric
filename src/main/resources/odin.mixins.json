@@ -24,7 +24,8 @@
     "mixins.MessageHandlerMixin",
     "mixins.MixinGameRenderer",
     "mixins.MouseMixin",
-    "mixins.PlayerEntityRendererMixin"
+    "mixins.PlayerEntityRendererMixin",
+    "mixins.WorldRendererMixin"
   ],
   "mixins": [
     "accessors.PlayerInteractEntityC2SPacketAccessor",

@@ -24,7 +24,6 @@ import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils.getRoomData
 import kotlinx.coroutines.launch
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 import net.minecraft.text.Text
-import net.minecraft.util.math.Vec3d
 
 val devCommand = Commodore("oddev") {
 
@@ -67,12 +66,12 @@ val devCommand = Commodore("oddev") {
                 "kuudra" -> """
                         |inKuudra: ${KuudraUtils.inKuudra}, tier: ${KuudraUtils.kuudraTier}, phase: ${KuudraUtils.phase}
                         |kuudraTeammates: ${KuudraUtils.freshers.map { it.key }}
-                        |giantZombies: ${KuudraUtils.giantZombies.joinToString { Vec3d(it.x, it.y, it.z).toString() }}
+                        |giantZombies: ${KuudraUtils.giantZombies.joinToString { it.entityPos.toString() }}
                         |supplies: ${Supply.entries.joinToString { "${it.name} -> ${it.isActive}" }}
                         |kuudraEntity: ${KuudraUtils.kuudraEntity}
                         |builders: ${KuudraUtils.playersBuildingAmount}
                         |build: ${KuudraUtils.buildDonePercentage}
-                        |buildingPiles: ${KuudraUtils.buildingPiles.joinToString { Vec3d(it.x, it.y, it.z).toString() }}
+                        |buildingPiles: ${KuudraUtils.buildingPiles.joinToString { it.entityPos.toString() }}
                         |missing: ${NoPre.missing}
                     """.trimIndent()
                 "dungeon" -> """
