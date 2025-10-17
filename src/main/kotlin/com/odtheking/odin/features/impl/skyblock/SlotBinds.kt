@@ -12,7 +12,7 @@ import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.render.drawLine
 import meteordevelopment.orbit.EventHandler
 import meteordevelopment.orbit.EventPriority
-import net.minecraft.client.gui.screen.Screen
+import net.minecraft.client.gui.screen.ingame.HandledScreen
 import net.minecraft.client.gui.screen.ingame.InventoryScreen
 import net.minecraft.screen.slot.SlotActionType
 import org.lwjgl.glfw.GLFW
@@ -30,7 +30,7 @@ object SlotBinds : Module(
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onGuiClick(event: GuiEvent.SlotClick) {
-        if (!Screen.hasShiftDown() || event.screen !is InventoryScreen) return
+        if (!mc.isShiftPressed || event.screen !is InventoryScreen) return
         val clickedSlot = (event.screen as HandledScreenAccessor).focusedSlot?.id?.takeIf { it in 5 until 45 }
             ?: return modMessage("§cYou must be hovering over a valid slot (5–44).")
         val boundSlot = slotBinds[clickedSlot] ?: return
@@ -41,13 +41,15 @@ object SlotBinds : Module(
             else -> return
         }
 
-        mc.interactionManager?.clickSlot(event.screen.screenHandler.syncId, from, to % 36, SlotActionType.SWAP, mc.player)
+        val screen = event.screen as? HandledScreen<*> ?: return
+
+        mc.interactionManager?.clickSlot(screen.screenHandler.syncId, from, to % 36, SlotActionType.SWAP, mc.player)
         event.cancel()
     }
 
     @EventHandler
     fun onGuiPress(event: GuiEvent.KeyPress) {
-        if (event.screen !is InventoryScreen || event.keyCode != setNewSlotbind.code) return
+        if (event.screen !is InventoryScreen || event.input.keycode != setNewSlotbind.code) return
         val clickedSlot = (event.screen as HandledScreenAccessor).focusedSlot?.id?.takeIf { it in 5 until 45 } ?: return
 
         event.cancel()
@@ -83,7 +85,7 @@ object SlotBinds : Module(
             screen.screenHandler.getSlot(slot)?.let { it.x + screen.x + 8 to it.y + screen.y + 8 }
         } ?: return
 
-        if (previousSlot == null && !(Screen.hasShiftDown())) return
+        if (previousSlot == null && !(mc.isShiftPressed)) return
 
         event.drawContext.matrices.pushMatrix()
         event.drawContext.matrices.translate(0f, 0f)
@@ -93,6 +95,6 @@ object SlotBinds : Module(
 
     @EventHandler
     fun onGuiClose(event: GuiEvent.Close) {
-        previousSlot = null;
+        previousSlot = null
     }
 }

@@ -115,9 +115,9 @@ object LeapMenu : Module(
     @EventHandler
     fun keyTyped(event: GuiEvent.KeyPress) {
         val chest = (event.screen as? HandledScreen<*>) ?: return
-        if (!useNumberKeys || chest.title?.string?.equalsOneOf("Spirit Leap", "Teleport to Player") == false || keybindList.none { it.code == event.keyCode } || leapTeammates.isEmpty()) return
+        if (!useNumberKeys || chest.title?.string?.equalsOneOf("Spirit Leap", "Teleport to Player") == false || keybindList.none { it.code == event.input.keycode } || leapTeammates.isEmpty()) return
 
-        val index = keybindList.indexOfFirst { it.code == event.keyCode }
+        val index = keybindList.indexOfFirst { it.code == event.input.keycode }
         val playerToLeap = if (index + 1 > leapTeammates.size) return else leapTeammates[index]
         if (playerToLeap == EMPTY) return
         if (playerToLeap.isDead) return modMessage("This player is dead, can't leap.")

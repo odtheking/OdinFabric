@@ -1,5 +1,7 @@
 package com.odtheking.odin.utils
 
+import com.google.common.collect.ImmutableMultimap
+import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
 import com.mojang.authlib.properties.PropertyMap
 import net.minecraft.component.DataComponentTypes
@@ -41,7 +43,7 @@ inline val ItemStack.loreString: List<String>
 
 val ItemStack.texture: String?
     get() =
-        get(DataComponentTypes.PROFILE)?.gameProfile()?.properties?.get("textures")?.firstOrNull()?.value
+        get(DataComponentTypes.PROFILE)?.gameProfile?.properties?.get("textures")?.firstOrNull()?.value
 
 enum class ItemRarity(
     val loreName: String,
@@ -72,21 +74,15 @@ fun ItemStack.getSkyblockRarity(): ItemRarity? {
 
 fun createSkullStack(textureHash: String): ItemStack {
     val stack = ItemStack(Items.PLAYER_HEAD)
-    val properties = PropertyMap()
-    properties.put(
+
+    val property = Property(
         "textures",
-        Property(
-            "textures",
-            Base64.getEncoder().encodeToString(
-                "{\"textures\":{\"SKIN\":{\"url\":\"http://textures.minecraft.net/texture/$textureHash\"}}}".toByteArray()
-            )
-        )
+        Base64.getEncoder().encodeToString("{\"textures\":{\"SKIN\":{\"url\":\"http://textures.minecraft.net/texture/$textureHash\"}}}".toByteArray())
     )
-    val profile = ProfileComponent(
-        Optional.empty(),
-        Optional.empty(),
-        properties
-    )
+    val multimap = ImmutableMultimap.builder<String, Property>().put("textures", property).build()
+    val gameProfile = GameProfile(null, null, PropertyMap(multimap))
+    val profile = ProfileComponent.ofStatic(gameProfile)
+
     stack.set(DataComponentTypes.PROFILE, profile)
     return stack
 }

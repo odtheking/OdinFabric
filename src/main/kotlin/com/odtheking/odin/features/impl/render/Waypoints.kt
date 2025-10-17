@@ -33,7 +33,7 @@ object Waypoints : Module(
     private val pingLocationToggle by BooleanSetting("Ping Waypoint", false, desc = "Adds a waypoint at the location you are looking at.").withDependency { pingLocationDropDown }
     private val pingLocation by KeybindSetting("Ping Keybind", GLFW.GLFW_KEY_UNKNOWN, desc = "Sends the location you are looking at as coords in chat for waypoints.").onPress {
         if (!pingLocationToggle) return@onPress
-        Etherwarp.getEtherPos(mc.player?.pos, pingDistance).pos?.let { pos ->
+        Etherwarp.getEtherPos(mc.player?.entityPos, pingDistance).pos?.let { pos ->
             addTempWaypoint("§fWaypoint", pos.x, pos.y, pos.z, pingWaypointTime)
             if (sendPingedLocation) sendCommand("odinwaypoint share ${pos.x} ${pos.y} ${pos.z}")
         }
@@ -65,7 +65,7 @@ object Waypoints : Module(
     @EventHandler
     fun onRenderWorld(event: RenderEvent.Last) {
         temporaryWaypoints.removeAll {
-            event.context.drawCustomBeacon(Text.of(it.name).asOrderedText(), it.blockPos, it.color)
+            event.drawCustomBeacon(Text.of(it.name).asOrderedText(), it.blockPos, it.color)
             System.currentTimeMillis() > it.timeAdded + it.duration
         }
     }
@@ -76,7 +76,7 @@ object Waypoints : Module(
     }
 
     fun addTempWaypoint(name: String = "Waypoint", x: Int, y: Int, z: Int, duration: Long = 60_000) {
-        if (!Waypoints.enabled) return
+        if (!enabled) return
         if (listOf(x, y, z).any { abs(it) > 5000 }) return modMessage("§cWaypoint out of bounds.")
         if (temporaryWaypoints.any { it.blockPos.x == x && it.blockPos.y == y && it.blockPos.z == z }) return modMessage(
             "§cWaypoint already exists at $x, $y, $z."

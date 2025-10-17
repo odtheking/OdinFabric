@@ -3,6 +3,7 @@ package com.odtheking.odin.features.impl.dungeon.puzzlesolvers
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.odtheking.odin.OdinMod.logger
+import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.features.impl.dungeon.puzzlesolvers.PuzzleSolvers.onPuzzleComplete
 import com.odtheking.odin.utils.Color
@@ -10,7 +11,6 @@ import com.odtheking.odin.utils.render.drawBeaconBeam
 import com.odtheking.odin.utils.render.drawFilledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import com.odtheking.odin.utils.startsWithOneOf
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Box
 import java.io.InputStreamReader
@@ -68,13 +68,13 @@ object QuizSolver {
         triviaOptions[2].blockPos = getRealCoords(BlockPos(10, 70, 6))
     }
 
-    fun onRenderWorld(context: WorldRenderContext, quizColor: Color, quizDepth: Boolean) {
+    fun onRenderWorld(event: RenderEvent, quizColor: Color, quizDepth: Boolean) {
         if (triviaAnswers == null || triviaOptions.isEmpty()) return
         triviaOptions.forEach { answer ->
             if (!answer.isCorrect) return@forEach
             answer.blockPos?.add(0, -1, 0)?.let {
-                context.drawFilledBox(Box(it), quizColor, depth = quizDepth)
-                context.drawBeaconBeam(it, quizColor)
+                event.drawFilledBox(Box(it), quizColor, depth = quizDepth)
+                event.drawBeaconBeam(it, quizColor)
             }
         }
     }

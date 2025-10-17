@@ -9,6 +9,9 @@ import com.odtheking.odin.features.impl.render.PlayerSize
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.ui.isAreaHovered
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
+import net.minecraft.client.gui.Click
+import net.minecraft.client.input.CharInput
+import net.minecraft.client.input.KeyInput
 import kotlin.math.floor
 
 /**
@@ -100,51 +103,51 @@ class Panel(private val category: Category) {
         return true
     }
 
-    fun mouseClicked(mouseX: Float, mouseY: Float, button: Int): Boolean {
+    fun mouseClicked(mouseX: Float, mouseY: Float, click: Click): Boolean {
         if (isAreaHovered(panelSetting.x, panelSetting.y, WIDTH, HEIGHT)) {
-            if (button == 0) {
+            if (click.button() == 0) {
                 deltaX = (panelSetting.x - mouseX)
                 deltaY = (panelSetting.y - mouseY)
                 dragging = true
                 return true
-            } else if (button == 1) {
+            } else if (click.button() == 1) {
                 panelSetting.extended = !panelSetting.extended
                 return true
             }
         } else if (isMouseOverExtended) {
             return moduleButtons.reversed().any {
                 if (!it.module.name.contains(SearchBar.currentSearch, true)) return@any false
-                it.mouseClicked(mouseX, mouseY, button)
+                it.mouseClicked(mouseX, mouseY, click)
             }
         }
         return false
     }
 
-    fun mouseReleased(state: Int) {
-        if (state == 0) dragging = false
+    fun mouseReleased(click: Click) {
+        dragging = false
 
         if (panelSetting.extended)
             moduleButtons.reversed().forEach {
                 if (!it.module.name.contains(SearchBar.currentSearch, true)) return@forEach
-                it.mouseReleased(state)
+                it.mouseReleased(click)
             }
     }
 
-    fun keyTyped(typedChar: Char): Boolean {
+    fun keyTyped(input: CharInput): Boolean {
         if (!panelSetting.extended) return false
 
         return moduleButtons.reversed().any {
             if (!it.module.name.contains(SearchBar.currentSearch, true)) return@any false
-            it.keyTyped(typedChar)
+            it.keyTyped(input)
         }
     }
 
-    fun keyPressed(keyCode: Int, scanCode: Int): Boolean {
+    fun keyPressed(input: KeyInput): Boolean {
         if (!panelSetting.extended) return false
 
         return moduleButtons.reversed().any {
             if (!it.module.name.contains(SearchBar.currentSearch, true)) return@any false
-            it.keyPressed(keyCode, scanCode)
+            it.keyPressed(input)
         }
     }
 

@@ -1,6 +1,7 @@
 package com.odtheking.odin.features.impl.dungeon.puzzlesolvers
 
 import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Color.Companion.withAlpha
@@ -9,7 +10,6 @@ import com.odtheking.odin.utils.isXZInterceptable
 import com.odtheking.odin.utils.render.drawFilledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Box
@@ -44,13 +44,13 @@ object TPMazeSolver {
         }
     }
 
-    fun onRenderWorld(context: WorldRenderContext, mazeColorOne: Color, mazeColorMultiple: Color, mazeColorVisited: Color) {
+    fun onRenderWorld(event: RenderEvent, mazeColorOne: Color, mazeColorMultiple: Color, mazeColorVisited: Color) {
         if (DungeonUtils.currentRoomName != "Teleport Maze") return
         tpPads.forEach {
             when (it) {
-                in correctPortals -> context.drawFilledBox(Box(it), if (correctPortals.size == 1) mazeColorOne else mazeColorMultiple, depth = false)
-                in visited -> context.drawFilledBox(Box(it), mazeColorVisited, depth = true)
-                else -> context.drawFilledBox(Box(it), Colors.WHITE.withAlpha(0.5f), depth = true)
+                in correctPortals -> event.drawFilledBox(Box(it), if (correctPortals.size == 1) mazeColorOne else mazeColorMultiple, depth = false)
+                in visited -> event.drawFilledBox(Box(it), mazeColorVisited, depth = true)
+                else -> event.drawFilledBox(Box(it), Colors.WHITE.withAlpha(0.5f), depth = true)
             }
         }
     }
