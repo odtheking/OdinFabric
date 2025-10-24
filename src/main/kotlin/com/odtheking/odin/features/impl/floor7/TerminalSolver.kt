@@ -26,6 +26,7 @@ import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket
 import net.minecraft.screen.slot.SlotActionType
 import net.minecraft.screen.sync.ItemStackHash
+import org.lwjgl.glfw.GLFW
 
 @AlwaysActive // So it can be used in other modules
 object TerminalSolver : Module(
@@ -144,26 +145,26 @@ object TerminalSolver : Module(
         if (!enabled || this == null) return
 
         if (renderType == 1 && !(type == TerminalTypes.MELODY && cancelMelodySolver)) {
-            currentTerm?.type?.getGUI()?.mouseClicked(event.screen, event.click.button())
+            currentTerm?.type?.getGUI()?.mouseClicked(event.screen, event.button)
             event.cancel()
             return
         }
 
         val slotIndex = (event.screen as HandledScreenAccessor).focusedSlot?.id ?: return
 
-        if (blockIncorrectClicks && !canClick(slotIndex, event.click.button())) {
+        if (blockIncorrectClicks && !canClick(slotIndex, event.button)) {
             event.cancel()
             return
         }
 
         if (middleClickGUI) {
-            click(slotIndex, event.click.button(), hideClicked && !isClicked)
+            click(slotIndex, if (event.button == 0) GLFW.GLFW_MOUSE_BUTTON_3 else event.button, hideClicked && !isClicked)
             event.cancel()
             return
         }
 
         if (hideClicked && !isClicked) {
-            simulateClick(slotIndex, event.click.button())
+            simulateClick(slotIndex, event.button)
             isClicked = true
         }
     }
