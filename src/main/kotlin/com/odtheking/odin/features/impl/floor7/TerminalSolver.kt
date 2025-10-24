@@ -26,6 +26,7 @@ import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket
 import net.minecraft.screen.slot.SlotActionType
 import net.minecraft.screen.sync.ItemStackHash
+import org.lwjgl.glfw.GLFW
 
 @AlwaysActive // So it can be used in other modules
 object TerminalSolver : Module(
@@ -157,7 +158,7 @@ object TerminalSolver : Module(
         }
 
         if (middleClickGUI) {
-            click(slotIndex, event.button, hideClicked && !isClicked)
+            click(slotIndex, if (event.button == 4) GLFW.GLFW_MOUSE_BUTTON_3 else event.button, hideClicked && !isClicked)
             event.cancel()
             return
         }

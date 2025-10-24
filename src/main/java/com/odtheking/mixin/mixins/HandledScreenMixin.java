@@ -31,7 +31,7 @@ public class HandledScreenMixin {
     }
 
     @Inject(method = "renderBackground", at = @At("HEAD"), cancellable = true)
-    protected void onRender1(DrawContext context, int mouseX, int mouseY, float deltaTicks, CallbackInfo ci) {
+    protected void onRenderBackground(DrawContext context, int mouseX, int mouseY, float deltaTicks, CallbackInfo ci) {
         if (new GuiEvent.DrawBackground((Screen) (Object) this, context).postAndCatch()) ci.cancel();
     }
 

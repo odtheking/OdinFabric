@@ -80,6 +80,11 @@ open class TermSimGUI(
         EVENT_BUS.subscribe(this)
     }
 
+    override fun removed() {
+        EVENT_BUS.unsubscribe(this)
+        super.removed()
+    }
+
     @EventHandler(priority = EventPriority.LOW)
     fun onPacketSend(event: PacketEvent.Send) {
         val packet = event.packet as? ClickSlotC2SPacket ?: return
@@ -88,13 +93,13 @@ open class TermSimGUI(
         event.cancel()
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    fun onPacketReceive(event: PacketEvent.Receive) {
+//    @EventHandler(priority = EventPriority.LOWEST)
+//    fun onPacketReceive(event: PacketEvent.Receive) {
 //        val packet = event.packet as? ScreenHandlerSlotUpdateS2CPacket ?: return
 //        if (OdinMain.mc.currentScreen !== this || packet.func_149175_c() == -2 || event.packet.func_149173_d() !in 0 until size) return
 //        packet.func_149174_e()?.let { mc.thePlayer?.inventoryContainer?.putStackInSlot(packet.func_149173_d(), it) }
 //        event.isCanceled = true
-    }
+//     }
 
     private fun delaySlotClick(slot: Slot, button: Int) {
         if (mc.currentScreen == StartGUI) return slotClick(slot, button)
