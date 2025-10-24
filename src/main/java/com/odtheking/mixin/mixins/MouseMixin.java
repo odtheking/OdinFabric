@@ -30,11 +30,11 @@ public class MouseMixin {
         this.beforeY = this.y;
     }
 
-    @Inject(method = "unlockCursor", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/Window;getHandle()J"))
+    @Inject(method = "unlockCursor", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;getWindow()Lnet/minecraft/client/util/Window;"))
     private void odin$correctCursorPosition(CallbackInfo ci) {
         if (OdinMod.INSTANCE.getMc().currentScreen instanceof GenericContainerScreen && NoCursorReset.shouldHookMouse()) {
             InputUtil.setCursorParameters(
-                OdinMod.INSTANCE.getMc().getWindow().getHandle(), InputUtil.GLFW_CURSOR_NORMAL,
+                OdinMod.INSTANCE.getMc().getWindow(), InputUtil.GLFW_CURSOR_NORMAL,
                 this.beforeX, this.beforeY
             );
             this.x = this.beforeX;
