@@ -62,6 +62,7 @@ open class TerminalHandler(val type: TerminalTypes) {
                 if (button == GLFW.GLFW_MOUSE_BUTTON_3) SlotActionType.CLONE else SlotActionType.PICKUP,
                 Int2ObjectOpenHashMap(), ItemStackHash.EMPTY
             )).postAndCatch()
+            return
         }
         mc.interactionManager?.clickSlot(screenHandler.syncId, slotIndex, button, if (button == GLFW.GLFW_MOUSE_BUTTON_3) SlotActionType.CLONE else SlotActionType.PICKUP, mc.player)
     }

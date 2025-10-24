@@ -158,7 +158,7 @@ object TerminalSolver : Module(
         }
 
         if (middleClickGUI) {
-            click(slotIndex, if (event.button == 4) GLFW.GLFW_MOUSE_BUTTON_3 else event.button, hideClicked && !isClicked)
+            click(slotIndex, if (event.button == 0) GLFW.GLFW_MOUSE_BUTTON_3 else event.button, hideClicked && !isClicked)
             event.cancel()
             return
         }
