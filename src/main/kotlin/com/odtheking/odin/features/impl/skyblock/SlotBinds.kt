@@ -70,7 +70,7 @@ object SlotBinds : Module(
     }
 
     @EventHandler
-    fun onRenderScreen(event: GuiEvent.Draw) {
+    fun onRenderScreen(event: GuiEvent.DrawTooltip) {
         val screen = event.screen as? InventoryScreen ?: return
         val hoveredSlot = (screen as HandledScreenAccessor).focusedSlot?.id?.takeIf { it in 5 until 45 } ?: return
         val boundSlot = slotBinds[hoveredSlot]
@@ -93,6 +93,6 @@ object SlotBinds : Module(
 
     @EventHandler
     fun onGuiClose(event: GuiEvent.Close) {
-        previousSlot = null;
+        previousSlot = null
     }
 }

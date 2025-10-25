@@ -6,7 +6,9 @@ import com.odtheking.odin.utils.Colors
 import net.minecraft.client.gui.DrawContext
 import org.joml.Matrix3x2f
 import kotlin.math.atan2
-import kotlin.math.sqrt
+import kotlin.math.ceil
+import kotlin.math.hypot
+import kotlin.math.max
 
 fun DrawContext.drawString(text: String, x: Int, y: Int, color: Int = Colors.WHITE.rgba, shadow: Boolean = true) {
     this.drawText(mc.textRenderer, text, x, y, color, shadow)
@@ -37,11 +39,11 @@ fun DrawContext.drawLine(
     val dx = x2 - x1
     val dy = y2 - y1
 
+    val half = max(1, (lineWidth / 2f).toInt())
+
     matrices.pushMatrix()
     matrices.translate(x1, y1)
-    val angle = atan2(dy.toDouble(), dx.toDouble()).toFloat()
-    val right = Matrix3x2f().rotate(angle)
-    matrices.mul(right)
-    this.fill(0, (-lineWidth / 2f).toInt(), sqrt((dx * dx + dy * dy)).toInt(), (lineWidth / 2f).toInt(), color.rgba)
+    matrices.mul(Matrix3x2f().identity().rotate(atan2(dy, dx)))
+    fill(0, -half, ceil(hypot(dx, dy)).toInt(), half, color.rgba)
     matrices.popMatrix()
 }
