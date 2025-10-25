@@ -230,3 +230,109 @@ fun RenderEvent.drawCylinder(
     matrix.pop()
     bufferSource.draw()
 }
+
+//fun RenderEvent.drawConnectedBlockOutlines(
+//    blocks: Collection<BlockPos>,
+//    color: Color,
+//    thickness: Float = 5f,
+//    depth: Boolean = false
+//) {
+//    if (blocks.isEmpty()) return
+//
+//    val matrix = matrixStack
+//    val bufferSource = buffer as? VertexConsumerProvider.Immediate ?: return
+//    val layer = if (depth) CustomRenderLayer.LINE_LIST else CustomRenderLayer.LINE_LIST_ESP
+//
+//    val blockSet = blocks as? Set ?: blocks.toSet()
+//
+//    val blockLongs = blockSet.mapTo(HashSet(blockSet.size)) { it.asLong() }
+//
+//    val avgDist = blockSet.fold(0.0) { acc, pos ->
+//        acc + cameraPosition.squaredDistanceTo(Vec3d.ofCenter(pos))
+//    } / blockSet.size
+//    RenderSystem.lineWidth((thickness / avgDist.pow(0.15)).toFloat())
+//
+//    matrix.push()
+//    with(cameraPosition) { matrix.translate(-x, -y, -z) }
+//
+//    val buffer = bufferSource.getBuffer(layer)
+//
+//    val drawnEdges = HashSet<Long>(blockSet.size * 6)
+//
+//    val rgba = color.rgba
+//
+//    for (pos in blockSet) {
+//        val px = pos.x
+//        val py = pos.y
+//        val pz = pos.z
+//
+//        val hasNorth = blockLongs.contains(BlockPos.asLong(px, py, pz - 1))
+//        val hasSouth = blockLongs.contains(BlockPos.asLong(px, py, pz + 1))
+//        val hasEast = blockLongs.contains(BlockPos.asLong(px + 1, py, pz))
+//        val hasWest = blockLongs.contains(BlockPos.asLong(px - 1, py, pz))
+//        val hasUp = blockLongs.contains(BlockPos.asLong(px, py + 1, pz))
+//        val hasDown = blockLongs.contains(BlockPos.asLong(px, py - 1, pz))
+//
+//        val x = px.toDouble()
+//        val y = py.toDouble()
+//        val z = pz.toDouble()
+//
+//        if (!hasDown) {
+//            if (!hasNorth && drawnEdges.add(edgeHash(px, py, pz, 0)))
+//                drawEdgeFast(matrix, buffer, rgba, x, y, z, x + 1, y, z)
+//            if (!hasSouth && drawnEdges.add(edgeHash(px, py, pz, 1)))
+//                drawEdgeFast(matrix, buffer, rgba, x, y, z + 1, x + 1, y, z + 1)
+//            if (!hasWest && drawnEdges.add(edgeHash(px, py, pz, 2)))
+//                drawEdgeFast(matrix, buffer, rgba, x, y, z, x, y, z + 1)
+//            if (!hasEast && drawnEdges.add(edgeHash(px, py, pz, 3)))
+//                drawEdgeFast(matrix, buffer, rgba, x + 1, y, z, x + 1, y, z + 1)
+//        }
+//
+//        if (!hasUp) {
+//            if (!hasNorth && drawnEdges.add(edgeHash(px, py, pz, 4)))
+//                drawEdgeFast(matrix, buffer, rgba, x, y + 1, z, x + 1, y + 1, z)
+//            if (!hasSouth && drawnEdges.add(edgeHash(px, py, pz, 5)))
+//                drawEdgeFast(matrix, buffer, rgba, x, y + 1, z + 1, x + 1, y + 1, z + 1)
+//            if (!hasWest && drawnEdges.add(edgeHash(px, py, pz, 6)))
+//                drawEdgeFast(matrix, buffer, rgba, x, y + 1, z, x, y + 1, z + 1)
+//            if (!hasEast && drawnEdges.add(edgeHash(px, py, pz, 7)))
+//                drawEdgeFast(matrix, buffer, rgba, x + 1, y + 1, z, x + 1, y + 1, z + 1)
+//        }
+//
+//        if (!hasNorth && !hasWest && drawnEdges.add(edgeHash(px, py, pz, 8)))
+//            drawEdgeFast(matrix, buffer, rgba, x, y, z, x, y + 1, z)
+//        if (!hasNorth && !hasEast && drawnEdges.add(edgeHash(px, py, pz, 9)))
+//            drawEdgeFast(matrix, buffer, rgba, x + 1, y, z, x + 1, y + 1, z)
+//        if (!hasSouth && !hasWest && drawnEdges.add(edgeHash(px, py, pz, 10)))
+//            drawEdgeFast(matrix, buffer, rgba, x, y, z + 1, x, y + 1, z + 1)
+//        if (!hasSouth && !hasEast && drawnEdges.add(edgeHash(px, py, pz, 11)))
+//            drawEdgeFast(matrix, buffer, rgba, x + 1, y, z + 1, x + 1, y + 1, z + 1)
+//    }
+//
+//    matrix.pop()
+//    bufferSource.draw(layer)
+//}
+//
+//@Suppress("NOTHING_TO_INLINE")
+//private inline fun edgeHash(x: Int, y: Int, z: Int, edge: Int): Long {
+//    return (x.toLong() shl 38) or (y.toLong() shl 26) or (z.toLong() shl 14) or edge.toLong()
+//}
+//
+//@Suppress("NOTHING_TO_INLINE")
+//private inline fun drawEdgeFast(
+//    matrix: MatrixStack,
+//    buffer: net.minecraft.client.render.VertexConsumer,
+//    rgba: Int,
+//    x1: Double,
+//    y1: Double,
+//    z1: Double,
+//    x2: Double,
+//    y2: Double,
+//    z2: Double
+//) {
+//    VertexRendering.drawVector(
+//        matrix, buffer,
+//        Vector3f(x1.toFloat(), y1.toFloat(), z1.toFloat()),
+//        Vec3d(x2 - x1, y2 - y1, z2 - z1), rgba
+//    )
+//}

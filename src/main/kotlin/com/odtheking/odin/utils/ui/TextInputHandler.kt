@@ -241,7 +241,7 @@ class TextInputHandler(
     fun keyTyped(input: CharInput): Boolean {
         if (!listening) return false
 
-        insert(StringHelper.stripInvalidChars(input.toString()))
+        insert(StringHelper.stripInvalidChars(input.asString()))
         return true
     }
 
