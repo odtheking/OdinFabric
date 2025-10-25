@@ -7,7 +7,8 @@ import com.odtheking.odin.features.ModuleManager
 import com.odtheking.odin.utils.ServerUtils
 import com.odtheking.odin.utils.handlers.MobCaches
 import com.odtheking.odin.utils.handlers.TickTasks
-import com.odtheking.odin.utils.sendDataToServer
+import com.odtheking.odin.utils.network.WebUtils
+import com.odtheking.odin.utils.network.WebUtils.postData
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.odtheking.odin.utils.skyblock.SkyblockPlayer
@@ -17,6 +18,7 @@ import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import meteordevelopment.orbit.EventBus
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
@@ -42,6 +44,7 @@ object OdinMod : ModInitializer {
     }
     val version: Version by lazy { metadata.version }
     val logger: Logger = LogManager.getLogger("Odin")
+    val okClient = WebUtils.createClient()
 
     val scope = CoroutineScope(SupervisorJob() + EmptyCoroutineContext)
 
@@ -67,6 +70,8 @@ object OdinMod : ModInitializer {
         Config.load()
 
         val name = mc.session?.username?.takeIf { !it.matches(Regex("Player\\d{2,3}")) } ?: return
-        sendDataToServer(body = """{"username": "$name", "version": "Fabric $version"}""")
+        scope.launch {
+            postData("https://api.odtheking.com/tele/", body = """{"username": "$name", "version": "Fabric $version"}""")
+        }
     }
 }

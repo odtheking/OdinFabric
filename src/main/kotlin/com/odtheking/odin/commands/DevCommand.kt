@@ -6,7 +6,9 @@ import com.odtheking.odin.OdinMod
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.features.ModuleManager.generateFeatureList
+import com.odtheking.odin.features.impl.floor7.MelodyMessage.melodyWebSocket
 import com.odtheking.odin.features.impl.nether.NoPre
+import com.odtheking.odin.features.impl.render.ClickGUIModule.webSocketUrl
 import com.odtheking.odin.features.impl.render.PlayerSize
 import com.odtheking.odin.utils.customData
 import com.odtheking.odin.utils.modMessage
@@ -26,6 +28,12 @@ import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 import net.minecraft.text.Text
 
 val devCommand = Commodore("oddev") {
+
+    literal("ws") {
+        literal("connect").runs { lobby: String ->
+            melodyWebSocket.connect("${webSocketUrl}${lobby}")
+        }
+    }
 
     literal("getitem").runs {
         modMessage("Item in hand: ${mc.player?.mainHandStack?.customData}")

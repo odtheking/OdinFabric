@@ -1,6 +1,7 @@
 package com.odtheking.odin.utils.ui.rendering
 
-import com.odtheking.odin.utils.setupConnection
+import com.odtheking.odin.utils.network.WebUtils.getInputStream
+import kotlinx.coroutines.runBlocking
 import org.lwjgl.system.MemoryUtil
 import java.io.File
 import java.io.FileNotFoundException
@@ -42,7 +43,7 @@ class Image(
 
         private fun getStream(path: String): InputStream {
             val trimmedPath = path.trim()
-            return if (trimmedPath.startsWith("http")) setupConnection(trimmedPath)
+            return if (trimmedPath.startsWith("http")) runBlocking { getInputStream(trimmedPath).getOrThrow() }
             else {
                 val file = File(trimmedPath)
                 if (file.exists() && file.isFile) Files.newInputStream(file.toPath())
