@@ -9,6 +9,7 @@
   "client": [
     "accessors.HandledScreenAccessor",
     "accessors.KeyBindingAccessor",
+    "accessors.SpecialGuiElementRendererAccessor",
     "mixins.BossBarHudMixin",
     "mixins.ChatScreenMixin",
     "mixins.ClientPlayNetworkHandlerMixin",

@@ -7,6 +7,7 @@ import com.odtheking.odin.features.ModuleManager
 import com.odtheking.odin.utils.ServerUtils
 import com.odtheking.odin.utils.handlers.MobCaches
 import com.odtheking.odin.utils.handlers.TickTasks
+import com.odtheking.odin.utils.render.item.ItemStateRenderer
 import com.odtheking.odin.utils.sendDataToServer
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.skyblock.LocationUtils
@@ -20,6 +21,7 @@ import kotlinx.coroutines.SupervisorJob
 import meteordevelopment.orbit.EventBus
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
+import net.fabricmc.fabric.api.client.rendering.v1.SpecialGuiElementRegistry
 import net.fabricmc.loader.api.FabricLoader
 import net.fabricmc.loader.api.Version
 import net.fabricmc.loader.api.metadata.ModMetadata
@@ -63,6 +65,10 @@ object OdinMod : ModInitializer {
             EventDispatcher, ModuleManager, DungeonListener,
             ScanUtils, DungeonUtils, SplitsManager
         ).forEach { EVENT_BUS.subscribe(it) }
+
+        SpecialGuiElementRegistry.register { context ->
+            ItemStateRenderer(context.vertexConsumers())
+        }
 
         Config.load()
 
