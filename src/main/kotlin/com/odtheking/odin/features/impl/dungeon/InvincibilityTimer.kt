@@ -8,6 +8,7 @@ import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.render.drawStringWidth
+import com.odtheking.odin.utils.render.item.ItemStateRenderer
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.entity.EquipmentSlot
@@ -46,7 +47,7 @@ object InvincibilityTimer : Module(
         }.ifEmpty { return@HUD 0 to 0 }
 
         visibleTypes.forEachIndexed { index, type ->
-            this.drawItem(type.itemStack, 0, -1 + index * 14)
+            ItemStateRenderer.draw(this, type.itemStack, 0, -1 + index * 14)
             val y = index * 14 + 3
 
             if (type == InvincibilityType.BONZO && mc.player?.getEquippedStack(EquipmentSlot.HEAD)?.itemId?.equalsOneOf("BONZO_MASK", "STARRED_BONZO_MASK") == true ||
