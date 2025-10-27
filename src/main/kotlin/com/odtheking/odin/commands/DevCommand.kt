@@ -52,6 +52,10 @@ val devCommand = Commodore("oddev") {
         }
     }
 
+    literal("deletedevs").runs {
+        PlayerSize.randoms.clear()
+    }
+
     literal("generatefeaturelist").runs {
         setClipboardContent(generateFeatureList())
         modMessage("Generated feature list and copied to clipboard.")
