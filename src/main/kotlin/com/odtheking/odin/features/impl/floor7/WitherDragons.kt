@@ -104,9 +104,9 @@ object WitherDragons : Module(
         if (dragonHealth) {
             DragonCheck.dragonEntityList.forEach { dragon ->
                 if (dragon.health > 0) {
-                    event.context.drawText(
+                    event.drawText(
                         Text.of(colorHealth(dragon.health)).asOrderedText(),
-                        dragon.pos.addVec(y = 1.5), 1f, false
+                        dragon.entityPos.addVec(y = 1.5), 1f, false
                     )
                 }
             }
@@ -114,14 +114,14 @@ object WitherDragons : Module(
 
         WitherDragonsEnum.entries.forEach { dragon ->
             if (dragonTimer && dragon.state == WitherDragonState.SPAWNING && dragon.timeToSpawn > 0) {
-                event.context.drawText(
+                event.drawText(
                     Text.of("§${dragon.colorCode}${dragon.name.first()}: ${getDragonTimer(dragon.timeToSpawn)}").asOrderedText(),
                     dragon.spawnPos.toCenterPos(), 1f, false
                 )
             }
 
             if (dragonBoxes && dragon.state != WitherDragonState.DEAD)
-                event.context.drawWireFrameBox(dragon.boxesDimensions, dragon.color, depth = true)
+                event.drawWireFrameBox(dragon.boxesDimensions, dragon.color, depth = true)
         }
     }
 
