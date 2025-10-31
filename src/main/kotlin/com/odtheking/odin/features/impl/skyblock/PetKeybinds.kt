@@ -59,7 +59,7 @@ object PetKeybinds : Module(
             previousPageKeybind.code -> if (current > 1) 45 else return modMessage("§cYou are already on the first page.").let { false }
             unequipKeybind.code ->
                 screen.screenHandler.slots.subList(10, 43)
-                    .indexOfFirst { it.stack?.loreString?.contains("§7§cClick to despawn!") == true }
+                    .indexOfFirst { it.stack?.loreString?.contains("Click to despawn!") == true }
                     .takeIf { it != -1 }?.plus(10) ?: return modMessage("§cCouldn't find equipped pet").let { false }
 
             else -> {
@@ -73,7 +73,7 @@ object PetKeybinds : Module(
             }
         }
 
-        if (nounequip && screen.screenHandler.slots.subList(10, 43).indexOfFirst { it.stack?.loreString?.contains("§7§cClick to despawn!") == true } == index
+        if (nounequip && screen.screenHandler.slots[index].stack?.loreString?.contains("Click to despawn!") == true
             && unequipKeybind.code != keyCode) return modMessage("§cThat pet is already equipped!").let { false }
 
         mc.interactionManager?.clickSlot(screen.screenHandler.syncId, index, GLFW.GLFW_MOUSE_BUTTON_1, SlotActionType.PICKUP, mc.player)
