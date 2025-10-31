@@ -14,6 +14,9 @@ import com.odtheking.odin.utils.ui.animations.EaseInOutAnimation
 import com.odtheking.odin.utils.ui.mouseX
 import com.odtheking.odin.utils.ui.mouseY
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
+import net.minecraft.client.gui.Click
+import net.minecraft.client.input.CharInput
+import net.minecraft.client.input.KeyInput
 import kotlin.math.floor
 
 /**
@@ -66,13 +69,13 @@ class ModuleButton(val module: Module, val panel: Panel) {
         return totalHeight
     }
 
-    fun mouseClicked(mouseX: Float, mouseY: Float, button: Int): Boolean {
+    fun mouseClicked(mouseX: Float, mouseY: Float, click: Click): Boolean {
         if (hover.hasStarted) {
-            if (button == 0) {
+            if (click.button() == 0) {
                 colorAnim.start()
                 module.toggle()
                 return true
-            } else if (button == 1) {
+            } else if (click.button() == 1) {
                 if (module.settings.isNotEmpty()) {
                     extendAnim.start()
                     extended = !extended
@@ -81,31 +84,31 @@ class ModuleButton(val module: Module, val panel: Panel) {
             }
         } else if (extended) {
             for (setting in representableSettings) {
-                if (setting.isVisible && setting.mouseClicked(mouseX, mouseY, button)) return true
+                if (setting.isVisible && setting.mouseClicked(mouseX, mouseY, click)) return true
             }
         }
         return false
     }
 
-    fun mouseReleased(state: Int) {
+    fun mouseReleased(click: Click) {
         if (!extended) return
         for (setting in representableSettings) {
-            if (setting.isVisible) setting.mouseReleased(state)
+            if (setting.isVisible) setting.mouseReleased(click)
         }
     }
 
-    fun keyTyped(typedChar: Char): Boolean {
+    fun keyTyped(input: CharInput): Boolean {
         if (!extended) return false
         for (setting in representableSettings) {
-            if (setting.isVisible && setting.keyTyped(typedChar)) return true
+            if (setting.isVisible && setting.keyTyped(input)) return true
         }
         return false
     }
 
-    fun keyPressed(keyCode: Int, scanCode: Int): Boolean {
+    fun keyPressed(input: KeyInput): Boolean {
         if (!extended) return false
         for (setting in representableSettings) {
-            if (setting.isVisible && setting.keyPressed(keyCode, scanCode)) return true
+            if (setting.isVisible && setting.keyPressed(input)) return true
         }
         return false
     }

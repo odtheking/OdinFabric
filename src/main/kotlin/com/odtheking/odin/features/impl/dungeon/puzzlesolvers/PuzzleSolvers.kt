@@ -146,14 +146,14 @@ object PuzzleSolvers : Module(
     @EventHandler
     fun onWorldRender(event: RenderEvent.Last) {
         if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return
-        if (iceFillSolver) IceFillSolver.onRenderWorld(event.context, iceFillColor)
-        if (weirdosSolver) WeirdosSolver.onRenderWorld(event.context, weirdosColor, weirdosWrongColor, weirdosStyle)
-        if (boulderSolver) BoulderSolver.onRenderWorld(event.context, showAllBoulderClicks, boulderStyle, boulderColor)
-        if (blazeSolver)   BlazeSolver.onRenderWorld(event.context, blazeLineNext, blazeLineAmount, blazeStyle, blazeFirstColor, blazeSecondColor, blazeAllColor, blazeWidth, blazeHeight, blazeSendComplete, blazeLineWidth)
-        if (beamsSolver)   BeamsSolver.onRenderWorld(event.context, beamStyle, beamsTracer, beamsAlpha)
-        if (waterSolver)   WaterSolver.onRenderWorld(event.context, showTracer, tracerColorFirst, tracerColorSecond)
-        if (quizSolver)    QuizSolver.onRenderWorld(event.context, quizColor, quizDepth)
-        if (tpMaze)        TPMazeSolver.onRenderWorld(event.context, mazeColorOne, mazeColorMultiple, mazeColorVisited)
+        if (iceFillSolver) IceFillSolver.onRenderWorld(event, iceFillColor)
+        if (weirdosSolver) WeirdosSolver.onRenderWorld(event, weirdosColor, weirdosWrongColor, weirdosStyle)
+        if (boulderSolver) BoulderSolver.onRenderWorld(event, showAllBoulderClicks, boulderStyle, boulderColor)
+        if (blazeSolver)   BlazeSolver.onRenderWorld(event, blazeLineNext, blazeLineAmount, blazeStyle, blazeFirstColor, blazeSecondColor, blazeAllColor, blazeWidth, blazeHeight, blazeSendComplete, blazeLineWidth)
+        if (beamsSolver)   BeamsSolver.onRenderWorld(event, beamStyle, beamsTracer, beamsAlpha)
+        if (waterSolver)   WaterSolver.onRenderWorld(event, showTracer, tracerColorFirst, tracerColorSecond)
+        if (quizSolver)    QuizSolver.onRenderWorld(event, quizColor, quizDepth)
+        if (tpMaze)        TPMazeSolver.onRenderWorld(event, mazeColorOne, mazeColorMultiple, mazeColorVisited)
     }
 
     private val puzzlePBs = PersonalBest(+MapSetting("PuzzlePBs", mutableMapOf<Int, Float>()))

@@ -3,7 +3,9 @@ package com.odtheking.odin.utils.ui
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
-import net.minecraft.client.gui.screen.Screen
+import net.minecraft.client.gui.Click
+import net.minecraft.client.input.CharInput
+import net.minecraft.client.input.KeyInput
 import net.minecraft.util.StringHelper
 import org.lwjgl.glfw.GLFW
 import kotlin.math.max
@@ -84,12 +86,12 @@ class TextInputHandler(
         NVGRenderer.popScissor()
     }
 
-    fun mouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int): Boolean {
+    fun mouseClicked(mouseX: Float, mouseY: Float, click: Click): Boolean {
         if (!isAreaHovered(x, y, width, height)) {
             resetState()
             return false
         }
-        if (mouseButton != 0) return false
+        if (click.button() != 0) return false
 
         listening = true
         dragging = true
@@ -119,12 +121,12 @@ class TextInputHandler(
         if (dragging) caretFromMouse(mouseX)
     }
 
-    fun keyPressed(keyCode: Int): Boolean {
+    fun keyPressed(input: KeyInput): Boolean {
         if (!listening) return false
-        val returnValue = when (keyCode) {
+        val returnValue = when (input.keycode) {
             GLFW.GLFW_KEY_BACKSPACE -> {
                 if (selection != caret) deleteSelection()
-                else if (Screen.hasControlDown()) {
+                else if (input.hasCtrl()) {
                     val previousSpace = getPreviousSpace()
                     textSetter(text.removeRangeSafe(previousSpace, caret))
                     caret -= if (caret > previousSpace) caret - previousSpace else 0
@@ -133,12 +135,12 @@ class TextInputHandler(
                     caret--
                 }
                 clearSelection()
-                selection != caret || Screen.hasControlDown() || caret != 0
+                selection != caret || input.hasCtrl() || caret != 0
             }
 
             GLFW.GLFW_KEY_DELETE -> {
                 if (selection != caret) deleteSelection()
-                else if (Screen.hasControlDown()) {
+                else if (input.hasCtrl()) {
                     val nextSpace = getNextSpace()
                     textSetter(text.removeRangeSafe(caret, nextSpace))
                     caret = if (caret < nextSpace) caret else nextSpace
@@ -147,34 +149,34 @@ class TextInputHandler(
                     caret = if (caret < text.length) caret else text.length
                 }
                 clearSelection()
-                selection != caret || Screen.hasControlDown() || caret != text.length
+                selection != caret || input.hasCtrl() || caret != text.length
             }
 
             GLFW.GLFW_KEY_RIGHT -> {
                 if (caret != text.length) {
-                    caret = if (Screen.hasControlDown()) getNextSpace() else caret + 1
-                    if (!Screen.hasShiftDown()) selection = caret
+                    caret = if (input.hasCtrl()) getNextSpace() else caret + 1
+                    if (!input.hasShift()) selection = caret
                     true
                 } else false
             }
 
             GLFW.GLFW_KEY_LEFT -> {
                 if (caret != 0) {
-                    caret = if (Screen.hasControlDown()) getPreviousSpace() else caret - 1
-                    if (!Screen.hasShiftDown()) selection = caret
+                    caret = if (input.hasCtrl()) getPreviousSpace() else caret - 1
+                    if (!input.hasShift()) selection = caret
                     true
                 } else false
             }
 
             GLFW.GLFW_KEY_HOME -> {
                 caret = 0
-                if (!Screen.hasShiftDown()) selection = caret
+                if (!input.hasShift()) selection = caret
                 true
             }
 
             GLFW.GLFW_KEY_END -> {
                 caret = text.length
-                if (!Screen.hasShiftDown()) selection = caret
+                if (!input.hasShift()) selection = caret
                 true
             }
 
@@ -184,8 +186,8 @@ class TextInputHandler(
             }
 
             else -> {
-                if (Screen.hasControlDown() && !Screen.hasShiftDown()) {
-                    when (keyCode) {
+                if (input.hasCtrl() && !input.hasShift()) {
+                    when (input.keycode) {
                         GLFW.GLFW_KEY_V -> {
                             mc.keyboard?.clipboard?.let { insert(it) }
                             true
@@ -236,10 +238,10 @@ class TextInputHandler(
         return returnValue
     }
 
-    fun keyTyped(typedChar: Char): Boolean {
+    fun keyTyped(input: CharInput): Boolean {
         if (!listening) return false
 
-        insert(StringHelper.stripInvalidChars(typedChar.toString()))
+        insert(StringHelper.stripInvalidChars(input.asString()))
         return true
     }
 

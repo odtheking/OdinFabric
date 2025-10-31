@@ -41,12 +41,12 @@ object KuudraInfo : Module(
 
         KuudraUtils.kuudraEntity?.let {
             if (highlightKuudra)
-                event.context.drawWireFrameBox(it.boundingBox, kuudraColor, depth = true)
+                event.drawWireFrameBox(it.boundingBox, kuudraColor, depth = true)
 
             if (kuudraHPDisplay) {
-                event.context.drawText(
+                event.drawText(
                     Text.of(getCurrentHealthDisplay(it.health)).asOrderedText(),
-                    it.pos.add(it.rotationVector.multiply(13.0).addVec(y = 10.0)), healthSize, depth = true
+                    it.entityPos.add(it.rotationVector.multiply(13.0).addVec(y = 10.0)), healthSize, depth = true
                 )
             }
         }

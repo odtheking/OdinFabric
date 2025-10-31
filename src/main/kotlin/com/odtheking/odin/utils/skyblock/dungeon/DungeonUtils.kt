@@ -15,7 +15,6 @@ import net.minecraft.block.SkullBlock
 import net.minecraft.block.entity.SkullBlockEntity
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
-import kotlin.jvm.optionals.getOrNull
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.roundToLong
@@ -205,7 +204,7 @@ object DungeonUtils {
                         name,
                         DungeonClass.entries.find { it.name == clazz } ?: continue,
                         clazzLvl = romanToInt(clazzLevel),
-                        mc.networkHandler?.getPlayerListEntry(name)?.skinTextures?.texture
+                        mc.networkHandler?.getPlayerListEntry(name)?.skinTextures?.body?.id()
                             ?: Identifier.of("textures/entity/steve.png"),
                         mc.world?.players?.find { it.name?.string == name } ?: mc.player,
                         false))
@@ -230,7 +229,7 @@ object DungeonUtils {
         return when {
             state.block.equalsOneOf(Blocks.CHEST, Blocks.TRAPPED_CHEST, Blocks.LEVER) -> true
             state.block is SkullBlock ->
-                (mc.world?.getBlockEntity(pos) as? SkullBlockEntity)?.owner?.uuid?.getOrNull()
+                (mc.world?.getBlockEntity(pos) as? SkullBlockEntity)?.owner?.gameProfile?.id
                     ?.toString()?.equalsOneOf(WITHER_ESSENCE_ID, REDSTONE_KEY) ?: false
 
             else -> false

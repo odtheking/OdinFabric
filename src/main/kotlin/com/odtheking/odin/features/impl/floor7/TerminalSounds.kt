@@ -47,7 +47,7 @@ object TerminalSounds : Module(
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onSlotClick(event: GuiEvent.MouseClick) {
         val id = (event.screen as HandledScreenAccessor).focusedSlot?.id ?: return
-        if (shouldReplaceSounds) playSoundForSlot(id, event.button)
+        if (shouldReplaceSounds) playSoundForSlot(id, event.click.button())
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

@@ -1,5 +1,7 @@
 package com.odtheking.odin.utils
 
+import com.google.common.collect.ImmutableMultimap
+import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
 import com.mojang.authlib.properties.PropertyMap
 import net.minecraft.component.DataComponentTypes
@@ -13,7 +15,7 @@ import net.minecraft.text.Text
 import java.util.*
 
 const val ID = "id"
-const val UUID = "uuid"
+const val UUID_STRING = "uuid"
 
 inline val ItemStack.customData: NbtCompound
     get() =
@@ -29,7 +31,7 @@ inline val NbtCompound.itemId: String
 
 inline val ItemStack.itemUUID: String
     get() =
-        customData.getString(UUID, "")
+        customData.getString(UUID_STRING, "")
 
 inline val ItemStack.lore: List<Text>
     get() =
@@ -41,7 +43,7 @@ inline val ItemStack.loreString: List<String>
 
 val ItemStack.texture: String?
     get() =
-        get(DataComponentTypes.PROFILE)?.gameProfile()?.properties?.get("textures")?.firstOrNull()?.value
+        get(DataComponentTypes.PROFILE)?.gameProfile?.properties?.get("textures")?.firstOrNull()?.value
 
 enum class ItemRarity(
     val loreName: String,
@@ -72,21 +74,14 @@ fun ItemStack.getSkyblockRarity(): ItemRarity? {
 
 fun createSkullStack(textureHash: String): ItemStack {
     val stack = ItemStack(Items.PLAYER_HEAD)
-    val properties = PropertyMap()
-    properties.put(
+
+    val property = Property(
         "textures",
-        Property(
-            "textures",
-            Base64.getEncoder().encodeToString(
-                "{\"textures\":{\"SKIN\":{\"url\":\"http://textures.minecraft.net/texture/$textureHash\"}}}".toByteArray()
-            )
-        )
+        Base64.getEncoder().encodeToString("{\"textures\":{\"SKIN\":{\"url\":\"http://textures.minecraft.net/texture/$textureHash\"}}}".toByteArray())
     )
-    val profile = ProfileComponent(
-        Optional.empty(),
-        Optional.empty(),
-        properties
-    )
-    stack.set(DataComponentTypes.PROFILE, profile)
+    val multimap = ImmutableMultimap.builder<String, Property>().put("textures", property).build()
+    val gameProfile = GameProfile(UUID.randomUUID(), "_", PropertyMap(multimap))
+
+    stack.set(DataComponentTypes.PROFILE, ProfileComponent.ofStatic(gameProfile))
     return stack
 }

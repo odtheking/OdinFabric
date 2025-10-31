@@ -9,7 +9,6 @@ import meteordevelopment.orbit.EventHandler
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
 import net.minecraft.entity.ItemEntity
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket
 import net.minecraft.network.packet.s2c.play.ItemPickupAnimationS2CPacket
@@ -37,10 +36,6 @@ object EventDispatcher {
 
         ClientTickEvents.END_CLIENT_TICK.register { _ ->
             mc.world?.let { TickEvent.End().postAndCatch() }
-        }
-
-        WorldRenderEvents.AFTER_TRANSLUCENT.register { context ->
-            mc.world?.let { RenderEvent.Last(context).postAndCatch() }
         }
     }
 

@@ -7,6 +7,7 @@
     "defaultRequire": 1
   },
   "client": [
+    "accessors.BeaconBeamAccessor",
     "accessors.HandledScreenAccessor",
     "accessors.KeyBindingAccessor",
     "accessors.SpecialGuiElementRendererAccessor",
@@ -24,7 +25,8 @@
     "mixins.MessageHandlerMixin",
     "mixins.MixinGameRenderer",
     "mixins.MouseMixin",
-    "mixins.PlayerEntityRendererMixin"
+    "mixins.PlayerEntityRendererMixin",
+    "mixins.WorldRendererMixin"
   ],
   "mixins": [
     "accessors.PlayerInteractEntityC2SPacketAccessor",
