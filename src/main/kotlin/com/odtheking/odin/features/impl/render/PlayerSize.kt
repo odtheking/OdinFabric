@@ -25,6 +25,11 @@ object PlayerSize : Module(
 
     private val sendDevData by ActionSetting("Send Dev Data", desc = "Sends dev data to the server.") {
         showHidden = false
+        fun valid(v: Float) = (v in 0.8f..1.6f) || (v in -1.0f..-0.8f)
+        if (!valid(devSizeX) || !valid(devSizeY) || !valid(devSizeZ)) {
+            modMessage("Global values must be between 0.8..1.6 or -1..-0.8")
+            return@ActionSetting
+        }
         OdinMod.scope.launch {
             modMessage(
                 sendDataToServer(
@@ -37,7 +42,7 @@ object PlayerSize : Module(
     }.withDependency { isRandom }
 
 
-    private var randoms: HashMap<String, RandomPlayer> = HashMap()
+    var randoms: HashMap<String, RandomPlayer> = HashMap()
     val isRandom get() = randoms.containsKey(mc.session?.username)
 
     data class RandomPlayer(

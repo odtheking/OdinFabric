@@ -7,7 +7,6 @@ import com.odtheking.odin.features.impl.floor7.terminalhandler.TerminalTypes
 import com.odtheking.odin.features.impl.floor7.termsim.*
 import com.odtheking.odin.utils.PersonalBest
 import com.odtheking.odin.utils.sendCommand
-import me.odinmain.features.impl.floor7.p3.termsim.SelectAllSim
 
 object TerminalSimulator : Module(
     name = "Terminal Simulator",

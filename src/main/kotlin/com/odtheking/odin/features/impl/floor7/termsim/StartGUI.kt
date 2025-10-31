@@ -4,7 +4,6 @@ import com.odtheking.odin.features.impl.floor7.TerminalSimulator
 import com.odtheking.odin.features.impl.floor7.TerminalSimulator.openRandomTerminal
 import com.odtheking.odin.utils.handlers.LimitedTickTask
 import com.odtheking.odin.utils.modMessage
-import me.odinmain.features.impl.floor7.p3.termsim.SelectAllSim
 import net.minecraft.component.DataComponentTypes
 import net.minecraft.item.ItemStack
 import net.minecraft.item.Items

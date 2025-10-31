@@ -26,6 +26,7 @@ import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket
 import net.minecraft.screen.slot.SlotActionType
 import net.minecraft.screen.sync.ItemStackHash
+import net.minecraft.util.DyeColor
 import org.lwjgl.glfw.GLFW
 
 @AlwaysActive // So it can be used in other modules
@@ -33,6 +34,7 @@ object TerminalSolver : Module(
     name = "Terminal Solver",
     description = "Renders solution for terminals in floor 7."
 ) {
+    private val debug by BooleanSetting("Debug Messages", false, desc = "Enables debug messages for the terminal solver.")
     val renderType by SelectorSetting("Mode", "Normal", arrayListOf("Normal", "Custom GUI"), desc = "How the terminal solver should render.")
     private val cancelToolTip by BooleanSetting("Stop Tooltips", true, desc = "Stops rendering tooltips in terminals.").withDependency { renderType != 1 }
     val hideClicked by BooleanSetting("Hide Clicked", false, desc = "Visually hides your first click before a gui updates instantly to improve perceived response time. Does not affect actual click time.")
@@ -96,7 +98,7 @@ object TerminalSolver : Module(
                         StartsWithHandler(startsWithRegex.find(windowName)?.groupValues?.get(1) ?: return modMessage("Failed to find letter, please report this!"))
 
                     TerminalTypes.SELECT ->
-                        SelectAllHandler(selectAllRegex.find(windowName)?.groupValues?.get(1)?.replace("light blue", "aqua", true)?.replace("light gray", "silver", true)?.replace("_", " ") ?: return modMessage("Failed to find color, please report this!"))
+                        SelectAllHandler(DyeColor.entries.find { it.name.replace("_", " ").equals(selectAllRegex.find(windowName)?.groupValues?.get(1), true) } ?: return modMessage("Failed to find color, please report this!"))
 
                     TerminalTypes.MELODY -> MelodyHandler()
                 }
@@ -197,7 +199,7 @@ object TerminalSolver : Module(
         val slotIndex = event.slot.id
         val inventorySize = (event.screen as? HandledScreen<*>)?.screenHandler?.slots?.size ?: return
 
-        event.cancel()
+        if (!debug) event.cancel()
         if (slotIndex !in solution || slotIndex > inventorySize - 37) return
 
         when (type) {

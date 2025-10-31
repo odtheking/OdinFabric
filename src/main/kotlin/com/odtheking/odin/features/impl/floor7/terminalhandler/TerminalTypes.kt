@@ -3,7 +3,6 @@ package com.odtheking.odin.features.impl.floor7.terminalhandler
 import com.github.stivais.commodore.parsers.CommandParsable
 import com.odtheking.odin.features.impl.floor7.termGUI.*
 import com.odtheking.odin.features.impl.floor7.termsim.*
-import me.odinmain.features.impl.floor7.p3.termsim.SelectAllSim
 
 @CommandParsable
 enum class TerminalTypes(

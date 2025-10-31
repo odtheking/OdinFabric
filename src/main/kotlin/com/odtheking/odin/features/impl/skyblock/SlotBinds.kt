@@ -72,7 +72,7 @@ object SlotBinds : Module(
     }
 
     @EventHandler
-    fun onRenderScreen(event: GuiEvent.Draw) {
+    fun onRenderScreen(event: GuiEvent.DrawTooltip) {
         val screen = event.screen as? InventoryScreen ?: return
         val hoveredSlot = (screen as HandledScreenAccessor).focusedSlot?.id?.takeIf { it in 5 until 45 } ?: return
         val boundSlot = slotBinds[hoveredSlot]
@@ -87,10 +87,7 @@ object SlotBinds : Module(
 
         if (previousSlot == null && !(mc.isShiftPressed)) return
 
-        event.drawContext.matrices.pushMatrix()
-        event.drawContext.matrices.translate(0f, 0f)
         event.drawContext.drawLine(startX.toFloat(), startY.toFloat(), endX.toFloat(), endY.toFloat(), lineColor, 1f)
-        event.drawContext.matrices.popMatrix()
     }
 
     @EventHandler

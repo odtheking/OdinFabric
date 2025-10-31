@@ -21,7 +21,7 @@ abstract class GuiEvent(val screen: Screen) : CancellableEvent() {
 
     class Draw(screen: Screen, val drawContext: DrawContext, val mouseX: Int, val mouseY: Int) : GuiEvent(screen)
 
-    class DrawBackground(screen: Screen, val drawContext: DrawContext) : GuiEvent(screen)
+    class DrawBackground(screen: Screen, val drawContext: DrawContext, val mouseX: Int, val mouseY: Int) : GuiEvent(screen)
 
     class DrawSlot(screen: Screen, val drawContext: DrawContext, val slot: Slot) : GuiEvent(screen)
 
