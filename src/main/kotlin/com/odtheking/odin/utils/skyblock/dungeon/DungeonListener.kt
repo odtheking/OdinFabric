@@ -36,6 +36,7 @@ object DungeonListener {
     var dungeonStats = DungeonStats()
     var puzzles = ArrayList<Puzzle>()
     var floor: Floor? = null
+    var hasDungeonStarted = false
     var paul = false
 
     private fun getBoss(): Boolean = with(mc.player) {
@@ -60,6 +61,7 @@ object DungeonListener {
         puzzles.clear()
         floor = null
         paul = false
+        hasDungeonStarted = false
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -112,6 +114,7 @@ object DungeonListener {
                 if (event.packet.overlay) return
 
                 val message = event.packet.content?.string?.noControlCodes ?: return
+                if (dungeonStart.matches(message)) hasDungeonStarted = true
                 if (expectingBloodRegex.matches(message)) expectingBloodUpdate = true
                 doorOpenRegex.find(message)?.let { dungeonStats.doorOpener = it.groupValues[1] }
                 deathRegex.find(message)?.let { match ->
@@ -199,6 +202,7 @@ object DungeonListener {
     private val puzzleCountRegex = Regex("^Puzzles: \\((\\d+)\\)\$")
     private val deathsRegex = Regex("^Team Deaths: (\\d+)$")
     private val cryptRegex = Regex("^ Crypts: (\\d+)$")
+    private val dungeonStart = Regex("\\[NPC] Mort: Here, I found this map when I first entered the dungeon\\.|\\[NPC] Mort: Right-click the Orb for spells, and Left-click \\(or Drop\\) to use your Ultimate!")
 
     data class DungeonStats(
         var secretsFound: Int = 0,
