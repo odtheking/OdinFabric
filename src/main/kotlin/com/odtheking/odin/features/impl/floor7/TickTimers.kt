@@ -16,7 +16,7 @@ import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 
 object TickTimers : Module(
     name = "Tick Timers",
-    description = "Displays timers for Outbounds, Necron, Goldor, and Storm."
+    description = "Displays timers for Necron, Goldor, Storm, Outbounds and Secrets."
 ) {
     private val displayInTicks by BooleanSetting("Display in Ticks", false, desc = "Display the timers in ticks instead of seconds.")
     private val symbolDisplay by BooleanSetting("Display Symbol", true, desc = "Displays s or t after the timers.")
@@ -56,13 +56,21 @@ object TickTimers : Module(
 
     private var padTickTime: Int = -1
 
-    private val outboundsHud by HUD("Outbounds Death Tick Hud", "Displays a timer for out of bounds death ticks.") {
+    private val outboundsHud by HUD("Outbounds Hud", "Displays a timer for out of bounds death ticks.") {
         if (it)                    drawStringWidth(formatTimer(15, 20, "§8Outbounds:"), 1, 1, Colors.MINECRAFT_DARK_RED) + 2 to 10
         else if (outboundsTime >= 0) drawStringWidth(formatTimer(outboundsTime, 20, "§8Outbounds:"), 1, 1, Colors.MINECRAFT_DARK_RED) + 2 to 10
         else 0 to 0
     }
 
     private var outboundsTime: Int = -1
+
+    private val secretsHud by HUD("Secrets Hud", "Displays a timer for secret spawn ticks.") {
+        if (it)                    drawStringWidth(formatTimer(15, 20, "§7Secret:"), 1, 1, Colors.MINECRAFT_DARK_RED) + 2 to 10
+        else if (secretsTime >= 0) drawStringWidth(formatTimer(secretsTime, 20, "§7Secret:"), 1, 1, Colors.MINECRAFT_DARK_RED) + 2 to 10
+        else 0 to 0
+    }
+
+    private var secretsTime: Int = -1
 
     @EventHandler
     fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
@@ -73,15 +81,19 @@ object TickTimers : Module(
             if (goldorTickTime >= 0 && goldorHud.enabled) goldorTickTime--
             if (padTickTime == 0 && stormHud.enabled) padTickTime = 20
             if (padTickTime >= 0 && stormHud.enabled) padTickTime--
-            if (outboundsTime == 0 && outboundsHud.enabled) outboundsTime = 40
-            if (outboundsTime >= 0 && outboundsHud.enabled) outboundsTime--
             if (necronTime >= 0 && necronHud.enabled) necronTime--
             return@with
         }
 
 
-        if (DungeonUtils.hasDungeonStarted) outboundsTime = -1
-        else outboundsTime = 40 - (mc.player!!.world.time % 40).toInt() // asserted because we are in dungeons
+        if (!DungeonUtils.hasDungeonStarted) {
+            // asserted because we are in dungeons
+            if (outboundsHud.enabled) outboundsTime = 40 - (mc.player!!.world.time % 40).toInt()
+        }
+        else {
+            outboundsTime = -1
+            if (secretsHud.enabled) secretsTime = 20 - (mc.player!!.world.time % 20).toInt()
+        }
 
         if (this !is GameMessageS2CPacket || overlay) return
         when {
@@ -106,6 +118,7 @@ object TickTimers : Module(
         padTickTime = -1
         necronTime = -1
         outboundsTime = -1
+        secretsTime = -1
     }
 
     private fun formatTimer(time: Int, max: Int, prefix: String): String {
