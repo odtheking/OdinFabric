@@ -92,7 +92,8 @@ object TickTimers : Module(
         }
         else {
             outboundsTime = -1
-            if (secretsHud.enabled) secretsTime = 20 - (mc.player!!.world.time % 20).toInt()
+            if (DungeonUtils.inBoss) secretsTime = -1
+            else if (secretsHud.enabled) secretsTime = 20 - (mc.player!!.world.time % 20).toInt()
         }
 
         if (this !is GameMessageS2CPacket || overlay) return
