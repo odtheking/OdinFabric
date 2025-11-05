@@ -13,6 +13,7 @@ import com.odtheking.odin.utils.toFixed
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.network.packet.s2c.common.CommonPingS2CPacket
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
+import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket
 
 object TickTimers : Module(
     name = "Tick Timers",
@@ -82,7 +83,22 @@ object TickTimers : Module(
             if (padTickTime == 0 && stormHud.enabled) padTickTime = 20
             if (padTickTime >= 0 && stormHud.enabled) padTickTime--
             if (necronTime >= 0 && necronHud.enabled) necronTime--
+            if (outboundsTime == 0 && outboundsHud.enabled) outboundsTime = 40
+            if (outboundsTime >= 0 && outboundsHud.enabled) outboundsTime--
+            if (secretsTime == 0 && secretsHud.enabled) secretsTime = 20
+            if (secretsTime >= 0 && secretsHud.enabled) secretsTime--
             return@with
+        }
+
+        if (this is WorldTimeUpdateS2CPacket) {
+            if (!DungeonUtils.hasDungeonStarted) {
+                if (outboundsHud.enabled) outboundsTime = 40 - (mc.player!!.world.time % 40).toInt()
+            }
+            else {
+                outboundsTime = -1
+                if (secretsHud.enabled && !DungeonUtils.inBoss) secretsTime = 20 - (mc.player!!.world.time % 20).toInt()
+                else secretsTime = -1
+            }
         }
 
 
@@ -92,8 +108,7 @@ object TickTimers : Module(
         }
         else {
             outboundsTime = -1
-            if (DungeonUtils.inBoss) secretsTime = -1
-            else if (secretsHud.enabled) secretsTime = 20 - (mc.player!!.world.time % 20).toInt()
+            if (secretsHud.enabled) secretsTime = 20 - (mc.player!!.world.time % 20).toInt()
         }
 
         if (this !is GameMessageS2CPacket || overlay) return
