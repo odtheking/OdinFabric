@@ -31,6 +31,9 @@ object DungeonUtils {
     inline val inBoss: Boolean
         get() = DungeonListener.inBoss
 
+    inline val hasDungeonStarted: Boolean
+        get() = DungeonListener.hasDungeonStarted
+
     inline val secretCount: Int
         get() = DungeonListener.dungeonStats.secretsFound
 
