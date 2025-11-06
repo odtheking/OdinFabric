@@ -64,7 +64,7 @@ object SpringBoots : Module(
 
         on<RenderEvent.Last> {
             if (!LocationUtils.isInSkyblock || blockAmount == 0f) return@on
-            mc.player?.pos?.addVec(y = blockAmount)?.let { context.drawWireFrameBox(Box.from(it), Colors.MINECRAFT_RED) }
+            mc.player?.entityPos?.addVec(y = blockAmount)?.let { drawWireFrameBox(Box.from(it), Colors.MINECRAFT_RED) }
         }
     }
 

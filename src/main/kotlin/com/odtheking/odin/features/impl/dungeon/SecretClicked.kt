@@ -72,7 +72,7 @@ object SecretClicked : Module(
                 val currentColor = if (secret.locked) lockedColor else color
                 val box = mc.world?.getBlockState(secret.pos)?.getOutlineShape(mc.world, secret.pos)?.asCuboid()
                     ?.takeIf { !it.isEmpty }?.boundingBox?.offset(secret.pos) ?: Box(secret.pos)
-                context.drawStyledBox(box, currentColor, style, depthCheck)
+                drawStyledBox(box, currentColor, style, depthCheck)
             }
         }
 

@@ -45,7 +45,7 @@ object KeyHighlight : Module(
                     currentKey = null
                     return@on
                 }
-                context.drawWireFrameBox(Box.from(keyType.entity?.pos?.add(-0.5, 1.0, -0.5)), keyType.color(), depth = true)
+                drawWireFrameBox(Box.from(keyType.entity?.entityPos?.add(-0.5, 1.0, -0.5)), keyType.color(), depth = true)
             }
         }
 

@@ -119,11 +119,11 @@ object InactiveWaypoints : Module(
                 if ((name == "Inactive Terminal" && showTerminals) || (name == "Inactive" && showDevices) || (name == "Not Activated" && showLevers)) {
                     val customName = Text.of(if (name == "Inactive Terminal") "Terminal" else if (name == "Inactive") "Device" else "Lever").asOrderedText()
                     if (renderBox)
-                        context.drawWireFrameBox(Box.from(it.pos.addVec(-0.5, z = -0.5)), color, depth = depthCheck)
+                        drawWireFrameBox(Box.from(it.entityPos.addVec(-0.5, z = -0.5)), color, depth = depthCheck)
                     if (renderText)
-                        context.drawText(customName, it.pos.addVec(y = 2.0), 1.5f, true)
+                        drawText(customName, it.entityPos.addVec(y = 2.0), 1.5f, true)
                     if (renderBeacon)
-                        context.drawBeaconBeam(it.blockPos, color)
+                        drawBeaconBeam(it.blockPos, color)
                 }
                 it.isCustomNameVisible = !hideDefault
             }

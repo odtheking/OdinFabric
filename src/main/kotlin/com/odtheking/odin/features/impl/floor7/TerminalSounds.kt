@@ -44,7 +44,7 @@ object TerminalSounds : Module(
         }
 
         on<GuiEvent.MouseClick> {
-            if (shouldReplaceSounds) playSoundForSlot((screen as HandledScreenAccessor).focusedSlot?.id ?: return@on, button)
+            if (shouldReplaceSounds) playSoundForSlot((screen as HandledScreenAccessor).focusedSlot?.id ?: return@on, click.button())
         }
 
         on<GuiEvent.CustomTermGuiClick> {

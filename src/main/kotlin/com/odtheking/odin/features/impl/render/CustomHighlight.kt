@@ -43,11 +43,11 @@ object CustomHighlight : Module(
                 ) ?: false
 
                 when (renderStyle) {
-                    0 -> context.drawWireFrameBox(boundingBox, color, depth = !canSee)
-                    1 -> context.drawFilledBox(boundingBox, color, depth = !canSee)
+                    0 -> drawWireFrameBox(boundingBox, color, depth = !canSee)
+                    1 -> drawFilledBox(boundingBox, color, depth = !canSee)
                     2 -> {
-                        context.drawWireFrameBox(boundingBox, color, depth = !canSee)
-                        context.drawFilledBox(boundingBox, color.multiplyAlpha(0.5f), depth = !canSee)
+                        drawWireFrameBox(boundingBox, color, depth = !canSee)
+                        drawFilledBox(boundingBox, color.multiplyAlpha(0.5f), depth = !canSee)
                     }
                 }
             }

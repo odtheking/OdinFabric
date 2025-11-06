@@ -38,11 +38,11 @@ object WardrobeKeybinds : Module(
 
     init {
         on<GuiEvent.MouseClick> {
-            if (screen is HandledScreen<*> && onClick(screen, button)) cancel()
+            if (screen is HandledScreen<*> && onClick(screen, click.button())) cancel()
         }
 
         on<GuiEvent.KeyPress> {
-            if (screen is HandledScreen<*> && onClick(screen, keyCode)) cancel()
+            if (screen is HandledScreen<*> && onClick(screen, input.keycode)) cancel()
         }
     }
 

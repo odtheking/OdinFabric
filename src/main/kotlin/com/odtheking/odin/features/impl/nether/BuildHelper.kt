@@ -38,7 +38,7 @@ object BuildHelper : Module(
             if (!KuudraUtils.inKuudra || KuudraUtils.phase != 2) return@on
             if (stunNotificationNumber != 0f && KuudraUtils.buildDonePercentage >= stunNotificationNumber) alert("§l§3Go to stun", false)
             if (buildHelperDraw)
-                context.drawText(
+                drawText(
                     Text.of("§bBuild §c${colorBuild(KuudraUtils.buildDonePercentage)}%").asOrderedText(),
                     Vec3d(-101.5, 82.0, -105.5),
                     3f,
@@ -46,7 +46,7 @@ object BuildHelper : Module(
                 )
 
             if (buildHelperDraw)
-                context.drawText(
+                drawText(
                     Text.of("§bBuilders ${colorBuilders(KuudraUtils.playersBuildingAmount)}").asOrderedText(),
                     Vec3d(-101.5, 81.0, -105.5),
                     3f,
@@ -55,7 +55,7 @@ object BuildHelper : Module(
 
             if (unfinishedWaypoints)
                 KuudraUtils.buildingPiles.forEach {
-                    context.drawCustomBeacon(
+                    drawCustomBeacon(
                         it.name.asOrderedText(),
                         it.blockPos,
                         Colors.MINECRAFT_DARK_RED,

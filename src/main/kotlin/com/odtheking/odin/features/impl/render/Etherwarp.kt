@@ -63,7 +63,7 @@ object Etherwarp : Module(
             if (mc.player?.isSneaking == false || mc.currentScreen != null) return@on
 
             etherPos = getEtherPos(
-                if (useServerPosition) mc.player?.lastPos else mc.player?.pos,
+                if (useServerPosition) mc.player?.lastPos else mc.player?.entityPos,
                 56.0 + (mc.player?.mainHandStack?.isEtherwarpItem()?.getInt("tuned_transmission", 0) ?: return@on),
                 etherWarp = true
             )
@@ -75,11 +75,11 @@ object Etherwarp : Module(
                         ?.takeIf { !it.isEmpty }?.boundingBox?.offset(pos) ?: Box(pos)
 
                 when (renderStyle) {
-                    0 -> context.drawWireFrameBox(box, color)
-                    1 -> context.drawFilledBox(box, color)
+                    0 -> drawWireFrameBox(box, color)
+                    1 -> drawFilledBox(box, color)
                     2 -> {
-                        context.drawWireFrameBox(box, color)
-                        context.drawFilledBox(box, color.multiplyAlpha(0.5f))
+                        drawWireFrameBox(box, color)
+                        drawFilledBox(box, color.multiplyAlpha(0.5f))
                     }
                 }
             }

@@ -40,7 +40,7 @@ object ArrowAlign : Module(
         TickTask(1) {
             if (DungeonUtils.getF7Phase() != M7Phases.P3) return@TickTask
             clicksRemaining.clear()
-            if ((mc.player?.pos?.distanceTo(Vec3d(0.0, 120.0, 77.0)) ?: return@TickTask) > 200) {
+            if ((mc.player?.entityPos?.distanceTo(Vec3d(0.0, 120.0, 77.0)) ?: return@TickTask) > 200) {
                 currentFrameRotations = null
                 targetSolution = null
                 return@TickTask
@@ -97,7 +97,7 @@ object ArrowAlign : Module(
                     clickNeeded < 5 -> '6'
                     else -> 'c'
                 }
-                context.drawText(
+                drawText(
                     Text.of("§$colorCode$clickNeeded").asOrderedText(),
                     getFramePositionFromIndex(index).toCenterPos().addVec(y = 0.1, x = -0.3),
                     1f,
