@@ -23,8 +23,6 @@ abstract class GuiEvent(val screen: Screen) : CancellableEvent() {
 
     class DrawSlot(screen: Screen, val drawContext: DrawContext, val slot: Slot) : GuiEvent(screen)
 
-    class NVGRender(screen: Screen) : GuiEvent(screen)
-
     class CustomTermGuiClick(screen: Screen, val slot: Int, val button: Int) : GuiEvent(screen)
 
     class DrawTooltip(screen: Screen, val drawContext: DrawContext, val mouseX: Int, val mouseY: Int) : GuiEvent(screen)
