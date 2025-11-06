@@ -2,15 +2,14 @@ package com.odtheking.odin.features.impl.dungeon
 
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.NumberSetting
-import com.odtheking.odin.events.PacketEvent
+import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.handlers.LimitedTickTask
-import com.odtheking.odin.utils.noControlCodes
+import com.odtheking.odin.utils.matchesOneOf
 import com.odtheking.odin.utils.sendCommand
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
-import meteordevelopment.orbit.EventHandler
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 
 object DungeonRequeue : Module(
     name = "Dungeon Requeue",
@@ -30,31 +29,26 @@ object DungeonRequeue : Module(
     private val youLeftRegex = Regex("You left the party.")
     var disableRequeue = false
 
-    @EventHandler
-    fun onPacketReceive(event: PacketEvent.Receive) = with(event.packet) {
-        if (this !is GameMessageS2CPacket || overlay) return@with
-
-        when {
-            content.string.noControlCodes.matches(extraStatsRegex) -> {
-                if (disableRequeue) {
-                    disableRequeue = false
-                    return@with
-                }
-                LimitedTickTask(delay * 20, 1) {
-                    if (!disableRequeue) {
-                        val command = if (type) "instancerequeue" else "od ${DungeonUtils.floor?.name?.lowercase()}"
-                        sendCommand(command)
+    init {
+        on<ChatPacketEvent> {
+            when {
+                value.matches(extraStatsRegex) -> {
+                    if (disableRequeue) {
+                        disableRequeue = false
+                        return@on
+                    }
+                    LimitedTickTask(delay * 20, 1) {
+                        if (!disableRequeue)
+                            sendCommand(if (type) "instancerequeue" else "od ${DungeonUtils.floor?.name?.lowercase()}")
                     }
                 }
+                disablePartyLeave && value.matchesOneOf(transferredRegex, leftOrRemovedRegex, disbandedEmptyRegex,
+                    kickedOfflineRegex, kickedByRegex, youLeftRegex, disbandedByRegex) -> disableRequeue = true
             }
-            disablePartyLeave && (content.string.matches(transferredRegex) || content.string.matches(leftOrRemovedRegex) || content.string.matches(disbandedEmptyRegex)
-                    || content.string.matches(kickedOfflineRegex) || content.string.matches(kickedByRegex) || content.string.matches(youLeftRegex)
-                    || content.string.matches(disbandedByRegex)) -> disableRequeue = true
         }
-    }
 
-    @EventHandler
-    fun onWorldLoad(event: WorldLoadEvent) {
-        disableRequeue = false
+        on<WorldLoadEvent> {
+            disableRequeue = false
+        }
     }
 }

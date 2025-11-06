@@ -2,9 +2,10 @@ package com.odtheking.odin.features.impl.floor7
 
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.ColorSetting
-import com.odtheking.odin.events.PacketEvent
+import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.Colors
@@ -14,9 +15,7 @@ import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.render.*
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
-import meteordevelopment.orbit.EventHandler
 import net.minecraft.entity.decoration.ArmorStandEntity
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 import net.minecraft.text.Text
 import net.minecraft.util.math.Box
 
@@ -68,55 +67,67 @@ object InactiveWaypoints : Module(
                 it.name.string.containsOneOf("Inactive", "Not Activated", "CLICK HERE", ignoreCase = true)
             }?.toSet().orEmpty()
         }
-    }
 
-    @EventHandler
-    fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
-        if (this !is GameMessageS2CPacket || overlay || !DungeonUtils.inBoss) return
-        val text = content?.string ?: return
+        on<ChatPacketEvent> {
+            if (!DungeonUtils.inBoss) return@on
 
-        when {
-            completedRegex.matches(text) -> {
-                val it = completedRegex.find(text) ?: return
-                val completed = (it.groupValues[4].toIntOrNull() ?: 0).apply { if (this == 1) firstInSection = true }
+            when {
+                completedRegex.matches(value) -> {
+                    val it = completedRegex.find(value) ?: return@on
+                    val completed = (it.groupValues[4].toIntOrNull() ?: 0).apply { if (this == 1) firstInSection = true }
 
-                if (completed == (it.groupValues[5].toIntOrNull() ?: 0)) {
-                    if (gate) newSection() else isComplete = true
-                    return
+                    if (completed == (it.groupValues[5].toIntOrNull() ?: 0)) {
+                        if (gate) newSection() else isComplete = true
+                        return@on
+                    }
+
+                    when (it.groupValues[3]) {
+                        "lever" -> levers++
+                        "terminal" -> terminals++
+                        "device" -> if (!firstInSection || lastCompleted != completed) device = true
+                    }
+                    lastCompleted = completed
                 }
 
-                when (it.groupValues[3]) {
-                    "lever" -> levers++
-
-                    "terminal" -> terminals++
-
-                    "device" -> if (!firstInSection || lastCompleted != completed) device = true
+                gateRegex.matches(value) -> {
+                    gate = true
+                    if (isComplete) newSection()
                 }
-                lastCompleted = completed
-            }
 
-            gateRegex.matches(text) -> {
-                gate = true
-                if (isComplete) newSection()
-            }
+                goldorRegex.matches(value) -> {
+                    shouldRender = true
+                    resetState()
+                    section = 1
+                }
 
-            goldorRegex.matches(text) -> {
-                shouldRender = true
-                resetState()
-                section = 1
-            }
-
-            coreOpeningRegex.matches(text) -> {
-                shouldRender = false
-                resetState()
+                coreOpeningRegex.matches(value) -> {
+                    shouldRender = false
+                    resetState()
+                }
             }
         }
-    }
 
-    @EventHandler
-    fun onWorldLoad(event: WorldLoadEvent) {
-        shouldRender = false
-        resetState()
+        on<WorldLoadEvent> {
+            shouldRender = false
+            resetState()
+        }
+
+        on<RenderEvent.Last> {
+            if (inactiveList.isEmpty() || DungeonUtils.getF7Phase() != M7Phases.P3) return@on
+            inactiveList.forEach {
+                val name = it.name.string
+                if ((name == "Inactive Terminal" && showTerminals) || (name == "Inactive" && showDevices) || (name == "Not Activated" && showLevers)) {
+                    val customName = Text.of(if (name == "Inactive Terminal") "Terminal" else if (name == "Inactive") "Device" else "Lever").asOrderedText()
+                    if (renderBox)
+                        context.drawWireFrameBox(Box.from(it.pos.addVec(-0.5, z = -0.5)), color, depth = depthCheck)
+                    if (renderText)
+                        context.drawText(customName, it.pos.addVec(y = 2.0), 1.5f, true)
+                    if (renderBeacon)
+                        context.drawBeaconBeam(it.blockPos, color)
+                }
+                it.isCustomNameVisible = !hideDefault
+            }
+        }
     }
 
     private fun resetState() {
@@ -139,23 +150,5 @@ object InactiveWaypoints : Module(
         gate = false
         levers = 0
         section++
-    }
-
-    @EventHandler
-    fun onRenderWorld(event: RenderEvent.Last) {
-        if (inactiveList.isEmpty() || DungeonUtils.getF7Phase() != M7Phases.P3) return
-        inactiveList.forEach {
-            val name = it.name.string
-            if ((name == "Inactive Terminal" && showTerminals) || (name == "Inactive" && showDevices) || (name == "Not Activated" && showLevers)) {
-                val customName = Text.of(if (name == "Inactive Terminal") "Terminal" else if (name == "Inactive") "Device" else "Lever").asOrderedText()
-                if (renderBox)
-                    event.drawWireFrameBox(Box.from(it.entityPos.addVec(-0.5, z = -0.5)), color, depth = depthCheck)
-                if (renderText)
-                    event.drawText(customName, it.entityPos.addVec(y = 2.0), 1.5f, true)
-                if (renderBeacon)
-                    event.drawBeaconBeam(it.blockPos, color)
-            }
-            it.isCustomNameVisible = !hideDefault
-        }
     }
 }

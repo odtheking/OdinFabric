@@ -1,20 +1,27 @@
 package com.odtheking.odin.features.impl.floor7
 
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
-import com.odtheking.odin.clickgui.settings.impl.*
-import com.odtheking.odin.events.PacketEvent
+import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
+import com.odtheking.odin.clickgui.settings.impl.DropdownSetting
+import com.odtheking.odin.clickgui.settings.impl.NumberSetting
+import com.odtheking.odin.clickgui.settings.impl.SelectorSetting
+import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.core.on
+import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.*
+import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.render.drawStringWidth
 import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
-import meteordevelopment.orbit.EventHandler
-import net.minecraft.network.packet.s2c.common.CommonPingS2CPacket
-import net.minecraft.network.packet.s2c.play.*
+import net.minecraft.network.packet.s2c.play.EntityEquipmentUpdateS2CPacket
+import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket
+import net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket
+import net.minecraft.network.packet.s2c.play.ParticleS2CPacket
 import net.minecraft.text.Text
 
 object WitherDragons : Module(
@@ -54,8 +61,8 @@ object WitherDragons : Module(
 
     private val dragonPriorityDropDown by DropdownSetting("Dragon Priority Dropdown")
     val dragonPriorityToggle by BooleanSetting("Dragon Priority", false, desc = "Displays the priority of dragons spawning.").withDependency { dragonPriorityDropDown }
-    val normalPower by NumberSetting("Normal Power", 22.0f, 0.0, 32.0, desc = "Power needed to split.").withDependency { dragonPriorityToggle && dragonPriorityDropDown }
-    val easyPower by NumberSetting("Easy Power", 19.0f, 0.0, 32.0, desc = "Power needed when its Purple and another dragon.").withDependency { dragonPriorityToggle && dragonPriorityDropDown }
+    val normalPower by NumberSetting("Normal Power", 22f, 0, 32, desc = "Power needed to split.").withDependency { dragonPriorityToggle && dragonPriorityDropDown }
+    val easyPower by NumberSetting("Easy Power", 19f, 0, 32, desc = "Power needed when its Purple and another dragon.").withDependency { dragonPriorityToggle && dragonPriorityDropDown }
     val soloDebuff by SelectorSetting("Purple Solo Debuff", "Tank", arrayListOf("Tank", "Healer"), desc = "The class that solo debuffs purple, the other class helps b/m.").withDependency { dragonPriorityToggle && dragonPriorityDropDown }
     val soloDebuffOnAll by BooleanSetting("Solo Debuff on All Splits", true, desc = "Same as Purple Solo Debuff but for all dragons (A will only have 1 debuff).").withDependency { dragonPriorityToggle && dragonPriorityDropDown }
     val paulBuff by BooleanSetting("Paul Buff", false, desc = "Multiplies the power in your run by 1.25.").withDependency { dragonPriorityToggle && dragonPriorityDropDown }
@@ -64,64 +71,69 @@ object WitherDragons : Module(
     var priorityDragon = WitherDragonsEnum.None
     var currentTick = 0L
 
-    val dragonPBs = PersonalBest(+MapSetting("DragonPBs", mutableMapOf<Int, Float>()))
+    val dragonPBs = PersonalBest(this, "DragonPBs")
 
-    @EventHandler
-    fun onWorldLoad(event: WorldLoadEvent) {
-        WitherDragonsEnum.reset()
-    }
+    init {
+        onReceive<ParticleS2CPacket> {
+            if (DungeonUtils.getF7Phase() == M7Phases.P5) handleSpawnPacket(this)
+        }
 
-    @EventHandler
-    fun onPacketReceive(event: PacketEvent.Receive) {
-        if (DungeonUtils.getF7Phase() != M7Phases.P5) return
+        onReceive<EntityEquipmentUpdateS2CPacket> {
+            if (DungeonUtils.getF7Phase() == M7Phases.P5) DragonCheck.dragonSprayed(this)
+        }
 
-        when (event.packet) {
-            is CommonPingS2CPacket -> {
-                WitherDragonsEnum.entries.forEach { if (it.state == WitherDragonState.SPAWNING && it.timeToSpawn > 0) it.timeToSpawn-- }
-                currentTick++
-            }
-            is ParticleS2CPacket -> handleSpawnPacket(event.packet)
-            is EntityEquipmentUpdateS2CPacket -> DragonCheck.dragonSprayed(event.packet)
-            is EntitySpawnS2CPacket -> DragonCheck.dragonSpawn(event.packet)
-            is EntityTrackerUpdateS2CPacket -> DragonCheck.dragonUpdate(event.packet)
-            is GameMessageS2CPacket -> {
-                val text = event.packet.content?.string ?: return
+        onReceive<EntitySpawnS2CPacket> {
+            if (DungeonUtils.getF7Phase() == M7Phases.P5) DragonCheck.dragonSpawn(this)
+        }
 
-                if (witherKingRegex.matches(text)) {
-                    WitherDragonsEnum.entries.find { DragonCheck.lastDragonDeath == it && DragonCheck.lastDragonDeath != WitherDragonsEnum.None }?.let {
-                        if (sendNotification) modMessage("§${it.colorCode}${it.name} dragon counts.")
-                        DragonCheck.lastDragonDeath = WitherDragonsEnum.None
-                    } ?: WitherDragonsEnum.entries.find { it.state == WitherDragonState.ALIVE }?.setDead(true)
-                }
+        onReceive<EntityTrackerUpdateS2CPacket> {
+            if (DungeonUtils.getF7Phase() == M7Phases.P5) DragonCheck.dragonUpdate(this)
+        }
+
+        on<ChatPacketEvent> {
+            if (DungeonUtils.getF7Phase() != M7Phases.P5) return@on
+            if (witherKingRegex.matches(value)) {
+                WitherDragonsEnum.entries.find { DragonCheck.lastDragonDeath == it && DragonCheck.lastDragonDeath != WitherDragonsEnum.None }?.let {
+                    if (sendNotification) modMessage("§${it.colorCode}${it.name} dragon counts.")
+                    DragonCheck.lastDragonDeath = WitherDragonsEnum.None
+                } ?: WitherDragonsEnum.entries.find { it.state == WitherDragonState.ALIVE }?.setDead(true)
             }
         }
-    }
 
-    @EventHandler
-    fun onRenderWorld(event: RenderEvent.Last) {
-        if (DungeonUtils.getF7Phase() != M7Phases.P5) return
+        TickTask(0, true) {
+            WitherDragonsEnum.entries.forEach { if (it.state == WitherDragonState.SPAWNING && it.timeToSpawn > 0) it.timeToSpawn-- }
+            currentTick++
+        }
 
-        if (dragonHealth) {
-            DragonCheck.dragonEntityList.forEach { dragon ->
-                if (dragon.health > 0) {
-                    event.drawText(
-                        Text.of(colorHealth(dragon.health)).asOrderedText(),
-                        dragon.entityPos.addVec(y = 1.5), 1f, false
+        on<RenderEvent.Last> {
+            if (DungeonUtils.getF7Phase() != M7Phases.P5) return@on
+
+            if (dragonHealth) {
+                DragonCheck.dragonEntityList.forEach { dragon ->
+                    if (dragon.health > 0) {
+                        context.drawText(
+                            Text.of(colorHealth(dragon.health)).asOrderedText(),
+                            dragon.pos.addVec(y = 1.5), 1f, false
+                        )
+                    }
+                }
+            }
+
+            WitherDragonsEnum.entries.forEach { dragon ->
+                if (dragonTimer && dragon.state == WitherDragonState.SPAWNING && dragon.timeToSpawn > 0) {
+                    context.drawText(
+                        Text.of("§${dragon.colorCode}${dragon.name.first()}: ${getDragonTimer(dragon.timeToSpawn)}").asOrderedText(),
+                        dragon.spawnPos.toCenterPos(), 1f, false
                     )
                 }
+
+                if (dragonBoxes && dragon.state != WitherDragonState.DEAD)
+                    context.drawWireFrameBox(dragon.boxesDimensions, dragon.color, depth = true)
             }
         }
 
-        WitherDragonsEnum.entries.forEach { dragon ->
-            if (dragonTimer && dragon.state == WitherDragonState.SPAWNING && dragon.timeToSpawn > 0) {
-                event.drawText(
-                    Text.of("§${dragon.colorCode}${dragon.name.first()}: ${getDragonTimer(dragon.timeToSpawn)}").asOrderedText(),
-                    dragon.spawnPos.toCenterPos(), 1f, false
-                )
-            }
-
-            if (dragonBoxes && dragon.state != WitherDragonState.DEAD)
-                event.drawWireFrameBox(dragon.boxesDimensions, dragon.color, depth = true)
+        on<WorldLoadEvent> {
+            WitherDragonsEnum.reset()
         }
     }
 

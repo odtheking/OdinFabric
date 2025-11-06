@@ -3,16 +3,16 @@ package com.odtheking.odin.features.impl.nether
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.ColorSetting
-import com.odtheking.odin.events.PacketEvent
+import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.RenderEvent
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.*
+import com.odtheking.odin.utils.ChatManager.hideMessage
 import com.odtheking.odin.utils.render.drawCustomBeacon
 import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.skyblock.Supply
-import meteordevelopment.orbit.EventHandler
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 import net.minecraft.text.Text
 import net.minecraft.util.math.Vec3d
 import kotlin.math.cos
@@ -33,59 +33,53 @@ object SupplyHelper : Module(
     private val runStartRegex = Regex("^\\[NPC] Elle: Okay adventurers, I will go and fish up Kuudra!$")
     private var startRun = 0L
 
-    @EventHandler
-    fun onChat(event: PacketEvent.Receive) = with(event.packet) {
-        if (this !is GameMessageS2CPacket || overlay || !KuudraUtils.inKuudra || !sendSupplyTime) return
-        val message = content.string.noControlCodes
+    init {
+        on<ChatPacketEvent> {
+            if (!KuudraUtils.inKuudra || !sendSupplyTime) return@on
 
-        when {
-            runStartRegex.matches(message) -> startRun = System.currentTimeMillis()
+            when {
+                runStartRegex.matches(value) -> startRun = System.currentTimeMillis()
 
-            supplyPickUpRegex.matches(message) -> {
-                if (KuudraUtils.phase != 1) return
-                val (name, current, total) = supplyPickUpRegex.find(message)?.destructured ?: return
-                modMessage("§6$name §a§lrecovered a supply in ${formatTime(System.currentTimeMillis() - startRun)}! §r§8($current/$total)", "")
-                event.cancel()
-            }
-        }
-    }
-
-    @EventHandler
-    fun onWorldRender(event: RenderEvent.Last) {
-        if (!KuudraUtils.inKuudra || KuudraUtils.phase != 1) return
-
-        if (supplyDropWaypoints) {
-            Supply.entries.forEach { type ->
-                if (type.equalsOneOf(Supply.None, Supply.Square) || !type.isActive) return@forEach
-                event.drawCustomBeacon(
-                    Text.of("§ePlace Here!").asOrderedText(),
-                    type.dropOffSpot,
-                    if (NoPre.missing == type) Colors.MINECRAFT_GREEN else Colors.MINECRAFT_RED,
-                    increase = false,
-                    distance = false
-                )
+                supplyPickUpRegex.matches(value) -> {
+                    if (KuudraUtils.phase != 1) return@on
+                    val (name, current, total) = supplyPickUpRegex.find(value)?.destructured ?: return@on
+                    modMessage("§6$name §a§lrecovered a supply in ${formatTime(System.currentTimeMillis() - startRun)}! §r§8($current/$total)", "")
+                    hideMessage()
+                }
             }
         }
 
-        if (suppliesWaypoints) {
-            KuudraUtils.giantZombies.forEach {
-                event.drawCustomBeacon(
-                    Text.of("Pick Up!").asOrderedText(),
-                    Vec3d(it.x + (3.7 * cos((it.yaw + 130) * (Math.PI / 180))), 73.0, it.z + (3.7 * sin((it.yaw + 130) * (Math.PI / 180)))).toBlockPos(),
-                    supplyWaypointColor,
-                    increase = false
-                )
+        on<RenderEvent.Last> {
+            if (!KuudraUtils.inKuudra || KuudraUtils.phase != 1) return@on
+            if (supplyDropWaypoints) {
+                Supply.entries.forEach { type ->
+                    if (type.equalsOneOf(Supply.None, Supply.Square) || !type.isActive) return@forEach
+                    context.drawCustomBeacon(
+                        Text.of("§ePlace Here!").asOrderedText(),
+                        type.dropOffSpot,
+                        if (NoPre.missing == type) Colors.MINECRAFT_GREEN else Colors.MINECRAFT_RED,
+                        increase = false, distance = false
+                    )
+                }
             }
-        }
 
-        if (renderArea) {
-            Supply.entries.forEach { type ->
-                event.drawText(
-                    Text.of("§e${type.name}").asOrderedText(),
-                    type.pickUpSpot.toCenterPos(),
-                    2f,
-                    true
-                )
+            if (suppliesWaypoints) {
+                KuudraUtils.giantZombies.forEach {
+                    context.drawCustomBeacon(
+                        Text.of("Pick Up!").asOrderedText(),
+                        Vec3d(it.x + (3.7 * cos((it.yaw + 130) * (Math.PI / 180))), 73.0, it.z + (3.7 * sin((it.yaw + 130) * (Math.PI / 180)))).toBlockPos(),
+                        supplyWaypointColor, increase = false
+                    )
+                }
+            }
+
+            if (renderArea) {
+                Supply.entries.forEach { type ->
+                    context.drawText(
+                        Text.of("§e${type.name}").asOrderedText(),
+                        type.pickUpSpot.toCenterPos(), 2f, true
+                    )
+                }
             }
         }
     }

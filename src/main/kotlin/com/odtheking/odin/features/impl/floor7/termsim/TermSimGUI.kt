@@ -1,13 +1,14 @@
 package com.odtheking.odin.features.impl.floor7.termsim
 
-import com.odtheking.odin.OdinMod.EVENT_BUS
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.events.TerminalEvent
+import com.odtheking.odin.events.core.EventBus
+import com.odtheking.odin.events.core.EventPriority
+import com.odtheking.odin.events.core.on
+import com.odtheking.odin.events.core.onSend
 import com.odtheking.odin.features.impl.floor7.TerminalSounds
 import com.odtheking.odin.utils.handlers.LimitedTickTask
-import meteordevelopment.orbit.EventHandler
-import meteordevelopment.orbit.EventPriority
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen
 import net.minecraft.component.DataComponentTypes
 import net.minecraft.entity.player.PlayerEquipment
@@ -60,37 +61,36 @@ open class TermSimGUI(
         }
     }
 
-    @EventHandler
-    fun onTerminalSolved(event: TerminalEvent.Solved) {
-        if (mc.currentScreen !== this) return
-        PacketEvent.Receive(CloseScreenS2CPacket(-2)).postAndCatch()
-        StartGUI.open(ping)
-    }
-
     open fun slotClick(slot: Slot, button: Int) {}
 
     override fun close() {
-        EVENT_BUS.unsubscribe(this)
+        EventBus.unsubscribe(this)
         doesAcceptClick = true
         super.close()
     }
 
     override fun init() {
         super.init()
-        EVENT_BUS.subscribe(this)
+        EventBus.subscribe(this)
     }
 
     override fun removed() {
-        EVENT_BUS.unsubscribe(this)
+        EventBus.unsubscribe(this)
         super.removed()
     }
 
-    @EventHandler(priority = EventPriority.LOW)
-    fun onPacketSend(event: PacketEvent.Send) {
-        val packet = event.packet as? ClickSlotC2SPacket ?: return
-        if (mc.currentScreen !== this) return
-        delaySlotClick(guiInventorySlots.getOrNull(packet.slot.toInt()) ?: return, packet.button.toInt())
-        event.cancel()
+    init {
+        on<TerminalEvent.Solved> {
+            if (mc.currentScreen !== this@TermSimGUI) return@on
+            PacketEvent.Receive(CloseScreenS2CPacket(-2)).postAndCatch()
+            StartGUI.open(ping)
+        }
+
+        onSend<ClickSlotC2SPacket>  (EventPriority.LOW) {
+            if (mc.currentScreen !== this@TermSimGUI) return@onSend
+            delaySlotClick(guiInventorySlots.getOrNull(slot.toInt()) ?: return@onSend, button.toInt())
+            it.cancel()
+        }
     }
 
 //    @EventHandler(priority = EventPriority.LOWEST)

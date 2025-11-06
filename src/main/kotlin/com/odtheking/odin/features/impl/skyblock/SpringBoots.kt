@@ -1,8 +1,9 @@
 package com.odtheking.odin.features.impl.skyblock
 
-import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.TickEvent
+import com.odtheking.odin.events.core.on
+import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.addVec
@@ -11,7 +12,6 @@ import com.odtheking.odin.utils.isItem
 import com.odtheking.odin.utils.render.drawStringWidth
 import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.skyblock.LocationUtils
-import meteordevelopment.orbit.EventHandler
 import net.minecraft.entity.EquipmentSlot
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket
 import net.minecraft.sound.SoundEvents
@@ -21,7 +21,7 @@ object SpringBoots : Module(
     name = "Spring Boots",
     description = "Shows the current jump height of your spring boots."
 ) {
-    private val hud by HUD("Spring Boots", "Shows the how high you will jump.") {
+    private val hud by HUD("Spring Boots", "Shows how high you will jump.") {
         if (blockAmount == 0f && !it) return@HUD 0 to 0
         var width = 1
         width += drawStringWidth("Height: ", width, 1, Colors.MINECRAFT_LIGHT_PURPLE, true)
@@ -34,38 +34,38 @@ object SpringBoots : Module(
     private var highCount = 0
     private var lowCount = 0
 
-    @EventHandler
-    fun onPacketReceive(event: PacketEvent.Receive) = with(event.packet) {
-        if (!LocationUtils.isInSkyblock || this !is PlaySoundS2CPacket) return
-        val id = sound.value().id
+    init {
+        onReceive<PlaySoundS2CPacket> {
+            if (!LocationUtils.isInSkyblock) return@onReceive
+            val id = sound.value().id
 
-        when {
-            SoundEvents.BLOCK_NOTE_BLOCK_PLING.matchesId(id) && mc.player?.isSneaking == true && EquipmentSlot.FEET isItem "SPRING_BOOTS" ->
-                when (pitch) {
-                    0.6984127f -> lowCount = (lowCount + 1).coerceAtMost(2)
-                    in pitchSet -> highCount++
+            when {
+                SoundEvents.BLOCK_NOTE_BLOCK_PLING.matchesId(id) && mc.player?.isSneaking == true && EquipmentSlot.FEET isItem "SPRING_BOOTS" ->
+                    when (pitch) {
+                        0.6984127f -> lowCount = (lowCount + 1).coerceAtMost(2)
+                        in pitchSet -> highCount++
+                    }
+
+                SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH.id == id && pitch.equalsOneOf(0.0952381f, 1.6984127f) -> {
+                    highCount = 0
+                    lowCount = 0
                 }
-
-            SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH.id == id && pitch.equalsOneOf(0.0952381f, 1.6984127f) -> {
-                highCount = 0
-                lowCount = 0
             }
+
+            blockAmount = blocksList[(lowCount + highCount).coerceIn(blocksList.indices)]
         }
 
-        blockAmount = blocksList[(lowCount + highCount).coerceIn(blocksList.indices)]
-    }
+        on<TickEvent.End> {
+            if (!LocationUtils.isInSkyblock || mc.player?.isSneaking == true || !(EquipmentSlot.FEET isItem "SPRING_BOOTS")) return@on
+            highCount = 0
+            lowCount = 0
+            blockAmount = 0f
+        }
 
-    @EventHandler
-    fun onRenderWorld(event: RenderEvent.Last) {
-        if (!LocationUtils.isInSkyblock || blockAmount == 0f) return
-        mc.player?.entityPos?.addVec(y = blockAmount)?.let { event.drawWireFrameBox(Box.from(it), Colors.MINECRAFT_RED) }
-    }
-
-    @EventHandler
-    fun onTick(event: TickEvent.End) {
-        if (!LocationUtils.isInSkyblock || !(mc.player?.isSneaking == false || !(EquipmentSlot.FEET isItem "SPRING_BOOTS"))) return
-        highCount = 0
-        lowCount = 0
+        on<RenderEvent.Last> {
+            if (!LocationUtils.isInSkyblock || blockAmount == 0f) return@on
+            mc.player?.pos?.addVec(y = blockAmount)?.let { context.drawWireFrameBox(Box.from(it), Colors.MINECRAFT_RED) }
+        }
     }
 
     private fun getColor(blocks: Float): String {

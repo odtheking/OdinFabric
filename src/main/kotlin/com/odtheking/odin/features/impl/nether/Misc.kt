@@ -3,13 +3,11 @@ package com.odtheking.odin.features.impl.nether
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.NumberSetting
-import com.odtheking.odin.events.PacketEvent
+import com.odtheking.odin.events.ChatPacketEvent
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.handlers.LimitedTickTask
-import com.odtheking.odin.utils.noControlCodes
 import com.odtheking.odin.utils.sendCommand
-import meteordevelopment.orbit.EventHandler
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 
 object Misc : Module(
     name = "Misc",
@@ -23,18 +21,16 @@ object Misc : Module(
         Regex("^\\[NPC] Elle: Good job everyone. A hard fought battle come to an end. Let's get out of here before we run into any more trouble!$")
     private val endStoneRegex = Regex("^Used Extreme Focus! \\((\\d+) Mana\\)$")
 
-    @EventHandler
-    fun onChat(event: PacketEvent.Receive) = with(event.packet) {
-        if (this !is GameMessageS2CPacket || overlay) return
-        val message = content.string.noControlCodes
+    init {
+        on<ChatPacketEvent> {
+            if (manaDrain) endStoneRegex.find(value)?.groupValues?.getOrNull(1)?.let { mana ->
+                val players =
+                    mc.world?.players?.filter { it.squaredDistanceTo(mc.player) < 49 && it.uuid.version() == 4 } ?: return@on
+                sendCommand("pc Used $mana mana (${players.size} players nearby)")
+            }
 
-        if (manaDrain) endStoneRegex.find(message)?.groupValues?.getOrNull(1)?.let { mana ->
-            val players =
-                mc.world?.players?.filter { it.squaredDistanceTo(mc.player) < 49 && it.uuid.version() == 4 } ?: return
-            sendCommand("pc Used $mana mana (${players.size} players nearby)")
+            if (autoRequeue && endRunRegex.matches(value))
+                LimitedTickTask(requeueDelay, 1) { sendCommand("instancerequeue") }
         }
-
-        if (autoRequeue && endRunRegex.matches(message))
-            LimitedTickTask(requeueDelay, 1) { sendCommand("instancerequeue") }
     }
 }

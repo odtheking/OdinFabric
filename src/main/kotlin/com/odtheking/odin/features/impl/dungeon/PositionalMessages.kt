@@ -4,9 +4,10 @@ import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.ListSetting
 import com.odtheking.odin.clickgui.settings.impl.NumberSetting
-import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.core.on
+import com.odtheking.odin.events.core.onSend
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.render.drawCylinder
@@ -14,7 +15,6 @@ import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.sendCommand
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
-import meteordevelopment.orbit.EventHandler
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket
 import net.minecraft.text.Text
 import net.minecraft.util.math.Box
@@ -38,36 +38,36 @@ object PositionalMessages : Module(
     val posMessageStrings by ListSetting("Pos Messages", mutableListOf<PosMessage>())
     private val sentMessages = mutableMapOf<PosMessage, Boolean>()
 
-    @EventHandler
-    fun onPacketSend(event: PacketEvent.Send) {
-        if (event.packet is PlayerMoveC2SPacket) posMessageSend()
+    init {
+        onSend<PlayerMoveC2SPacket> {
+            posMessageSend()
+        }
+
+        on<RenderEvent.Last> {
+            if (!showPositions || (onlyDungeons && !DungeonUtils.inDungeons)) return@on
+            posMessageStrings.forEach { message ->
+                if (message.distance != null) {
+                    context.drawCylinder(Vec3d(message.x, message.y, message.z), message.distance.toFloat(), cylinderHeight.toFloat(), color = message.color, depth = depthCheck)
+                    if (displayMessage) context.drawText(Text.of(message.message).asOrderedText(), Vec3d(message.x, message.y + 1, message.z), messageSize, depthCheck)
+                } else {
+                    val box = Box(message.x, message.y, message.z, message.x2 ?: return@forEach, message.y2 ?: return@forEach,message.z2  ?: return@forEach)
+                    context.drawWireFrameBox(box, message.color, depth = depthCheck)
+                    if (!displayMessage) return@forEach
+                    val center = Vec3d((message.x + message.x2) / 2, (message.y + message.y2) / 2, (message.z + message.z2) / 2)
+                    context.drawText(Text.of(message.message).asOrderedText(), center.add(0.0, 1.0, 0.0), messageSize, depthCheck)
+                }
+            }
+        }
+
+        on<WorldLoadEvent> {
+            if (oncePerWorld) sentMessages.forEach { (message) -> sentMessages[message] = false }
+        }
     }
 
     private fun posMessageSend() {
         if (onlyDungeons && !DungeonUtils.inDungeons) return
         posMessageStrings.forEach { message ->
             message.x2?.let { handleInString(message) } ?: handleAtString(message)
-        }
-    }
-
-    @EventHandler
-    fun onRenderWorldLast(event: RenderEvent.Last) {
-        if (!showPositions || (onlyDungeons && !DungeonUtils.inDungeons)) return
-        posMessageStrings.forEach { message ->
-            if (message.distance != null) {
-                event.drawCylinder(Vec3d(message.x, message.y, message.z), message.distance.toFloat(), cylinderHeight.toFloat(), color = message.color, depth = depthCheck)
-                if (displayMessage) event.drawText(Text.of(message.message).asOrderedText(), Vec3d(message.x, message.y + 1, message.z), messageSize, depthCheck)
-            } else {
-                val box = Box(message.x, message.y, message.z, message.x2 ?: return@forEach, message.y2 ?: return@forEach,message.z2  ?: return@forEach)
-                event.drawWireFrameBox(box, message.color, depth = depthCheck)
-                if (!displayMessage) return@forEach
-                val center = Vec3d(
-                    (message.x + message.x2) / 2,
-                    (message.y + message.y2) / 2,
-                    (message.z + message.z2) / 2
-                )
-                event.drawText(Text.of(message.message).asOrderedText(), center.add(0.0, 1.0, 0.0), messageSize, depthCheck)
-            }
         }
     }
 
@@ -85,20 +85,12 @@ object PositionalMessages : Module(
 
     private fun handleInString(posMessage: PosMessage) {
         val msgSent = sentMessages.getOrDefault(posMessage, false)
-        if (mc.player != null && Box(posMessage.x, posMessage.y, posMessage.z, posMessage.x2 ?: return, posMessage.y2 ?: return, posMessage.z2 ?: return).contains(mc.player?.entityPos)) {
+        if (mc.player != null && Box(posMessage.x, posMessage.y, posMessage.z, posMessage.x2 ?: return, posMessage.y2 ?: return, posMessage.z2 ?: return).contains(mc.player?.pos)) {
             if (!msgSent) Timer().schedule(posMessage.delay) {
-                if (Box(posMessage.x, posMessage.y, posMessage.z, posMessage.x2, posMessage.y2, posMessage.z2).contains(mc.player?.entityPos))
+                if (Box(posMessage.x, posMessage.y, posMessage.z, posMessage.x2, posMessage.y2, posMessage.z2).contains(mc.player?.pos))
                     sendCommand("pc ${posMessage.message}")
             }
             sentMessages[posMessage] = true
         } else if (!oncePerWorld) sentMessages[posMessage] = false
-    }
-
-    @EventHandler
-    fun onWorldLoad(event: WorldLoadEvent) {
-        if (!oncePerWorld) return
-        sentMessages.forEach { (message, _) ->
-            sentMessages[message] = false
-        }
     }
 }

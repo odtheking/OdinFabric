@@ -5,17 +5,16 @@ import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.DropdownSetting
 import com.odtheking.odin.clickgui.settings.impl.KeybindSetting
 import com.odtheking.odin.clickgui.settings.impl.NumberSetting
-import com.odtheking.odin.events.PacketEvent
+import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.render.drawCustomBeacon
-import com.odtheking.odin.utils.sendCommand
-import meteordevelopment.orbit.EventHandler
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
+import com.odtheking.odin.utils.sendChatMessage
 import net.minecraft.text.Text
 import net.minecraft.util.math.BlockPos
 import org.lwjgl.glfw.GLFW
@@ -28,14 +27,13 @@ object Waypoints : Module(
     private val fromParty by BooleanSetting("From Party Chat", true, desc = "Adds waypoints from party chat.")
     private val fromAll by BooleanSetting("From All Chat", false, desc = "Adds waypoints from all chat.")
 
-
     private val pingLocationDropDown by DropdownSetting("Ping Location Dropdown", false)
     private val pingLocationToggle by BooleanSetting("Ping Waypoint", false, desc = "Adds a waypoint at the location you are looking at.").withDependency { pingLocationDropDown }
     private val pingLocation by KeybindSetting("Ping Keybind", GLFW.GLFW_KEY_UNKNOWN, desc = "Sends the location you are looking at as coords in chat for waypoints.").onPress {
         if (!pingLocationToggle) return@onPress
-        Etherwarp.getEtherPos(mc.player?.entityPos, pingDistance).pos?.let { pos ->
+        Etherwarp.getEtherPos(mc.player?.pos, pingDistance).pos?.let { pos ->
             addTempWaypoint("§fWaypoint", pos.x, pos.y, pos.z, pingWaypointTime)
-            if (sendPingedLocation) sendCommand("odinwaypoint share ${pos.x} ${pos.y} ${pos.z}")
+            if (sendPingedLocation) sendChatMessage("x: ${pos.x}, y: ${pos.y}, z: ${pos.z}")
         }
     }.withDependency { pingLocationToggle && pingLocationDropDown }
     private val sendPingedLocation by BooleanSetting("Send Pinged Location", false, desc = "Sends the location you are looking at as coords in chat for waypoints.").withDependency { pingLocationToggle && pingLocationDropDown }
@@ -49,30 +47,27 @@ object Waypoints : Module(
 
     private val temporaryWaypoints = mutableListOf<Waypoint>()
 
-    @EventHandler
-    fun onPacketReceive(event: PacketEvent.Receive) = with(event.packet) {
-        if (this !is GameMessageS2CPacket || overlay) return
+    init {
+        on<ChatPacketEvent> {
+            val (name, x, y, z) = when {
+                fromParty && partyRegex.matches(value) -> partyRegex.find(value)?.destructured
+                fromAll && allRegex.matches(value) -> allRegex.find(value)?.destructured
+                else -> null
+            } ?: return@on
 
-        val (name, x, y, z) = when {
-            fromParty && partyRegex.matches(content.string) -> partyRegex.find(content.string)?.destructured
-            fromAll && allRegex.matches(content.string) -> allRegex.find(content.string)?.destructured
-            else -> null
-        } ?: return
-
-        addTempWaypoint("§6$name", x.toIntOrNull() ?: return, y.toIntOrNull() ?: return, z.toIntOrNull() ?: return)
-    }
-
-    @EventHandler
-    fun onRenderWorld(event: RenderEvent.Last) {
-        temporaryWaypoints.removeAll {
-            event.drawCustomBeacon(Text.of(it.name).asOrderedText(), it.blockPos, it.color)
-            System.currentTimeMillis() > it.timeAdded + it.duration
+            addTempWaypoint("§6$name", x.toIntOrNull() ?: return@on, y.toIntOrNull() ?: return@on, z.toIntOrNull() ?: return@on)
         }
-    }
 
-    @EventHandler
-    fun onWorldLoad(event: WorldLoadEvent) {
-        temporaryWaypoints.clear()
+        on<RenderEvent.Last> {
+            temporaryWaypoints.removeAll {
+                context.drawCustomBeacon(Text.of(it.name).asOrderedText(), it.blockPos, it.color)
+                System.currentTimeMillis() > it.timeAdded + it.duration
+            }
+        }
+
+        on<WorldLoadEvent> {
+            temporaryWaypoints.clear()
+        }
     }
 
     fun addTempWaypoint(name: String = "Waypoint", x: Int, y: Int, z: Int, duration: Long = 60_000) {

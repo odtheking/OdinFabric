@@ -7,6 +7,7 @@ import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.utils.Vec2
 import com.odtheking.odin.utils.devMessage
 import com.odtheking.odin.utils.equalsOneOf
@@ -14,7 +15,6 @@ import com.odtheking.odin.utils.skyblock.Island
 import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonListener.inBoss
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.*
-import meteordevelopment.orbit.EventHandler
 import net.minecraft.block.Blocks
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
@@ -51,28 +51,41 @@ object ScanUtils {
         }
     }
 
-    @EventHandler
-    fun onTick(event: TickEvent.End) {
-        if (mc.world == null || mc.player == null) return
-
-        if ((!DungeonUtils.inDungeons && !LocationUtils.currentArea.isArea(Island.SinglePlayer)) || inBoss) {
-            currentRoom?.let { RoomEnterEvent(null).postAndCatch() }
-            return
-        } // We want the current room to register as null if we are not in a dungeon
-
-        val roomCenter = getRoomCenter(mc.player?.x?.toInt() ?: return, mc.player?.z?.toInt() ?: return)
-        if (roomCenter == lastRoomPos && LocationUtils.currentArea.isArea(Island.SinglePlayer)) return // extra SinglePlayer caching for invalid placed rooms
-        lastRoomPos = roomCenter
-
-        passedRooms.find { previousRoom -> previousRoom.roomComponents.any { it.vec2 == roomCenter } }?.let { room ->
-            if (currentRoom?.roomComponents?.none { it.vec2 == roomCenter } == true) RoomEnterEvent(room).postAndCatch()
-            return
-        } // We want to use cached rooms instead of scanning it again if we have already passed through it and if we are already in it we don't want to trigger the event
-
-        scanRoom(roomCenter)?.let { room -> if (room.rotation != Rotations.NONE) RoomEnterEvent(room).postAndCatch() }
-    }
-
     private val horizontals = Direction.entries.filter { it.axis.isHorizontal }
+
+    init {
+        on<TickEvent.End> {
+            if (mc.world == null || mc.player == null) return@on
+
+            if ((!DungeonUtils.inDungeons && !LocationUtils.currentArea.isArea(Island.SinglePlayer)) || inBoss) {
+                currentRoom?.let { RoomEnterEvent(null).postAndCatch() }
+                return@on
+            } // We want the current room to register as null if we are not in a dungeon
+
+            val roomCenter = getRoomCenter(mc.player?.x?.toInt() ?: return@on, mc.player?.z?.toInt() ?: return@on)
+            if (roomCenter == lastRoomPos && LocationUtils.currentArea.isArea(Island.SinglePlayer)) return@on // extra SinglePlayer caching for invalid placed rooms
+            lastRoomPos = roomCenter
+
+            passedRooms.find { previousRoom -> previousRoom.roomComponents.any { it.vec2 == roomCenter } }?.let { room ->
+                if (currentRoom?.roomComponents?.none { it.vec2 == roomCenter } == true) RoomEnterEvent(room).postAndCatch()
+                return@on
+            } // We want to use cached rooms instead of scanning it again if we have already passed through it and if we are already in it we don't want to trigger the event
+
+            scanRoom(roomCenter)?.let { room -> if (room.rotation != Rotations.NONE) RoomEnterEvent(room).postAndCatch() }
+        }
+
+        on<RoomEnterEvent> {
+            currentRoom = room
+            if (passedRooms.none { it.data.name == currentRoom?.data?.name }) passedRooms.add(currentRoom ?: return@on)
+            devMessage("${room?.data?.name} - ${room?.rotation} || clay: ${room?.clayPos}")
+        }
+
+        on<WorldLoadEvent> {
+            passedRooms.clear()
+            currentRoom = null
+            lastRoomPos = Vec2(0, 0)
+        }
+    }
 
     private fun updateRotation(room: Room) {
         val roomHeight = getTopLayerOfRoom(room.roomComponents.first().vec2)
@@ -160,18 +173,4 @@ object ScanUtils {
             val chunk = mc.world?.getChunk(ChunkSectionPos.getSectionCoord(vec2.x), ChunkSectionPos.getSectionCoord(vec2.z)) ?: return 0
             chunk.getHeightmap(Heightmap.Type.WORLD_SURFACE).get(vec2.x and 15, vec2.z and 15).coerceIn(11..140) - 1
         }*/
-
-    @EventHandler
-    fun onRoomEnter(event: RoomEnterEvent) {
-        currentRoom = event.room
-        if (passedRooms.none { it.data.name == currentRoom?.data?.name }) passedRooms.add(currentRoom ?: return)
-        devMessage("${event.room?.data?.name} - ${event.room?.rotation} || clay: ${event.room?.clayPos}")
-    }
-
-    @EventHandler
-    fun onWorldLoad(event: WorldLoadEvent) {
-        passedRooms.clear()
-        currentRoom = null
-        lastRoomPos = Vec2(0, 0)
-    }
 }

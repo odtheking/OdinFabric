@@ -5,9 +5,9 @@ import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.DropdownSetting
 import com.odtheking.odin.clickgui.settings.impl.KeybindSetting
 import com.odtheking.odin.events.GuiEvent
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.modMessage
-import meteordevelopment.orbit.EventHandler
 import net.minecraft.client.gui.screen.ingame.HandledScreen
 import net.minecraft.screen.slot.SlotActionType
 import org.lwjgl.glfw.GLFW
@@ -36,14 +36,14 @@ object WardrobeKeybinds : Module(
     private val wardrobeRegex = Regex("Wardrobe \\((\\d)/(\\d)\\)")
     private val equippedRegex = Regex("Slot (\\d): Equipped")
 
-    @EventHandler
-    fun onGuiEvent(event: GuiEvent.MouseClick) {
-        if (onClick((event.screen as? HandledScreen<*>) ?: return, event.click.button())) event.cancel()
-    }
+    init {
+        on<GuiEvent.MouseClick> {
+            if (screen is HandledScreen<*> && onClick(screen, button)) cancel()
+        }
 
-    @EventHandler
-    fun onGuiEvent(event: GuiEvent.KeyPress) {
-        if (onClick((event.screen as? HandledScreen<*>) ?: return, event.input.keycode)) event.cancel()
+        on<GuiEvent.KeyPress> {
+            if (screen is HandledScreen<*> && onClick(screen, keyCode)) cancel()
+        }
     }
 
     private fun onClick(screen: HandledScreen<*>, keyCode: Int): Boolean {

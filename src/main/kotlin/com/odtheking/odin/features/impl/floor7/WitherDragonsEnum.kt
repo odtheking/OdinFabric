@@ -101,7 +101,7 @@ enum class WitherDragonsEnum(
         if (priorityDragon == this) priorityDragon = None
 
         if (sendTime && WitherDragons.enabled) {
-            WitherDragons.dragonPBs.time(ordinal, ((currentTick - spawnedTime) / 20f), "s§7!", "§${colorCode}${name} §7was alive for §6")
+            WitherDragons.dragonPBs.time(name, ((currentTick - spawnedTime) / 20f), "s§7!", "§${colorCode}${name} §7was alive for §6")
         }
     }
 
@@ -144,11 +144,10 @@ enum class WitherDragonState {
 }
 
 fun handleSpawnPacket(particle: ParticleS2CPacket) {
-    val parameters = particle.parameters
     if (
         particle.count != 20 ||
         particle.y != 19.0 ||
-        parameters.type != ParticleTypes.FLAME ||
+        particle.parameters.type != ParticleTypes.FLAME ||
         particle.offsetX != 2f ||
         particle.offsetY != 3f ||
         particle.offsetZ != 2f ||
@@ -167,19 +166,14 @@ fun handleSpawnPacket(particle: ParticleS2CPacket) {
 
         if (particle.x !in dragon.xRange || particle.z !in dragon.zRange) return@fold newSpawned to dragons
 
-        if (sendSpawning && WitherDragons.enabled) {
-            modMessage("§${dragon.colorCode}$dragon §fdragon is spawning.")
-        }
+        if (sendSpawning && WitherDragons.enabled) modMessage("§${dragon.colorCode}$dragon §fdragon is spawning.")
 
         dragon.state = WitherDragonState.SPAWNING
         dragons.add(dragon)
         newSpawned to dragons
     }
 
-    if (dragons.isNotEmpty() &&
-        (dragons.size == 2 || spawned >= 2) &&
-        (priorityDragon == WitherDragonsEnum.None || priorityDragon.entity?.isDead == false)) {
+    if (dragons.isNotEmpty() && (dragons.size == 2 || spawned >= 2) && (priorityDragon == WitherDragonsEnum.None || priorityDragon.entity?.isDead == false))
         priorityDragon = findPriority(dragons).also { displaySpawningDragon(it) }
-    }
 }
 

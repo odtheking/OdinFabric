@@ -2,17 +2,15 @@ package com.odtheking.odin.features.impl.nether
 
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
-import com.odtheking.odin.events.PacketEvent
+import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.alert
 import com.odtheking.odin.utils.modMessage
-import com.odtheking.odin.utils.noControlCodes
 import com.odtheking.odin.utils.sendCommand
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.skyblock.Supply
-import meteordevelopment.orbit.EventHandler
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 import net.minecraft.util.math.Vec3d
 
 object NoPre : Module(
@@ -30,66 +28,65 @@ object NoPre : Module(
     private var preSpot = Supply.None
     var missing = Supply.None
 
-    @EventHandler
-    fun onChat(event: PacketEvent.Receive) = with(event.packet) {
-        if (this !is GameMessageS2CPacket || overlay || !KuudraUtils.inKuudra) return
-        val message = content.string.noControlCodes
+    init {
+        on<ChatPacketEvent> {
+            if (!KuudraUtils.inKuudra) return@on
 
-        when {
-            preRegex.matches(message) -> {
-                val playerLocation = mc.player?.blockPos ?: return
-                preSpot = when {
-                    Supply.Triangle.pickUpSpot.isWithinDistance(playerLocation, 15.0) -> Supply.Triangle
-                    Supply.X.pickUpSpot.isWithinDistance(playerLocation, 30.0) -> Supply.X
-                    Supply.Equals.pickUpSpot.isWithinDistance(playerLocation, 15.0) -> Supply.Equals
-                    Supply.Slash.pickUpSpot.isWithinDistance(playerLocation, 15.0) -> Supply.Slash
-                    else -> Supply.None
-                }
-                modMessage(if (preSpot == Supply.None) "§cDidn't register your pre-spot because you didn't get there in time." else "Pre-spot: ${preSpot.name}")
-            }
-
-            startRegex.matches(message) -> {
-                if (preSpot == Supply.None) return
-                var second = false
-                var pre = false
-                var msg = ""
-                KuudraUtils.giantZombies.forEach { supply ->
-                    val supplyLoc = Vec3d(supply.x, 76.0, supply.z)
-                    when {
-                        preSpot.pickUpSpot.isWithinDistance(supplyLoc, 18.0) -> pre = true
-                        preSpot == Supply.Triangle && Supply.Shop.pickUpSpot.isWithinDistance(supplyLoc, 18.0) -> second = true
-                        preSpot == Supply.X && Supply.xCannon.pickUpSpot.isWithinDistance(supplyLoc, 16.0) -> second = true
-                        preSpot == Supply.Slash && Supply.Square.pickUpSpot.isWithinDistance(supplyLoc, 20.0) -> second = true
+            when {
+                preRegex.matches(value) -> {
+                    val playerLocation = mc.player?.blockPos ?: return@on
+                    preSpot = when {
+                        Supply.Triangle.pickUpSpot.isWithinDistance(playerLocation, 15.0) -> Supply.Triangle
+                        Supply.X.pickUpSpot.isWithinDistance(playerLocation, 30.0) -> Supply.X
+                        Supply.Equals.pickUpSpot.isWithinDistance(playerLocation, 15.0) -> Supply.Equals
+                        Supply.Slash.pickUpSpot.isWithinDistance(playerLocation, 15.0) -> Supply.Slash
+                        else -> Supply.None
                     }
+                    modMessage(if (preSpot == Supply.None) "§cDidn't register your pre-spot because you didn't get there in time." else "Pre-spot: ${preSpot.name}")
                 }
-                if (second && pre) return
-                if (!pre && preSpot != Supply.None) msg = "No ${preSpot.name}!"
-                else if (!second) {
-                    msg = when (preSpot) {
-                        Supply.Triangle -> "No Shop!"
-                        Supply.X -> "No xCannon!"
-                        Supply.Slash -> "No Square!"
-                        else -> return
-                    }
-                }
-                if (msg.isNotEmpty()) sendCommand("pc $msg")
-            }
 
-            partyRegex.matches(message) -> {
-                val match = partyRegex.find(message)?.groupValues ?: return
-                missing = Supply.valueOf(match.lastOrNull() ?: return)
-                if (!showCratePriority) return
-                val cratePriority = cratePriority(missing).ifEmpty { return }
-                alert(cratePriority)
-                modMessage("Crate Priority: $cratePriority")
+                startRegex.matches(value) -> {
+                    if (preSpot == Supply.None) return@on
+                    var second = false
+                    var pre = false
+                    var msg = ""
+                    KuudraUtils.giantZombies.forEach { supply ->
+                        val supplyLoc = Vec3d(supply.x, 76.0, supply.z)
+                        when {
+                            preSpot.pickUpSpot.isWithinDistance(supplyLoc, 18.0) -> pre = true
+                            preSpot == Supply.Triangle && Supply.Shop.pickUpSpot.isWithinDistance(supplyLoc, 18.0) -> second = true
+                            preSpot == Supply.X && Supply.xCannon.pickUpSpot.isWithinDistance(supplyLoc, 16.0) -> second = true
+                            preSpot == Supply.Slash && Supply.Square.pickUpSpot.isWithinDistance(supplyLoc, 20.0) -> second = true
+                        }
+                    }
+                    if (second && pre) return@on
+                    if (!pre && preSpot != Supply.None) msg = "No ${preSpot.name}!"
+                    else if (!second) {
+                        msg = when (preSpot) {
+                            Supply.Triangle -> "No Shop!"
+                            Supply.X -> "No xCannon!"
+                            Supply.Slash -> "No Square!"
+                            else -> return@on
+                        }
+                    }
+                    if (msg.isNotEmpty()) sendCommand("pc $msg")
+                }
+
+                partyRegex.matches(value) -> {
+                    val match = partyRegex.find(value)?.groupValues ?: return@on
+                    missing = Supply.valueOf(match.lastOrNull() ?: return@on)
+                    if (!showCratePriority) return@on
+                    val cratePriority = cratePriority(missing).ifEmpty { return@on }
+                    alert(cratePriority)
+                    modMessage("Crate Priority: $cratePriority")
+                }
             }
         }
-    }
 
-    @EventHandler
-    fun onWorldLoad(event: WorldLoadEvent) {
-        preSpot = Supply.None
-        missing = Supply.None
+        on<WorldLoadEvent> {
+            preSpot = Supply.None
+            missing = Supply.None
+        }
     }
 
     private fun cratePriority(missing: Supply): String {

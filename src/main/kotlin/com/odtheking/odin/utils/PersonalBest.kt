@@ -2,9 +2,11 @@ package com.odtheking.odin.utils
 
 import com.odtheking.odin.clickgui.settings.impl.MapSetting
 import com.odtheking.odin.config.Config
+import com.odtheking.odin.features.Module
 
-class PersonalBest(private val mapSetting: MapSetting<Int, Float, MutableMap<Int, Float>>) {
-    
+class PersonalBest(module: Module, name: String) {
+
+    private val mapSetting = module.register(MapSetting(name, mutableMapOf<String, Float>()))
     /**
      * Updates the personal best for a specific puzzle
      * 
@@ -14,20 +16,23 @@ class PersonalBest(private val mapSetting: MapSetting<Int, Float, MutableMap<Int
      * @param message The message prefix to display
      * @param sendOnlyPB Whether to only send message on new PB
      */
-    fun time(index: Int, time: Float, unit: String = "s§7!", message: String, sendOnlyPB: Boolean = false, alwaysSendPB: Boolean = false, sendMessage: Boolean = true) {
-        var msg = "$message$time$unit"
+    fun time(index: String, time: Float, unit: String = "s§7!", message: String, sendOnlyPB: Boolean = false, alwaysSendPB: Boolean = false, sendMessage: Boolean = true) {
+        val msg = "$message$time$unit"
         val oldPB = mapSetting.value[index] ?: 9999f
 
         if (oldPB > time) {
-            mapSetting.value[index] = time
-            Config.save()
-            msg += " §7(§d§lNew PB§r§7) Old PB was §8$oldPB"
-            if (sendMessage) modMessage(msg)
+            set(index, time)
+            if (sendMessage) modMessage("$msg §7(§d§lNew PB§r§7) Old PB was §8$oldPB")
         } else if (!sendOnlyPB && sendMessage) modMessage("$msg ${if (alwaysSendPB) "(§8$oldPB§7)" else ""}")
     }
 
-    fun set(index: Int, time: Float) {
+    fun set(index: String, time: Float) {
         mapSetting.value[index] = time
+        Config.save()
+    }
+
+    fun reset() {
+        mapSetting.value.clear()
         Config.save()
     }
 }

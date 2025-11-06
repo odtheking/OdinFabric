@@ -2,9 +2,10 @@ package com.odtheking.odin.features.impl.dungeon
 
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.ColorSetting
-import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.core.on
+import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Color.Companion.withAlpha
@@ -12,7 +13,6 @@ import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.alert
 import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
-import meteordevelopment.orbit.EventHandler
 import net.minecraft.entity.Entity
 import net.minecraft.entity.decoration.ArmorStandEntity
 import net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket
@@ -28,31 +28,30 @@ object KeyHighlight : Module(
 
     private var currentKey: KeyType? = null
 
-    @EventHandler
-    fun onPacketReceive(event: PacketEvent.Receive) = with(event.packet) {
-        if (this !is EntityTrackerUpdateS2CPacket || !DungeonUtils.inDungeons || DungeonUtils.inBoss) return@with
-        val entity = mc.world?.getEntityById(id) as? ArmorStandEntity ?: return
-        if (currentKey?.entity == entity) return
-        currentKey = KeyType.entries.find { it.displayName == entity.name?.string } ?: return
-        currentKey?.entity = entity
+    init {
+        onReceive<EntityTrackerUpdateS2CPacket> {
+            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
+            val entity = mc.world?.getEntityById(id) as? ArmorStandEntity ?: return@onReceive
+            if (currentKey?.entity == entity) return@onReceive
+            currentKey = KeyType.entries.find { it.displayName == entity.name?.string } ?: return@onReceive
+            currentKey?.entity = entity
 
-        if (announceKeySpawn) alert("§${currentKey?.colorCode}${entity.name?.string}§7 spawned!")
-    }
-
-    @EventHandler
-    fun onRenderWorld(event: RenderEvent.Last) {
-        currentKey?.let { keyType ->
-            if (keyType.entity?.isAlive == false) {
-                currentKey = null
-                return
-            }
-            event.drawWireFrameBox(Box.from(keyType.entity?.entityPos?.add(-0.5, 1.0, -0.5)), keyType.color(), depth = true)
+            if (announceKeySpawn) alert("§${currentKey?.colorCode}${entity.name?.string}§7 spawned!")
         }
-    }
 
-    @EventHandler
-    fun onWorldLoad(event: WorldLoadEvent) {
-        currentKey = null
+        on<RenderEvent.Last> {
+            currentKey?.let { keyType ->
+                if (keyType.entity?.isAlive == false) {
+                    currentKey = null
+                    return@on
+                }
+                context.drawWireFrameBox(Box.from(keyType.entity?.pos?.add(-0.5, 1.0, -0.5)), keyType.color(), depth = true)
+            }
+        }
+
+        on<WorldLoadEvent> {
+            currentKey = null
+        }
     }
 
     private enum class KeyType(val displayName: String, val color: () -> Color, val colorCode: Char) {

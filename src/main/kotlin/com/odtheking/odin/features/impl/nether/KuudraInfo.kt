@@ -5,6 +5,7 @@ import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.ColorSetting
 import com.odtheking.odin.clickgui.settings.impl.NumberSetting
 import com.odtheking.odin.events.RenderEvent
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.addVec
@@ -14,7 +15,6 @@ import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.render.getStringWidth
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.toFixed
-import meteordevelopment.orbit.EventHandler
 import net.minecraft.text.Text
 
 object KuudraInfo : Module(
@@ -35,19 +35,20 @@ object KuudraInfo : Module(
         getStringWidth(string) + 2 to mc.textRenderer.fontHeight
     }
 
-    @EventHandler
-    fun renderWorldEvent(event: RenderEvent.Last) {
-        if (!KuudraUtils.inKuudra) return
+    init {
+        on<RenderEvent.Last> {
+            if (!KuudraUtils.inKuudra) return@on
 
-        KuudraUtils.kuudraEntity?.let {
-            if (highlightKuudra)
-                event.drawWireFrameBox(it.boundingBox, kuudraColor, depth = true)
+            KuudraUtils.kuudraEntity?.let {
+                if (highlightKuudra)
+                    context.drawWireFrameBox(it.boundingBox, kuudraColor, depth = true)
 
-            if (kuudraHPDisplay) {
-                event.drawText(
-                    Text.of(getCurrentHealthDisplay(it.health)).asOrderedText(),
-                    it.entityPos.add(it.rotationVector.multiply(13.0).addVec(y = 10.0)), healthSize, depth = true
-                )
+                if (kuudraHPDisplay) {
+                    context.drawText(
+                        Text.of(getCurrentHealthDisplay(it.health)).asOrderedText(),
+                        it.pos.add(it.rotationVector.multiply(13.0).addVec(y = 10.0)), healthSize, depth = true
+                    )
+                }
             }
         }
     }

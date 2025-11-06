@@ -1,17 +1,15 @@
 package com.odtheking.odin.utils.skyblock
 
-import com.odtheking.odin.events.PacketEvent
+import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.impl.skyblock.Splits
 import com.odtheking.odin.utils.PersonalBest
 import com.odtheking.odin.utils.formatTime
 import com.odtheking.odin.utils.handlers.LimitedTickTask
+import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.modMessage
-import com.odtheking.odin.utils.noControlCodes
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonListener
-import meteordevelopment.orbit.EventHandler
-import net.minecraft.network.packet.s2c.common.CommonPingS2CPacket
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 
 data class Split(val regex: Regex, val name: String, var time: Long = 0L, var ticks: Long = 0L)
 data class SplitsGroup(val splits: List<Split>, val personalBest: PersonalBest?)
@@ -21,62 +19,67 @@ object SplitsManager {
     var currentSplits: SplitsGroup = SplitsGroup(emptyList(), null)
     private var tickCounter: Long = 0L
 
-    @EventHandler
-    fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
-        if (this is CommonPingS2CPacket) {
-            tickCounter++
-            return@with
-        }
-        if (this !is GameMessageS2CPacket || overlay) return
-        if (content.string == "Starting in 1 second.") {
-            tickCounter = 0L
-            currentSplits = when (LocationUtils.currentArea) {
-                Island.Dungeon -> {
-                    val floor = DungeonListener.floor ?: return@with
+    init {
+        on<ChatPacketEvent> {
+            if (value == "Starting in 1 second.") {
+                tickCounter = 0L
+                currentSplits = when (LocationUtils.currentArea) {
+                    Island.Dungeon -> {
+                        val floor = DungeonListener.floor ?: return@on
 
-                    with(dungeonSplits[floor.floorNumber].toMutableList()) {
-                        addAll(0, listOf(
+                        with(dungeonSplits[floor.floorNumber].toMutableList()) {
+                            addAll(0, listOf(
                                 Split(MORT_REGEX, "§2Blood Open"),
                                 Split(BLOOD_OPEN_REGEX, "§bBlood Clear"),
                                 Split(Regex("\\[BOSS] The Watcher: You have proven yourself\\. You may pass\\."), "§dPortal Entry")
                             )
-                        )
-                        add(Split(Regex("^\\s*☠ Defeated (.+) in 0?([\\dhms ]+?)\\s*(\\(NEW RECORD!\\))?$"), "§1Total"))
-                        SplitsGroup(map { it.copy(time = 0L, ticks = 0L) }, Splits.dungeonPBsList[floor.ordinal])
+                            )
+                            add(Split(Regex("^\\s*☠ Defeated (.+) in 0?([\\dhms ]+?)\\s*(\\(NEW RECORD!\\))?$"), "§1Total"))
+                            SplitsGroup(map { it.copy(time = 0L, ticks = 0L) }, Splits.dungeonPBsList[floor.ordinal])
+                        }
                     }
-                }
 
-                Island.Kuudra -> when (KuudraUtils.kuudraTier) {
-                    5 -> SplitsGroup(kuudraT5SplitsGroup.map { it.copy(time = 0L, ticks = 0L) }, Splits.kuudraT5PBs)
-                    4 -> SplitsGroup(kuudraSplitsGroup.map { it.copy(time = 0L, ticks = 0L) }, Splits.kuudraT4PBs)
-                    3 -> SplitsGroup(kuudraSplitsGroup.map { it.copy(time = 0L, ticks = 0L) }, Splits.kuudraT3PBs)
-                    2 -> SplitsGroup(kuudraSplitsGroup.map { it.copy(time = 0L, ticks = 0L) }, Splits.kuudraT2PBs)
-                    1 -> SplitsGroup(kuudraSplitsGroup.map { it.copy(time = 0L, ticks = 0L) }, Splits.kuudraT1PBs)
+                    Island.Kuudra -> when (KuudraUtils.kuudraTier) {
+                        5 -> SplitsGroup(kuudraT5SplitsGroup.map { it.copy(time = 0L, ticks = 0L) }, Splits.kuudraT5PBs)
+                        4 -> SplitsGroup(kuudraSplitsGroup.map { it.copy(time = 0L, ticks = 0L) }, Splits.kuudraT4PBs)
+                        3 -> SplitsGroup(kuudraSplitsGroup.map { it.copy(time = 0L, ticks = 0L) }, Splits.kuudraT3PBs)
+                        2 -> SplitsGroup(kuudraSplitsGroup.map { it.copy(time = 0L, ticks = 0L) }, Splits.kuudraT2PBs)
+                        1 -> SplitsGroup(kuudraSplitsGroup.map { it.copy(time = 0L, ticks = 0L) }, Splits.kuudraT1PBs)
+                        else -> SplitsGroup(emptyList(), null)
+                    }
+
                     else -> SplitsGroup(emptyList(), null)
                 }
+            } else {
+                val currentSplit = currentSplits.splits.find { it.regex.matches(value) } ?: return@on
+                if (currentSplit.time != 0L) return@on
+                currentSplit.time = System.currentTimeMillis()
+                currentSplit.ticks = tickCounter
 
-                else -> SplitsGroup(emptyList(), null)
-            }
-        } else {
-            val currentSplit = currentSplits.splits.find { it.regex.matches(content.string.noControlCodes) } ?: return
-            if (currentSplit.time != 0L) return
-            currentSplit.time = System.currentTimeMillis()
-            currentSplit.ticks = tickCounter
+                val index = currentSplits.splits.indexOf(currentSplit).takeIf { it != 0 } ?: return@on
+                val currentSplitTime = (currentSplit.time - currentSplits.splits[index - 1].time) / 1000f
 
-            val index = currentSplits.splits.indexOf(currentSplit).takeIf { it != 0 } ?: return
-            val currentSplitTime = (currentSplit.time - currentSplits.splits[index - 1].time) / 1000f
-
-            if (index == currentSplits.splits.size - 1) {
-                val (times, _, _) = getAndUpdateSplitsTimes(currentSplits)
-                LimitedTickTask(10, 1) {
-                    currentSplits.personalBest?.time(index - 1, currentSplitTime, "s§7!", "§6${currentSplits.splits[index - 1].name} §7took §6", true, Splits.sendOnlyPB, Splits.enabled)
-                    currentSplits.personalBest?.time(index, times.last() / 1000f, "s§7!", "§6Total time §7took §6", true, Splits.sendOnlyPB, Splits.enabled)
-                    times.forEachIndexed { i, it ->
-                        val name = if (i == currentSplits.splits.size - 1) "Total" else currentSplits.splits[i].name
-                        if (Splits.sendSplits && Splits.enabled) modMessage("§6$name §7took §6${formatTime((it))} §7to complete.")
+                if (index == currentSplits.splits.size - 1) {
+                    val (times, _, _) = getAndUpdateSplitsTimes(currentSplits)
+                    LimitedTickTask(10, 1) {
+                        currentSplits.personalBest?.time(currentSplits.splits[index - 1].name, currentSplitTime, "s§7!", "§6${currentSplits.splits[index - 1].name} §7took §6", true, Splits.sendOnlyPB, Splits.enabled)
+                        currentSplits.personalBest?.time(currentSplits.splits[index].name, times.last() / 1000f, "s§7!", "§6Total time §7took §6", true, Splits.sendOnlyPB, Splits.enabled)
+                        times.forEachIndexed { i, it ->
+                            val name = if (i == currentSplits.splits.size - 1) "Total" else currentSplits.splits[i].name
+                            if (Splits.sendSplits && Splits.enabled) modMessage("§6$name §7took §6${formatTime((it))} §7to complete.")
+                        }
                     }
-                }
-            } else currentSplits.personalBest?.time(index - 1, currentSplitTime, "s§7!", "§6${currentSplits.splits[index - 1].name} §7took §6", true, Splits.sendOnlyPB, Splits.enabled)
+                } else currentSplits.personalBest?.time(currentSplits.splits[index - 1].name, currentSplitTime, "s§7!", "§6${currentSplits.splits[index - 1].name} §7took §6", true, Splits.sendOnlyPB, Splits.enabled)
+            }
+        }
+
+        TickTask(0, true) {
+            tickCounter++
+        }
+
+        on<WorldLoadEvent> {
+            currentSplits = SplitsGroup(mutableListOf(), null)
+            tickCounter = 0L
         }
     }
 
@@ -103,12 +106,6 @@ object SplitsManager {
             }
         }
         return Triple(times, tickTimes, current)
-    }
-
-    @EventHandler
-    fun onWorldLoad(event: WorldLoadEvent) {
-        currentSplits = SplitsGroup(mutableListOf(), null)
-        tickCounter = 0L
     }
 }
 

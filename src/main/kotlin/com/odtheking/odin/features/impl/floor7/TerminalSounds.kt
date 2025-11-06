@@ -5,16 +5,15 @@ import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.ActionSetting
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.StringSetting
+import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.GuiEvent
-import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.events.TerminalEvent
+import com.odtheking.odin.events.core.on
+import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.features.impl.floor7.terminalhandler.TerminalTypes
 import com.odtheking.odin.utils.playSoundAtPlayer
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
-import meteordevelopment.orbit.EventHandler
-import meteordevelopment.orbit.EventPriority
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket
 import net.minecraft.sound.SoundEvent
 import net.minecraft.sound.SoundEvents
@@ -38,31 +37,31 @@ object TerminalSounds : Module(
     private val gateRegex = Regex("^The gate has been destroyed!$")
     private var lastPlayed = System.currentTimeMillis()
 
-    @EventHandler
-    fun onTermComplete(event: TerminalEvent.Solved) {
-        if (shouldReplaceSounds && (!completeSounds && !clickSounds)) mc.player?.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), 8f, 4f)
-        else if (shouldReplaceSounds && completeSounds && !clickSounds) playCompleteSound()
-    }
+    init {
+        on<TerminalEvent.Solved> {
+            if (shouldReplaceSounds && (!completeSounds && !clickSounds)) mc.player?.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), 8f, 4f)
+            else if (shouldReplaceSounds && completeSounds && !clickSounds) playCompleteSound()
+        }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    fun onSlotClick(event: GuiEvent.MouseClick) {
-        val id = (event.screen as HandledScreenAccessor).focusedSlot?.id ?: return
-        if (shouldReplaceSounds) playSoundForSlot(id, event.click.button())
-    }
+        on<GuiEvent.MouseClick> {
+            if (shouldReplaceSounds) playSoundForSlot((screen as HandledScreenAccessor).focusedSlot?.id ?: return@on, button)
+        }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    fun onCustomSlotClick(event: GuiEvent.CustomTermGuiClick) {
-        if (shouldReplaceSounds) playSoundForSlot(event.slot, event.button)
-    }
+        on<GuiEvent.CustomTermGuiClick> {
+            if (shouldReplaceSounds) playSoundForSlot(slot, button)
+        }
 
-    @EventHandler
-    fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
-        if (this is PlaySoundS2CPacket && sound.value() == SoundEvents.BLOCK_NOTE_BLOCK_PLING.value() && volume == 8f && pitch == 4.047619f && shouldReplaceSounds)
-            event.cancel()
-        if (this !is GameMessageS2CPacket || overlay || !DungeonUtils.inDungeons || !shouldReplaceSounds) return
-        when {
-            content.string.matches(gateRegex) -> playSoundAtPlayer(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value())
-            content.string.matches(coreRegex) -> playSoundAtPlayer(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value())
+        onReceive<PlaySoundS2CPacket> {
+            if (sound.value() == SoundEvents.BLOCK_NOTE_BLOCK_PLING.value() && volume == 8f && pitch == 4.047619f && shouldReplaceSounds)
+                it.cancel()
+        }
+
+        on<ChatPacketEvent> {
+            if (!DungeonUtils.inDungeons || !shouldReplaceSounds) return@on
+            when {
+                value.matches(gateRegex) -> playSoundAtPlayer(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value())
+                value.matches(coreRegex) -> playSoundAtPlayer(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value())
+            }
         }
     }
 

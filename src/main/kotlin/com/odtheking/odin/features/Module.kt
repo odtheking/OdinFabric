@@ -5,6 +5,7 @@ import com.odtheking.odin.clickgui.settings.AlwaysActive
 import com.odtheking.odin.clickgui.settings.DevModule
 import com.odtheking.odin.clickgui.settings.Setting
 import com.odtheking.odin.clickgui.settings.impl.HUDSetting
+import com.odtheking.odin.events.core.EventBus
 import com.odtheking.odin.features.impl.render.ClickGUIModule
 import com.odtheking.odin.utils.modMessage
 import net.minecraft.client.gui.DrawContext
@@ -60,7 +61,7 @@ abstract class Module(
     init {
         if (alwaysActive) {
             @Suppress("LeakingThis")
-            OdinMod.EVENT_BUS.subscribe(this)
+            EventBus.subscribe(this)
         }
     }
 
@@ -68,14 +69,14 @@ abstract class Module(
      * Gets toggled when module is enabled
      */
     open fun onEnable() {
-        if (!alwaysActive) OdinMod.EVENT_BUS.subscribe(this)
+        if (!alwaysActive) EventBus.subscribe(this)
     }
 
     /**
      * Gets toggled when module is disabled
      */
     open fun onDisable() {
-        if (!alwaysActive) OdinMod.EVENT_BUS.unsubscribe(this)
+        if (!alwaysActive) EventBus.unsubscribe(this)
     }
 
     open fun onKeybind() {

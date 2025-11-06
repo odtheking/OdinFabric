@@ -1,21 +1,16 @@
 package com.odtheking.odin.utils.ui.rendering
 
-import com.mojang.blaze3d.opengl.GlStateManager
-import com.mojang.blaze3d.systems.RenderSystem
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.utils.Color.Companion.alpha
 import com.odtheking.odin.utils.Color.Companion.blue
 import com.odtheking.odin.utils.Color.Companion.green
 import com.odtheking.odin.utils.Color.Companion.red
-import net.minecraft.client.gl.GlBackend
-import net.minecraft.client.texture.GlTexture
 import net.minecraft.util.Identifier
 import org.lwjgl.nanovg.NVGColor
 import org.lwjgl.nanovg.NVGPaint
 import org.lwjgl.nanovg.NanoSVG.*
 import org.lwjgl.nanovg.NanoVG.*
 import org.lwjgl.nanovg.NanoVGGL3.*
-import org.lwjgl.opengl.GL30
 import org.lwjgl.stb.STBImage.stbi_load_from_memory
 import org.lwjgl.system.MemoryUtil.memAlloc
 import org.lwjgl.system.MemoryUtil.memFree
@@ -38,10 +33,9 @@ object NVGRenderer {
     private val images = HashMap<Image, NVGImage>()
 
     private var scissor: Scissor? = null
-
+    private var drawing: Boolean = false
     private var vg = -1L
 
-    private var drawing: Boolean = false
 
     init {
         vg = nvgCreate(NVG_ANTIALIAS or NVG_STENCIL_STROKES)
@@ -51,13 +45,6 @@ object NVGRenderer {
     fun beginFrame(width: Float, height: Float) {
         if (drawing) throw IllegalStateException("[NVGRenderer] Already drawing, but called beginFrame")
 
-        val framebuffer = mc.framebuffer
-        val glFramebuffer = (framebuffer.colorAttachment as GlTexture).getOrCreateFramebuffer(
-            (RenderSystem.getDevice() as GlBackend).bufferManager, null)
-        GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, glFramebuffer)
-        GlStateManager._viewport(0, 0, framebuffer.textureWidth, framebuffer.textureHeight)
-        GlStateManager._activeTexture(GL30.GL_TEXTURE0)
-
         nvgBeginFrame(vg, width, height, 1f)
         nvgTextAlign(vg, NVG_ALIGN_LEFT or NVG_ALIGN_TOP)
         drawing = true
@@ -66,19 +53,6 @@ object NVGRenderer {
     fun endFrame() {
         if (!drawing) throw IllegalStateException("[NVGRenderer] Not drawing, but called endFrame")
         nvgEndFrame(vg)
-        GlStateManager._disableCull() // default states that mc expects
-        GlStateManager._disableDepthTest()
-        GlStateManager._enableBlend()
-        GlStateManager._blendFuncSeparate(770, 771, 1, 0)
-
-        GlStateManager._glUseProgram(0) // fixes invalid program errors when using NVG
-
-        if (TextureTracker.previousActiveTexture != -1) { // prevents issues with gui background rendering
-            GlStateManager._activeTexture(TextureTracker.previousActiveTexture)
-            if (TextureTracker.previousBoundTexture != -1) GlStateManager._bindTexture(TextureTracker.previousBoundTexture)
-        }
-
-        GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0) // fixes macos issues
 
         drawing = false
     }
@@ -417,12 +391,4 @@ object NVGRenderer {
 
     private data class NVGImage(var count: Int, val nvg: Int)
     private data class NVGFont(val id: Int, val buffer: ByteBuffer)
-}
-
-object TextureTracker {
-    @JvmStatic
-    var previousBoundTexture = -1
-
-    @JvmStatic
-    var previousActiveTexture = -1
 }

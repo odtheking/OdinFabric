@@ -56,6 +56,9 @@ fun String.startsWithOneOf(vararg options: String, ignoreCase: Boolean = false):
 fun Any?.equalsOneOf(vararg options: Any?): Boolean =
     options.any { this == it }
 
+fun String.matchesOneOf(vararg options: Regex): Boolean =
+    options.any { this.matches(it) }
+
 fun logError(throwable: Throwable, context: Any) {
     val message =
         "${OdinMod.version} Caught an ${throwable::class.simpleName ?: "error"} at ${context::class.simpleName}."

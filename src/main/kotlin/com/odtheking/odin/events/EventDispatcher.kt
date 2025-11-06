@@ -1,16 +1,23 @@
 package com.odtheking.odin.events
 
 import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.events.core.onReceive
+import com.odtheking.odin.events.core.onSend
+import com.odtheking.odin.utils.ChatManager
 import com.odtheking.odin.utils.containsOneOf
 import com.odtheking.odin.utils.equalsOneOf
+import com.odtheking.odin.utils.noControlCodes
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.isSecret
-import meteordevelopment.orbit.EventHandler
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents
+import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
 import net.minecraft.entity.ItemEntity
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket
+import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket
+import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 import net.minecraft.network.packet.s2c.play.ItemPickupAnimationS2CPacket
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket
 import net.minecraft.sound.SoundEvents
@@ -37,29 +44,49 @@ object EventDispatcher {
         ClientTickEvents.END_CLIENT_TICK.register { _ ->
             mc.world?.let { TickEvent.End().postAndCatch() }
         }
-    }
 
-    @EventHandler
-    fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
-        if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return
-        when (this) {
-            is PlaySoundS2CPacket -> {
-                if (sound.value().equalsOneOf(SoundEvents.ENTITY_BAT_HURT, SoundEvents.ENTITY_BAT_DEATH) && volume == 0.1f)
-                    SecretPickupEvent.Bat(this).postAndCatch()
-            }
-            is ItemPickupAnimationS2CPacket -> {
-                val itemEntity = mc.world?.getEntityById(entityId) as? ItemEntity ?: return@with
-                if (itemEntity.stack?.name?.string?.containsOneOf(dungeonItemDrops, true) == true && itemEntity.distanceTo(mc.player) <= 6)
-                    SecretPickupEvent.Item(itemEntity).postAndCatch()
+        WorldRenderEvents.AFTER_TRANSLUCENT.register { context ->
+            mc.world?.let { RenderEvent.Last(context).postAndCatch() }
+        }
+
+        ClientReceiveMessageEvents.ALLOW_GAME.register { text, overlay ->
+            if (overlay) return@register false
+            !ChatManager.shouldCancelMessage(text)
+        }
+
+        onReceive<ItemPickupAnimationS2CPacket> {
+            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
+            val itemEntity = mc.world?.getEntityById(entityId) as? ItemEntity ?: return@onReceive
+            if (itemEntity.stack?.name?.string?.containsOneOf(dungeonItemDrops, true) == true && itemEntity.distanceTo(mc.player) <= 6)
+                SecretPickupEvent.Item(itemEntity).postAndCatch()
+        }
+
+        onReceive<EntitiesDestroyS2CPacket> {
+            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
+            entityIds.forEach { id ->
+                val entity = mc.world?.getEntityById(id) as? ItemEntity ?: return@forEach
+                if (entity.stack?.name?.string?.containsOneOf(dungeonItemDrops, true) == true && entity.distanceTo(mc.player) <= 6)
+                    SecretPickupEvent.Item(entity).postAndCatch()
             }
         }
-    }
 
-    @EventHandler
-    fun onPacketSend(event: PacketEvent.Send) = with (event.packet) {
-        if (!DungeonUtils.inDungeons) return
-        if (this is PlayerInteractBlockC2SPacket)
-            SecretPickupEvent.Interact(blockHitResult.blockPos, mc.world?.getBlockState(blockHitResult.blockPos)?.takeIf { isSecret(it, blockHitResult.blockPos) } ?: return).postAndCatch()
+        onReceive<PlaySoundS2CPacket> {
+            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
+            if (sound.equalsOneOf(SoundEvents.ENTITY_BAT_HURT, SoundEvents.ENTITY_BAT_DEATH) && volume == 0.1f)
+                SecretPickupEvent.Bat(this).postAndCatch()
+        }
+
+        onSend<PlayerInteractBlockC2SPacket> {
+            if (!DungeonUtils.inDungeons) return@onSend
+            SecretPickupEvent.Interact(
+                blockHitResult.blockPos,
+                mc.world?.getBlockState(blockHitResult.blockPos)?.takeIf { isSecret(it, blockHitResult.blockPos) } ?: return@onSend
+            ).postAndCatch()
+        }
+
+        onReceive<GameMessageS2CPacket> {
+            if (!overlay) content?.string?.noControlCodes?.let { ChatPacketEvent(it, content).postAndCatch() }
+        }
     }
 
     private val dungeonItemDrops = listOf(
