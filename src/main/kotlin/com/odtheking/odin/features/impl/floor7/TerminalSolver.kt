@@ -1,28 +1,26 @@
 package com.odtheking.odin.features.impl.floor7
 
 import com.odtheking.mixin.accessors.HandledScreenAccessor
-import com.odtheking.odin.OdinMod.EVENT_BUS
 import com.odtheking.odin.clickgui.settings.AlwaysActive
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.*
+import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.GuiEvent
 import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.events.TerminalEvent
+import com.odtheking.odin.events.core.*
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.features.impl.floor7.terminalhandler.*
 import com.odtheking.odin.features.impl.floor7.termsim.TermSimGUI
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.Color.Companion.darker
-import com.odtheking.odin.utils.ui.rendering.NVGRenderer
+import com.odtheking.odin.utils.handlers.TickTask
+import com.odtheking.odin.utils.ui.rendering.NVGSpecialRenderer
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps
-import meteordevelopment.orbit.EventHandler
-import meteordevelopment.orbit.EventPriority
 import net.minecraft.client.gui.screen.ingame.HandledScreen
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket
-import net.minecraft.network.packet.s2c.common.CommonPingS2CPacket
 import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket
 import net.minecraft.screen.slot.SlotActionType
 import net.minecraft.screen.sync.ItemStackHash
@@ -79,184 +77,178 @@ object TerminalSolver : Module(
     private val selectAllRegex = Regex("Select all the (.+) items!")
     private var lastClickTime = 0L
 
-    @EventHandler
-    fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
-        when (this) {
-            is OpenScreenS2CPacket -> {
-                currentTerm?.let { if (!it.isClicked && mc.currentScreen !is TermSimGUI) leftTerm() }
-                val windowName = name?.string ?: return
-                val newTermType = TerminalTypes.entries.find { terminal -> windowName.startsWith(terminal.windowName) }?.takeIf { it != currentTerm?.type } ?: return
+    init {
+        onReceive<OpenScreenS2CPacket> {
+            currentTerm?.let { if (!it.isClicked && mc.currentScreen !is TermSimGUI) leftTerm() }
+            val windowName = name?.string ?: return@onReceive
+            val newTermType = TerminalTypes.entries.find { terminal -> windowName.startsWith(terminal.windowName) }?.takeIf { it != currentTerm?.type } ?: return@onReceive
 
-                currentTerm = when (newTermType) {
-                    TerminalTypes.PANES -> PanesHandler()
+            currentTerm = when (newTermType) {
+                TerminalTypes.PANES -> PanesHandler()
 
-                    TerminalTypes.RUBIX -> RubixHandler()
+                TerminalTypes.RUBIX -> RubixHandler()
 
-                    TerminalTypes.NUMBERS -> NumbersHandler()
+                TerminalTypes.NUMBERS -> NumbersHandler()
 
-                    TerminalTypes.STARTS_WITH ->
-                        StartsWithHandler(startsWithRegex.find(windowName)?.groupValues?.get(1) ?: return modMessage("Failed to find letter, please report this!"))
+                TerminalTypes.STARTS_WITH ->
+                    StartsWithHandler(startsWithRegex.find(windowName)?.groupValues?.get(1) ?: return@onReceive modMessage("Failed to find letter, please report this!"))
 
-                    TerminalTypes.SELECT ->
-                        SelectAllHandler(DyeColor.entries.find { it.name.replace("_", " ").equals(selectAllRegex.find(windowName)?.groupValues?.get(1), true) } ?: return modMessage("Failed to find color, please report this!"))
+                TerminalTypes.SELECT ->
+                    SelectAllHandler(DyeColor.entries.find { it.name.replace("_", " ").equals(selectAllRegex.find(windowName)?.groupValues?.get(1), true) } ?: return@onReceive modMessage("Failed to find color, please report this!"))
 
-                    TerminalTypes.MELODY -> MelodyHandler()
-                }
-
-                currentTerm?.let {
-                    devMessage("§aNew terminal: §6${it.type.name}")
-                    TerminalEvent.Opened(it).postAndCatch()
-                    lastTermOpened = it
-                }
+                TerminalTypes.MELODY -> MelodyHandler()
             }
 
-            is CloseScreenS2CPacket -> leftTerm()
-
-            is GameMessageS2CPacket -> if (!overlay) {
-                termSolverRegex.find(content?.string ?: return@with)?.let { message ->
-                    if (message.groupValues[1] == mc.player?.name?.string) lastTermOpened?.let { TerminalEvent.Solved(it).postAndCatch() }
-                }
+            currentTerm?.let {
+                devMessage("§aNew terminal: §6${it.type.name}")
+                TerminalEvent.Opened(it).postAndCatch()
+                lastTermOpened = it
             }
         }
-    }
 
-    @EventHandler
-    fun onPacketSend(event: PacketEvent.Send) = with(event.packet) {
-        when (this) {
-            is CloseHandledScreenC2SPacket -> leftTerm()
+        onReceive<CloseScreenS2CPacket> {
+            leftTerm()
+        }
 
-            is ClickSlotC2SPacket -> {
-                lastClickTime = System.currentTimeMillis()
+        on<ChatPacketEvent> {
+            termSolverRegex.find(value)?.let { message ->
+                if (message.groupValues[1] == mc.player?.name?.string) lastTermOpened?.let { TerminalEvent.Solved(it).postAndCatch() }
+            }
+        }
+
+        onSend<CloseHandledScreenC2SPacket> {
+            leftTerm()
+        }
+
+        onSend<ClickSlotC2SPacket> {
+            lastClickTime = System.currentTimeMillis()
+            currentTerm?.isClicked = true
+        }
+
+        onSend<CloseHandledScreenC2SPacket> {
+            leftTerm()
+        }
+
+        TickTask(0, true) {
+            if (System.currentTimeMillis() - lastClickTime >= terminalReloadThreshold && currentTerm?.isClicked == true) currentTerm?.let {
+                PacketEvent.Send(ClickSlotC2SPacket(mc.player?.currentScreenHandler?.syncId ?: -1, 0, 0, 0, SlotActionType.PICKUP, Int2ObjectMaps.emptyMap(), ItemStackHash.EMPTY)).postAndCatch()
+                it.isClicked = false
+            }
+        }
+
+        on<GuiEvent.MouseClick> (EventPriority.HIGH) {
+            if (!enabled || currentTerm == null) return@on
+
+            if (renderType == 1 && !(currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver)) {
+                currentTerm?.type?.getGUI()?.mouseClicked(screen, button)
+                cancel()
+                return@on
+            }
+
+            val slotIndex = (screen as HandledScreenAccessor).focusedSlot?.id ?: return@on
+
+            if (blockIncorrectClicks && currentTerm?.canClick(slotIndex, button) == false) {
+                cancel()
+                return@on
+            }
+
+            if (middleClickGUI) {
+                currentTerm?.click(slotIndex, if (button == 0) GLFW.GLFW_MOUSE_BUTTON_3 else button, hideClicked && currentTerm?.isClicked == false)
+                cancel()
+                return@on
+            }
+
+            if (hideClicked && currentTerm?.isClicked == false) {
+                currentTerm?.simulateClick(slotIndex, button)
                 currentTerm?.isClicked = true
             }
+        }
 
-            is CommonPingS2CPacket -> {
-                if (System.currentTimeMillis() - lastClickTime >= terminalReloadThreshold && currentTerm?.isClicked == true) currentTerm?.let {
-                    PacketEvent.Receive(ClickSlotC2SPacket(mc.player?.currentScreenHandler?.syncId ?: -1, 0, 0, 0, SlotActionType.PICKUP, Int2ObjectMaps.emptyMap(), ItemStackHash.EMPTY)).postAndCatch()
-                    it.isClicked = false
-                }
+        on<GuiEvent.DrawBackground> {
+            if (!enabled || currentTerm == null || (currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver) || renderType != 1) return@on
+
+            NVGSpecialRenderer.draw(drawContext, 0, 0, drawContext.scaledWindowWidth, drawContext.scaledWindowHeight) {
+                currentTerm?.type?.getGUI()?.render()
             }
 
-            else -> return
-        }
-        if (event.packet is CloseHandledScreenC2SPacket) leftTerm()
-    }
-
-    @EventHandler(priority = EventPriority.HIGH)
-    fun onGuiClick(event: GuiEvent.MouseClick) = with(currentTerm) {
-        if (!enabled || this == null) return
-
-        if (renderType == 1 && !(type == TerminalTypes.MELODY && cancelMelodySolver)) {
-            currentTerm?.type?.getGUI()?.mouseClicked(event.screen, event.button)
-            event.cancel()
-            return
+            cancel()
         }
 
-        val slotIndex = (event.screen as HandledScreenAccessor).focusedSlot?.id ?: return
-
-        if (blockIncorrectClicks && !canClick(slotIndex, event.button)) {
-            event.cancel()
-            return
-        }
-
-        if (middleClickGUI) {
-            click(slotIndex, if (event.button == 0) GLFW.GLFW_MOUSE_BUTTON_3 else event.button, hideClicked && !isClicked)
-            event.cancel()
-            return
-        }
-
-        if (hideClicked && !isClicked) {
-            simulateClick(slotIndex, event.button)
-            isClicked = true
-        }
-    }
-
-    @EventHandler
-    fun onDrawBackground(event: GuiEvent.DrawBackground) {
-        if (!enabled || currentTerm == null || (currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver) || renderType != 1) return
-
-        NVGRenderer.beginFrame(mc.window.width.toFloat(), mc.window.height.toFloat())
-        currentTerm?.type?.getGUI()?.render()
-        NVGRenderer.endFrame()
-        event.cancel()
-    }
-
-    @EventHandler
-    fun onDrawGui(event: GuiEvent.Draw) {
-        if (!enabled || currentTerm == null || (currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver)) return
-        if (renderType == 1) {
-            event.cancel()
-            return
-        }
-        val screen = (event.screen as? HandledScreen<*>) as? HandledScreenAccessor ?: return
-        event.drawContext.fill(screen.x + 7, screen.y + 16, screen.x + screen.width - 7, screen.y + screen.height - 96, backgroundColor.rgba)
-    }
-
-    @EventHandler
-    fun drawSlot(event: GuiEvent.DrawSlot) = with(currentTerm) {
-        if (!enabled || renderType == 1 || this?.type == null || (type == TerminalTypes.MELODY && cancelMelodySolver)) return
-
-        val slotIndex = event.slot.id
-        val inventorySize = (event.screen as? HandledScreen<*>)?.screenHandler?.slots?.size ?: return
-
-        if (!debug) event.cancel()
-        if (slotIndex !in solution || slotIndex > inventorySize - 37) return
-
-        when (type) {
-            TerminalTypes.PANES -> event.drawContext.fill(event.slot.x, event.slot.y, event.slot.x + 16, event.slot.y + 16, panesColor.rgba)
-
-            TerminalTypes.STARTS_WITH, TerminalTypes.SELECT ->
-                event.drawContext.fill(event.slot.x, event.slot.y, event.slot.x + 16, event.slot.y + 16, startsWithColor.rgba)
-
-            TerminalTypes.NUMBERS -> {
-                val index = solution.indexOf(event.slot.index)
-                if (index < 3) {
-                    val color = when (index) {
-                        0 -> orderColor
-                        1 -> orderColor2
-                        else -> orderColor3
-                    }.rgba
-                    event.drawContext.fill(event.slot.x, event.slot.y, event.slot.x + 16, event.slot.y + 16, color)
-                    event.cancel()
-                }
-                val amount = event.slot.stack?.count?.toString() ?: ""
-                if (showNumbers) event.drawContext.drawText(event.screen.textRenderer, amount, event.slot.x + 8 - event.screen.textRenderer.getWidth(amount) / 2, event.slot.y + 4, Colors.WHITE.rgba, false)
+        on<GuiEvent.Draw> {
+            if (!enabled || currentTerm == null || (currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver)) return@on
+            if (renderType == 1) {
+                cancel()
+                return@on
             }
+            val screen = (screen as? HandledScreen<*>) as? HandledScreenAccessor ?: return@on
+            drawContext.fill(screen.x + 7, screen.y + 16, screen.x + screen.width - 7, screen.y + screen.height - 96, backgroundColor.rgba)
+        }
 
-            TerminalTypes.RUBIX -> {
-                val needed = solution.count { it == slotIndex }
-                val text = if (needed < 3) needed else (needed - 5)
-                if (text != 0) {
-                    val color = when (text) {
-                        2 -> rubixColor2
-                        1 -> rubixColor1
-                        -2 -> oppositeRubixColor2
-                        else -> oppositeRubixColor1
+        on<GuiEvent.DrawSlot> {
+            val term = currentTerm ?: return@on
+            if (!enabled || renderType == 1 || currentTerm?.type == null || (term.type == TerminalTypes.MELODY && cancelMelodySolver)) return@on
+
+            val slotIndex = slot.id
+            val inventorySize = (screen as? HandledScreen<*>)?.screenHandler?.slots?.size ?: return@on
+
+            if (!debug) cancel()
+            if (slotIndex !in term.solution || slotIndex > inventorySize - 37) return@on
+
+            when (term.type) {
+                TerminalTypes.PANES -> drawContext.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, panesColor.rgba)
+
+                TerminalTypes.STARTS_WITH, TerminalTypes.SELECT ->
+                    drawContext.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, startsWithColor.rgba)
+
+                TerminalTypes.NUMBERS -> {
+                    val index = term.solution.indexOf(slot.index)
+                    if (index < 3) {
+                        val color = when (index) {
+                            0 -> orderColor
+                            1 -> orderColor2
+                            else -> orderColor3
+                        }.rgba
+                        drawContext.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, color)
+                        cancel()
                     }
+                    val amount = slot.stack?.count?.toString() ?: ""
+                    if (showNumbers) drawContext.drawCenteredTextWithShadow(screen.textRenderer, amount, slot.x + 8, slot.y + 4, Colors.WHITE.rgba)
+                }
 
-                    event.drawContext.fill(event.slot.x, event.slot.y, event.slot.x + 16, event.slot.y + 16, color.rgba)
-                    event.drawContext.drawText(event.screen.textRenderer, text.toString(), event.slot.x + 8 - event.screen.textRenderer.getWidth(text.toString()) / 2, event.slot.y + 4, Colors.WHITE.rgba, false)
+                TerminalTypes.RUBIX -> {
+                    val needed = term.solution.count { it == slotIndex }
+                    val text = if (needed < 3) needed else (needed - 5)
+                    if (text != 0) {
+                        val color = when (text) {
+                            2 -> rubixColor2
+                            1 -> rubixColor1
+                            -2 -> oppositeRubixColor2
+                            else -> oppositeRubixColor1
+                        }
+
+                        drawContext.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, color.rgba)
+                        drawContext.drawCenteredTextWithShadow(screen.textRenderer, text.toString(), slot.x + 8, slot.y + 4, Colors.WHITE.rgba)
+                    }
+                }
+
+                TerminalTypes.MELODY -> {
+                    drawContext.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, when {
+                        slotIndex / 9 == 0 || slotIndex / 9 == 5 -> melodyColumColor
+                        (slotIndex % 9).equalsOneOf(1, 2, 3, 4, 5) -> melodyPointerColor
+                        else -> melodyPointerColor
+                    }.rgba)
                 }
             }
-
-            TerminalTypes.MELODY -> {
-                event.drawContext.fill(event.slot.x, event.slot.y, event.slot.x + 16, event.slot.y + 16, when {
-                    slotIndex / 9 == 0 || slotIndex / 9 == 5 -> melodyColumColor
-                    (slotIndex % 9).equalsOneOf(1, 2, 3, 4, 5) -> melodyPointerColor
-                    else -> melodyPointerColor
-                }.rgba)
-            }
         }
-    }
 
-    @EventHandler
-    fun onTooltipDraw(event: GuiEvent.DrawTooltip) {
-        if (enabled && cancelToolTip && currentTerm != null) event.cancel()
+        on<GuiEvent.DrawTooltip> {
+            if (enabled && cancelToolTip && currentTerm != null) cancel()
+        }
     }
 
     private fun leftTerm() {
         currentTerm?.let {
-            EVENT_BUS.unsubscribe(it)
+            EventBus.unsubscribe(it)
             devMessage("§cLeft terminal: §6${it.type.name}")
             TerminalEvent.Closed(it).postAndCatch()
             currentTerm?.type?.getGUI()?.closeGui()

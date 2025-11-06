@@ -3,14 +3,13 @@ package com.odtheking.odin.features.impl.dungeon
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.StringSetting
-import com.odtheking.odin.events.PacketEvent
+import com.odtheking.odin.events.ChatPacketEvent
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.render.drawStringWidth
 import com.odtheking.odin.utils.sendCommand
 import com.odtheking.odin.utils.toFixed
-import meteordevelopment.orbit.EventHandler
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 
 object WarpCooldown : Module(
     name = "Warp Cooldown",
@@ -28,13 +27,12 @@ object WarpCooldown : Module(
     private val kickedJoiningRegex = Regex("^You were kicked while joining that server!$")
     private var warpTimer = 0L
 
-    @EventHandler
-    fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
-        if (this !is GameMessageS2CPacket || overlay) return
-        val contentString = content.string
-        when {
-            announceKick && (contentString.matches(kickedJoiningRegex) || contentString.matches(kickedInstanceRegex)) -> sendCommand("pc $kickText")
-            contentString.matches(enterRegex) -> warpTimer = System.currentTimeMillis() + 30_000L
+    init {
+        on<ChatPacketEvent> {
+            when {
+                announceKick && (value.matches(kickedJoiningRegex) || value.matches(kickedInstanceRegex)) -> sendCommand("pc $kickText")
+                value.matches(enterRegex) -> warpTimer = System.currentTimeMillis() + 30_000L
+            }
         }
     }
 }

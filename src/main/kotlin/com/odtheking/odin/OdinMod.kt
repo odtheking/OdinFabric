@@ -3,11 +3,12 @@ package com.odtheking.odin
 import com.odtheking.odin.commands.*
 import com.odtheking.odin.config.Config
 import com.odtheking.odin.events.EventDispatcher
+import com.odtheking.odin.events.core.EventBus
 import com.odtheking.odin.features.ModuleManager
 import com.odtheking.odin.utils.ServerUtils
 import com.odtheking.odin.utils.handlers.MobCaches
 import com.odtheking.odin.utils.handlers.TickTasks
-import com.odtheking.odin.utils.render.item.ItemStateRenderer
+import com.odtheking.odin.utils.render.ItemStateRenderer
 import com.odtheking.odin.utils.sendDataToServer
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.skyblock.LocationUtils
@@ -16,10 +17,10 @@ import com.odtheking.odin.utils.skyblock.SplitsManager
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonListener
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils
+import com.odtheking.odin.utils.ui.rendering.NVGSpecialRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
-import meteordevelopment.orbit.EventBus
-import net.fabricmc.api.ModInitializer
+import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.rendering.v1.SpecialGuiElementRegistry
 import net.fabricmc.loader.api.FabricLoader
@@ -28,14 +29,11 @@ import net.fabricmc.loader.api.metadata.ModMetadata
 import net.minecraft.client.MinecraftClient
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import java.lang.invoke.MethodHandles
 import kotlin.coroutines.EmptyCoroutineContext
 
-object OdinMod : ModInitializer {
+object OdinMod : ClientModInitializer {
     val mc: MinecraftClient
         get() = MinecraftClient.getInstance()
-
-    val EVENT_BUS = EventBus()
 
     const val MOD_ID = "odin-fabric"
 
@@ -47,11 +45,7 @@ object OdinMod : ModInitializer {
 
     val scope = CoroutineScope(SupervisorJob() + EmptyCoroutineContext)
 
-    override fun onInitialize() {
-        EVENT_BUS.registerLambdaFactory("com.odtheking") { lookupInMethod, klass ->
-            lookupInMethod.invoke(null, klass, MethodHandles.lookup()) as MethodHandles.Lookup
-        }
-
+    override fun onInitializeClient() {
         ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
             arrayOf(
                 mainCommand, petCommand, devCommand, waypointCommand,
@@ -64,7 +58,11 @@ object OdinMod : ModInitializer {
             SkyblockPlayer, MobCaches, ServerUtils,
             EventDispatcher, ModuleManager, DungeonListener,
             ScanUtils, DungeonUtils, SplitsManager
-        ).forEach { EVENT_BUS.subscribe(it) }
+        ).forEach { EventBus.subscribe(it) }
+
+        SpecialGuiElementRegistry.register { context ->
+            NVGSpecialRenderer(context.vertexConsumers())
+        }
 
         SpecialGuiElementRegistry.register { context ->
             ItemStateRenderer(context.vertexConsumers())

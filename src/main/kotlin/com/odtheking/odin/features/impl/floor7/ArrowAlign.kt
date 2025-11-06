@@ -3,8 +3,9 @@ package com.odtheking.odin.features.impl.floor7
 import com.odtheking.mixin.accessors.PlayerInteractEntityC2SPacketAccessor
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
-import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.events.RenderEvent
+import com.odtheking.odin.events.core.on
+import com.odtheking.odin.events.core.onSend
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.addVec
 import com.odtheking.odin.utils.component1
@@ -14,7 +15,6 @@ import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
-import meteordevelopment.orbit.EventHandler
 import net.minecraft.entity.decoration.ItemFrameEntity
 import net.minecraft.item.Items
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket
@@ -60,53 +60,50 @@ object ArrowAlign : Module(
                 }
             }
         }
-    }
 
-    @EventHandler
-    fun onPacket(event: PacketEvent.Send) {
-        val packet = event.packet as? PlayerInteractEntityC2SPacket ?: return
-        if (DungeonUtils.getF7Phase() != M7Phases.P3) return
+        onSend<PlayerInteractEntityC2SPacket> {
+            if (DungeonUtils.getF7Phase() != M7Phases.P3) return@onSend
 
-        packet.handle(object : PlayerInteractEntityC2SPacket.Handler {
-            override fun interact(hand: Hand) {
-                val entity = mc.world?.getEntityById((packet as PlayerInteractEntityC2SPacketAccessor).entityId) as? ItemFrameEntity ?: return
-                if (entity.heldItemStack?.item != Items.ARROW) return
-                val (x, y, z) = entity.blockPos
+            handle(object : PlayerInteractEntityC2SPacket.Handler {
+                override fun interact(hand: Hand) {
+                    val entity = mc.world?.getEntityById((this@onSend as PlayerInteractEntityC2SPacketAccessor).entityId) as? ItemFrameEntity ?: return
+                    if (entity.heldItemStack?.item != Items.ARROW) return
+                    val (x, y, z) = entity.blockPos
 
-                val frameIndex = ((y - frameGridCorner.y) + (z - frameGridCorner.z) * 5)
-                if (x != frameGridCorner.x || currentFrameRotations?.get(frameIndex) == -1 || frameIndex !in 0..24) return
+                    val frameIndex = ((y - frameGridCorner.y) + (z - frameGridCorner.z) * 5)
+                    if (x != frameGridCorner.x || currentFrameRotations?.get(frameIndex) == -1 || frameIndex !in 0..24) return
 
-                if (!clicksRemaining.containsKey(frameIndex) && mc.player?.isSneaking == invertSneak && blockWrong) {
-                    event.cancel()
-                    return
+                    if (!clicksRemaining.containsKey(frameIndex) && mc.player?.isSneaking == invertSneak && blockWrong) {
+                        it.cancel()
+                        return
+                    }
+
+                    recentClickTimestamps[frameIndex] = System.currentTimeMillis()
+                    currentFrameRotations = currentFrameRotations?.toMutableList()?.apply { this[frameIndex] = (this[frameIndex] + 1) % 8 }
+
+                    if (calculateClicksNeeded(currentFrameRotations?.get(frameIndex) ?: return, targetSolution?.get(frameIndex) ?: return) == 0) clicksRemaining.remove(frameIndex)
                 }
+                override fun interactAt(hand: Hand, pos: Vec3d) {}
+                override fun attack() {}
+            })
+        }
 
-                recentClickTimestamps[frameIndex] = System.currentTimeMillis()
-                currentFrameRotations = currentFrameRotations?.toMutableList()?.apply { this[frameIndex] = (this[frameIndex] + 1) % 8 }
-
-                if (calculateClicksNeeded(currentFrameRotations?.get(frameIndex) ?: return, targetSolution?.get(frameIndex) ?: return) == 0) clicksRemaining.remove(frameIndex)
+        on<RenderEvent.Last> {
+            if (clicksRemaining.isEmpty() || DungeonUtils.getF7Phase() != M7Phases.P3) return@on
+            clicksRemaining.forEach { (index, clickNeeded) ->
+                val colorCode = when {
+                    clickNeeded == 0 -> return@forEach
+                    clickNeeded < 3 -> 'a'
+                    clickNeeded < 5 -> '6'
+                    else -> 'c'
+                }
+                context.drawText(
+                    Text.of("§$colorCode$clickNeeded").asOrderedText(),
+                    getFramePositionFromIndex(index).toCenterPos().addVec(y = 0.1, x = -0.3),
+                    1f,
+                    false
+                )
             }
-            override fun interactAt(hand: Hand, pos: Vec3d) {}
-            override fun attack() {}
-        })
-    }
-
-    @EventHandler
-    fun onRenderWorld(event: RenderEvent.Last) {
-        if (clicksRemaining.isEmpty() || DungeonUtils.getF7Phase() != M7Phases.P3) return
-        clicksRemaining.forEach { (index, clickNeeded) ->
-            val colorCode = when {
-                clickNeeded == 0 -> return@forEach
-                clickNeeded < 3 -> 'a'
-                clickNeeded < 5 -> '6'
-                else -> 'c'
-            }
-            event.context.drawText(
-                Text.of("§$colorCode$clickNeeded").asOrderedText(),
-                getFramePositionFromIndex(index).toCenterPos().addVec(y = 0.1, x = -0.3),
-                1f,
-                false
-            )
         }
     }
 

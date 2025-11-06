@@ -2,10 +2,11 @@ package com.odtheking.odin.features.impl.dungeon
 
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.*
-import com.odtheking.odin.events.PacketEvent
+import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.SecretPickupEvent
 import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.Colors
@@ -13,8 +14,6 @@ import com.odtheking.odin.utils.handlers.LimitedTickTask
 import com.odtheking.odin.utils.playSoundAtPlayer
 import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
-import meteordevelopment.orbit.EventHandler
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 import net.minecraft.sound.SoundEvent
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
@@ -46,34 +45,40 @@ object SecretClicked : Module(
     private val clickedSecretsList = CopyOnWriteArrayList<Secret>()
     private var lastPlayed = System.currentTimeMillis()
 
-    @EventHandler
-    fun onRenderWorld(event: RenderEvent.Last) {
-        if (!boxes || !DungeonUtils.inDungeons || (DungeonUtils.inBoss && !boxInBoss) || clickedSecretsList.isEmpty()) return
-
-        clickedSecretsList.forEach { secret ->
-            val currentColor = if (secret.locked) lockedColor else color
-            val box = mc.world?.getBlockState(secret.pos)?.getOutlineShape(mc.world, secret.pos)?.asCuboid()
-                ?.takeIf { !it.isEmpty }?.boundingBox?.offset(secret.pos) ?: Box(secret.pos)
-            event.context.drawStyledBox(box, currentColor, style, depthCheck)
+    init {
+        on<SecretPickupEvent.Interact> {
+            secretBox(blockPos)
+            secretChime()
         }
-    }
 
-    @EventHandler
-    fun onSecretInteract(event: SecretPickupEvent.Interact) {
-        secretBox(event.blockPos)
-        secretChime()
-    }
+        on<SecretPickupEvent.Bat> {
+            secretBox(BlockPos(packet.x.toInt(), packet.y.toInt(), packet.z.toInt()))
+            secretChime()
+        }
 
-    @EventHandler
-    fun onSecretBat(event: SecretPickupEvent.Bat) {
-        secretBox(BlockPos(event.packet.x.toInt(), event.packet.y.toInt(), event.packet.z.toInt()))
-        secretChime()
-    }
+        on<SecretPickupEvent.Item> {
+            if (toggleItems) secretBox(entity.blockPos)
+            secretChime()
+        }
 
-    @EventHandler
-    fun onSecretItem(event: SecretPickupEvent.Item) {
-        if (toggleItems) secretBox(event.entity.blockPos)
-        secretChime()
+        on<ChatPacketEvent> {
+            if (value == "That chest is locked!") clickedSecretsList.lastOrNull()?.locked = true
+        }
+
+        on<RenderEvent.Last> {
+            if (!boxes || !DungeonUtils.inDungeons || (DungeonUtils.inBoss && !boxInBoss) || clickedSecretsList.isEmpty()) return@on
+
+            clickedSecretsList.forEach { secret ->
+                val currentColor = if (secret.locked) lockedColor else color
+                val box = mc.world?.getBlockState(secret.pos)?.getOutlineShape(mc.world, secret.pos)?.asCuboid()
+                    ?.takeIf { !it.isEmpty }?.boundingBox?.offset(secret.pos) ?: Box(secret.pos)
+                context.drawStyledBox(box, currentColor, style, depthCheck)
+            }
+        }
+
+        on<WorldLoadEvent> {
+            clickedSecretsList.clear()
+        }
     }
 
     private fun secretChime() {
@@ -86,16 +91,5 @@ object SecretClicked : Module(
         if (!boxes || (DungeonUtils.inBoss && !boxInBoss) || clickedSecretsList.any { it.pos == pos }) return
         clickedSecretsList.add(Secret(pos))
         LimitedTickTask(timeToStay * 20, 1) { clickedSecretsList.removeFirstOrNull() }
-    }
-
-    @EventHandler
-    fun onWorldLoad(event: WorldLoadEvent) {
-        clickedSecretsList.clear()
-    }
-
-    @EventHandler
-    fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
-        if (this !is GameMessageS2CPacket || overlay) return
-        if (content.string == "That chest is locked!") clickedSecretsList.lastOrNull()?.locked = true
     }
 }

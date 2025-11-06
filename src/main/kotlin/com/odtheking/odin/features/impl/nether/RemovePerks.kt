@@ -2,10 +2,10 @@ package com.odtheking.odin.features.impl.nether
 
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.events.GuiEvent
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.containsOneOf
 import com.odtheking.odin.utils.equalsOneOf
-import meteordevelopment.orbit.EventHandler
 import net.minecraft.client.gui.screen.ingame.HandledScreen
 
 object RemovePerks : Module(
@@ -14,16 +14,16 @@ object RemovePerks : Module(
 ) {
     private val renderStun by BooleanSetting("Show Stun", false, desc = "Shows the stun role perks.")
 
-    @EventHandler
-    fun renderSlot(event: GuiEvent.DrawSlot) = with(event.screen) {
-        if (this is HandledScreen<*> && title.string == "Perk Menu" && slotCheck(event.slot.stack?.name?.string ?: return))
-            event.cancel()
-    }
+    init {
+        on<GuiEvent.DrawSlot> {
+            if (screen.title?.string == "Perk Menu" && slotCheck(slot.stack?.name?.string ?: return@on))
+                cancel()
+        }
 
-    @EventHandler
-    fun guiMouseClick(event: GuiEvent.SlotClick) = with(event.screen) {
-        if (this is HandledScreen<*> && title.string == "Perk Menu" && slotCheck(screenHandler?.getSlot(event.slotId)?.stack?.name?.string ?: return))
-            event.cancel()
+        on<GuiEvent.SlotClick> {
+            if (screen is HandledScreen<*> && screen.title?.string == "Perk Menu" && slotCheck(screen.screenHandler?.getSlot(slotId)?.stack?.name?.string ?: return@on))
+                cancel()
+        }
     }
 
     private fun slotCheck(slot: String): Boolean =

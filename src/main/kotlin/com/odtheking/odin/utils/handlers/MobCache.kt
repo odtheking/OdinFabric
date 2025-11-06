@@ -1,9 +1,9 @@
 package com.odtheking.odin.utils.handlers
 
 import com.odtheking.odin.OdinMod.mc
-import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.events.WorldLoadEvent
-import meteordevelopment.orbit.EventHandler
+import com.odtheking.odin.events.core.on
+import com.odtheking.odin.events.core.onReceive
 import net.minecraft.entity.Entity
 import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket
@@ -61,35 +61,29 @@ object MobCaches {
                 }
             }
         }
+
+        onReceive<EntitySpawnS2CPacket> {
+            mobProcessQueue.add(entityId)
+        }
+
+        onReceive<EntitiesDestroyS2CPacket> {
+            entityIds.forEach { id ->
+                mobProcessQueue.removeIf { it == id }
+
+                mobCaches.forEach { cache ->
+                    cache.removeIf { it.id == id }
+                }
+            }
+        }
+
+        on<WorldLoadEvent> {
+            mobProcessQueue.clear()
+
+            mobCaches.forEach { it.clear() }
+        }
     }
 
     fun registerMobCache(mobCache: MobCache) {
         mobCaches.add(mobCache)
-    }
-
-    @EventHandler
-    fun onMobMetadata(event: PacketEvent.Receive) {
-        if (event.packet is EntitySpawnS2CPacket)
-            mobProcessQueue.add(event.packet.entityId)
-    }
-
-    @EventHandler
-    fun onMobDespawn(event: PacketEvent.Receive) {
-        if (event.packet !is EntitiesDestroyS2CPacket) return
-
-        event.packet.entityIds.forEach { id ->
-            mobProcessQueue.removeIf { it == id }
-
-            mobCaches.forEach { cache ->
-                cache.removeIf { it.id == id }
-            }
-        }
-    }
-
-    @EventHandler
-    fun onWorldLoad(event: WorldLoadEvent) {
-        mobProcessQueue.clear()
-
-        mobCaches.forEach { it.clear() }
     }
 }

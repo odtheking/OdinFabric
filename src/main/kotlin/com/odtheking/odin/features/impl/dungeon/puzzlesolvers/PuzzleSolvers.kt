@@ -3,18 +3,22 @@ package com.odtheking.odin.features.impl.dungeon.puzzlesolvers
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.*
 import com.odtheking.odin.events.*
+import com.odtheking.odin.events.core.on
+import com.odtheking.odin.events.core.onReceive
+import com.odtheking.odin.events.core.onSend
 import com.odtheking.odin.features.Module
-import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.Color.Companion.withAlpha
+import com.odtheking.odin.utils.Colors
+import com.odtheking.odin.utils.PersonalBest
+import com.odtheking.odin.utils.equalsOneOf
 import com.odtheking.odin.utils.handlers.TickTask
+import com.odtheking.odin.utils.sendCommand
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.RoomType
-import meteordevelopment.orbit.EventHandler
 import net.minecraft.block.Blocks
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket
 import net.minecraft.network.packet.s2c.play.BlockEventS2CPacket
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket
 import net.minecraft.util.math.BlockPos
 
@@ -86,11 +90,9 @@ object PuzzleSolvers : Module(
 
     private val puzzleTimers by BooleanSetting("Puzzle Timers", true, desc = "Shows the time it took to solve each puzzle.")
     private val sendPuzzleTime by BooleanSetting("Send Puzzle Time", false, desc = "Sends the time it took to solve each puzzle in party chat.").withDependency { puzzleTimers }
-    private val puzzleToIntMap = mapOf("Creeper Beams" to 0, "Lower Blaze" to 1, "Higher Blaze" to 2, "Boulder" to 3, "Ice Fill" to 4, "Quiz" to 5, "Teleport Maze" to 6, "Water Board" to 7, "Three Weirdos" to 8)
     private val puzzleTimersMap = hashMapOf<String, PuzzleTimer>()
     private data class PuzzleTimer(val timeEntered: Long = System.currentTimeMillis(), var sentMessage: Boolean = false)
     private val weirdosRegex = Regex("\\[NPC] (.+): (.+).?")
-    private val anyRegex = Regex(".*")
 
     init {
         TickTask(10) {
@@ -103,95 +105,84 @@ object PuzzleSolvers : Module(
             if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@TickTask
             if (waterSolver) WaterSolver.onServerTick()
         }
-    }
 
-    @EventHandler
-    fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
-        if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return
-        when (this) {
-            is PlayerPositionLookS2CPacket -> if (tpMaze) TPMazeSolver.tpPacket(this)
-            is GameMessageS2CPacket -> if (!overlay) {
-                if (weirdosSolver) {
-                    weirdosRegex.find(content.string.noControlCodes)?.let {
-                        val (npc, message) = it.destructured
-                        WeirdosSolver.onNPCMessage(npc, message)
-                    }
-                }
-                if (quizSolver && anyRegex.matches(content.string.noControlCodes)) QuizSolver.onMessage(content.string.noControlCodes)
-            }
-            is BlockEventS2CPacket -> {
-                if (block != Blocks.CHERRY_LOG) return
-                val room = DungeonUtils.currentRoom?.takeIf { room -> room.data.type == RoomType.PUZZLE } ?: return
+        on<WorldLoadEvent> {
+            puzzleTimersMap.clear()
+            IceFillSolver.reset()
+            WeirdosSolver.reset()
+            BoulderSolver.reset()
+            TPMazeSolver.reset()
+            WaterSolver.reset()
+            BlazeSolver.reset()
+            BeamsSolver.reset()
+            QuizSolver.reset()
+        }
 
-                when (room.data.name) {
-                    "Three Weirdos" -> pos.equalsOneOf(room.getRealCoords(BlockPos(18, 69, 24)), room.getRealCoords(BlockPos(16, 69, 25)), room.getRealCoords(BlockPos(14, 69, 24)))
-                    "Ice Fill"      -> pos.equalsOneOf(room.getRealCoords(BlockPos(14, 75, 29)), room.getRealCoords(BlockPos(16, 75, 29)))
-                    "Teleport Maze" -> pos == room.getRealCoords(BlockPos(15, 70, 20))
-                    "Water Board"   -> pos == room.getRealCoords(BlockPos(15, 56, 22))
-                    "Boulder"       -> pos == room.getRealCoords(BlockPos(15, 66, 29))
-                    else            -> false
-                }.takeIf { !it } ?: onPuzzleComplete(room.data.name)
-            }
+        on<RoomEnterEvent> {
+            BoulderSolver.onRoomEnter(this)
+            IceFillSolver.onRoomEnter(this, useOptimizedPatterns)
+            TPMazeSolver.onRoomEnter(this)
+            BeamsSolver.onRoomEnter(this)
+            QuizSolver.onRoomEnter(this)
+            if (puzzleTimers && this.room?.data?.type == RoomType.PUZZLE && puzzleTimersMap.none { it.key == this.room.data.name }) puzzleTimersMap[this.room.data.name] = PuzzleTimer()
+        }
+
+        on<BlockUpdateEvent> {
+            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
+            if (beamsSolver) BeamsSolver.onBlockChange(this)
+        }
+
+        onReceive<PlayerPositionLookS2CPacket> {
+            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
+            if (tpMaze) TPMazeSolver.tpPacket(this)
+        }
+
+        on<ChatPacketEvent> {
+            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
+            if (weirdosSolver) weirdosRegex.find(value)?.destructured?.let { (npc, message) -> WeirdosSolver.onNPCMessage(npc, message) }
+            if (quizSolver) QuizSolver.onMessage(value)
+        }
+
+        onReceive<BlockEventS2CPacket> {
+            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss || block != Blocks.CHERRY_LOG) return@onReceive
+            val room = DungeonUtils.currentRoom?.takeIf { room -> room.data.type == RoomType.PUZZLE } ?: return@onReceive
+
+            when (room.data.name) {
+                "Three Weirdos" -> pos.equalsOneOf(room.getRealCoords(BlockPos(18, 69, 24)), room.getRealCoords(BlockPos(16, 69, 25)), room.getRealCoords(BlockPos(14, 69, 24)))
+                "Ice Fill"      -> pos.equalsOneOf(room.getRealCoords(BlockPos(14, 75, 29)), room.getRealCoords(BlockPos(16, 75, 29)))
+                "Teleport Maze" -> pos == room.getRealCoords(BlockPos(15, 70, 20))
+                "Water Board"   -> pos == room.getRealCoords(BlockPos(15, 56, 22))
+                "Boulder"       -> pos == room.getRealCoords(BlockPos(15, 66, 29))
+                else            -> false
+            }.takeIf { !it } ?: onPuzzleComplete(room.data.name)
+        }
+
+        onSend<PlayerInteractBlockC2SPacket> {
+            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onSend
+            if (waterSolver) WaterSolver.waterInteract(this)
+            if (boulderSolver) BoulderSolver.playerInteract(this)
+       }
+
+        on<RenderEvent.Last> {
+            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
+            if (iceFillSolver) IceFillSolver.onRenderWorld(context, iceFillColor)
+            if (weirdosSolver) WeirdosSolver.onRenderWorld(context, weirdosColor, weirdosWrongColor, weirdosStyle)
+            if (boulderSolver) BoulderSolver.onRenderWorld(context, showAllBoulderClicks, boulderStyle, boulderColor)
+            if (blazeSolver)   BlazeSolver.onRenderWorld(context, blazeLineNext, blazeLineAmount, blazeStyle, blazeFirstColor, blazeSecondColor, blazeAllColor, blazeWidth, blazeHeight, blazeSendComplete, blazeLineWidth)
+            if (beamsSolver)   BeamsSolver.onRenderWorld(context, beamStyle, beamsTracer, beamsAlpha)
+            if (waterSolver)   WaterSolver.onRenderWorld(context, showTracer, tracerColorFirst, tracerColorSecond)
+            if (quizSolver)    QuizSolver.onRenderWorld(context, quizColor, quizDepth)
+            if (tpMaze)        TPMazeSolver.onRenderWorld(context, mazeColorOne, mazeColorMultiple, mazeColorVisited)
         }
     }
 
-    @EventHandler
-    fun onPacketSend(event: PacketEvent.Send) = with (event.packet) {
-        if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return
-        if (this !is PlayerInteractBlockC2SPacket) return
-        if (waterSolver) WaterSolver.waterInteract(this)
-        if (boulderSolver) BoulderSolver.playerInteract(this)
-    }
-
-    @EventHandler
-    fun onWorldRender(event: RenderEvent.Last) {
-        if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return
-        if (iceFillSolver) IceFillSolver.onRenderWorld(event.context, iceFillColor)
-        if (weirdosSolver) WeirdosSolver.onRenderWorld(event.context, weirdosColor, weirdosWrongColor, weirdosStyle)
-        if (boulderSolver) BoulderSolver.onRenderWorld(event.context, showAllBoulderClicks, boulderStyle, boulderColor)
-        if (blazeSolver)   BlazeSolver.onRenderWorld(event.context, blazeLineNext, blazeLineAmount, blazeStyle, blazeFirstColor, blazeSecondColor, blazeAllColor, blazeWidth, blazeHeight, blazeSendComplete, blazeLineWidth)
-        if (beamsSolver)   BeamsSolver.onRenderWorld(event.context, beamStyle, beamsTracer, beamsAlpha)
-        if (waterSolver)   WaterSolver.onRenderWorld(event.context, showTracer, tracerColorFirst, tracerColorSecond)
-        if (quizSolver)    QuizSolver.onRenderWorld(event.context, quizColor, quizDepth)
-        if (tpMaze)        TPMazeSolver.onRenderWorld(event.context, mazeColorOne, mazeColorMultiple, mazeColorVisited)
-    }
-
-    private val puzzlePBs = PersonalBest(+MapSetting("PuzzlePBs", mutableMapOf<Int, Float>()))
-
-    @EventHandler
-    fun onRoomEnter(event: RoomEnterEvent) {
-        BoulderSolver.onRoomEnter(event)
-        IceFillSolver.onRoomEnter(event, useOptimizedPatterns)
-        TPMazeSolver.onRoomEnter(event)
-        BeamsSolver.onRoomEnter(event)
-        QuizSolver.onRoomEnter(event)
-        if (puzzleTimers && event.room?.data?.type == RoomType.PUZZLE && puzzleTimersMap.none { it.key == event.room.data.name }) puzzleTimersMap[event.room.data.name] = PuzzleTimer()
-    }
-
-    @EventHandler
-    fun onBlockUpdate(event: BlockUpdateEvent) {
-        if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return
-        if (beamsSolver) BeamsSolver.onBlockChange(event)
-    }
-
-    @EventHandler
-    fun onWorldLoad(event: WorldLoadEvent) {
-        puzzleTimersMap.clear()
-        IceFillSolver.reset()
-        WeirdosSolver.reset()
-        BoulderSolver.reset()
-        TPMazeSolver.reset()
-        WaterSolver.reset()
-        BlazeSolver.reset()
-        BeamsSolver.reset()
-        QuizSolver.reset()
-    }
+    private val puzzlePBs = PersonalBest(this, "PuzzlePBs")
 
     fun onPuzzleComplete(puzzleName: String) {
         puzzleTimersMap[puzzleName]?.let {
             if (it.sentMessage) return
             val time = (System.currentTimeMillis() - it.timeEntered) / 1000f
-            puzzlePBs.time(puzzleToIntMap[puzzleName] ?: return@let, time, "s§7!", "§a${puzzleName} §7solved in §6", sendOnlyPB = false)
+            puzzlePBs.time(puzzleName, time, "s§7!", "§a${puzzleName} §7solved in §6", sendOnlyPB = false)
             if (sendPuzzleTime) sendCommand("pc It took me $time seconds to solve the $puzzleName puzzle. ${if (time > 30) ":(" else ":)"}")
             it.sentMessage = true
         }

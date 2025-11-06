@@ -5,6 +5,7 @@ import com.odtheking.odin.clickgui.settings.impl.MapSetting
 import com.odtheking.odin.clickgui.settings.impl.NumberSetting
 import com.odtheking.odin.clickgui.settings.impl.SelectorSetting
 import com.odtheking.odin.events.RenderEvent
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Color.Companion.multiplyAlpha
@@ -14,7 +15,6 @@ import com.odtheking.odin.utils.handlers.MobCache
 import com.odtheking.odin.utils.render.drawFilledBox
 import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.renderBoundingBox
-import meteordevelopment.orbit.EventHandler
 import net.minecraft.world.RaycastContext
 
 object CustomHighlight : Module(
@@ -30,24 +30,25 @@ object CustomHighlight : Module(
         highlightMap.any { entity.displayName?.string?.contains(it.key, true) == true }
     }
 
-    @EventHandler
-    fun onRenderWorld(event: RenderEvent.Last) {
-        entities.forEach { entity ->
-            val boundingBox = entity.renderBoundingBox
-            val color = highlightMap[entity.displayName?.string] ?: this.color
-            val canSee = mc.player?.canSee(
-                entity,
-                RaycastContext.ShapeType.VISUAL,
-                RaycastContext.FluidHandling.NONE,
-                entity.eyeY
-            ) ?: false
+    init {
+        on<RenderEvent.Last> {
+            entities.forEach { entity ->
+                val boundingBox = entity.renderBoundingBox
+                val color = highlightMap[entity.displayName?.string] ?: color
+                val canSee = mc.player?.canSee(
+                    entity,
+                    RaycastContext.ShapeType.VISUAL,
+                    RaycastContext.FluidHandling.NONE,
+                    entity.eyeY
+                ) ?: false
 
-            when (renderStyle) {
-                0 -> event.context.drawWireFrameBox(boundingBox, color, depth = !canSee)
-                1 -> event.context.drawFilledBox(boundingBox, color, depth = !canSee)
-                2 -> {
-                    event.context.drawWireFrameBox(boundingBox, color, depth = !canSee)
-                    event.context.drawFilledBox(boundingBox, color.multiplyAlpha(0.5f), depth = !canSee)
+                when (renderStyle) {
+                    0 -> context.drawWireFrameBox(boundingBox, color, depth = !canSee)
+                    1 -> context.drawFilledBox(boundingBox, color, depth = !canSee)
+                    2 -> {
+                        context.drawWireFrameBox(boundingBox, color, depth = !canSee)
+                        context.drawFilledBox(boundingBox, color.multiplyAlpha(0.5f), depth = !canSee)
+                    }
                 }
             }
         }

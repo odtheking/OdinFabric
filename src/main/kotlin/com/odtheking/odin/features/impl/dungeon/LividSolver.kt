@@ -1,9 +1,10 @@
 package com.odtheking.odin.features.impl.dungeon
 
 import com.odtheking.odin.events.BlockUpdateEvent
-import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.core.on
+import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Colors
@@ -11,7 +12,6 @@ import com.odtheking.odin.utils.handlers.LimitedTickTask
 import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
-import meteordevelopment.orbit.EventHandler
 import net.minecraft.block.Block
 import net.minecraft.block.Blocks
 import net.minecraft.entity.effect.StatusEffects
@@ -26,35 +26,33 @@ object LividSolver : Module(
     private val woolLocation = BlockPos(5, 108, 43)
     private var currentLivid = Livid.HOCKEY
 
-    @EventHandler
-    fun onBlockChange(event: BlockUpdateEvent) {
-        if (!DungeonUtils.inBoss || !DungeonUtils.isFloor(5) || event.pos != woolLocation) return
-        currentLivid = Livid.entries.find { livid -> livid.wool.defaultState == event.updated.block.defaultState } ?: return
-        LimitedTickTask((mc.player?.getStatusEffect(StatusEffects.BLINDNESS)?.duration ?: 0) - 20, 1) {
-            modMessage("Found Livid: §${currentLivid.colorCode}${currentLivid.entityName}")
+    init {
+        on<BlockUpdateEvent> {
+            if (!DungeonUtils.inBoss || !DungeonUtils.isFloor(5) || pos != woolLocation) return@on
+            currentLivid = Livid.entries.find { livid -> livid.wool.defaultState == updated.block.defaultState } ?: return@on
+            LimitedTickTask((mc.player?.getStatusEffect(StatusEffects.BLINDNESS)?.duration ?: 0) - 20, 1) {
+                modMessage("Found Livid: §${currentLivid.colorCode}${currentLivid.entityName}")
+            }
         }
-    }
 
-    @EventHandler
-    fun onPacketReceive(event: PacketEvent.Receive) {
-        if (event.packet !is EntityTrackerUpdateS2CPacket || !DungeonUtils.inBoss || !DungeonUtils.isFloor(5)) return
-        LimitedTickTask((mc.player?.getStatusEffect(StatusEffects.BLINDNESS)?.duration ?: 0) - 20, 1) {
-            currentLivid.entity = (mc.world?.getEntityById(event.packet.id) as? PlayerEntity)?.takeIf { it.name.string == "${currentLivid.entityName} Livid" } ?: return@LimitedTickTask
+        onReceive<EntityTrackerUpdateS2CPacket> {
+            if (!DungeonUtils.inBoss || !DungeonUtils.isFloor(5)) return@onReceive
+            LimitedTickTask((mc.player?.getStatusEffect(StatusEffects.BLINDNESS)?.duration ?: 0) - 20, 1) {
+                currentLivid.entity = (mc.world?.getEntityById(id) as? PlayerEntity)?.takeIf { it.name.string == "${currentLivid.entityName} Livid" } ?: return@LimitedTickTask
+            }
         }
-    }
 
-    @EventHandler
-    fun onRenderEvent(event: RenderEvent.Last) {
-        if (!DungeonUtils.inBoss || !DungeonUtils.isFloor(5) || mc.player?.getStatusEffect(StatusEffects.BLINDNESS) != null) return
-        currentLivid.entity?.let { entity ->
-            event.context.drawWireFrameBox(entity.boundingBox, currentLivid.color, depth = true)
+        on<RenderEvent.Last> {
+            if (!DungeonUtils.inBoss || !DungeonUtils.isFloor(5) || mc.player?.getStatusEffect(StatusEffects.BLINDNESS) != null) return@on
+            currentLivid.entity?.let { entity ->
+                context.drawWireFrameBox(entity.boundingBox, currentLivid.color, depth = true)
+            }
         }
-    }
 
-    @EventHandler
-    fun onWorldLoad(event: WorldLoadEvent) {
-        currentLivid = Livid.HOCKEY
-        currentLivid.entity = null
+        on<WorldLoadEvent> {
+            currentLivid = Livid.HOCKEY
+            currentLivid.entity = null
+        }
     }
 
     private enum class Livid(val entityName: String, val colorCode: Char, val color: Color, val wool: Block) {

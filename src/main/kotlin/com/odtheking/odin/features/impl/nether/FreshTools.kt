@@ -1,16 +1,14 @@
 package com.odtheking.odin.features.impl.nether
 
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
-import com.odtheking.odin.events.PacketEvent
+import com.odtheking.odin.events.ChatPacketEvent
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
-import com.odtheking.odin.utils.noControlCodes
 import com.odtheking.odin.utils.render.drawString
 import com.odtheking.odin.utils.render.drawStringWidth
 import com.odtheking.odin.utils.sendCommand
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.toFixed
-import meteordevelopment.orbit.EventHandler
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 
 object FreshTools : Module(
     name = "Fresh Tools",
@@ -44,9 +42,10 @@ object FreshTools : Module(
 
     private val ownFreshRegex = Regex("^Your Fresh Tools Perk bonus doubles your building speed for the next 10 seconds!$")
 
-    @EventHandler
-    fun onChat(event: PacketEvent.Receive) = with(event.packet) {
-        if (this is GameMessageS2CPacket && !overlay && notifyFresh && KuudraUtils.inKuudra && ownFreshRegex.matches(content.string.noControlCodes))
-            sendCommand("pc FRESH")
+    init {
+        on<ChatPacketEvent> {
+            if (notifyFresh && KuudraUtils.inKuudra && ownFreshRegex.matches(value))
+                sendCommand("pc FRESH")
+        }
     }
 }

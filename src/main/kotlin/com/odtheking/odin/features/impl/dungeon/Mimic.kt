@@ -4,17 +4,16 @@ import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.ActionSetting
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.StringSetting
-import com.odtheking.odin.events.PacketEvent
+import com.odtheking.odin.events.ChatPacketEvent
+import com.odtheking.odin.events.core.on
+import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.sendCommand
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonListener
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
-import meteordevelopment.orbit.EventHandler
-import net.minecraft.entity.EntityStatuses
-import net.minecraft.entity.EquipmentSlot
 import net.minecraft.entity.mob.ZombieEntity
-import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
+import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket
+import net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket
 
 object Mimic : Module(
     name = "Mimic",
@@ -30,13 +29,24 @@ object Mimic : Module(
 
     private val princeRegex = Regex("^A Prince falls\\. \\+1 Bonus Score$")
 
-    @EventHandler
-    fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
-        if (this is GameMessageS2CPacket && !overlay && DungeonUtils.inDungeons && content.string.matches(princeRegex)) princeKilled()
-        if (this !is EntityStatusS2CPacket || status != EntityStatuses.PLAY_DEATH_SOUND_OR_ADD_PROJECTILE_HIT_PARTICLES ||
-            !DungeonUtils.inDungeons || DungeonUtils.inBoss || DungeonUtils.mimicKilled) return@with
-        val entity = getEntity(mc.world) ?: return@with
-        if (entity is ZombieEntity && entity.isBaby && EquipmentSlot.entries.all { entity.getEquippedStack(it).isEmpty }) mimicKilled()
+    init {
+        onReceive<EntitiesDestroyS2CPacket> {
+            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss || DungeonUtils.mimicKilled) return@onReceive
+            entityIds.forEach { id ->
+                val entity = mc.world?.getEntityById(id) ?: return@forEach
+                if (entity is ZombieEntity && entity.isBaby) mimicKilled()
+            }
+        }
+
+        onReceive<EntityTrackerUpdateS2CPacket> {
+            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss || DungeonUtils.mimicKilled) return@onReceive
+            val entity = mc.world?.getEntityById(id) ?: return@onReceive
+            if (entity is ZombieEntity && entity.isBaby && entity.health <= 0f) mimicKilled()
+        }
+
+        on<ChatPacketEvent> {
+            if (value.matches(princeRegex) && !DungeonUtils.princeKilled && DungeonUtils.inDungeons) princeKilled()
+        }
     }
 
     private fun mimicKilled() {

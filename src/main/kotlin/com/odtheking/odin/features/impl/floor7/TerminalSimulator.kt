@@ -1,6 +1,5 @@
 package com.odtheking.odin.features.impl.floor7
 
-import com.odtheking.odin.clickgui.settings.impl.MapSetting
 import com.odtheking.odin.clickgui.settings.impl.NumberSetting
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.features.impl.floor7.terminalhandler.TerminalTypes
@@ -14,7 +13,7 @@ object TerminalSimulator : Module(
 ) {
     private val ping by NumberSetting("Ping", 0, 0, 500, desc = "Ping of the terminal.")
 
-    val termSimPBs = PersonalBest(+MapSetting("TermsimPBs", mutableMapOf<Int, Float>()))
+    val termSimPBs = PersonalBest(this, "TermsimPBs")
 
     override fun onKeybind() {
         sendCommand("termsim $ping")

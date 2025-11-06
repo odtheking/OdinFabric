@@ -17,7 +17,7 @@
     "modmenu": [
       "com.odtheking.odin.clickgui.ModMenuIntegration"
     ],
-    "main": [
+    "client": [
       {
         "adapter": "kotlin",
         "value": "com.odtheking.odin.OdinMod"

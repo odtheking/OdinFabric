@@ -1,7 +1,6 @@
 package com.odtheking.odin.features.impl.skyblock
 
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
-import com.odtheking.odin.clickgui.settings.impl.MapSetting
 import com.odtheking.odin.clickgui.settings.impl.NumberSetting
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Colors
@@ -57,28 +56,28 @@ object Splits : Module(
     private val numbersAfterDecimal by NumberSetting("Numbers After Decimal", 2, 0, 5, 1, desc = "Numbers after decimal in time.")
     val showTickTime by BooleanSetting("Show Tick Time", false, desc = "Show tick-based time alongside real time.")
 
-    val kuudraT5PBs = PersonalBest(+MapSetting("KuudraT5", mutableMapOf<Int, Float>()))
-    val kuudraT4PBs = PersonalBest(+MapSetting("KuudraT4", mutableMapOf<Int, Float>()))
-    val kuudraT3PBs = PersonalBest(+MapSetting("KuudraT3", mutableMapOf<Int, Float>()))
-    val kuudraT2PBs = PersonalBest(+MapSetting("KuudraT2", mutableMapOf<Int, Float>()))
-    val kuudraT1PBs = PersonalBest(+MapSetting("KuudraT1", mutableMapOf<Int, Float>()))
+    val kuudraT5PBs = PersonalBest(this, "KuudraT5")
+    val kuudraT4PBs = PersonalBest(this, "KuudraT4")
+    val kuudraT3PBs = PersonalBest(this, "KuudraT3")
+    val kuudraT2PBs = PersonalBest(this, "KuudraT2")
+    val kuudraT1PBs = PersonalBest(this, "KuudraT1")
 
-    private val dungeonEPBs = PersonalBest(+MapSetting("DungeonE", mutableMapOf<Int, Float>()))
-    private val dungeonF1PBs = PersonalBest(+MapSetting("DungeonF1", mutableMapOf<Int, Float>()))
-    private val dungeonF2PBs = PersonalBest(+MapSetting("DungeonF2", mutableMapOf<Int, Float>()))
-    private val dungeonF3PBs = PersonalBest(+MapSetting("DungeonF3", mutableMapOf<Int, Float>()))
-    private val dungeonF4PBs = PersonalBest(+MapSetting("DungeonF4", mutableMapOf<Int, Float>()))
-    private val dungeonF5PBs = PersonalBest(+MapSetting("DungeonF5", mutableMapOf<Int, Float>()))
-    private val dungeonF6PBs = PersonalBest(+MapSetting("DungeonF6", mutableMapOf<Int, Float>()))
-    private val dungeonF7PBs = PersonalBest(+MapSetting("DungeonF7", mutableMapOf<Int, Float>()))
+    private val dungeonEPBs = PersonalBest(this, "DungeonE")
+    private val dungeonF1PBs = PersonalBest(this, "DungeonF1")
+    private val dungeonF2PBs = PersonalBest(this, "DungeonF2")
+    private val dungeonF3PBs = PersonalBest(this, "DungeonF3")
+    private val dungeonF4PBs = PersonalBest(this, "DungeonF4")
+    private val dungeonF5PBs = PersonalBest(this, "DungeonF5")
+    private val dungeonF6PBs = PersonalBest(this, "DungeonF6")
+    private val dungeonF7PBs = PersonalBest(this, "DungeonF7")
 
-    private val dungeonM1PBs = PersonalBest(+MapSetting("DungeonM1", mutableMapOf<Int, Float>()))
-    private val dungeonM2PBs = PersonalBest(+MapSetting("DungeonM2", mutableMapOf<Int, Float>()))
-    private val dungeonM3PBs = PersonalBest(+MapSetting("DungeonM3", mutableMapOf<Int, Float>()))
-    private val dungeonM4PBs = PersonalBest(+MapSetting("DungeonM4", mutableMapOf<Int, Float>()))
-    private val dungeonM5PBs = PersonalBest(+MapSetting("DungeonM5", mutableMapOf<Int, Float>()))
-    private val dungeonM6PBs = PersonalBest(+MapSetting("DungeonM6", mutableMapOf<Int, Float>()))
-    private val dungeonM7PBs = PersonalBest(+MapSetting("DungeonM7", mutableMapOf<Int, Float>()))
+    private val dungeonM1PBs = PersonalBest(this, "DungeonM1")
+    private val dungeonM2PBs = PersonalBest(this, "DungeonM2")
+    private val dungeonM3PBs = PersonalBest(this, "DungeonM3")
+    private val dungeonM4PBs = PersonalBest(this, "DungeonM4")
+    private val dungeonM5PBs = PersonalBest(this, "DungeonM5")
+    private val dungeonM6PBs = PersonalBest(this, "DungeonM6")
+    private val dungeonM7PBs = PersonalBest(this, "DungeonM7")
 
     val dungeonPBsList = listOf(dungeonEPBs, dungeonF1PBs, dungeonF2PBs, dungeonF3PBs, dungeonF4PBs, dungeonF5PBs, dungeonF6PBs, dungeonF7PBs,
         dungeonM1PBs, dungeonM2PBs, dungeonM3PBs, dungeonM4PBs, dungeonM5PBs, dungeonM6PBs, dungeonM7PBs)

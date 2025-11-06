@@ -4,6 +4,7 @@ import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.StringSetting
 import com.odtheking.odin.events.TerminalEvent
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.features.impl.floor7.terminalhandler.TerminalTypes
 import com.odtheking.odin.features.impl.floor7.termsim.TermSimGUI
@@ -11,7 +12,6 @@ import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.sendCommand
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
-import meteordevelopment.orbit.EventHandler
 import net.minecraft.item.Items
 
 object MelodyMessage : Module(
@@ -25,15 +25,6 @@ object MelodyMessage : Module(
 
     private var claySlots = hashMapOf(25 to "Melody 25%", 34 to "Melody 50%", 43 to "Melody 75%")
 
-    @EventHandler
-    fun onTermLoad(event: TerminalEvent.Opened) {
-        if (DungeonUtils.getF7Phase() != M7Phases.P3 || event.terminal.type != TerminalTypes.MELODY || mc.currentScreen is TermSimGUI) return
-        if (sendMelodyMessage) sendCommand("pc $melodyMessage")
-        if (melodySendCoords) sendCommand("od sendcoords")
-
-        claySlots = hashMapOf(25 to "Melody 25%", 34 to "Melody 50%", 43 to "Melody 75%")
-    }
-
     init {
         TickTask(5) {
             if (DungeonUtils.getF7Phase() != M7Phases.P3 || TerminalSolver.currentTerm?.type != TerminalTypes.MELODY || mc.currentScreen is TermSimGUI || !melodyProgress) return@TickTask
@@ -42,6 +33,14 @@ object MelodyMessage : Module(
 
             sendCommand("pc ${claySlots[greenClayIndices.last()] ?: return@TickTask}")
             greenClayIndices.forEach { claySlots.remove(it) }
+        }
+
+        on<TerminalEvent.Opened> {
+            if (DungeonUtils.getF7Phase() != M7Phases.P3 || terminal.type != TerminalTypes.MELODY || mc.currentScreen is TermSimGUI) return@on
+            if (sendMelodyMessage) sendCommand("pc $melodyMessage")
+            if (melodySendCoords) sendCommand("od sendcoords")
+
+            claySlots = hashMapOf(25 to "Melody 25%", 34 to "Melody 50%", 43 to "Melody 75%")
         }
     }
 }

@@ -13,7 +13,7 @@ object HidePlayers : Module(
     name = "Hide Players",
     description = "Hides players in your vicinity."
 ) {
-    private val hideAll by BooleanSetting("Hide all", false, desc = "Hides all players, regardless of distance.")
+    private val hideAll by BooleanSetting("Hide all", desc = "Hides all players, regardless of distance.")
     private val distance by NumberSetting("Distance", 3f, 0, 32, .5, "The number of blocks away to hide players.", unit = " blocks").withDependency { !hideAll }
 
     @JvmStatic

@@ -3,6 +3,7 @@ package com.odtheking.odin.features.impl.dungeon
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.*
 import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.Colors
@@ -13,7 +14,6 @@ import com.odtheking.odin.utils.render.drawString
 import com.odtheking.odin.utils.render.drawStringWidth
 import com.odtheking.odin.utils.render.getStringWidth
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
-import meteordevelopment.orbit.EventHandler
 
 object MapInfo : Module(
     name = "Map Info",
@@ -103,11 +103,10 @@ object MapInfo : Module(
             if (printWhenScore) modMessage("§b${DungeonUtils.score} §ascore reached in §6${DungeonUtils.dungeonTime} || ${DungeonUtils.floor?.name}.")
             shownTitle = true
         }
-    }
 
-    @EventHandler
-    fun onWorldLoad(event: WorldLoadEvent) {
-        shownTitle = false
+        on<WorldLoadEvent> {
+            shownTitle = false
+        }
     }
 
     private fun colorizeCrypts(count: Int): String {

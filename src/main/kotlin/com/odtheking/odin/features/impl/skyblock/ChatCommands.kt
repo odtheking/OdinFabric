@@ -3,14 +3,13 @@ package com.odtheking.odin.features.impl.skyblock
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.DropdownSetting
+import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.MessageSentEvent
-import com.odtheking.odin.events.PacketEvent
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.handlers.LimitedTickTask
 import com.odtheking.odin.utils.skyblock.LocationUtils
-import meteordevelopment.orbit.EventHandler
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 import net.minecraft.sound.SoundEvents
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -52,47 +51,44 @@ object ChatCommands : Module(
     // https://regex101.com/r/joY7dm/1
     private val messageRegex = Regex("^(?:Party > (\\[[^]]*?])? ?(\\w{1,16})(?: [ቾ⚒])?: ?(.+)\$|Guild > (\\[[^]]*?])? ?(\\w{1,16})(?: \\[([^]]*?)])?: ?(.+)\$|From (\\[[^]]*?])? ?(\\w{1,16}): ?(.+)\$)")
 
-    @EventHandler
-    fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
-        if (this !is GameMessageS2CPacket || overlay) return
+    init {
+        on<ChatPacketEvent> {
+            val result = messageRegex.find(value) ?: return@on
+            val channel = when(result.value.split(" ")[0]) {
+                "From" -> if (!privateChatCommands) return@on else ChatChannel.PRIVATE
+                "Party" -> if (!partyChatCommands)  return@on else ChatChannel.PARTY
+                "Guild" -> if (!guildChatCommands)  return@on else ChatChannel.GUILD
+                else -> return@on
+            }
 
-        val result = messageRegex.find(content.string.noControlCodes) ?: return
-        val channel = when(result.value.split(" ")[0]) {
-            "From" -> if (!privateChatCommands) return else ChatChannel.PRIVATE
-            "Party" -> if (!partyChatCommands)  return else ChatChannel.PARTY
-            "Guild" -> if (!guildChatCommands)  return else ChatChannel.GUILD
-            else -> return
-        }
+            val ign = result.groups[2]?.value ?: result.groups[5]?.value ?: result.groups[9]?.value ?: return@on
+            val msg = result.groups[3]?.value ?: result.groups[7]?.value ?: result.groups[10]?.value ?: return@on
 
-        val ign = result.groups[2]?.value ?: result.groups[5]?.value ?: result.groups[9]?.value ?: return
-        val msg = result.groups[3]?.value ?: result.groups[7]?.value ?: result.groups[10]?.value ?: return
+            if (!msg.startsWith("!")) return@on
 
-        if (!msg.startsWith("!")) return
-
-        LimitedTickTask(4, 1) {
-            handleChatCommands(msg, ign, channel)
-        }
-        Unit
-    }
-
-    @EventHandler
-    fun onMessageSent(event: MessageSentEvent) {
-        if (!chatEmotes || (event.message.startsWith("/") && !listOf("/pc", "/ac", "/gc", "/msg", "/w", "/r").any { event.message.startsWith(it) })) return
-
-        var replaced = false
-        val words = event.message.split(" ").toMutableList()
-
-        for (i in words.indices) {
-            replacements[words[i]]?.let {
-                replaced = true
-                words[i] = it
+            LimitedTickTask(4, 1) {
+                handleChatCommands(msg, ign, channel)
             }
         }
 
-        if (!replaced) return
+        on<MessageSentEvent> {
+            if (!chatEmotes || (message.startsWith("/") && !listOf("/pc", "/ac", "/gc", "/msg", "/w", "/r").any { message.startsWith(it) })) return@on
 
-        event.cancel()
-        sendChatMessage(words.joinToString(" "))
+            var replaced = false
+            val words = message.split(" ").toMutableList()
+
+            for (i in words.indices) {
+                replacements[words[i]]?.let {
+                    replaced = true
+                    words[i] = it
+                }
+            }
+
+            if (!replaced) return@on
+
+            cancel()
+            sendChatMessage(words.joinToString(" "))
+        }
     }
 
     private fun handleChatCommands(message: String, name: String, channel: ChatChannel) {

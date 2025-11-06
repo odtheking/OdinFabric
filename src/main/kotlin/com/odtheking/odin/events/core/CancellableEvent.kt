@@ -1,23 +1,18 @@
 package com.odtheking.odin.events.core
 
-import com.odtheking.odin.OdinMod
 import com.odtheking.odin.utils.logError
-import meteordevelopment.orbit.ICancellable
 
-abstract class CancellableEvent : ICancellable {
-    private var cancelled = false
+abstract class CancellableEvent : Event() {
+    var isCancelled = false
+        private set
 
-    override fun isCancelled(): Boolean {
-        return cancelled
+    fun cancel() {
+        isCancelled = true
     }
 
-    override fun setCancelled(cancelled: Boolean) {
-        this.cancelled = cancelled
-    }
-
-    fun postAndCatch(): Boolean {
+    override fun postAndCatch(): Boolean {
         runCatching {
-            OdinMod.EVENT_BUS.post(this)
+            EventBus.post(this)
         }.onFailure {
             logError(it, this)
         }

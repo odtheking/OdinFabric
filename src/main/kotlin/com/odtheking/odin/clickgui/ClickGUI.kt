@@ -1,10 +1,8 @@
 package com.odtheking.odin.clickgui
 
-import com.odtheking.odin.OdinMod
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.clickgui.settings.impl.ColorSetting
 import com.odtheking.odin.config.Config
-import com.odtheking.odin.events.GuiEvent
 import com.odtheking.odin.features.Category
 import com.odtheking.odin.features.impl.render.ClickGUIModule
 import com.odtheking.odin.utils.Color
@@ -12,7 +10,8 @@ import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.ui.HoverHandler
 import com.odtheking.odin.utils.ui.animations.LinearAnimation
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
-import meteordevelopment.orbit.EventHandler
+import com.odtheking.odin.utils.ui.rendering.NVGSpecialRenderer
+import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.text.Text
 import kotlin.math.sign
@@ -39,26 +38,20 @@ object ClickGUI : Screen(Text.of("Click GUI")) {
     val gray38 = Color(38, 38, 38)
     val gray26 = Color(26, 26, 26)
 
-    init {
-        OdinMod.EVENT_BUS.subscribe(this)
-    }
+    override fun render(context: DrawContext, mouseX: Int, mouseY: Int, deltaTicks: Float) {
+        NVGSpecialRenderer.draw(context, 0, 0, context.scaledWindowWidth, context.scaledWindowHeight) {
+            if (openAnim.isAnimating()) {
+                NVGRenderer.translate(0f, openAnim.get(-10f, 0f))
+                NVGRenderer.globalAlpha(openAnim.get(0f, 1f))
+            }
 
-    @EventHandler
-    fun render(event: GuiEvent.NVGRender) {
-        if (mc.currentScreen != this) return
-        NVGRenderer.beginFrame(mc.window.width.toFloat(), mc.window.height.toFloat())
-        if (openAnim.isAnimating()) {
-            NVGRenderer.translate(0f, openAnim.get(-10f, 0f))
-            NVGRenderer.globalAlpha(openAnim.get(0f, 1f))
+            for (element in panels) {
+                element.draw(odinMouseX, odinMouseY)
+            }
+            SearchBar.draw(mc.window.width / 2f - 175f, mc.window.height - 110f, odinMouseX, odinMouseY)
+            desc.render()
         }
-
-        for (element in panels) {
-            element.draw(odinMouseX, odinMouseY)
-        }
-        SearchBar.draw(mc.window.width / 2f - 175f, mc.window.height - 110f, odinMouseX, odinMouseY)
-        desc.render()
-
-        NVGRenderer.endFrame()
+        super.render(context, mouseX, mouseY, deltaTicks)
     }
 
     override fun mouseScrolled(

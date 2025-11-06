@@ -6,6 +6,7 @@ import com.odtheking.odin.clickgui.HudManager
 import com.odtheking.odin.clickgui.settings.impl.HUDSetting
 import com.odtheking.odin.clickgui.settings.impl.KeybindSetting
 import com.odtheking.odin.events.InputEvent
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.impl.dungeon.*
 import com.odtheking.odin.features.impl.dungeon.puzzlesolvers.PuzzleSolvers
 import com.odtheking.odin.features.impl.floor7.*
@@ -13,7 +14,6 @@ import com.odtheking.odin.features.impl.nether.*
 import com.odtheking.odin.features.impl.render.*
 import com.odtheking.odin.features.impl.skyblock.*
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
-import meteordevelopment.orbit.EventHandler
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements
 import net.minecraft.client.gui.DrawContext
@@ -38,6 +38,7 @@ object ModuleManager {
 
         // floor 7
         TerminalSimulator, TerminalSolver, TerminalTimes, TerminalSounds, TickTimers, ArrowAlign, InactiveWaypoints,
+        WitherDragons,
 
         // render
         ClickGUIModule, Camera, Etherwarp, PlayerSize, PerformanceHUD, RenderOptimizer,
@@ -64,6 +65,12 @@ object ModuleManager {
             }
         }
 
+        on<InputEvent> {
+            for (setting in keybindSettingsCache) {
+                if (setting.value.code == key.code) setting.onPress?.invoke()
+            }
+        }
+
         HudElementRegistry.attachElementBefore(VanillaHudElements.SLEEP, HUD_LAYER, ModuleManager::render)
     }
 
@@ -78,13 +85,6 @@ object ModuleManager {
         context.matrices?.popMatrix()
     }
 
-    @EventHandler
-    fun activateModuleKeyBinds(event: InputEvent) {
-        for (setting in keybindSettingsCache) {
-            if (setting.value.code == event.key.code) setting.onPress?.invoke()
-        }
-    }
-
     fun getModuleByName(name: String?): Module? = modules.firstOrNull { it.name.equals(name, true) }
 
     fun generateFeatureList(): String {
@@ -93,14 +93,8 @@ object ModuleManager {
         for ((category, modulesInCategory) in modules.groupBy { it.category }.entries) {
             featureList.appendLine("Category: ${category.displayName}")
             for (module in modulesInCategory.sortedByDescending {
-                NVGRenderer.textWidth(
-                    it.name,
-                    16f,
-                    NVGRenderer.defaultFont
-                )
-            }) {
-                featureList.appendLine("- ${module.name}: ${module.description}")
-            }
+                NVGRenderer.textWidth(it.name, 16f, NVGRenderer.defaultFont)
+            }) featureList.appendLine("- ${module.name}: ${module.description}")
             featureList.appendLine()
         }
         return featureList.toString()

@@ -1,4 +1,4 @@
-package com.odtheking.odin.utils.render.item
+package com.odtheking.odin.utils.render
 
 import com.mojang.blaze3d.textures.FilterMode
 import com.odtheking.mixin.accessors.SpecialGuiElementRendererAccessor
