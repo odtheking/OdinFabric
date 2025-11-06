@@ -23,6 +23,7 @@ object PetKeybinds : Module(
     private val nextPageKeybind by KeybindSetting("Next Page", GLFW.GLFW_KEY_UNKNOWN, "Goes to the next page.")
     private val previousPageKeybind by KeybindSetting("Previous Page", GLFW.GLFW_KEY_UNKNOWN, "Goes to the previous page.")
     private val nounequip by BooleanSetting("Disable Unequip", false, desc = "Prevents using a pets keybind to unequip a pet. Does not prevent unequip keybind or normal clicking.")
+    private val closeIfAlreadyEquipped by BooleanSetting("Close If Already Equipped", false, "If the pet is already equipped, closes the Pets menu instead.")
     private val advanced by DropdownSetting("Show Settings", false)
 
     private val pet1 by KeybindSetting("Pet 1", GLFW.GLFW_KEY_1, "Pet 1 on the list.").withDependency { advanced }
@@ -54,7 +55,7 @@ object PetKeybinds : Module(
             (it.component1().toIntOrNull() ?: 1) to (it.component2().toIntOrNull() ?: 1)
         } ?: return false
 
-        val index = when (keyCode) {
+        var index = when (keyCode) {
             nextPageKeybind.code -> if (current < total) 53 else return false.also { modMessage("§cYou are already on the last page.") }
             previousPageKeybind.code -> if (current > 1) 45 else return false.also { modMessage("§cYou are already on the first page.") }
             unequipKeybind.code ->
@@ -73,8 +74,14 @@ object PetKeybinds : Module(
             }
         }
 
-        if (nounequip && screen.screenHandler.slots[index].stack?.loreString?.contains("Click to despawn!") == true
-            && unequipKeybind.code != keyCode) return false.also { modMessage("§cThat pet is already equipped!") }
+        if (screen.screenHandler.slots[index].stack?.loreString?.contains("Click to despawn!") == true && unequipKeybind.code != keyCode) {
+            modMessage("§cThat pet is already equipped!")
+            if (closeIfAlreadyEquipped) {
+                index = 49
+            } else if (nounequip) {
+                return false
+            }
+        }
 
         mc.interactionManager?.clickSlot(screen.screenHandler.syncId, index, GLFW.GLFW_MOUSE_BUTTON_1, SlotActionType.PICKUP, mc.player)
         return true
