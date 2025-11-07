@@ -114,7 +114,7 @@ object MelodyMessage : Module(
 
     private fun onSlotUpdate(packet: ScreenHandlerSlotUpdateS2CPacket) {
         val term = TerminalSolver.currentTerm ?: return
-        if (/* DungeonUtils.getF7Phase() != M7Phases.P3 ||*/ term.type != TerminalTypes.MELODY /* || mc.currentScreen is TermSimGUI */) return
+        if (DungeonUtils.getF7Phase() != M7Phases.P3 || term.type != TerminalTypes.MELODY || mc.currentScreen is TermSimGUI) return
 
         val item = packet.stack?.item ?: return
         if (item == Items.LIME_TERRACOTTA) {
