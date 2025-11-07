@@ -1,15 +1,15 @@
 package com.odtheking.odin.events.core
 
-import com.odtheking.odin.OdinMod
 import com.odtheking.odin.utils.logError
 
 abstract class Event {
 
-    fun postAndCatch() {
+    open fun postAndCatch(): Boolean {
         runCatching {
-            OdinMod.EVENT_BUS.post(this)
+            EventBus.post(this)
         }.onFailure {
             logError(it, this)
         }
+        return false
     }
 }

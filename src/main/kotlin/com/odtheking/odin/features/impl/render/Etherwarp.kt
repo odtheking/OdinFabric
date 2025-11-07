@@ -2,8 +2,10 @@ package com.odtheking.odin.features.impl.render
 
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.*
-import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.events.RenderEvent
+import com.odtheking.odin.events.core.on
+import com.odtheking.odin.events.core.onReceive
+import com.odtheking.odin.events.core.onSend
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.Color.Companion.multiplyAlpha
@@ -12,8 +14,8 @@ import com.odtheking.odin.utils.render.drawFilledBox
 import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.skyblock.Island
 import com.odtheking.odin.utils.skyblock.LocationUtils
-import meteordevelopment.orbit.EventHandler
 import net.minecraft.block.*
+import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket
@@ -50,72 +52,69 @@ object Etherwarp : Module(
 
     private var etherPos: EtherPos? = null
 
-    @EventHandler
-    fun onRenderLast(event: RenderEvent.Last) {
-        if (mc.player?.isSneaking == false || mc.currentScreen != null) return
+    init {
+        onReceive<PlaySoundS2CPacket> {
+            if (!sounds || sound.value() != SoundEvents.ENTITY_ENDER_DRAGON_HURT || volume != 1f || pitch != 0.53968257f) return@onReceive
+            mc.execute { playSoundAtPlayer(SoundEvent.of(Identifier.of(customSound))) }
+            it.cancel()
+        }
 
-        etherPos = getEtherPos(
-            if (useServerPosition) mc.player?.lastPos else mc.player?.pos,
-            56.0 + (isEtherwarpItem()?.getInt("tuned_transmission", 0) ?: return),
-            etherWarp = true
-        )
-        if (etherPos?.succeeded != true && !renderFail) return
-        val color = if (etherPos?.succeeded == true) color else failColor
-        etherPos?.pos?.let { pos ->
-            val box = if (fullBlock) Box(pos) else
-                mc.world?.getBlockState(pos)?.getOutlineShape(mc.world, pos)?.asCuboid()
-                    ?.takeIf { !it.isEmpty }?.boundingBox?.offset(pos) ?: Box(pos)
+        on<RenderEvent.Last> {
+            if (mc.player?.isSneaking == false || mc.currentScreen != null) return@on
 
-            when (renderStyle) {
-                0 -> event.context.drawWireFrameBox(box, color)
-                1 -> event.context.drawFilledBox(box, color)
-                2 -> {
-                    event.context.drawWireFrameBox(box, color)
-                    event.context.drawFilledBox(box, color.multiplyAlpha(0.5f))
+            etherPos = getEtherPos(
+                if (useServerPosition) mc.player?.lastPos else mc.player?.pos,
+                56.0 + (mc.player?.mainHandStack?.isEtherwarpItem()?.getInt("tuned_transmission", 0) ?: return@on),
+                etherWarp = true
+            )
+            if (etherPos?.succeeded != true && !renderFail) return@on
+            val color = if (etherPos?.succeeded == true) color else failColor
+            etherPos?.pos?.let { pos ->
+                val box = if (fullBlock) Box(pos) else
+                    mc.world?.getBlockState(pos)?.getOutlineShape(mc.world, pos)?.asCuboid()
+                        ?.takeIf { !it.isEmpty }?.boundingBox?.offset(pos) ?: Box(pos)
+
+                when (renderStyle) {
+                    0 -> context.drawWireFrameBox(box, color)
+                    1 -> context.drawFilledBox(box, color)
+                    2 -> {
+                        context.drawWireFrameBox(box, color)
+                        context.drawFilledBox(box, color.multiplyAlpha(0.5f))
+                    }
+                }
+            }
+        }
+
+        onSend<PlayerInteractItemC2SPacket> {
+            if (!LocationUtils.currentArea.isArea(Island.SinglePlayer) || mc.player?.isSneaking == false || mc.player?.mainHandStack?.isEtherwarpItem() == null) return@onSend
+
+            etherPos?.pos?.let {
+                if (etherPos?.succeeded == false) return@onSend
+                mc.executeSync {
+                    mc.player?.networkHandler?.sendPacket(
+                        PlayerMoveC2SPacket.Full(
+                            it.x + 0.5,
+                            it.y + 1.05,
+                            it.z + 0.5,
+                            mc.player?.yaw ?: 0f,
+                            mc.player?.pitch ?: 0f,
+                            mc.player?.isOnGround ?: false,
+                            false
+                        )
+                    )
+                    mc.player?.setPosition(it.x + 0.5, it.y + 1.05, it.z + 0.5)
+                    mc.player?.setVelocity(0.0, 0.0, 0.0)
                 }
             }
         }
     }
 
-    @EventHandler
-    fun onSoundPacket(event: PacketEvent.Receive) = with(event.packet) {
-        if (!sounds || this !is PlaySoundS2CPacket || sound.value() != SoundEvents.ENTITY_ENDER_DRAGON_HURT || volume != 1f || pitch != 0.53968257f) return
-        mc.execute { playSoundAtPlayer(SoundEvent.of(Identifier.of(customSound))) }
-        event.cancel()
-    }
-
-    @EventHandler
-    fun onPacketReceive(event: PacketEvent.Receive) = with(event.packet) {
-        if (this !is PlayerInteractItemC2SPacket || !LocationUtils.currentArea.isArea(Island.SinglePlayer) || mc.player?.isSneaking == false || mc.currentScreen != null || isEtherwarpItem() == null) return
-
-      etherPos?.pos?.let {
-            if (etherPos?.succeeded == false) return@let
-            mc.executeSync {
-                mc.player?.networkHandler?.sendPacket(
-                    PlayerMoveC2SPacket.Full(
-                        it.x + 0.5,
-                        it.y + 1.05,
-                        it.z + 0.5,
-                        mc.player?.yaw ?: 0f,
-                        mc.player?.pitch ?: 0f,
-                        mc.player?.isOnGround ?: false,
-                        false
-                    )
-                )
-                mc.player?.setPosition(it.x + 0.5, it.y + 1.05, it.z + 0.5)
-                mc.player?.setVelocity(0.0, 0.0, 0.0)
-            }
-        }
-        Unit
-    }
-
-    private fun isEtherwarpItem(): NbtCompound? =
-        mc.player?.mainHandStack?.customData?.takeIf {
+    private fun ItemStack.isEtherwarpItem(): NbtCompound? =
+        customData.takeIf {
             it.getInt("ethermerge", 0) == 1 || it.itemId == "ETHERWARP_CONDUIT"
         }
 
     data class EtherPos(val succeeded: Boolean, val pos: BlockPos?, val state: BlockState?) {
-        val vec: Vec3d? by lazy { pos?.let { Vec3d(it) } }
 
         companion object {
             val NONE = EtherPos(false, null, null)

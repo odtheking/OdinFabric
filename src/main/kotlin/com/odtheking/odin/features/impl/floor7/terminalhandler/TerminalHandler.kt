@@ -2,15 +2,14 @@ package com.odtheking.odin.features.impl.floor7.terminalhandler
 
 import com.google.common.primitives.Shorts
 import com.google.common.primitives.SignedBytes
-import com.odtheking.odin.OdinMod.EVENT_BUS
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.events.TerminalEvent
+import com.odtheking.odin.events.core.EventBus
+import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.impl.floor7.termsim.TermSimGUI
 import com.odtheking.odin.utils.equalsOneOf
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
-import meteordevelopment.orbit.EventHandler
-import meteordevelopment.orbit.EventPriority
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen
 import net.minecraft.item.ItemStack
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket
@@ -27,24 +26,20 @@ open class TerminalHandler(val type: TerminalTypes) {
     val timeOpened = System.currentTimeMillis()
     var isClicked = false
 
-    @EventHandler(priority = EventPriority.LOW)
-    fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
-        when (this) {
-            is ScreenHandlerSlotUpdateS2CPacket -> {
-                if (slot !in 0 until type.windowSize) return@with
-                items[slot] = stack
-                if (handleSlotUpdate(this)) TerminalEvent.Updated(this@TerminalHandler).postAndCatch()
-            }
-            is OpenScreenS2CPacket -> {
-                isClicked = false
-                items.fill(null)
-            }
-        }
-    }
-
     init {
         @Suppress("LeakingThis")
-        EVENT_BUS.subscribe(this)
+        EventBus.subscribe(this)
+
+        onReceive<ScreenHandlerSlotUpdateS2CPacket> {
+            if (slot !in 0 until type.windowSize) return@onReceive
+            items[slot] = stack
+            if (handleSlotUpdate(this)) TerminalEvent.Updated(this@TerminalHandler).postAndCatch()
+        }
+
+        onReceive<OpenScreenS2CPacket> {
+            isClicked = false
+            items.fill(null)
+        }
     }
 
     open fun handleSlotUpdate(packet: ScreenHandlerSlotUpdateS2CPacket): Boolean = false

@@ -12,7 +12,6 @@ version = property("mod_version")!!
 repositories {
     mavenCentral()
     maven("https://jitpack.io")
-    maven("https://maven.meteordev.org/releases")
     maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
     maven("https://maven.terraformersmc.com/")
 }
@@ -25,11 +24,6 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}")
 
     modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:${property("devauth_version")}")
-
-    property("orbit_version").let {
-        modImplementation("meteordevelopment:orbit:$it")
-        include("meteordevelopment:orbit:$it")
-    }
 
     property("commodore_version").let {
         implementation("com.github.stivais:Commodore:$it")

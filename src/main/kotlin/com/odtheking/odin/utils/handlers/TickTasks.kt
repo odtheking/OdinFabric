@@ -1,9 +1,9 @@
 package com.odtheking.odin.utils.handlers
 
-import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.events.TickEvent
+import com.odtheking.odin.events.core.on
+import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.utils.logError
-import meteordevelopment.orbit.EventHandler
 import net.minecraft.network.packet.s2c.common.CommonPingS2CPacket
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -61,14 +61,13 @@ object TickTasks {
         serverTickTasks.remove(task)
     }
 
-    @EventHandler
-    fun onTick(event: TickEvent.End) {
-        for (task in clientTickTasks) task.run()
-    }
+    init {
+        on<TickEvent.End> {
+            for (task in clientTickTasks) task.run()
+        }
 
-    @EventHandler
-    fun onServerTick(event: PacketEvent.Receive) {
-        if (event.packet is CommonPingS2CPacket)
+        onReceive<CommonPingS2CPacket> {
             for (task in serverTickTasks) task.run()
+        }
     }
 }

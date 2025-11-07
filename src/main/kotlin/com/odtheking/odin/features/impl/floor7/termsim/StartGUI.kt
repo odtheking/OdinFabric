@@ -4,7 +4,6 @@ import com.odtheking.odin.features.impl.floor7.TerminalSimulator
 import com.odtheking.odin.features.impl.floor7.TerminalSimulator.openRandomTerminal
 import com.odtheking.odin.utils.handlers.LimitedTickTask
 import com.odtheking.odin.utils.modMessage
-import me.odinmain.features.impl.floor7.p3.termsim.SelectAllSim
 import net.minecraft.component.DataComponentTypes
 import net.minecraft.item.ItemStack
 import net.minecraft.item.Items
@@ -58,7 +57,7 @@ object StartGUI : TermSimGUI(
                     }
                     return
                 }
-                repeat(6) { i -> TerminalSimulator.termSimPBs.set(i, 9999f) }
+                repeat(6) { TerminalSimulator.termSimPBs.reset() }
                 modMessage("§cPBs reset!")
             }
             10 -> PanesSim.open(ping)

@@ -1,16 +1,15 @@
 package com.odtheking.odin.features.impl.dungeon
 
 import com.odtheking.odin.events.BlockUpdateEvent
-import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Colors
+import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.render.drawStringWidth
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.toFixed
-import meteordevelopment.orbit.EventHandler
 import net.minecraft.block.Blocks
-import net.minecraft.network.packet.s2c.common.CommonPingS2CPacket
 import net.minecraft.util.math.BlockPos
 
 object SpiritBear : Module(
@@ -29,6 +28,38 @@ object SpiritBear : Module(
         } ?: (0 to 0)
     }
 
+    private inline val blockLocations get() = if (DungeonUtils.floor?.isMM == true) m4BlockLocations else f4BlockLocations
+    private inline val maxKills get() = if (DungeonUtils.floor?.isMM == true) 30 else 25
+    private val lastBlockLocation = BlockPos(7, 77, 34)
+    private var timer = -1 // state: -1=NotSpawned, 0=Alive, 1+=Spawning
+    private var kills = 0
+
+    init {
+        on<BlockUpdateEvent> {
+            if (!DungeonUtils.isFloor(4) || !DungeonUtils.inBoss || !blockLocations.contains(pos)) return@on
+
+            when (updated.block) {
+                Blocks.SEA_LANTERN if old.block == Blocks.COAL_BLOCK -> {
+                    if (kills < maxKills) kills++
+                    if (pos == lastBlockLocation) timer = 68
+                }
+                Blocks.COAL_BLOCK if old.block == Blocks.SEA_LANTERN -> {
+                    if (kills > 0) kills--
+                    if (pos == lastBlockLocation) timer = -1
+                }
+            }
+        }
+
+        TickTask(0, true) {
+            if (timer > 0) timer--
+        }
+
+        on<WorldLoadEvent> {
+            kills = 0
+            timer = -1
+        }
+    }
+
     private val f4BlockLocations = hashSetOf(
         BlockPos(-3, 77, 33), BlockPos(-9, 77, 31), BlockPos(-16, 77, 26), BlockPos(-20, 77, 20), BlockPos(-23, 77, 13),
         BlockPos(-24, 77, 6), BlockPos(-24, 77, 0), BlockPos(-22, 77, -7), BlockPos(-18, 77, -13), BlockPos(-12, 77, -19),
@@ -44,37 +75,4 @@ object SpiritBear : Module(
         BlockPos(32, 77, -5), BlockPos(34, 77, 1), BlockPos(34, 77, 7), BlockPos(33, 77, 12), BlockPos(31, 77, 18),
         BlockPos(28, 77, 23), BlockPos(23, 77, 28), BlockPos(18, 77, 31), BlockPos(12, 77, 33), BlockPos(7, 77, 34)
     )
-    private val lastBlockLocation = BlockPos(7, 77, 34)
-    private inline val blockLocations: HashSet<BlockPos> get() = if (DungeonUtils.floor?.isMM == true) m4BlockLocations else f4BlockLocations
-    private inline val maxKills: Int get() = if (DungeonUtils.floor?.isMM == true) 30 else 25
-
-    private var kills = 0
-    private var timer = -1 // state: -1=NotSpawned, 0=Alive, 1+=Spawning
-
-    @EventHandler
-    fun onWorldLoad(event: WorldLoadEvent) {
-        kills = 0
-        timer = -1
-    }
-
-    @EventHandler
-    fun onBlockChange(event: BlockUpdateEvent) {
-        if (!DungeonUtils.isFloor(4) || !DungeonUtils.inBoss || !blockLocations.contains(event.pos)) return
-        when {
-            event.updated.block == Blocks.SEA_LANTERN && event.old.block == Blocks.COAL_BLOCK -> {
-                if (kills < maxKills) kills++
-                if (event.pos == lastBlockLocation) timer = 68
-            }
-
-            event.updated.block == Blocks.COAL_BLOCK && event.old.block == Blocks.SEA_LANTERN -> {
-                if (kills > 0) kills--
-                if (event.pos == lastBlockLocation) timer = -1
-            }
-        }
-    }
-
-    @EventHandler
-    fun onPacketReceive(event: PacketEvent.Receive) {
-        if (event.packet is CommonPingS2CPacket && timer > 0) timer--
-    }
 }

@@ -3,17 +3,17 @@ package com.odtheking.odin.features.impl.dungeon
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.ColorSetting
 import com.odtheking.odin.clickgui.settings.impl.SelectorSetting
-import com.odtheking.odin.events.PacketEvent
+import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.*
+import com.odtheking.odin.utils.handlers.TickTask
+import com.odtheking.odin.utils.render.ItemStateRenderer
 import com.odtheking.odin.utils.render.drawStringWidth
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
-import meteordevelopment.orbit.EventHandler
 import net.minecraft.entity.EquipmentSlot
 import net.minecraft.item.ItemStack
-import net.minecraft.network.packet.s2c.common.CommonPingS2CPacket
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 
 object InvincibilityTimer : Module(
     name = "Invincibility Timer",
@@ -46,7 +46,7 @@ object InvincibilityTimer : Module(
         }.ifEmpty { return@HUD 0 to 0 }
 
         visibleTypes.forEachIndexed { index, type ->
-            this.drawItem(type.itemStack, 0, -1 + index * 14)
+            ItemStateRenderer.draw(this, type.itemStack, 0, -1 + index * 14)
             val y = index * 14 + 3
 
             if (type == InvincibilityType.BONZO && mc.player?.getEquippedStack(EquipmentSlot.HEAD)?.itemId?.equalsOneOf("BONZO_MASK", "STARRED_BONZO_MASK") == true ||
@@ -69,21 +69,21 @@ object InvincibilityTimer : Module(
     }
     private val showOnlyInBoss by BooleanSetting("Show In Boss", false, desc = "Only shows invincibility timers during dungeon boss fights.")
 
-    @EventHandler
-    fun onWorldLoad(event: WorldLoadEvent) {
-        InvincibilityType.entries.forEach { it.reset() }
-    }
+    init {
+        TickTask(0, true) {
+            InvincibilityType.entries.forEach { it.tick() }
+        }
 
-    @EventHandler
-    fun onPacketReceive(event: PacketEvent.Receive) {
-        val packet = event.packet
-        if (packet is CommonPingS2CPacket) InvincibilityType.entries.forEach { it.tick() }
-        if (packet !is GameMessageS2CPacket || packet.overlay) return
-        val message = packet.content.string.noControlCodes
+        on<ChatPacketEvent> {
+            if (!DungeonUtils.inDungeons) return@on
+            InvincibilityType.entries.firstOrNull { type -> value.matches(type.regex) }?.let { type ->
+                if (invincibilityAnnounce) sendCommand("pc ${type.name.lowercase().capitalizeFirst()} Procced!")
+                type.proc()
+            }
+        }
 
-        InvincibilityType.entries.firstOrNull { type -> message.matches(type.regex) }?.let { type ->
-            if (invincibilityAnnounce) sendCommand("pc ${type.name.lowercase().capitalizeFirst()} Procced!")
-            type.proc()
+        on<WorldLoadEvent> {
+            InvincibilityType.entries.forEach { it.reset() }
         }
     }
 

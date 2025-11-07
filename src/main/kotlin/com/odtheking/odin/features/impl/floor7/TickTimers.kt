@@ -3,16 +3,15 @@ package com.odtheking.odin.features.impl.floor7
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.HudElement
-import com.odtheking.odin.events.PacketEvent
+import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Colors
+import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.render.drawStringWidth
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.toFixed
-import meteordevelopment.orbit.EventHandler
-import net.minecraft.network.packet.s2c.common.CommonPingS2CPacket
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 
 object TickTimers : Module(
     name = "Tick Timers",
@@ -56,41 +55,39 @@ object TickTimers : Module(
 
     private var padTickTime: Int = -1
 
-    @EventHandler
-    fun onPacketReceive(event: PacketEvent.Receive) = with (event.packet) {
-        if (!DungeonUtils.inBoss) return@with
-        if (this is CommonPingS2CPacket) {
+    init {
+        on<ChatPacketEvent> {
+            when {
+                necronHud.enabled && value.matches(necronRegex) -> necronTime = 60
+                goldorHud.enabled && value.matches(goldorRegex) -> goldorTickTime = 60
+                goldorHud.enabled && value.matches(coreOpeningRegex) -> {
+                    goldorStartTime = -1
+                    goldorTickTime = -1
+                }
+                value.matches(stormStartRegex) -> {
+                    if (goldorHud.enabled) goldorStartTime = 104
+                    if (stormHud.enabled) padTickTime = -1
+                }
+                stormHud.enabled && value.matches(stormPadRegex) -> padTickTime = 20
+            }
+        }
+
+        TickTask(0, true) {
+            if (!DungeonUtils.inBoss) return@TickTask
             if (goldorTickTime == 0 && goldorStartTime <= 0 && goldorHud.enabled) goldorTickTime = 60
             if (goldorStartTime >= 0 && goldorHud.enabled) goldorStartTime--
             if (goldorTickTime >= 0 && goldorHud.enabled) goldorTickTime--
             if (padTickTime == 0 && stormHud.enabled) padTickTime = 20
             if (padTickTime >= 0 && stormHud.enabled) padTickTime--
             if (necronTime >= 0 && necronHud.enabled) necronTime--
-            return@with
         }
 
-        if (this !is GameMessageS2CPacket || overlay) return
-        when {
-            necronHud.enabled && content.string.matches(necronRegex) -> necronTime = 60
-            goldorHud.enabled && content.string.matches(goldorRegex) -> goldorTickTime = 60
-            goldorHud.enabled && content.string.matches(coreOpeningRegex) -> {
-                goldorStartTime = -1
-                goldorTickTime = -1
-            }
-            content.string.matches(stormStartRegex) -> {
-                if (goldorHud.enabled) goldorStartTime = 104
-                if (stormHud.enabled) padTickTime = -1
-            }
-            stormHud.enabled && content.string.matches(stormPadRegex) -> padTickTime = 20
+        on<WorldLoadEvent> {
+            goldorStartTime = -1
+            goldorTickTime = -1
+            padTickTime = -1
+            necronTime = -1
         }
-    }
-
-    @EventHandler
-    fun onServerTick(event: WorldLoadEvent) {
-        goldorStartTime = -1
-        goldorTickTime = -1
-        padTickTime = -1
-        necronTime = -1
     }
 
     private fun formatTimer(time: Int, max: Int, prefix: String): String {

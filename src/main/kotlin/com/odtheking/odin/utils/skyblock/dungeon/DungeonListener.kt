@@ -2,9 +2,10 @@ package com.odtheking.odin.utils.skyblock.dungeon
 
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.OdinMod.scope
-import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.core.on
+import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.impl.dungeon.LeapMenu
 import com.odtheking.odin.features.impl.dungeon.LeapMenu.odinSorting
 import com.odtheking.odin.features.impl.dungeon.Mimic
@@ -16,8 +17,6 @@ import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getDungeonTeammate
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.Room
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import meteordevelopment.orbit.EventHandler
-import meteordevelopment.orbit.EventPriority
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 import net.minecraft.network.packet.s2c.play.PlayerListHeaderS2CPacket
 import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket
@@ -49,87 +48,80 @@ object DungeonListener {
         }
     }
 
-    @EventHandler
-    fun onWorldLoad(event: WorldLoadEvent) {
-        Blessing.entries.forEach { it.reset() }
-        dungeonTeammatesNoSelf = emptyList()
-        dungeonStats = DungeonStats()
-        expectingBloodUpdate = false
-        leapTeammates = emptyList()
-        dungeonTeammates.clear()
-        puzzles.clear()
-        floor = null
-        paul = false
-    }
+    init {
+        on<WorldLoadEvent> {
+            Blessing.entries.forEach { it.reset() }
+            dungeonTeammatesNoSelf = emptyList()
+            dungeonStats = DungeonStats()
+            expectingBloodUpdate = false
+            leapTeammates = emptyList()
+            dungeonTeammates.clear()
+            puzzles.clear()
+            floor = null
+            paul = false
+        }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    fun enterDungeonRoom(event: RoomEnterEvent) {
-        val room = event.room?.takeUnless { room -> passedRooms.any { it.data.name == room.data.name } } ?: return
-        dungeonStats.knownSecrets += room.data.secrets
-    }
+        on<RoomEnterEvent>(priority = 100) {
+            val room = room?.takeUnless { room -> passedRooms.any { it.data.name == room.data.name } } ?: return@on
+            dungeonStats.knownSecrets += room.data.secrets
+        }
 
-    @EventHandler
-    fun onPacket(event: PacketEvent.Receive) {
-        when (event.packet) {
-            is PlayerListS2CPacket -> {
-                if (event.packet.actions.none {
-                        it.equalsOneOf(
-                            PlayerListS2CPacket.Action.UPDATE_DISPLAY_NAME,
-                            PlayerListS2CPacket.Action.ADD_PLAYER
-                        )
-                    }) return
-                val tabListEntries =
-                    event.packet.entries?.mapNotNull { it.displayName?.string }?.ifEmpty { return } ?: return
-                updateDungeonTeammates(tabListEntries)
-                updateDungeonStats(tabListEntries)
-                getDungeonPuzzles(tabListEntries)
+        onReceive<PlayerListS2CPacket> {
+            if (actions.none {
+                    it.equalsOneOf(
+                        PlayerListS2CPacket.Action.UPDATE_DISPLAY_NAME,
+                        PlayerListS2CPacket.Action.ADD_PLAYER
+                    )
+                }) return@onReceive
+            val tabListEntries =
+                entries?.mapNotNull { it.displayName?.string }?.ifEmpty { return@onReceive } ?: return@onReceive
+            updateDungeonTeammates(tabListEntries)
+            updateDungeonStats(tabListEntries)
+            getDungeonPuzzles(tabListEntries)
+        }
+
+        onReceive<TeamS2CPacket> {
+            val team = team?.orElse(null) ?: return@onReceive
+
+            val text = team.prefix?.string?.plus(team.suffix?.string) ?: return@onReceive
+
+            floorRegex.find(text)?.groupValues?.get(1)?.let {
+                scope.launch(Dispatchers.IO) { paul = hasBonusPaulScore() }
+                floor = Floor.valueOf(it)
             }
 
-            is TeamS2CPacket -> {
-                val team = event.packet.team?.orElse(null) ?: return
+            clearedRegex.find(text)?.groupValues?.get(1)?.toIntOrNull()?.let {
+                if (dungeonStats.percentCleared != it && expectingBloodUpdate) dungeonStats.bloodDone = true
+                dungeonStats.percentCleared = it
+            }
+        }
 
-                val text = team.prefix?.string?.plus(team.suffix?.string) ?: return
+        onReceive<PlayerListHeaderS2CPacket> {
+            Blessing.entries.forEach { blessing ->
+                blessing.regex.find(footer?.string ?: return@forEach)
+                    ?.let { blessing.current = romanToInt(it.groupValues[1]) }
+            }
+        }
 
-                floorRegex.find(text)?.groupValues?.get(1)?.let {
-                    scope.launch(Dispatchers.IO) { paul = hasBonusPaulScore() }
-                    floor = Floor.valueOf(it)
-                }
-
-                clearedRegex.find(text)?.groupValues?.get(1)?.toIntOrNull()?.let {
-                    if (dungeonStats.percentCleared != it && expectingBloodUpdate) dungeonStats.bloodDone = true
-                    dungeonStats.percentCleared = it
-                }
+        onReceive<GameMessageS2CPacket> {
+            val message = content?.string?.noControlCodes ?: return@onReceive
+            if (expectingBloodRegex.matches(message)) expectingBloodUpdate = true
+            doorOpenRegex.find(message)?.let { dungeonStats.doorOpener = it.groupValues[1] }
+            deathRegex.find(message)?.let { match ->
+                dungeonTeammates.find { teammate ->
+                    teammate.name == (match.groupValues[1].takeUnless { it == "You" } ?: mc.player?.name?.string)
+                }?.deaths?.inc()
             }
 
-            is PlayerListHeaderS2CPacket -> {
-                Blessing.entries.forEach { blessing ->
-                    blessing.regex.find(event.packet.footer?.string ?: return@forEach)
-                        ?.let { blessing.current = romanToInt(it.groupValues[1]) }
-                }
-            }
+            when (partyMessageRegex.find(message)?.groupValues?.get(1)?.lowercase() ?: return@onReceive) {
+                "mimic killed", "mimic slain", "mimic killed!", "mimic dead", "mimic dead!", "\$skytils-dungeon-score-mimic\$", Mimic.mimicMessage ->
+                    dungeonStats.mimicKilled = true
 
-            is GameMessageS2CPacket -> {
-                if (event.packet.overlay) return
+                "prince killed", "prince slain", "prince killed!", "prince dead", "prince dead!", "\$skytils-dungeon-score-prince\$", Mimic.princeMessage ->
+                    dungeonStats.princeKilled = true
 
-                val message = event.packet.content?.string?.noControlCodes ?: return
-                if (expectingBloodRegex.matches(message)) expectingBloodUpdate = true
-                doorOpenRegex.find(message)?.let { dungeonStats.doorOpener = it.groupValues[1] }
-                deathRegex.find(message)?.let { match ->
-                    dungeonTeammates.find { teammate ->
-                        teammate.name == (match.groupValues[1].takeUnless { it == "You" } ?: mc.player?.name?.string)
-                    }?.deaths?.inc()
-                }
-
-                when (partyMessageRegex.find(message)?.groupValues?.get(1)?.lowercase() ?: return) {
-                    "mimic killed", "mimic slain", "mimic killed!", "mimic dead", "mimic dead!", "\$skytils-dungeon-score-mimic\$", Mimic.mimicMessage ->
-                        dungeonStats.mimicKilled = true
-
-                    "prince killed", "prince slain", "prince killed!", "prince dead", "prince dead!", "\$skytils-dungeon-score-prince\$", Mimic.princeMessage ->
-                        dungeonStats.princeKilled = true
-
-                    "blaze done!", "blaze done", "blaze puzzle solved!" ->
-                        puzzles.find { it == Puzzle.BLAZE }.let { it?.status = PuzzleStatus.Completed }
-                }
+                "blaze done!", "blaze done", "blaze puzzle solved!" ->
+                    puzzles.find { it == Puzzle.BLAZE }.let { it?.status = PuzzleStatus.Completed }
             }
         }
     }

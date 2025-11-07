@@ -4,6 +4,7 @@ import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.NumberSetting
 import com.odtheking.odin.events.RenderEvent
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.alert
@@ -12,7 +13,6 @@ import com.odtheking.odin.utils.render.drawString
 import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.render.getStringWidth
 import com.odtheking.odin.utils.skyblock.KuudraUtils
-import meteordevelopment.orbit.EventHandler
 import net.minecraft.text.Text
 import net.minecraft.util.math.Vec3d
 
@@ -33,37 +33,38 @@ object BuildHelper : Module(
 
     private val stunNotificationNumber by NumberSetting("Stun Percent", 93f, 0, 100, desc = "The build % to notify at (set to 0 to disable).", unit = "%")
 
-    @EventHandler
-    fun renderWorldEvent(event: RenderEvent.Last) {
-        if (!KuudraUtils.inKuudra || KuudraUtils.phase != 2) return
-        if (stunNotificationNumber != 0f && KuudraUtils.buildDonePercentage >= stunNotificationNumber) alert("§l§3Go to stun", false)
-        if (buildHelperDraw)
-            event.context.drawText(
-                Text.of("§bBuild §c${colorBuild(KuudraUtils.buildDonePercentage)}%").asOrderedText(),
-                Vec3d(-101.5, 82.0, -105.5),
-                3f,
-                false
-            )
-
-        if (buildHelperDraw)
-            event.context.drawText(
-                Text.of("§bBuilders ${colorBuilders(KuudraUtils.playersBuildingAmount)}").asOrderedText(),
-                Vec3d(-101.5, 81.0, -105.5),
-                3f,
-                false
-            )
-
-        if (unfinishedWaypoints)
-            KuudraUtils.buildingPiles.forEach {
-                event.context.drawCustomBeacon(
-                    it.name.asOrderedText(),
-                    it.blockPos,
-                    Colors.MINECRAFT_DARK_RED,
-                    increase = false,
-                    distance = false
+    init {
+        on<RenderEvent.Last> {
+            if (!KuudraUtils.inKuudra || KuudraUtils.phase != 2) return@on
+            if (stunNotificationNumber != 0f && KuudraUtils.buildDonePercentage >= stunNotificationNumber) alert("§l§3Go to stun", false)
+            if (buildHelperDraw)
+                context.drawText(
+                    Text.of("§bBuild §c${colorBuild(KuudraUtils.buildDonePercentage)}%").asOrderedText(),
+                    Vec3d(-101.5, 82.0, -105.5),
+                    3f,
+                    false
                 )
-                if (hideDefaultTag) it.isCustomNameVisible = false
-            }
+
+            if (buildHelperDraw)
+                context.drawText(
+                    Text.of("§bBuilders ${colorBuilders(KuudraUtils.playersBuildingAmount)}").asOrderedText(),
+                    Vec3d(-101.5, 81.0, -105.5),
+                    3f,
+                    false
+                )
+
+            if (unfinishedWaypoints)
+                KuudraUtils.buildingPiles.forEach {
+                    context.drawCustomBeacon(
+                        it.name.asOrderedText(),
+                        it.blockPos,
+                        Colors.MINECRAFT_DARK_RED,
+                        increase = false,
+                        distance = false
+                    )
+                    if (hideDefaultTag) it.isCustomNameVisible = false
+                }
+        }
     }
 
     private fun colorBuild(build: Int): String {

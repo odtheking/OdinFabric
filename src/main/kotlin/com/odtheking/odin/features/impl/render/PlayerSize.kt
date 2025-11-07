@@ -17,31 +17,24 @@ object PlayerSize : Module(
     name = "Player Size",
     description = "Changes the size of the player."
 ) {
-    private val devSize by BooleanSetting(
-        "Dev Size",
-        true,
-        desc = "Toggles client side dev size for your own player."
-    ).withDependency { isRandom }
+    private val devSize by BooleanSetting("Dev Size", true, desc = "Toggles client side dev size for your own player.").withDependency { isRandom }
     private val devSizeX by NumberSetting("Size X", 1f, -1, 3f, 0.1, desc = "X scale of the dev size.")
     private val devSizeY by NumberSetting("Size Y", 1f, -1, 3f, 0.1, desc = "Y scale of the dev size.")
     private val devSizeZ by NumberSetting("Size Z", 1f, -1, 3f, 0.1, desc = "Z scale of the dev size.")
     private val devWings by BooleanSetting("Wings", false, desc = "Toggles dragon wings.").withDependency { isRandom }
-    private val devWingsColor by ColorSetting(
-        "Wings Color",
-        Colors.WHITE,
-        desc = "Color of the dev wings."
-    ).withDependency { devWings && isRandom }
+    private val devWingsColor by ColorSetting("Wings Color", Colors.WHITE, desc = "Color of the dev wings.").withDependency { devWings && isRandom }
     private var showHidden by DropdownSetting("Show Hidden", false).withDependency { isRandom }
-    private val passcode by StringSetting(
-        "Passcode",
-        "odin",
-        desc = "Passcode for dev features."
-    ).withDependency { showHidden && isRandom }
+    private val passcode by StringSetting("Passcode", "odin", desc = "Passcode for dev features.").withDependency { showHidden && isRandom }
 
     const val DEV_SERVER = "https://api.odtheking.com/devs/"
 
     private val sendDevData by ActionSetting("Send Dev Data", desc = "Sends dev data to the server.") {
         showHidden = false
+        fun valid(v: Float) = (v in 0.8f..1.6f) || (v in -1.0f..-0.8f)
+        if (!valid(devSizeX) || !valid(devSizeY) || !valid(devSizeZ)) {
+            modMessage("Global values must be between 0.8..1.6 or -1..-0.8")
+            return@ActionSetting
+        }
         OdinMod.scope.launch {
             val body = buildDevBody(
                 mc.session.username ?: return@launch,
@@ -55,7 +48,7 @@ object PlayerSize : Module(
     }.withDependency { isRandom }
 
 
-    private var randoms: HashMap<String, RandomPlayer> = HashMap()
+    var randoms: HashMap<String, RandomPlayer> = HashMap()
     val isRandom get() = randoms.containsKey(mc.session?.username)
 
     data class RandomPlayer(
