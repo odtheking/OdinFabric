@@ -22,8 +22,7 @@
     "mixins.KeyBindingMixin",
     "mixins.MessageHandlerMixin",
     "mixins.MouseMixin",
-    "mixins.PlayerEntityRendererMixin",
-    "mixins.WorldRendererMixin"
+    "mixins.PlayerEntityRendererMixin"
   ],
   "mixins": [
     "accessors.PlayerInteractEntityC2SPacketAccessor",

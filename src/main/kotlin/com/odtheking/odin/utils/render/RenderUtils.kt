@@ -32,13 +32,13 @@ private val BEAM_TEXTURE = Identifier.ofVanilla("textures/entity/beacon_beam.png
 
 fun RenderEvent.drawLine(points: Collection<Vec3d>, color: Color, depth: Boolean, thickness: Float = 3f) {
     if (points.size < 2) return
-    val matrix = matrixStack
-    val bufferSource = buffer as? VertexConsumerProvider.Immediate ?: return
+    val matrix = context.matrices()
+    val bufferSource = context.consumers() as? VertexConsumerProvider.Immediate ?: return
     val layer = if (depth) CustomRenderLayer.LINE_LIST else CustomRenderLayer.LINE_LIST_ESP
     RenderSystem.lineWidth(thickness)
 
     matrix.push()
-    with(cameraPosition) { matrix.translate(-x, -y, -z) }
+    with(context.gameRenderer().camera.pos) { matrix.translate(-x, -y, -z) }
 
     val pointList = points.toList()
     for (i in 0 until pointList.size - 1) {
@@ -60,15 +60,17 @@ fun RenderEvent.drawLine(points: Collection<Vec3d>, color: Color, depth: Boolean
 }
 
 fun RenderEvent.drawWireFrameBox(box: Box, color: Color, thickness: Float = 5f, depth: Boolean = false) {
-    val matrix = matrixStack
-    val bufferSource = buffer as? VertexConsumerProvider.Immediate ?: return
+    val matrix = context.matrices()
+    val bufferSource = context.consumers() as? VertexConsumerProvider.Immediate ?: return
     val layer = if (depth) CustomRenderLayer.LINE_LIST else CustomRenderLayer.LINE_LIST_ESP
+    val cameraPosition = context.gameRenderer().camera.pos
     RenderSystem.lineWidth((thickness / cameraPosition.squaredDistanceTo(box.center).pow(0.15)).toFloat())
-
-    val entry: MatrixStack.Entry = matrixStack.peek()
 
     matrix.push()
     with(cameraPosition) { matrix.translate(-x, -y, -z) }
+
+    val entry: MatrixStack.Entry = matrix.peek()
+
     VertexRendering.drawBox(
         entry,
         bufferSource.getBuffer(layer),
@@ -84,12 +86,12 @@ fun RenderEvent.drawWireFrameBox(box: Box, color: Color, thickness: Float = 5f, 
 }
 
 fun RenderEvent.drawFilledBox(box: Box, color: Color, depth: Boolean = false) {
-    val matrix = matrixStack
-    val bufferSource = buffer as? VertexConsumerProvider.Immediate ?: return
+    val matrix = context.matrices()
+    val bufferSource = context.consumers() as? VertexConsumerProvider.Immediate ?: return
     val layer = if (depth) CustomRenderLayer.TRIANGLE_STRIP else CustomRenderLayer.TRIANGLE_STRIP_ESP
 
     matrix.push()
-    with(cameraPosition) { matrix.translate(-x, -y, -z) }
+    with(context.gameRenderer().camera.pos) { matrix.translate(-x, -y, -z) }
     VertexRendering.drawFilledBox(
         matrix,
         bufferSource.getBuffer(layer),
@@ -128,8 +130,8 @@ fun RenderEvent.drawStyledBox(
 fun RenderEvent.drawBeaconBeam(position: BlockPos, color: Color) {
     if (mc.world == null) return
 
-    val matrix = matrixStack
-    val camera = cameraPosition
+    val matrix = context.matrices()
+    val camera = context.gameRenderer().camera.pos
 
     matrix.push()
     matrix.translate(position.x - camera.x, position.y - camera.y, position.z - camera.z)
@@ -152,12 +154,13 @@ fun RenderEvent.drawBeaconBeam(position: BlockPos, color: Color) {
 }
 
 fun RenderEvent.drawText(text: OrderedText?, pos: Vec3d, scale: Float, depth: Boolean) {
-    val stack = matrixStack
+    val stack = context.matrices()
 
     stack.push()
     val matrix = stack.peek().positionMatrix
+    val camera = context.gameRenderer().camera
     with(scale * 0.025f) {
-        matrix.translate(pos).translate(-cameraPosition).rotate(cameraRotation).scale(this, -this, this)
+        matrix.translate(pos).translate(-camera.pos).rotate(camera.rotation).scale(this, -this, this)
     }
 
     val consumers = VertexConsumerProvider.immediate(ALLOCATOR)
@@ -200,10 +203,10 @@ fun RenderEvent.drawCylinder(
     thickness: Float = 5f,
     depth: Boolean = false
 ) {
-    val matrix = matrixStack
-    val bufferSource = buffer as? VertexConsumerProvider.Immediate ?: return
+    val matrix = context.matrices()
+    val bufferSource = context.consumers() as? VertexConsumerProvider.Immediate ?: return
     val layer = if (depth) CustomRenderLayer.LINE_LIST else CustomRenderLayer.LINE_LIST_ESP
-    val camera = cameraPosition
+    val camera = context.gameRenderer().camera.pos
 
     matrix.push()
     matrix.translate(center.x - camera.x, center.y - camera.y, center.z - camera.z)
