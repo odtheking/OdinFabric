@@ -11,7 +11,7 @@ import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.modMessage
 import kotlin.math.floor
 
-val PosMsgCommand = Commodore("posmsg") {
+val posMsgCommand = Commodore("posmsg") {
     literal("add") {
         literal("at").runs { x: Double, y: Double, z: Double, delay: Long, distance: Double, color: String, message: GreedyString ->
             val color = getColorFromString(color) ?: return@runs modMessage("Unknown color $color")

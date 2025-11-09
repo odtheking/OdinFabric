@@ -2,13 +2,13 @@ package com.odtheking.odin.events.core
 
 import com.odtheking.odin.events.PacketEvent
 import net.minecraft.network.packet.Packet
+import net.minecraft.util.profiler.Profiler
 import net.minecraft.util.profiler.Profilers
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.reflect.KClass
 
 object EventBus {
-
 
     @JvmField
     internal val listenerArrays = ConcurrentHashMap<KClass<out Event>, AtomicReference<Array<ListenerEntry<*>>>>()
@@ -18,8 +18,6 @@ object EventBus {
     internal val activeSubscribers = ConcurrentHashMap.newKeySet<Any>()
     @JvmField
     internal val subscriberClasses = ConcurrentHashMap<Any, KClass<*>>()
-
-    private val profiler = Profilers.get()
 
     fun subscribe(subscriber: Any) {
         if (activeSubscribers.add(subscriber)) {
@@ -36,9 +34,10 @@ object EventBus {
     }
 
     fun <T : Event> post(event: T) {
+        val profiler = Profilers.get()
         profiler.push(event::class.simpleName ?: "Event")
         try {
-            invokers[event::class]?.invoke(event)
+            invokers[event::class]?.invoke(event, profiler)
         } finally {
             profiler.pop()
         }
@@ -64,9 +63,7 @@ object EventBus {
         val subscriberClass = subscriber::class
         for ((eventClass, ref) in listenerArrays) {
             val listeners = ref.get()
-            if (listeners.any { it.subscriber == subscriberClass }) {
-                rebuildInvoker(eventClass, listeners)
-            }
+            if (listeners.any { it.subscriber == subscriberClass }) rebuildInvoker(eventClass, listeners)
         }
     }
 
@@ -104,11 +101,11 @@ object EventBus {
     }
 
     interface Invoker {
-        fun invoke(event: Event)
+        fun invoke(event: Event, profiler: Profiler)
     }
 
     private object EmptyInvoker : Invoker {
-        override fun invoke(event: Event) {}
+        override fun invoke(event: Event, profiler: Profiler) {}
     }
 
     private object InvokerFactory {
@@ -116,7 +113,7 @@ object EventBus {
             if (listeners.isEmpty()) return EmptyInvoker
 
             return object : Invoker {
-                override fun invoke(event: Event) {
+                override fun invoke(event: Event, profiler: Profiler) {
                     for (listener in listeners) {
                         profiler.push("Odin: ${listener.subscriberName}")
                         try {

@@ -9,7 +9,7 @@ internal interface Saving {
     /**
      * Used to update the setting from the json.
      */
-    fun read(element: JsonElement?)
+    fun read(element: JsonElement)
 
     /**
      * Used to create the json.

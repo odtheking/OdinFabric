@@ -35,6 +35,7 @@ class NVGSpecialRenderer(vertexConsumers: VertexConsumerProvider.Immediate)
         NVGRenderer.beginFrame(mc.window.width.toFloat(), mc.window.height.toFloat())
         state.renderContent()
         NVGRenderer.endFrame()
+        GlStateManager._disableDepthTest()
     }
 
     override fun getYOffset(height: Int, windowScaleFactor: Int): Float = height / 2f

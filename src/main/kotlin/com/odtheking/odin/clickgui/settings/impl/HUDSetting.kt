@@ -94,7 +94,7 @@ class HUDSetting(
         return this
     }
 
-    override fun read(element: JsonElement?) {
+    override fun read(element: JsonElement) {
         if (element !is JsonObject) return
         value.x = element.get("x")?.asInt ?: value.x
         value.y = element.get("y")?.asInt ?: value.y

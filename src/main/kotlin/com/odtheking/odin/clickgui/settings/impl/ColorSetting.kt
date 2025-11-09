@@ -1,7 +1,6 @@
 package com.odtheking.odin.clickgui.settings.impl
 
 import com.google.gson.JsonElement
-import com.google.gson.JsonPrimitive
 import com.odtheking.odin.clickgui.ClickGUI
 import com.odtheking.odin.clickgui.ClickGUI.gray38
 import com.odtheking.odin.clickgui.Panel
@@ -147,9 +146,9 @@ class ColorSetting(
         textInputHandler.mouseClicked(mouseX, mouseY, click)
 
         section = when {
-            isAreaHovered(lastX + 6f, lastY + 38f, width - 12f, 170f) -> 0 // sat & brightness
-            isAreaHovered(lastX + 6f, lastY + 214f, width - 12f, 15f) -> 1 // hue
-            isAreaHovered(lastX + 6f, lastY + 235f, width - 12f, 15f) && allowAlpha -> 2 // alpha
+            isAreaHovered(lastX + 6f, lastY + 36f, width - 12f, 170f) -> 0 // sat & brightness
+            isAreaHovered(lastX + 6f, lastY + 212f, width - 12f, 15f) -> 1 // hue
+            isAreaHovered(lastX + 6f, lastY + 232, width - 12f, 15f) && allowAlpha -> 2 // alpha
             else -> null
         }
 
@@ -182,10 +181,10 @@ class ColorSetting(
             20f
         )
 
-    override fun write(): JsonElement = JsonPrimitive("#${value.hex()}")
+    override fun write(): JsonElement = gson.toJsonTree(value, Color::class.java)
 
-    override fun read(element: JsonElement?) {
-        if (element?.asString?.startsWith("#") == true) value = Color(element.asString.drop(1))
+    override fun read(element: JsonElement) {
+        value = gson.fromJson(element, Color::class.java) ?: default.copy()
     }
 
     private fun handleColorDrag(mouseX: Float, mouseY: Float, x: Float, y: Float, width: Float) {

@@ -93,8 +93,8 @@ class KeybindSetting(
 
     override fun write(): JsonElement = JsonPrimitive(value.translationKey)
 
-    override fun read(element: JsonElement?) {
-        element?.asString?.let { value = InputUtil.fromTranslationKey(it) }
+    override fun read(element: JsonElement) {
+        element.asString?.let { value = InputUtil.fromTranslationKey(it) }
     }
 
     override fun reset() {

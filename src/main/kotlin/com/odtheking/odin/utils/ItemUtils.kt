@@ -85,3 +85,8 @@ fun createSkullStack(textureHash: String): ItemStack {
     stack.set(DataComponentTypes.PROFILE, ProfileComponent.ofStatic(gameProfile))
     return stack
 }
+
+fun ItemStack.isEtherwarpItem(): NbtCompound? =
+    customData.takeIf {
+        it.getInt("ethermerge", 0) == 1 || it.itemId == "ETHERWARP_CONDUIT"
+    }

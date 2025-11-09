@@ -12,8 +12,7 @@ import com.odtheking.odin.utils.Color.Companion.multiplyAlpha
 import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.handlers.MobCache
-import com.odtheking.odin.utils.render.drawFilledBox
-import com.odtheking.odin.utils.render.drawWireFrameBox
+import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.renderBoundingBox
 import net.minecraft.world.RaycastContext
 
@@ -42,14 +41,7 @@ object CustomHighlight : Module(
                     entity.eyeY
                 ) ?: false
 
-                when (renderStyle) {
-                    0 -> drawWireFrameBox(boundingBox, color, depth = !canSee)
-                    1 -> drawFilledBox(boundingBox, color, depth = !canSee)
-                    2 -> {
-                        drawWireFrameBox(boundingBox, color, depth = !canSee)
-                        drawFilledBox(boundingBox, color.multiplyAlpha(0.5f), depth = !canSee)
-                    }
-                }
+                drawStyledBox(boundingBox, color.multiplyAlpha(0.5f), renderStyle, !canSee)
             }
         }
     }

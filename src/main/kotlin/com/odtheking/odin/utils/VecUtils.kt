@@ -25,9 +25,6 @@ operator fun Vec3d.unaryMinus(): Vec3d = Vec3d(-x, -y, -z)
 fun Vec3d.floorVec(): Vec3d =
     Vec3d(floor(x), floor(y), floor(z))
 
-fun Vec3d.toBlockPos(): BlockPos =
-    BlockPos(x.toInt(), y.toInt(), z.toInt())
-
 fun Matrix4f.translate(vec: Vec3d): Matrix4f = this.translate(vec.x.toFloat(), vec.y.toFloat(), vec.z.toFloat())
 
 fun Vec3d.addVec(x: Number = 0.0, y: Number = 0.0, z: Number = 0.0): Vec3d =

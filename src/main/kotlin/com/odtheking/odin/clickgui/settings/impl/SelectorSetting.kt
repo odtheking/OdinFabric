@@ -120,7 +120,7 @@ class SelectorSetting(
 
     override fun write(): JsonElement = JsonPrimitive(selected)
 
-    override fun read(element: JsonElement?) {
-        element?.asString?.let { selected = it }
+    override fun read(element: JsonElement) {
+        element.asString?.let { selected = it }
     }
 }

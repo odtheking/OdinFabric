@@ -5,13 +5,13 @@ import com.odtheking.odin.clickgui.settings.ModuleButton
 import com.odtheking.odin.features.Category
 import com.odtheking.odin.features.ModuleManager
 import com.odtheking.odin.features.impl.render.ClickGUIModule
-import com.odtheking.odin.features.impl.render.PlayerSize
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.ui.isAreaHovered
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
 import net.minecraft.client.gui.Click
 import net.minecraft.client.input.CharInput
 import net.minecraft.client.input.KeyInput
+import net.fabricmc.loader.api.FabricLoader
 import kotlin.math.floor
 
 /**
@@ -27,7 +27,7 @@ class Panel(private val category: Category) {
 
     val moduleButtons: ArrayList<ModuleButton> = ArrayList<ModuleButton>().apply {
         ModuleManager.modules
-            .filter { it.category == category && (!it.isDevModule || PlayerSize.isRandom) }
+            .filter { it.category == category && (!it.isDevModule || FabricLoader.getInstance().isDevelopmentEnvironment) }
             .sortedByDescending { NVGRenderer.textWidth(it.name, 16f, NVGRenderer.defaultFont) }
             .forEach { add(ModuleButton(it, this@Panel)) }
     }

@@ -70,7 +70,7 @@ class StringSetting(
 
     override fun write(): JsonElement = JsonPrimitive(value)
 
-    override fun read(element: JsonElement?) {
-        element?.asString?.let { value = it }
+    override fun read(element: JsonElement) {
+        element.asString?.let { value = it }
     }
 }

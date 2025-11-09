@@ -8,15 +8,11 @@ import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.events.core.onSend
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.*
-import com.odtheking.odin.utils.Color.Companion.multiplyAlpha
 import com.odtheking.odin.utils.Color.Companion.withAlpha
-import com.odtheking.odin.utils.render.drawFilledBox
-import com.odtheking.odin.utils.render.drawWireFrameBox
+import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.skyblock.Island
 import com.odtheking.odin.utils.skyblock.LocationUtils
 import net.minecraft.block.*
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NbtCompound
 import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket
@@ -44,6 +40,7 @@ object Etherwarp : Module(
     private val renderStyle by SelectorSetting("Render Style", "Outline", listOf("Outline", "Filled", "Filled Outline"), desc = "Style of the box.").withDependency { render }
     private val useServerPosition by BooleanSetting("Use Server Position", false, desc = "Uses the server position for etherwarp instead of the client position.").withDependency { render }
     private val fullBlock by BooleanSetting("Full Block", false, desc = "Renders the the 1x1x1 block instead of it's actual size.").withDependency { render }
+    private val depth by BooleanSetting("Depth", true, desc = "Renders the box through walls.").withDependency { render }
 
     private val dropdown by DropdownSetting("Sounds", false)
     private val sounds by BooleanSetting("Custom Sounds", false, desc = "Plays the selected custom sound when you etherwarp.").withDependency { dropdown }
@@ -74,14 +71,7 @@ object Etherwarp : Module(
                     mc.world?.getBlockState(pos)?.getOutlineShape(mc.world, pos)?.asCuboid()
                         ?.takeIf { !it.isEmpty }?.boundingBox?.offset(pos) ?: Box(pos)
 
-                when (renderStyle) {
-                    0 -> drawWireFrameBox(box, color)
-                    1 -> drawFilledBox(box, color)
-                    2 -> {
-                        drawWireFrameBox(box, color)
-                        drawFilledBox(box, color.multiplyAlpha(0.5f))
-                    }
-                }
+                drawStyledBox(box, color, renderStyle, depth)
             }
         }
 
@@ -109,11 +99,6 @@ object Etherwarp : Module(
         }
     }
 
-    private fun ItemStack.isEtherwarpItem(): NbtCompound? =
-        customData.takeIf {
-            it.getInt("ethermerge", 0) == 1 || it.itemId == "ETHERWARP_CONDUIT"
-        }
-
     data class EtherPos(val succeeded: Boolean, val pos: BlockPos?, val state: BlockState?) {
 
         companion object {
@@ -135,7 +120,7 @@ object Etherwarp : Module(
 
         val startPos = position.addVec(y = eyeHeight)
         val endPos = player.rotationVector?.multiply(distance)?.add(startPos) ?: return EtherPos.NONE
-        return traverseVoxels(startPos, endPos, etherWarp).takeUnless { it == EtherPos.NONE && returnEnd } ?: EtherPos(true, endPos.toBlockPos(), null)
+        return traverseVoxels(startPos, endPos, etherWarp).takeUnless { it == EtherPos.NONE && returnEnd } ?: EtherPos(true, BlockPos.ofFloored(endPos), null)
     }
 
     /**
