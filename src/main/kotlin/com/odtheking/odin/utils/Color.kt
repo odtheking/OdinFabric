@@ -1,8 +1,12 @@
 package com.odtheking.odin.utils
 
+import com.google.gson.*
+import com.google.gson.annotations.JsonAdapter
 import java.awt.Color.HSBtoRGB
 import java.awt.Color.RGBtoHSB
+import java.lang.reflect.Type
 
+@JsonAdapter(Color.ColorSerializer::class)
 class Color(hue: Float, saturation: Float, brightness: Float, alpha: Float = 1f) {
     constructor(hsb: FloatArray, alpha: Float = 1f) : this(hsb[0], hsb[1], hsb[2], alpha)
     constructor(r: Int, g: Int, b: Int, alpha: Float = 1f) : this(RGBtoHSB(r, g, b, FloatArray(size = 3)), alpha)
@@ -105,6 +109,16 @@ class Color(hue: Float, saturation: Float, brightness: Float, alpha: Float = 1f)
     }
 
     fun copy(): Color = Color(this.rgba)
+
+    private class ColorSerializer : JsonDeserializer<Color>, JsonSerializer<Color> {
+        override fun deserialize(json: JsonElement, type: Type, context: JsonDeserializationContext?): Color {
+            return Color(json.asString.drop(1))
+        }
+
+        override fun serialize(color: Color, type: Type, context: JsonSerializationContext?): JsonElement {
+            return JsonPrimitive("#${color.hex()}")
+        }
+    }
 
     companion object {
         inline val Int.red get() = this shr 16 and 0xFF

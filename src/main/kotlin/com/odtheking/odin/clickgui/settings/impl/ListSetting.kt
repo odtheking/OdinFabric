@@ -21,8 +21,8 @@ class ListSetting<E, T : MutableCollection<E>>(
 
     override fun write(): JsonElement = gson.toJsonTree(value)
 
-    override fun read(element: JsonElement?) {
-        element?.asJsonArray?.let {
+    override fun read(element: JsonElement) {
+        element.asJsonArray?.let {
             val temp = gson.fromJson<T>(it, type)
             value.clear()
             value.addAll(temp)

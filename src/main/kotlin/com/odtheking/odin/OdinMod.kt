@@ -49,7 +49,7 @@ object OdinMod : ClientModInitializer {
         ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
             arrayOf(
                 mainCommand, petCommand, devCommand, waypointCommand,
-                highlightCommand, termSimCommand, PosMsgCommand
+                highlightCommand, termSimCommand, posMsgCommand, dungeonWaypointsCommand
             ).forEach { commodore -> commodore.register(dispatcher) }
         }
 
@@ -70,7 +70,7 @@ object OdinMod : ClientModInitializer {
 
         Config.load()
 
-        val name = mc.session?.username?.takeIf { !it.matches(Regex("Player\\d{2,3}")) } ?: return
+        val name = mc.session?.username ?: return
         sendDataToServer(body = """{"username": "$name", "version": "Fabric $version"}""")
     }
 }

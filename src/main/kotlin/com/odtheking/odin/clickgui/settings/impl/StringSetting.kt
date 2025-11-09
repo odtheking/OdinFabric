@@ -60,14 +60,14 @@ class StringSetting(
     }
 
     override fun keyTyped(typedChar: Char): Boolean {
-        return textInputHandler.keyTyped(typedChar)
+        return textInputHandler.charTyped(typedChar)
     }
 
     override fun getHeight(): Float = Panel.HEIGHT + 28f
 
     override fun write(): JsonElement = JsonPrimitive(value)
 
-    override fun read(element: JsonElement?) {
-        element?.asString?.let { value = it }
+    override fun read(element: JsonElement) {
+        element.asString?.let { value = it }
     }
 }

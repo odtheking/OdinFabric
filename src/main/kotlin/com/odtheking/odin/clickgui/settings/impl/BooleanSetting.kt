@@ -67,7 +67,7 @@ class BooleanSetting(
 
     override fun write(): JsonElement = JsonPrimitive(enabled)
 
-    override fun read(element: JsonElement?) {
-        if (element?.asBoolean != enabled) enabled = !enabled
+    override fun read(element: JsonElement) {
+        enabled = element.asBoolean
     }
 }

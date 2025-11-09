@@ -135,8 +135,8 @@ class NumberSetting<E>(
 
     override fun write(): JsonElement = JsonPrimitive(value)
 
-    override fun read(element: JsonElement?) {
-        element?.asNumber?.let { value = it as E }
+    override fun read(element: JsonElement) {
+        element.asNumber?.let { value = it as E }
     }
 
     private fun roundToIncrement(x: Number): Double =

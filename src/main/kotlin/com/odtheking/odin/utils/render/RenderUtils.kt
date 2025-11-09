@@ -2,6 +2,7 @@ package com.odtheking.odin.utils.render
 
 import com.mojang.blaze3d.systems.RenderSystem
 import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.features.impl.dungeon.dungeonwaypoints.DungeonWaypoints
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Color.Companion.multiplyAlpha
 import com.odtheking.odin.utils.addVec
@@ -212,6 +213,51 @@ fun WorldRenderContext.drawCylinder(
         VertexRendering.drawVector(matrix, buffer, Vector3f(x1, 0f, z1), Vec3d(0.0, height.toDouble(), 0.0), color.rgba)
     }
 
+
+    matrix.pop()
+    bufferSource.draw()
+}
+
+fun WorldRenderContext.drawBoxes(
+    waypoints: Collection<DungeonWaypoints.DungeonWaypoint>,
+    disableDepth: Boolean,
+) {
+    if (waypoints.isEmpty()) return
+
+    val matrix = matrixStack() ?: return
+    val bufferSource = consumers() as? VertexConsumerProvider.Immediate ?: return
+    val camera = camera()?.pos ?: return
+
+    matrix.push()
+    matrix.translate(-camera.x, -camera.y, -camera.z)
+
+    for (waypoint in waypoints) {
+        val color = waypoint.color
+        if (waypoint.isClicked || color.isTransparent) continue
+
+        val aabb = waypoint.box.offset(waypoint.blockPos)
+        val depth = waypoint.depth && !disableDepth
+
+        if (waypoint.filled) {
+            val layer = if (depth) CustomRenderLayer.TRIANGLE_STRIP else CustomRenderLayer.TRIANGLE_STRIP_ESP
+            VertexRendering.drawFilledBox(
+                matrix,
+                bufferSource.getBuffer(layer),
+                aabb.minX, aabb.minY, aabb.minZ,
+                aabb.maxX, aabb.maxY, aabb.maxZ,
+                color.redFloat, color.greenFloat, color.blueFloat, color.alphaFloat
+            )
+        } else {
+            val layer = if (depth) CustomRenderLayer.LINE_LIST else CustomRenderLayer.LINE_LIST_ESP
+            RenderSystem.lineWidth((3f / camera.squaredDistanceTo(aabb.center).pow(0.15)).toFloat())
+            VertexRendering.drawBox(
+                matrix,
+                bufferSource.getBuffer(layer),
+                aabb,
+                color.redFloat, color.greenFloat, color.blueFloat, color.alphaFloat
+            )
+        }
+    }
 
     matrix.pop()
     bufferSource.draw()

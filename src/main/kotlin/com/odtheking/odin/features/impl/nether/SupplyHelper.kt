@@ -7,14 +7,17 @@ import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
-import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.ChatManager.hideMessage
+import com.odtheking.odin.utils.Colors
+import com.odtheking.odin.utils.equalsOneOf
+import com.odtheking.odin.utils.formatTime
+import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.render.drawCustomBeacon
 import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.skyblock.Supply
 import net.minecraft.text.Text
-import net.minecraft.util.math.Vec3d
+import net.minecraft.util.math.BlockPos
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -67,7 +70,7 @@ object SupplyHelper : Module(
                 KuudraUtils.giantZombies.forEach {
                     context.drawCustomBeacon(
                         Text.of("Pick Up!").asOrderedText(),
-                        Vec3d(it.x + (3.7 * cos((it.yaw + 130) * (Math.PI / 180))), 73.0, it.z + (3.7 * sin((it.yaw + 130) * (Math.PI / 180)))).toBlockPos(),
+                        BlockPos((it.x + (3.7 * cos((it.yaw + 130) * (Math.PI / 180)))).toInt(), 73, ((it.z + (3.7 * sin((it.yaw + 130) * (Math.PI / 180)))).toInt())),
                         supplyWaypointColor, increase = false
                     )
                 }

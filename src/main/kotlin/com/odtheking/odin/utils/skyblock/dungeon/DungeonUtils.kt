@@ -237,6 +237,6 @@ object DungeonUtils {
         }
     }
 
-    fun Room.getRelativeCoords(pos: BlockPos) = pos.subtract(clayPos).rotateToNorth(rotation)
+    fun Room.getRelativeCoords(pos: BlockPos) = pos.subtract(clayPos.withY(0)).rotateToNorth(rotation)
     fun Room.getRealCoords(pos: BlockPos) = pos.rotateAroundNorth(rotation).add(clayPos.x, 0, clayPos.z)
 }

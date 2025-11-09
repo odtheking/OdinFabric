@@ -23,12 +23,10 @@ class MapSetting<K : Any, V : Any, T : MutableMap<K, V>>(
 
     override fun write(): JsonElement = gson.toJsonTree(value)
 
-    override fun read(element: JsonElement?) {
-        element?.let {
-            val temp = gson.fromJson<Map<K, V>>(it, type)
-            value.clear()
-            value.putAll(temp)
-        }
+    override fun read(element: JsonElement) {
+        val temp = gson.fromJson<Map<K, V>>(element, type)
+        value.clear()
+        value.putAll(temp)
     }
 }
 

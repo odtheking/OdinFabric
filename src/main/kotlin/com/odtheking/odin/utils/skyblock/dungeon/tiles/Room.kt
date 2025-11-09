@@ -4,6 +4,7 @@ import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
 import com.google.gson.reflect.TypeToken
+import com.odtheking.odin.features.impl.dungeon.dungeonwaypoints.DungeonWaypoints
 import com.odtheking.odin.utils.Vec2
 import net.minecraft.util.math.BlockPos
 import java.lang.reflect.Type
@@ -13,7 +14,7 @@ data class Room(
     var data: RoomData,
     var clayPos: BlockPos = BlockPos(0, 0, 0),
     val roomComponents: MutableSet<RoomComponent>,
-    //  var waypoints: MutableSet<DungeonWaypoint> = mutableSetOf()
+    var waypoints: MutableSet<DungeonWaypoints.DungeonWaypoint> = mutableSetOf()
 )
 
 data class RoomComponent(val x: Int, val z: Int, val core: Int = 0) {
