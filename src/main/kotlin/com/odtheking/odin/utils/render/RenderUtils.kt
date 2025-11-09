@@ -268,7 +268,7 @@ fun RenderEvent.drawBoxes(
             val layer = if (depth) CustomRenderLayer.LINE_LIST else CustomRenderLayer.LINE_LIST_ESP
             RenderSystem.lineWidth((3f / camera.squaredDistanceTo(aabb.center).pow(0.15)).toFloat())
             VertexRendering.drawBox(
-                matrix,
+                matrix.peek(),
                 bufferSource.getBuffer(layer),
                 aabb,
                 color.redFloat, color.greenFloat, color.blueFloat, color.alphaFloat

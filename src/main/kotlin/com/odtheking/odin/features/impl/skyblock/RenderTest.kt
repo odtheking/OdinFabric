@@ -1,5 +1,6 @@
 package com.odtheking.odin.features.impl.skyblock
 
+import com.odtheking.odin.clickgui.settings.DevModule
 import com.odtheking.odin.clickgui.settings.impl.SelectorSetting
 import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.core.on
@@ -11,6 +12,7 @@ import com.odtheking.odin.utils.render.drawLine
 import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.render.drawWireFrameBox
 
+@DevModule
 object RenderTest : Module(
     name = "Render Test",
     description = "Test rendering stuff"

@@ -6,6 +6,8 @@ import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ButtonWidget
 import net.minecraft.client.gui.widget.TextFieldWidget
+import net.minecraft.client.input.CharInput
+import net.minecraft.client.input.KeyInput
 import net.minecraft.text.Text
 import org.lwjgl.glfw.GLFW
 
@@ -31,7 +33,7 @@ object TextPromptScreen : Screen(Text.of("Enter Waypoint Text")) {
         addDrawableChild(textField)
         addDrawableChild(submitButton)
 
-        setFocused(textField)
+        focused = textField
     }
 
     override fun render(context: DrawContext, mouseX: Int, mouseY: Int, delta: Float) {
@@ -39,23 +41,23 @@ object TextPromptScreen : Screen(Text.of("Enter Waypoint Text")) {
         context.drawCenteredTextWithShadow(textRenderer, title, width / 2, height / 2 - 40, Colors.WHITE.rgba)
     }
 
-    override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+    override fun keyPressed(input: KeyInput): Boolean {
+        if (input.key == GLFW.GLFW_KEY_ESCAPE) {
             mc.setScreen(null)
             return true
         }
 
-        if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+        if (input.key == GLFW.GLFW_KEY_ENTER || input.key == GLFW.GLFW_KEY_KP_ENTER) {
             callback.invoke(textField.text)
             mc.setScreen(null)
             return true
         }
 
-        return super.keyPressed(keyCode, scanCode, modifiers)
+        return super.keyPressed(input)
     }
 
-    override fun charTyped(chr: Char, modifiers: Int): Boolean {
-        return super.charTyped(chr, modifiers)
+    override fun charTyped(input: CharInput): Boolean {
+        return super.charTyped(input)
     }
 
     override fun shouldPause(): Boolean = false

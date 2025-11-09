@@ -27,7 +27,7 @@ class Panel(private val category: Category) {
 
     val moduleButtons: ArrayList<ModuleButton> = ArrayList<ModuleButton>().apply {
         ModuleManager.modules
-            .filter { it.category == category && (!it.isDevModule || FabricLoader.getInstance().isDevelopmentEnvironment) }
+            .filter { it.category == category && (!it.isDevModule || FabricLoader.getInstance().isDevelopmentEnvironment || ClickGUIModule.devModules) }
             .sortedByDescending { NVGRenderer.textWidth(it.name, 16f, NVGRenderer.defaultFont) }
             .forEach { add(ModuleButton(it, this@Panel)) }
     }

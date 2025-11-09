@@ -98,14 +98,14 @@ object DungeonWaypoints : Module(
             if (DungeonUtils.inBoss || !DungeonUtils.inDungeons) return@on
             val room = DungeonUtils.currentRoom ?: return@on
 
-            context.drawBoxes(room.waypoints, disableDepth)
+            drawBoxes(room.waypoints, disableDepth)
 
             if (renderTitle) {
                 for (waypoint in room.waypoints) {
                     if (waypoint.isClicked || waypoint.title == null) continue
 
                     val pos = waypoint.blockPos.toCenterPos().add(0.0, 0.1 * titleScale, 0.0)
-                    context.drawText(
+                    drawText(
                         Text.of(waypoint.title).asOrderedText(),
                         pos, titleScale, waypoint.depth
                     )
@@ -117,7 +117,7 @@ object DungeonWaypoints : Module(
                     mc.world?.getBlockState(pos)?.getOutlineShape(mc.world, pos)?.asCuboid()
                         ?.takeIf { !it.isEmpty }?.boundingBox?.offset(pos) ?: Box(pos)
 
-                context.drawStyledBox(box, reachColor, style = if (filled) 0 else 1, depthCheck)
+                drawStyledBox(box, reachColor, style = if (filled) 0 else 1, depthCheck)
             }
         }
 
@@ -125,7 +125,7 @@ object DungeonWaypoints : Module(
             if (!allowEdits || key.code != GLFW.GLFW_MOUSE_BUTTON_RIGHT || mc.currentScreen != null) return@on
             val room = DungeonUtils.currentRoom ?: return@on
             mc.player?.mainHandStack?.isEtherwarpItem()?.let { item ->
-                Etherwarp.getEtherPos(mc.player?.pos, 56.0 + item.getInt("tuned_transmission", 0))
+                Etherwarp.getEtherPos(mc.player?.entityPos, 56.0 + item.getInt("tuned_transmission", 0))
                 .takeIf { it.succeeded && it.pos != null }
                 ?.also {
                     lastEtherTime = System.currentTimeMillis()
@@ -178,7 +178,7 @@ object DungeonWaypoints : Module(
         get() {
             val hitResult = mc.crosshairTarget
             return when {
-                hitResult?.type == HitResult.Type.MISS && !allowMidair -> Etherwarp.getEtherPos(mc.player?.pos, 5.0).pos
+                hitResult?.type == HitResult.Type.MISS && !allowMidair -> Etherwarp.getEtherPos(mc.player?.entityPos, 5.0).pos
                 hitResult is BlockHitResult -> hitResult.blockPos
                 else -> null
             }
