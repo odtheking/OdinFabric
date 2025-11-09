@@ -21,7 +21,6 @@
     "mixins.InGameOverlayRendererMixin",
     "mixins.KeyBindingMixin",
     "mixins.MessageHandlerMixin",
-    "mixins.MixinGameRenderer",
     "mixins.MouseMixin",
     "mixins.PlayerEntityRendererMixin",
     "mixins.WorldRendererMixin"

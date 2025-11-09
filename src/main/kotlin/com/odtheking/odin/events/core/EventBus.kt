@@ -2,11 +2,13 @@ package com.odtheking.odin.events.core
 
 import com.odtheking.odin.events.PacketEvent
 import net.minecraft.network.packet.Packet
+import net.minecraft.util.profiler.Profilers
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.reflect.KClass
 
 object EventBus {
+
 
     @JvmField
     internal val listenerArrays = ConcurrentHashMap<KClass<out Event>, AtomicReference<Array<ListenerEntry<*>>>>()
@@ -16,6 +18,8 @@ object EventBus {
     internal val activeSubscribers = ConcurrentHashMap.newKeySet<Any>()
     @JvmField
     internal val subscriberClasses = ConcurrentHashMap<Any, KClass<*>>()
+
+    private val profiler = Profilers.get()
 
     fun subscribe(subscriber: Any) {
         if (activeSubscribers.add(subscriber)) {
@@ -31,9 +35,13 @@ object EventBus {
         }
     }
 
-    fun <T : Event> post(event: T): T {
-        (invokers[event::class] ?: return event).invoke(event)
-        return event
+    fun <T : Event> post(event: T) {
+        profiler.push(event::class.simpleName ?: "Event")
+        try {
+            invokers[event::class]?.invoke(event)
+        } finally {
+            profiler.pop()
+        }
     }
 
     fun <T : Event> registerListener(
@@ -43,7 +51,8 @@ object EventBus {
         ignoreCancelled: Boolean,
         handler: (T) -> Unit
     ) {
-        val entry = ListenerEntry(subscriber, EventListener(priority, ignoreCancelled, handler))
+        val subscriberName = subscriber.simpleName ?: "Unknown"
+        val entry = ListenerEntry(subscriber, EventListener(priority, ignoreCancelled, subscriberName, handler))
         val ref = listenerArrays.computeIfAbsent(eventClass) { AtomicReference(emptyArray()) }
         val current = ref.get()
         val newArray = (current + entry).sortedByDescending { it.listener.priority }.toTypedArray()
@@ -85,6 +94,7 @@ object EventBus {
     class EventListener<T : Event>(
         val priority: Int,
         val ignoreCancelled: Boolean,
+        val subscriberName: String,
         val handler: (T) -> Unit
     ) {
         fun invoke(event: T) {
@@ -108,7 +118,12 @@ object EventBus {
             return object : Invoker {
                 override fun invoke(event: Event) {
                     for (listener in listeners) {
-                        listener.invoke(event)
+                        profiler.push("Odin: ${listener.subscriberName}")
+                        try {
+                            listener.invoke(event)
+                        } finally {
+                            profiler.pop()
+                        }
                     }
                 }
             }
