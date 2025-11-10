@@ -1,13 +1,13 @@
 package com.odtheking.odin.events
 
 import com.odtheking.odin.events.core.Event
-import net.minecraft.block.BlockState
-import net.minecraft.entity.ItemEntity
-import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket
-import net.minecraft.util.math.BlockPos
+import net.minecraft.core.BlockPos
+import net.minecraft.network.protocol.game.ClientboundSoundPacket
+import net.minecraft.world.entity.item.ItemEntity
+import net.minecraft.world.level.block.state.BlockState
 
 open class SecretPickupEvent : Event() {
     class Interact(val blockPos: BlockPos, val blockState: BlockState) : SecretPickupEvent()
     class Item(val entity: ItemEntity) : SecretPickupEvent()
-    class Bat(val packet: PlaySoundS2CPacket) : SecretPickupEvent()
+    class Bat(val packet: ClientboundSoundPacket) : SecretPickupEvent()
 }

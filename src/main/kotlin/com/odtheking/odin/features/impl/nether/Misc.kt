@@ -25,7 +25,7 @@ object Misc : Module(
         on<ChatPacketEvent> {
             if (manaDrain) endStoneRegex.find(value)?.groupValues?.getOrNull(1)?.let { mana ->
                 val players =
-                    mc.world?.players?.filter { it.squaredDistanceTo(mc.player) < 49 && it.uuid.version() == 4 } ?: return@on
+                    mc.level?.players()?.filter { it.distanceToSqr(mc.player) < 49 && it.uuid.version() == 4 } ?: return@on
                 sendCommand("pc Used $mana mana (${players.size} players nearby)")
             }
 

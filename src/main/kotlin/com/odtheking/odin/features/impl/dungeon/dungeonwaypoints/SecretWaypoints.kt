@@ -11,9 +11,9 @@ import com.odtheking.odin.features.impl.dungeon.dungeonwaypoints.DungeonWaypoint
 import com.odtheking.odin.utils.devMessage
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRelativeCoords
-import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket
-import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.Vec3d
+import net.minecraft.core.BlockPos
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket
+import net.minecraft.world.phys.Vec3
 
 object SecretWaypoints {
 
@@ -23,16 +23,16 @@ object SecretWaypoints {
     fun onSecret(event: SecretPickupEvent) {
         when (event) {
             is SecretPickupEvent.Interact -> clickSecret(event.blockPos, 0.0)
-            is SecretPickupEvent.Bat -> clickSecret(BlockPos.ofFloored(event.packet.x, event.packet.y, event.packet.z), 5.0)
-            is SecretPickupEvent.Item -> clickSecret(event.entity.blockPos, 3.0)
+            is SecretPickupEvent.Bat -> clickSecret(BlockPos.containing(event.packet.x, event.packet.y, event.packet.z), 5.0)
+            is SecretPickupEvent.Item -> clickSecret(event.entity.blockPosition(), 3.0)
         }
     }
 
-    fun onEtherwarp(packet: PlayerPositionLookS2CPacket) {
+    fun onEtherwarp(packet: ClientboundPlayerPositionPacket) {
         if (!DungeonUtils.inDungeons) return
         val etherPos = lastEtherPos ?: return
         if (System.currentTimeMillis() - lastEtherTime > 1000) return
-        if (packet.change.position.distanceTo(Vec3d(etherPos)) > 3) return
+        if (packet.change.position.distanceTo(Vec3(etherPos)) > 3) return
         val room = DungeonUtils.currentRoom ?: return
         val waypoints = getWaypoints(room)
         waypoints.find { wp ->
@@ -53,8 +53,8 @@ object SecretWaypoints {
         if (distance == 0.0) getWaypoints(room).find { wp -> wp.blockPos == blockPos && wp.secret && !wp.isClicked }
         else {
             waypoints.fold(null) { near: DungeonWaypoint?, wp ->
-                val waypointDistance = wp.blockPos.getSquaredDistance(blockPos)
-                if (waypointDistance <= distance && wp.secret && !wp.isClicked && (near == null || waypointDistance < near.blockPos.getSquaredDistance(blockPos))) wp
+                val waypointDistance = wp.blockPos.distSqr(blockPos)
+                if (waypointDistance <= distance && wp.secret && !wp.isClicked && (near == null || waypointDistance < near.blockPos.distSqr(blockPos))) wp
                 else near
             }
         }?.let {

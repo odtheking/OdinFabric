@@ -10,7 +10,7 @@ import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.alert
 import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.modMessage
-import com.odtheking.odin.utils.render.drawString
+import com.odtheking.odin.utils.render.drawStringExtension
 import com.odtheking.odin.utils.render.drawStringWidth
 import com.odtheking.odin.utils.render.getStringWidth
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
@@ -43,12 +43,12 @@ object MapInfo : Module(
         if (fullBackground) fill((-fullMargin).toInt(), 0, (fullWidth + (fullMargin * 2)).toInt(), 19, fullColor.rgba)
         val brWidth = getStringWidth(brText)
 
-        drawString(secretText, 1, 1, Colors.WHITE.rgba)
-        drawString(trText, fullWidth - 1 - getStringWidth(trText), 1, Colors.WHITE.rgba)
+        drawStringExtension(secretText, 1, 1, Colors.WHITE.rgba)
+        drawStringExtension(trText, fullWidth - 1 - getStringWidth(trText), 1, Colors.WHITE.rgba)
         val unknownWidth = drawStringWidth(unknownSecretsText, 1, 10, Colors.WHITE)
         val centerX = (unknownWidth + 1 + (fullWidth - 1 - unknownWidth - brWidth) / 2) - getStringWidth(mimicText) / 2
-        drawString(mimicText, centerX, 10, Colors.WHITE.rgba)
-        drawString(brText, fullWidth - 1 - brWidth, 10, Colors.WHITE.rgba)
+        drawStringExtension(mimicText, centerX, 10, Colors.WHITE.rgba)
+        drawStringExtension(brText, fullWidth - 1 - brWidth, 10, Colors.WHITE.rgba)
         fullWidth to 19
     }
 
@@ -70,7 +70,7 @@ object MapInfo : Module(
         val width = getStringWidth(secretText)
 
         if (compactSecretBackground) fill((-compactSecretMargin).toInt(), 0, (width + 2 + (compactSecretMargin * 2)).toInt(), 9, compactSecretColor.rgba)
-        drawString(secretText, 1, 1, Colors.WHITE.rgba)
+        drawStringExtension(secretText, 1, 1, Colors.WHITE.rgba)
         width + 2 to 10
     }
 
@@ -86,7 +86,7 @@ object MapInfo : Module(
         val scoreText = "§7Score: ${colorizeScore(DungeonUtils.score)}" + if (missing > 0) " §7(§6+${missing}?§7)" else ""
         val width = getStringWidth(scoreText)
         if (compactScoreBackground) fill((-compactScoreMargin).toInt(), 0, (width + 2 + (compactScoreMargin * 2)).toInt(), 9, compactScoreColor.rgba)
-        drawString(scoreText, 1, 1, Colors.WHITE.rgba)
+        drawStringExtension(scoreText, 1, 1, Colors.WHITE.rgba)
         width + 2 to 10
     }
 

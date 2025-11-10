@@ -1,9 +1,9 @@
 package com.odtheking.odin.events.core
 
 import com.odtheking.odin.events.PacketEvent
-import net.minecraft.network.packet.Packet
-import net.minecraft.util.profiler.Profiler
-import net.minecraft.util.profiler.Profilers
+import net.minecraft.network.protocol.Packet
+import net.minecraft.util.profiling.Profiler
+import net.minecraft.util.profiling.ProfilerFiller
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.reflect.KClass
@@ -34,7 +34,7 @@ object EventBus {
     }
 
     fun <T : Event> post(event: T) {
-        val profiler = Profilers.get()
+        val profiler = Profiler.get()
         profiler.push(event::class.simpleName ?: "Event")
         try {
             invokers[event::class]?.invoke(event, profiler)
@@ -101,11 +101,11 @@ object EventBus {
     }
 
     interface Invoker {
-        fun invoke(event: Event, profiler: Profiler)
+        fun invoke(event: Event, profiler: ProfilerFiller)
     }
 
     private object EmptyInvoker : Invoker {
-        override fun invoke(event: Event, profiler: Profiler) {}
+        override fun invoke(event: Event, profiler: ProfilerFiller) {}
     }
 
     private object InvokerFactory {
@@ -113,7 +113,7 @@ object EventBus {
             if (listeners.isEmpty()) return EmptyInvoker
 
             return object : Invoker {
-                override fun invoke(event: Event, profiler: Profiler) {
+                override fun invoke(event: Event, profiler: ProfilerFiller) {
                     for (listener in listeners) {
                         profiler.push("Odin: ${listener.subscriberName}")
                         try {

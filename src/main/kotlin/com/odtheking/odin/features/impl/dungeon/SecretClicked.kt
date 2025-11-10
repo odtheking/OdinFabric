@@ -14,10 +14,10 @@ import com.odtheking.odin.utils.handlers.LimitedTickTask
 import com.odtheking.odin.utils.playSoundAtPlayer
 import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
-import net.minecraft.sound.SoundEvent
-import net.minecraft.util.Identifier
-import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.Box
+import net.minecraft.core.BlockPos
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.sounds.SoundEvent
+import net.minecraft.world.phys.AABB
 import java.util.concurrent.CopyOnWriteArrayList
 
 object SecretClicked : Module(
@@ -37,7 +37,7 @@ object SecretClicked : Module(
     private val chimeDropdownSetting by DropdownSetting("Secret Chime Dropdown")
     private val chime by BooleanSetting("Secret Chime", true, desc = "Whether or not to play a sound when a secret is clicked.").withDependency { chimeDropdownSetting }
     private val customSound by StringSetting("Custom Sound", "entity.blaze.hurt", desc = "Name of a custom sound to play. Do not use the bat death sound or your game will freeze!", length = 64).withDependency { chimeDropdownSetting && chime }
-    private val reset by ActionSetting("Play Sound", desc = "Plays the sound with the current settings.") { playSoundAtPlayer(SoundEvent.of(Identifier.of(customSound))) }.withDependency { chimeDropdownSetting && chime }
+    private val reset by ActionSetting("Play Sound", desc = "Plays the sound with the current settings.") { playSoundAtPlayer(SoundEvent.createVariableRangeEvent(ResourceLocation.withDefaultNamespace(customSound))) }.withDependency { chimeDropdownSetting && chime }
 
     private val chimeInBoss by BooleanSetting("Chime In Boss", false, desc = "Prevent playing the sound if in boss room.").withDependency { chimeDropdownSetting && chime }
 
@@ -57,7 +57,7 @@ object SecretClicked : Module(
         }
 
         on<SecretPickupEvent.Item> {
-            if (toggleItems) secretBox(entity.blockPos)
+            if (toggleItems) secretBox(entity.blockPosition())
             secretChime()
         }
 
@@ -66,12 +66,13 @@ object SecretClicked : Module(
         }
 
         on<RenderEvent.Last> {
+            if (mc.level == null) return@on
             if (!boxes || !DungeonUtils.inDungeons || (DungeonUtils.inBoss && !boxInBoss) || clickedSecretsList.isEmpty()) return@on
 
             clickedSecretsList.forEach { secret ->
                 val currentColor = if (secret.locked) lockedColor else color
-                val box = mc.world?.getBlockState(secret.pos)?.getOutlineShape(mc.world, secret.pos)?.asCuboid()
-                    ?.takeIf { !it.isEmpty }?.boundingBox?.offset(secret.pos) ?: Box(secret.pos)
+                val box = mc.level?.getBlockState(secret.pos)?.getShape(mc.level!!, secret.pos)?.singleEncompassing()
+                    ?.takeIf { !it.isEmpty }?.bounds()?.move(secret.pos) ?: AABB(secret.pos)
                 context.drawStyledBox(box, currentColor, style, depthCheck)
             }
         }
@@ -83,7 +84,7 @@ object SecretClicked : Module(
 
     private fun secretChime() {
         if (!chime || (DungeonUtils.inBoss && !chimeInBoss) || System.currentTimeMillis() - lastPlayed <= 10) return
-        playSoundAtPlayer(SoundEvent.of(Identifier.of(customSound)))
+        playSoundAtPlayer(SoundEvent.createVariableRangeEvent(ResourceLocation.withDefaultNamespace(customSound)))
         lastPlayed = System.currentTimeMillis()
     }
 

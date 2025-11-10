@@ -7,26 +7,26 @@
     "defaultRequire": 1
   },
   "client": [
-    "accessors.HandledScreenAccessor",
-    "accessors.KeyBindingAccessor",
-    "accessors.SpecialGuiElementRendererAccessor",
-    "mixins.BossBarHudMixin",
+    "accessors.AbstractContainerScreenAccessor",
+    "accessors.KeyMappingAccessor",
+    "accessors.PictureInPictureRendererAccessor",
+    "mixins.BossBarHealthOverlayMixin",
     "mixins.ChatScreenMixin",
-    "mixins.ClientPlayNetworkHandlerMixin",
+    "mixins.ClientPacketListenerMixin",
     "mixins.EntityRendererMixin",
-    "mixins.ExperienceBarMixin",
-    "mixins.HandledScreenMixin",
-    "mixins.InGameHudMixin",
-    "mixins.InGameOverlayRendererMixin",
+    "mixins.ExperienceBarRendererMixin",
+    "mixins.AbstractContainerScreenMixin",
+    "mixins.GuiMixin",
+    "mixins.ScreenEffectRendererMixin",
     "mixins.KeyBindingMixin",
-    "mixins.MessageHandlerMixin",
-    "mixins.MouseMixin",
-    "mixins.PlayerEntityRendererMixin"
+    "mixins.ChatListenerMixin",
+    "mixins.MouseHandlerMixin",
+    "mixins.PlayerRendererMixin"
   ],
   "mixins": [
-    "accessors.PlayerInteractEntityC2SPacketAccessor",
-    "mixins.ClientConnectionMixin",
-    "mixins.WorldChunkMixin",
+    "accessors.ServerboundInteractPacketAccessor",
+    "mixins.ConnectionMixin",
+    "mixins.LevelChunkMixin",
     "mixins.YggdrasilSignatureIgnoreMixin"
   ]
 }

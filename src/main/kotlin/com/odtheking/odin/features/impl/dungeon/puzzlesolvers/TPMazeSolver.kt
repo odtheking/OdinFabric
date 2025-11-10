@@ -10,10 +10,10 @@ import com.odtheking.odin.utils.render.drawFilledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
-import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket
-import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.Box
-import net.minecraft.util.math.Vec3d
+import net.minecraft.core.BlockPos
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket
+import net.minecraft.world.phys.AABB
+import net.minecraft.world.phys.Vec3
 import java.util.concurrent.CopyOnWriteArraySet
 
 object TPMazeSolver {
@@ -25,22 +25,23 @@ object TPMazeSolver {
         if (this?.data?.name == "Teleport Maze") tpPads = endPortalFrameLocations.map { getRealCoords(BlockPos(it.x, it.y, it.z)) }.toSet()
     }
 
-    fun tpPacket(event: PlayerPositionLookS2CPacket) = with (event.change.position) {
+    fun tpPacket(event: ClientboundPlayerPositionPacket) = with (event.change.position) {
         if (DungeonUtils.currentRoomName != "Teleport Maze" || x % 0.5 != 0.0 || y != 69.5 || z % 0.5 != 0.0 || tpPads.isEmpty()) return
-        visited.addAll(tpPads.filter { Box.from(Vec3d(x, y, z)).expand(1.0, 0.0, 1.0).intersects(Box(it)) ||
-                mc.player?.boundingBox?.expand(1.0, 0.0, 1.0)?.intersects(Box(it)) == true })
-        getCorrectPortals(Vec3d(x, y, z), event.change.yaw, event.change.pitch)
+        visited.addAll(tpPads.filter { AABB.unitCubeFromLowerCorner(Vec3(x, y, z)).inflate(1.0, 0.0, 1.0).intersects(AABB(it)) ||
+                mc.player?.boundingBox?.inflate(1.0, 0.0, 1.0)?.intersects(AABB(it)) == true })
+        getCorrectPortals(Vec3(x, y, z), event.change.yRot, event.change.xRot)
     }
 
-    private fun getCorrectPortals(pos: Vec3d, yaw: Float, pitch: Float) {
+    private fun getCorrectPortals(pos: Vec3, yaw: Float, pitch: Float) {
+        if (mc.player == null) return
         if (correctPortals.isEmpty()) correctPortals = correctPortals.plus(tpPads)
 
         correctPortals = correctPortals.filter {
             it !in visited &&
             isXZInterceptable(
-                Box(it.x.toDouble(), it.y.toDouble(), it.z.toDouble(), it.x + 1.0, it.y + 4.0, it.z + 1.0).expand(0.75, 0.0, 0.75),
+                AABB(it.x.toDouble(), it.y.toDouble(), it.z.toDouble(), it.x + 1.0, it.y + 4.0, it.z + 1.0).inflate(0.75, 0.0, 0.75),
                 32.0, pos, yaw, pitch
-            ) && !Box(it).expand(.5, .0, .5).intersects(mc.player?.boundingBox)
+            ) && !AABB(it).inflate(.5, .0, .5).intersects(mc.player!!.boundingBox)
         }
     }
 
@@ -48,9 +49,9 @@ object TPMazeSolver {
         if (DungeonUtils.currentRoomName != "Teleport Maze") return
         tpPads.forEach {
             when (it) {
-                in correctPortals -> context.drawFilledBox(Box(it), if (correctPortals.size == 1) mazeColorOne else mazeColorMultiple, depth = false)
-                in visited -> context.drawFilledBox(Box(it), mazeColorVisited, depth = true)
-                else -> context.drawFilledBox(Box(it), Colors.WHITE.withAlpha(0.5f), depth = true)
+                in correctPortals -> context.drawFilledBox(AABB(it), if (correctPortals.size == 1) mazeColorOne else mazeColorMultiple, depth = false)
+                in visited -> context.drawFilledBox(AABB(it), mazeColorVisited, depth = true)
+                else -> context.drawFilledBox(AABB(it), Colors.WHITE.withAlpha(0.5f), depth = true)
             }
         }
     }

@@ -4,6 +4,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.odtheking.odin.OdinMod.logger
 import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.modMessage
@@ -12,15 +13,15 @@ import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.Rotations
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
-import net.minecraft.block.Blocks
-import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.Vec3d
-import net.minecraft.util.math.Vec3i
+import net.minecraft.world.level.block.Blocks
+import net.minecraft.core.BlockPos
+import net.minecraft.core.Vec3i
+import net.minecraft.world.phys.Vec3
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 
 object IceFillSolver {
-    private var currentPatterns: ArrayList<Vec3d> = ArrayList()
+    private var currentPatterns: ArrayList<Vec3> = ArrayList()
 
     private var representativeFloors: List<List<List<Int>>>
     private val gson = GsonBuilder().setPrettyPrinting().create()
@@ -51,19 +52,24 @@ object IceFillSolver {
     }
 
     private fun scanAllFloors(pos: BlockPos, rotation: Rotations, optimizePatterns: Boolean) {
-        listOf(pos, pos.add(transformTo(Vec3i(5, 1, 0), rotation)), pos.add(transformTo(Vec3i(12, 2, 0), rotation))).forEachIndexed { floorIndex, startPosition ->
+        listOf(pos, pos.offset(transformTo(
+            Vec3i(
+                5,
+                1,
+                0
+            ), rotation)), pos.offset(transformTo(Vec3i(12, 2, 0), rotation))).forEachIndexed { floorIndex, startPosition ->
             val floorHeight = representativeFloors[floorIndex]
             val startTime = System.nanoTime()
 
             for (patternIndex in floorHeight.indices) {
                 if (
-                    mc.world?.getBlockState(startPosition.add(transform(floorHeight[patternIndex][0], floorHeight[patternIndex][1], rotation)))?.block == Blocks.AIR &&
-                    mc.world?.getBlockState(startPosition.add(transform(floorHeight[patternIndex][2], floorHeight[patternIndex][3], rotation)))?.block != Blocks.AIR
+                    mc.level?.getBlockState(startPosition.offset(transform(floorHeight[patternIndex][0], floorHeight[patternIndex][1], rotation)))?.block == Blocks.AIR &&
+                    mc.level?.getBlockState(startPosition.offset(transform(floorHeight[patternIndex][2], floorHeight[patternIndex][3], rotation)))?.block != Blocks.AIR
                 ) {
                     modMessage("Section $floorIndex scan took ${(System.nanoTime() - startTime) / 1000000.0}ms pattern: $patternIndex")
 
                     (if (optimizePatterns) IceFillFloors.advanced[floorIndex][patternIndex] else IceFillFloors.IceFillFloors[floorIndex][patternIndex]).toMutableList().let {
-                        currentPatterns.addAll(it.map { Vec3d(startPosition.add(transformTo(it, rotation))).add(0.5, 0.1, 0.5) })
+                        currentPatterns.addAll(it.map { Vec3(startPosition.offset(transformTo(it, rotation))).add(0.5, 0.1, 0.5) })
                     }
                     return@forEachIndexed
                 }

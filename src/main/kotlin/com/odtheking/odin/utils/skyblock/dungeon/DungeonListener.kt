@@ -17,10 +17,10 @@ import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getDungeonTeammate
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.Room
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
-import net.minecraft.network.packet.s2c.play.PlayerListHeaderS2CPacket
-import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket
-import net.minecraft.network.packet.s2c.play.TeamS2CPacket
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket
+import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket
+import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
+import net.minecraft.network.protocol.game.ClientboundTabListPacket
 
 object DungeonListener {
 
@@ -66,24 +66,24 @@ object DungeonListener {
             dungeonStats.knownSecrets += room.data.secrets
         }
 
-        onReceive<PlayerListS2CPacket> {
-            if (actions.none {
+        onReceive<ClientboundPlayerInfoUpdatePacket> {
+            if (actions().none {
                     it.equalsOneOf(
-                        PlayerListS2CPacket.Action.UPDATE_DISPLAY_NAME,
-                        PlayerListS2CPacket.Action.ADD_PLAYER
+                        ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME,
+                        ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER
                     )
                 }) return@onReceive
             val tabListEntries =
-                entries?.mapNotNull { it.displayName?.string }?.ifEmpty { return@onReceive } ?: return@onReceive
+                entries()?.mapNotNull { it.displayName?.string }?.ifEmpty { return@onReceive } ?: return@onReceive
             updateDungeonTeammates(tabListEntries)
             updateDungeonStats(tabListEntries)
             getDungeonPuzzles(tabListEntries)
         }
 
-        onReceive<TeamS2CPacket> {
-            val team = team?.orElse(null) ?: return@onReceive
+        onReceive<ClientboundSetPlayerTeamPacket> {
+            val team = parameters?.orElse(null) ?: return@onReceive
 
-            val text = team.prefix?.string?.plus(team.suffix?.string) ?: return@onReceive
+            val text = team.playerPrefix?.string?.plus(team.playerSuffix?.string) ?: return@onReceive
 
             floorRegex.find(text)?.groupValues?.get(1)?.let {
                 scope.launch(Dispatchers.IO) { paul = hasBonusPaulScore() }
@@ -96,14 +96,14 @@ object DungeonListener {
             }
         }
 
-        onReceive<PlayerListHeaderS2CPacket> {
+        onReceive<ClientboundTabListPacket> {
             Blessing.entries.forEach { blessing ->
                 blessing.regex.find(footer?.string ?: return@forEach)
                     ?.let { blessing.current = romanToInt(it.groupValues[1]) }
             }
         }
 
-        onReceive<GameMessageS2CPacket> {
+        onReceive<ClientboundSystemChatPacket> {
             val message = content?.string?.noControlCodes ?: return@onReceive
             if (expectingBloodRegex.matches(message)) expectingBloodUpdate = true
             doorOpenRegex.find(message)?.let { dungeonStats.doorOpener = it.groupValues[1] }

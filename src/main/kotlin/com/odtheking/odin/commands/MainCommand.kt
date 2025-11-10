@@ -10,8 +10,8 @@ import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.features.impl.render.ClickGUIModule
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.handlers.LimitedTickTask
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
-import net.minecraft.text.Text
+import net.minecraft.network.chat.Component
+import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
 
 val mainCommand = Commodore("odin", "od") {
     runs {
@@ -54,7 +54,7 @@ val mainCommand = Commodore("odin", "od") {
     }
 
     literal("simulate").runs { greedyString: GreedyString ->
-        PacketEvent.Receive(GameMessageS2CPacket(Text.of(greedyString.string), false)).postAndCatch()
+        PacketEvent.Receive(ClientboundSystemChatPacket(Component.literal(greedyString.string), false)).postAndCatch()
         modMessage("§8Simulated message: ${greedyString.string}")
     }
 

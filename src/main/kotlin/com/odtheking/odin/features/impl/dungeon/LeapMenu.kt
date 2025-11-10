@@ -1,5 +1,6 @@
 package com.odtheking.odin.features.impl.dungeon
 
+import com.mojang.blaze3d.opengl.GlTexture
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.*
 import com.odtheking.odin.events.ChatPacketEvent
@@ -16,10 +17,9 @@ import com.odtheking.odin.utils.ui.HoverHandler
 import com.odtheking.odin.utils.ui.getQuadrant
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
 import com.odtheking.odin.utils.ui.rendering.NVGSpecialRenderer
-import net.minecraft.client.gui.screen.ingame.HandledScreen
-import net.minecraft.client.texture.GlTexture
-import net.minecraft.screen.slot.SlotActionType
-import net.minecraft.util.Identifier
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.inventory.ClickType
 import org.lwjgl.glfw.GLFW
 
 object LeapMenu : Module(
@@ -39,14 +39,14 @@ object LeapMenu : Module(
     private val leapAnnounce by BooleanSetting("Leap Announce", false, desc = "Announces when you leap to a player.")
     private val hoverHandler = List(4) { HoverHandler(200L) }
 
-    private val EMPTY = DungeonPlayer("Empty", DungeonClass.Unknown, 0, Identifier.of("textures/entity/steve.png"))
+    private val EMPTY = DungeonPlayer("Empty", DungeonClass.Unknown, 0, ResourceLocation.withDefaultNamespace("textures/entity/steve.png"))
     private val keybindList = listOf(topLeftKeybind, topRightKeybind, bottomLeftKeybind, bottomRightKeybind)
     private val leapedRegex = Regex("You have teleported to (\\w{1,16})!")
     private val imageCacheMap = mutableMapOf<String, Int>()
 
     init {
         on<GuiEvent.Draw> {
-            val chest = (screen as? HandledScreen<*>) ?: return@on
+            val chest = (screen as? AbstractContainerScreen<*>) ?: return@on
             if (chest.title?.string?.equalsOneOf("Spirit Leap", "Teleport to Player") == false || leapTeammates.isEmpty() || leapTeammates.all { it == EMPTY }) return@on
 
             val halfWidth = mc.window.width / 2f
@@ -57,7 +57,7 @@ object LeapMenu : Module(
             hoverHandler[2].handle(0f, halfHeight, halfWidth, halfHeight)
             hoverHandler[3].handle(halfWidth, halfHeight, halfWidth, halfHeight)
 
-            NVGSpecialRenderer.draw(drawContext, 0, 0, drawContext.scaledWindowWidth, drawContext.scaledWindowHeight) {
+            NVGSpecialRenderer.draw(guiGraphics, 0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight()) {
                 NVGRenderer.scale(scale, scale)
                 NVGRenderer.translate(halfWidth / scale, halfHeight / scale)
                 val boxWidth = 800f
@@ -77,7 +77,7 @@ object LeapMenu : Module(
                     val expandValue = hoverHandler[index].anim.get(0f, 15f, !hoverHandler[index].hasStarted)
                     NVGRenderer.rect(x - expandValue ,y - expandValue, boxWidth + expandValue * 2, boxHeight + expandValue * 2, (if (colorStyle) player.clazz.color else backgroundColor).rgba, 12f)
                     imageCacheMap.getOrPut(player.locationSkin.path) {
-                        NVGRenderer.createNVGImage((mc.textureManager?.getTexture(player.locationSkin)?.glTexture as? GlTexture)?.glId ?: 0, 64, 64)
+                        NVGRenderer.createNVGImage((mc.textureManager?.getTexture(player.locationSkin)?.texture as? GlTexture)?.glId() ?: 0, 64, 64)
                     }.let { glTextureId ->
                         NVGRenderer.image(glTextureId, 64, 64, 8, 8, 8, 8, x + 30f, y + 30f, 240f, 240f, 9f)
                     }
@@ -90,13 +90,13 @@ object LeapMenu : Module(
         }
 
         on<GuiEvent.DrawBackground> {
-            val chest = (screen as? HandledScreen<*>) ?: return@on
+            val chest = (screen as? AbstractContainerScreen<*>) ?: return@on
             if (!chest.title.string.equalsOneOf("Spirit Leap", "Teleport to Player") || leapTeammates.isEmpty() || leapTeammates.all { it == EMPTY }) return@on
             cancel()
         }
 
         on<GuiEvent.MouseClick> {
-            val chest = (screen as? HandledScreen<*>) ?: return@on
+            val chest = (screen as? AbstractContainerScreen<*>) ?: return@on
             if (!chest.title.string.equalsOneOf("Spirit Leap", "Teleport to Player") || leapTeammates.isEmpty() || leapTeammates.all { it == EMPTY }) return@on
 
             val quadrant = getQuadrant()
@@ -112,10 +112,10 @@ object LeapMenu : Module(
         }
 
         on<GuiEvent.KeyPress> {
-            val chest = (screen as? HandledScreen<*>) ?: return@on
-            if (!useNumberKeys || chest.title?.string?.equalsOneOf("Spirit Leap", "Teleport to Player") == false || keybindList.none { it.code == keyCode } || leapTeammates.isEmpty()) return@on
+            val chest = (screen as? AbstractContainerScreen<*>) ?: return@on
+            if (!useNumberKeys || chest.title?.string?.equalsOneOf("Spirit Leap", "Teleport to Player") == false || keybindList.none { it.value == keyCode } || leapTeammates.isEmpty()) return@on
 
-            val index = keybindList.indexOfFirst { it.code == keyCode }
+            val index = keybindList.indexOfFirst { it.value == keyCode }
             val playerToLeap = if (index + 1 > leapTeammates.size) return@on else leapTeammates[index]
             if (playerToLeap == EMPTY) return@on
             if (playerToLeap.isDead) return@on modMessage("This player is dead, can't leap.")
@@ -132,12 +132,13 @@ object LeapMenu : Module(
     }
 
 
-    private fun leapTo(name: String, screenHandler: HandledScreen<*>) {
-        val index = screenHandler.screenHandler.slots.subList(11, 16).firstOrNull {
-            it.stack?.name?.string?.substringAfter(' ').equals(name.noControlCodes, ignoreCase = true)
+    private fun leapTo(name: String, screenHandler: AbstractContainerScreen<*>) {
+        if (mc.player == null || mc.gameMode == null) return
+        val index = screenHandler.menu.slots.subList(11, 16).firstOrNull {
+            it.item?.hoverName?.string?.substringAfter(' ').equals(name.noControlCodes, ignoreCase = true)
         }?.index ?: return modMessage("Can't find player $name. This shouldn't be possible! are you nicked?")
         modMessage("Teleporting to $name.")
-        mc.interactionManager?.clickSlot(screenHandler.screenHandler.syncId, index, 0, SlotActionType.PICKUP, mc.player)
+        mc.gameMode!!.handleInventoryMouseClick(screenHandler.menu.containerId, index, 0, ClickType.PICKUP, mc.player!!)
     }
 
     /*private val leapTeammates: MutableList<DungeonPlayer> = mutableListOf(

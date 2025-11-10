@@ -16,15 +16,15 @@ import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.toFixed
-import net.minecraft.entity.boss.dragon.EnderDragonEntity
-import net.minecraft.network.packet.s2c.play.ParticleS2CPacket
-import net.minecraft.particle.ParticleTypes
-import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.Box
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon
+import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket
+import net.minecraft.core.BlockPos
+import net.minecraft.core.particles.ParticleTypes
+import net.minecraft.world.phys.AABB
 
 enum class WitherDragonsEnum(
     val spawnPos: BlockPos,
-    val boxesDimensions: Box,
+    val aabbDimensions: AABB,
     val colorCode: Char,
     val color: Color,
     val xRange: ClosedFloatingPointRange<Double>,
@@ -33,18 +33,18 @@ enum class WitherDragonsEnum(
     var state: WitherDragonState = WitherDragonState.DEAD,
     var timesSpawned: Int = 0,
     var entityId: Int? = null,
-    var entity: EnderDragonEntity? = null,
+    var entity: EnderDragon? = null,
     var isSprayed: Boolean = false,
     var spawnedTime: Long = 0,
     val skipKillTime: Int = 0,
     val arrowsHit: HashMap<String, ArrowsHit> = HashMap()
 ) {
-    Red(BlockPos(27, 14, 59), Box(14.5, 13.0, 45.5, 39.5, 28.0, 70.5), 'c', Colors.MINECRAFT_RED, 24.0..30.0, 56.0..62.0, skipKillTime = 50),
-    Orange(BlockPos(85, 14, 56), Box(72.0, 8.0, 47.0, 102.0, 28.0, 77.0), '6', Colors.MINECRAFT_GOLD, 82.0..88.0, 53.0..59.0, skipKillTime = 62),
-    Green(BlockPos(27, 14, 94), Box(7.0, 8.0, 80.0, 37.0, 28.0, 110.0), 'a', Colors.MINECRAFT_GREEN, 23.0..29.0, 91.0..97.0, skipKillTime = 52),
-    Blue(BlockPos(84, 14, 94), Box(71.5, 16.0, 82.5, 96.5, 26.0, 107.5), 'b', Colors.MINECRAFT_AQUA, 82.0..88.0, 91.0..97.0, skipKillTime = 47),
-    Purple(BlockPos(56, 14, 125), Box(45.5, 13.0, 113.5, 68.5, 23.0, 136.5), '5', Colors.MINECRAFT_DARK_PURPLE, 53.0..59.0, 122.0..128.0, skipKillTime = 38),
-    None(BlockPos(0, 0, 0), Box(0.0, 0.0, 0.0, 0.0, 0.0, 0.0), 'f', Colors.WHITE, 0.0..0.0, 0.0..0.0);
+    Red(BlockPos(27, 14, 59), AABB(14.5, 13.0, 45.5, 39.5, 28.0, 70.5), 'c', Colors.MINECRAFT_RED, 24.0..30.0, 56.0..62.0, skipKillTime = 50),
+    Orange(BlockPos(85, 14, 56), AABB(72.0, 8.0, 47.0, 102.0, 28.0, 77.0), '6', Colors.MINECRAFT_GOLD, 82.0..88.0, 53.0..59.0, skipKillTime = 62),
+    Green(BlockPos(27, 14, 94), AABB(7.0, 8.0, 80.0, 37.0, 28.0, 110.0), 'a', Colors.MINECRAFT_GREEN, 23.0..29.0, 91.0..97.0, skipKillTime = 52),
+    Blue(BlockPos(84, 14, 94), AABB(71.5, 16.0, 82.5, 96.5, 26.0, 107.5), 'b', Colors.MINECRAFT_AQUA, 82.0..88.0, 91.0..97.0, skipKillTime = 47),
+    Purple(BlockPos(56, 14, 125), AABB(45.5, 13.0, 113.5, 68.5, 23.0, 136.5), '5', Colors.MINECRAFT_DARK_PURPLE, 53.0..59.0, 122.0..128.0, skipKillTime = 38),
+    None(BlockPos(0, 0, 0), AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0), 'f', Colors.WHITE, 0.0..0.0, 0.0..0.0);
 
     fun setAlive(entityId: Int) {
         state = WitherDragonState.ALIVE
@@ -106,7 +106,7 @@ enum class WitherDragonsEnum(
     }
 
     fun updateEntity(entityId: Int) {
-        entity = (mc.world?.getEntityById(entityId) as? EnderDragonEntity)?.also { dragonEntityList.add(it) }
+        entity = (mc.level?.getEntity(entityId) as? EnderDragon)?.also { dragonEntityList.add(it) }
     }
 
     companion object {
@@ -143,15 +143,15 @@ enum class WitherDragonState {
     DEAD
 }
 
-fun handleSpawnPacket(particle: ParticleS2CPacket) {
+fun handleSpawnPacket(particle: ClientboundLevelParticlesPacket) {
     if (
         particle.count != 20 ||
         particle.y != 19.0 ||
-        particle.parameters.type != ParticleTypes.FLAME ||
-        particle.offsetX != 2f ||
-        particle.offsetY != 3f ||
-        particle.offsetZ != 2f ||
-        particle.speed != 0f ||
+        particle.particle.type != ParticleTypes.FLAME ||
+        particle.xDist != 2f ||
+        particle.yDist != 3f ||
+        particle.zDist != 2f ||
+        particle.maxSpeed != 0f ||
         particle.x % 1 != 0.0 ||
         particle.z % 1 != 0.0
     ) return
@@ -173,7 +173,7 @@ fun handleSpawnPacket(particle: ParticleS2CPacket) {
         newSpawned to dragons
     }
 
-    if (dragons.isNotEmpty() && (dragons.size == 2 || spawned >= 2) && (priorityDragon == WitherDragonsEnum.None || priorityDragon.entity?.isDead == false))
+    if (dragons.isNotEmpty() && (dragons.size == 2 || spawned >= 2) && (priorityDragon == WitherDragonsEnum.None || priorityDragon.entity?.isDeadOrDying == false))
         priorityDragon = findPriority(dragons).also { displaySpawningDragon(it) }
 }
 

@@ -2,43 +2,44 @@ package com.odtheking.odin.features.impl.floor7
 
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.utils.modMessage
-import net.minecraft.entity.boss.dragon.EnderDragonEntity
-import net.minecraft.entity.decoration.ArmorStandEntity
-import net.minecraft.item.Items
-import net.minecraft.network.packet.s2c.play.EntityEquipmentUpdateS2CPacket
-import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket
-import net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket
-import net.minecraft.util.math.Vec3d
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
+import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon
+import net.minecraft.world.entity.decoration.ArmorStand
+import net.minecraft.world.item.Items
+import net.minecraft.world.phys.Vec3
 import java.util.concurrent.CopyOnWriteArrayList
 
 object DragonCheck {
 
     var lastDragonDeath: WitherDragonsEnum = WitherDragonsEnum.None
-    val dragonEntityList = CopyOnWriteArrayList<EnderDragonEntity>()
+    val dragonEntityList = CopyOnWriteArrayList<EnderDragon>()
 
-    fun dragonUpdate(packet: EntityTrackerUpdateS2CPacket) {
+    fun dragonUpdate(packet: ClientboundSetEntityDataPacket) {
         val dragon = WitherDragonsEnum.entries.find { it.entityId == packet.id }?.apply {
             if (entity == null) updateEntity(packet.id)
         } ?: return
 
-        val entity = mc.world?.getEntityById(packet.id) as? EnderDragonEntity ?: return
+        val entity = mc.level?.getEntity(packet.id) as? EnderDragon ?: return
         if (entity.health <= 0 && dragon.state != WitherDragonState.DEAD) dragon.setDead()
     }
 
-    fun dragonSpawn(packet: EntitySpawnS2CPacket) {
+    fun dragonSpawn(packet: ClientboundAddEntityPacket) {
         WitherDragonsEnum.entries.find {
-            it.boxesDimensions.contains(Vec3d(packet.x, packet.y, packet.z)) &&
+            it.aabbDimensions.contains(Vec3(packet.x, packet.y, packet.z)) &&
             it.state == WitherDragonState.SPAWNING
-        }?.setAlive(packet.entityId)
+        }?.setAlive(packet.id)
     }
 
-    fun dragonSprayed(packet: EntityEquipmentUpdateS2CPacket) {
-        if (packet.equipmentList.none { it.second.item == Items.PACKED_ICE }) return
+    fun dragonSprayed(packet: ClientboundSetEquipmentPacket) {
+        if (packet.slots.none { it.second.item == Items.PACKED_ICE }) return
 
-        val sprayedEntity = mc.world?.getEntityById(packet.entityId) as? ArmorStandEntity ?: return
+        val sprayedEntity = mc.level?.getEntity(packet.entity) as? ArmorStand ?: return
 
         WitherDragonsEnum.entries.forEach { dragon ->
-            if (dragon.isSprayed || dragon.state != WitherDragonState.ALIVE || dragon.entity == null || sprayedEntity.distanceTo(dragon.entity) > 8) return@forEach
+            if (dragon.entity == null) return@forEach
+            if (dragon.isSprayed || dragon.state != WitherDragonState.ALIVE || sprayedEntity.distanceTo(dragon.entity!!) > 8) return@forEach
 
             if (WitherDragons.sendSpray) {
                 modMessage("§${dragon.colorCode}${dragon.name} §fdragon was sprayed in §c${(WitherDragons.currentTick - dragon.spawnedTime).let { 

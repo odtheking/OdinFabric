@@ -3,10 +3,10 @@ package com.odtheking.odin.features.impl.render
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
-import net.minecraft.entity.EntityType
-import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket
-import net.minecraft.network.packet.s2c.play.ParticleS2CPacket
-import net.minecraft.particle.ParticleTypes
+import net.minecraft.core.particles.ParticleTypes
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
+import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket
+import net.minecraft.world.entity.EntityType
 
 object RenderOptimizer : Module(
     name = "Render Optimizer",
@@ -19,15 +19,15 @@ object RenderOptimizer : Module(
     private val disableFireOverlay by BooleanSetting("Hide Fire Overlay", true, desc = "Hides the fire overlay to improve disability.")
 
     init {
-        onReceive<EntitySpawnS2CPacket> {
-            if (disableFallingBlocks && entityType == EntityType.FALLING_BLOCK)
+        onReceive<ClientboundAddEntityPacket> {
+            if (disableFallingBlocks && type == EntityType.FALLING_BLOCK)
                 it.cancel()
-            else if (disableLighting && entityType == EntityType.LIGHTNING_BOLT)
+            else if (disableLighting && type == EntityType.LIGHTNING_BOLT)
                 it.cancel()
         }
 
-        onReceive<ParticleS2CPacket> {
-            if (disableExplosion && parameters == ParticleTypes.EXPLOSION)
+        onReceive<ClientboundLevelParticlesPacket> {
+            if (disableExplosion && particle == ParticleTypes.EXPLOSION)
                 it.cancel()
         }
     }

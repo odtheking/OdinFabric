@@ -14,23 +14,23 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
-import net.minecraft.entity.ItemEntity
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket
-import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
-import net.minecraft.network.packet.s2c.play.ItemPickupAnimationS2CPacket
-import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket
-import net.minecraft.sound.SoundEvents
+import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket
+import net.minecraft.network.protocol.game.ClientboundSoundPacket
+import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
+import net.minecraft.network.protocol.game.ClientboundTakeItemEntityPacket
+import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket
+import net.minecraft.sounds.SoundEvents
+import net.minecraft.world.entity.item.ItemEntity
 
 object EventDispatcher {
 
     init {
         ClientPlayConnectionEvents.JOIN.register { handler, _, _ ->
-            ServerEvent.Connect(handler.serverInfo?.address ?: "SinglePlayer").postAndCatch()
+            ServerEvent.Connect(handler.serverData?.ip ?: "SinglePlayer").postAndCatch()
         }
 
         ClientPlayConnectionEvents.DISCONNECT.register { handler, _ ->
-            ServerEvent.Disconnect(handler.serverInfo?.address ?: "SinglePlayer").postAndCatch()
+            ServerEvent.Disconnect(handler.serverData?.ip ?: "SinglePlayer").postAndCatch()
         }
 
         ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register { _, _ ->
@@ -38,15 +38,15 @@ object EventDispatcher {
         }
 
         ClientTickEvents.START_CLIENT_TICK.register { _ ->
-            mc.world?.let { TickEvent.Start().postAndCatch() }
+            mc.level?.let { TickEvent.Start().postAndCatch() }
         }
 
         ClientTickEvents.END_CLIENT_TICK.register { _ ->
-            mc.world?.let { TickEvent.End().postAndCatch() }
+            mc.level?.let { TickEvent.End().postAndCatch() }
         }
 
         WorldRenderEvents.AFTER_TRANSLUCENT.register { context ->
-            mc.world?.let { RenderEvent.Last(context).postAndCatch() }
+            mc.level?.let { RenderEvent.Last(context).postAndCatch() }
         }
 
         ClientReceiveMessageEvents.ALLOW_GAME.register { text, overlay ->
@@ -54,37 +54,39 @@ object EventDispatcher {
             !ChatManager.shouldCancelMessage(text)
         }
 
-        onReceive<ItemPickupAnimationS2CPacket> {
+        onReceive<ClientboundTakeItemEntityPacket> {
+            if (mc.player == null) return@onReceive
             if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
-            val itemEntity = mc.world?.getEntityById(entityId) as? ItemEntity ?: return@onReceive
-            if (itemEntity.stack?.name?.string?.containsOneOf(dungeonItemDrops, true) == true && itemEntity.distanceTo(mc.player) <= 6)
+            val itemEntity = mc.level?.getEntity(itemId) as? ItemEntity ?: return@onReceive
+            if (itemEntity.item?.hoverName?.string?.containsOneOf(dungeonItemDrops, true) == true && itemEntity.distanceTo(mc.player!!) <= 6)
                 SecretPickupEvent.Item(itemEntity).postAndCatch()
         }
 
-        onReceive<EntitiesDestroyS2CPacket> {
+        onReceive<ClientboundRemoveEntitiesPacket> {
+            if (mc.player == null) return@onReceive
             if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
             entityIds.forEach { id ->
-                val entity = mc.world?.getEntityById(id) as? ItemEntity ?: return@forEach
-                if (entity.stack?.name?.string?.containsOneOf(dungeonItemDrops, true) == true && entity.distanceTo(mc.player) <= 6)
+                val entity = mc.level?.getEntity(id) as? ItemEntity ?: return@forEach
+                if (entity.item?.hoverName?.string?.containsOneOf(dungeonItemDrops, true) == true && entity.distanceTo(mc.player!!) <= 6)
                     SecretPickupEvent.Item(entity).postAndCatch()
             }
         }
 
-        onReceive<PlaySoundS2CPacket> {
+        onReceive<ClientboundSoundPacket> {
             if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
-            if (sound.equalsOneOf(SoundEvents.ENTITY_BAT_HURT, SoundEvents.ENTITY_BAT_DEATH) && volume == 0.1f)
+            if (sound.equalsOneOf(SoundEvents.BAT_HURT, SoundEvents.BAT_DEATH) && volume == 0.1f)
                 SecretPickupEvent.Bat(this).postAndCatch()
         }
 
-        onSend<PlayerInteractBlockC2SPacket> {
+        onSend<ServerboundUseItemOnPacket> {
             if (!DungeonUtils.inDungeons) return@onSend
             SecretPickupEvent.Interact(
-                blockHitResult.blockPos,
-                mc.world?.getBlockState(blockHitResult.blockPos)?.takeIf { isSecret(it, blockHitResult.blockPos) } ?: return@onSend
+                hitResult.blockPos,
+                mc.level?.getBlockState(hitResult.blockPos)?.takeIf { isSecret(it, hitResult.blockPos) } ?: return@onSend
             ).postAndCatch()
         }
 
-        onReceive<GameMessageS2CPacket> {
+        onReceive<ClientboundSystemChatPacket> {
             if (!overlay) content?.string?.noControlCodes?.let { ChatPacketEvent(it, content).postAndCatch() }
         }
     }

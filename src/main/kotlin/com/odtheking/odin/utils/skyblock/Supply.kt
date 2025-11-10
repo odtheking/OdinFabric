@@ -1,6 +1,6 @@
 package com.odtheking.odin.utils.skyblock
 
-import net.minecraft.util.math.BlockPos
+import net.minecraft.core.BlockPos
 
 enum class Supply(val pickUpSpot: BlockPos, val dropOffSpot: BlockPos, var isActive: Boolean = true) {
     Triangle(BlockPos(-67, 77, -122), BlockPos(-94, 78, -106)),

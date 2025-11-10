@@ -12,9 +12,9 @@ import com.odtheking.odin.utils.render.drawFilledBox
 import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.skyblock.Supply
-import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.Box
-import net.minecraft.util.math.Vec3d
+import net.minecraft.core.BlockPos
+import net.minecraft.world.phys.AABB
+import net.minecraft.world.phys.Vec3
 import java.util.*
 import kotlin.math.*
 
@@ -32,10 +32,10 @@ object PearlWaypoints : Module(
             if (!KuudraUtils.inKuudra || KuudraUtils.phase != 1) return@on
 
             var closest = true
-            getOrderedLineups(mc.player?.blockPos ?: return@on).forEach { (lineup, color) ->
+            getOrderedLineups(mc.player?.blockPosition() ?: return@on).forEach { (lineup, color) ->
                 lineup.startPos.forEach {
                     if (presetWaypoints) context.drawWireFrameBox(
-                        Box(it),
+                        AABB(it),
                         color.withAlpha(if (!closest && hideFarWaypoints) 0.25f else 1f),
                         if (!closest && hideFarWaypoints) 4f else 6f
                     )
@@ -44,13 +44,13 @@ object PearlWaypoints : Module(
                 lineup.lineups.forEach lineupLoop@{ blockPos ->
                     if ((NoPre.missing.equalsOneOf(Supply.None, Supply.Square) ||
                                 (lineup.supply != Supply.Square || enumToLineup[NoPre.missing] == blockPos)) && (!hideFarWaypoints || closest)) {
-                        if (presetWaypoints) context.drawFilledBox(Box(blockPos), color)
+                        if (presetWaypoints) context.drawFilledBox(AABB(blockPos), color)
                         if (dynamicWaypoints) {
                             val destinationSupply = if (lineup.supply == Supply.Square) NoPre.missing else lineup.supply
                             calculatePearl(destinationSupply.dropOffSpot)?.let {
-                                context.drawWireFrameBox(Box.of(it, 0.12, 0.12, 0.12), dynamicWaypointsColor, 2f)
+                                context.drawWireFrameBox(AABB.ofSize(it, 0.12, 0.12, 0.12), dynamicWaypointsColor, 2f)
                             }
-                            context.drawWireFrameBox(Box(BlockPos(lineup.supply.dropOffSpot.up())), dynamicWaypointsColor)
+                            context.drawWireFrameBox(AABB(BlockPos(lineup.supply.dropOffSpot.above())), dynamicWaypointsColor)
                         }
                     }
                 }
@@ -71,7 +71,7 @@ object PearlWaypoints : Module(
     private fun getOrderedLineups(pos: BlockPos): SortedMap<Lineup, Color> {
         return pearlLineups.toSortedMap(
             compareBy { key ->
-                key.startPos.minOfOrNull { it.getSquaredDistance(pos) } ?: Double.MAX_VALUE
+                key.startPos.minOfOrNull { it.distSqr(pos) } ?: Double.MAX_VALUE
             }
         )
     }
@@ -83,7 +83,7 @@ object PearlWaypoints : Module(
     private const val GRAV = 0.05
 
     // Made by Aidanmao
-    private fun calculatePearl(targetPos: BlockPos): Vec3d? {
+    private fun calculatePearl(targetPos: BlockPos): Vec3? {
         val posX = mc.player?.renderX ?: return null
         val posY = mc.player?.renderY ?: return null
         val posZ = mc.player?.renderZ ?: return null
@@ -118,7 +118,7 @@ object PearlWaypoints : Module(
         val radY = -atan2(offX, offZ)
         val cosRadP = cos(radP)
 
-        return Vec3d(posX - (cosRadP * sin(radY)) * 10, posY + (-sin(radP)) * 10, posZ + (cosRadP * cos(radY)) * 10)
+        return Vec3(posX - (cosRadP * sin(radY)) * 10, posY + (-sin(radP)) * 10, posZ + (cosRadP * cos(radY)) * 10)
     }
 
     private val pearlLineups: Map<Lineup, Color> = mapOf(

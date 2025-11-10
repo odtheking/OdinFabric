@@ -6,7 +6,7 @@ import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.containsOneOf
 import com.odtheking.odin.utils.equalsOneOf
-import net.minecraft.client.gui.screen.ingame.HandledScreen
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 
 object RemovePerks : Module(
     name = "Remove Perks",
@@ -16,12 +16,12 @@ object RemovePerks : Module(
 
     init {
         on<GuiEvent.DrawSlot> {
-            if (screen.title?.string == "Perk Menu" && slotCheck(slot.stack?.name?.string ?: return@on))
+            if (screen.title?.string == "Perk Menu" && slotCheck(slot.item?.hoverName?.string ?: return@on))
                 cancel()
         }
 
         on<GuiEvent.SlotClick> {
-            if (screen is HandledScreen<*> && screen.title?.string == "Perk Menu" && slotCheck(screen.screenHandler?.getSlot(slotId)?.stack?.name?.string ?: return@on))
+            if (screen is AbstractContainerScreen<*> && screen.title?.string == "Perk Menu" && slotCheck(screen.menu?.getSlot(slotId)?.item?.hoverName?.string ?: return@on))
                 cancel()
         }
     }

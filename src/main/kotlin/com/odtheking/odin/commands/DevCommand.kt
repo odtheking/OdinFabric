@@ -22,13 +22,13 @@ import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils
 import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils.getRoomCenter
 import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils.getRoomData
 import kotlinx.coroutines.launch
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
-import net.minecraft.text.Text
+import net.minecraft.network.chat.Component
+import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
 
 val devCommand = Commodore("oddev") {
 
     literal("getitem").runs {
-        modMessage("Item in hand: ${mc.player?.mainHandStack?.customData}")
+        modMessage("Item in hand: ${mc.player?.mainHandItem?.customData}")
     }
 
     literal("giveaotv").runs { tuners: Int? ->
@@ -41,7 +41,7 @@ val devCommand = Commodore("oddev") {
     }
 
     literal("simulate").runs { greedyString: GreedyString ->
-        PacketEvent.Receive(GameMessageS2CPacket(Text.of(greedyString.string), false)).postAndCatch()
+        PacketEvent.Receive(ClientboundSystemChatPacket(Component.literal(greedyString.string), false)).postAndCatch()
         modMessage("§8Simulated message: ${greedyString.string}")
     }
 
@@ -70,12 +70,12 @@ val devCommand = Commodore("oddev") {
                 "kuudra" -> """
                         |inKuudra: ${KuudraUtils.inKuudra}, tier: ${KuudraUtils.kuudraTier}, phase: ${KuudraUtils.phase}
                         |kuudraTeammates: ${KuudraUtils.freshers.map { it.key }}
-                        |giantZombies: ${KuudraUtils.giantZombies.joinToString { it.pos.toString() }}
+                        |giantZombies: ${KuudraUtils.giantZombies.joinToString { it.position().toString() }}
                         |supplies: ${Supply.entries.joinToString { "${it.name} -> ${it.isActive}" }}
                         |kuudraEntity: ${KuudraUtils.kuudraEntity}
                         |builders: ${KuudraUtils.playersBuildingAmount}
                         |build: ${KuudraUtils.buildDonePercentage}
-                        |buildingPiles: ${KuudraUtils.buildingPiles.joinToString { it.pos.toString() }}
+                        |buildingPiles: ${KuudraUtils.buildingPiles.joinToString { it.position().toString() }}
                         |missing: ${NoPre.missing}
                     """.trimIndent()
                 "dungeon" -> """

@@ -6,7 +6,7 @@ import com.google.gson.JsonElement
 import com.google.gson.reflect.TypeToken
 import com.odtheking.odin.features.impl.dungeon.dungeonwaypoints.DungeonWaypoints
 import com.odtheking.odin.utils.Vec2
-import net.minecraft.util.math.BlockPos
+import net.minecraft.core.BlockPos
 import java.lang.reflect.Type
 
 data class Room(
