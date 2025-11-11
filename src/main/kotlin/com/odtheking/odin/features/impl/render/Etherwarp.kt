@@ -57,7 +57,7 @@ object Etherwarp : Module(
         }
 
         on<RenderEvent.Last> {
-            if (mc.player?.isSneaking == false || mc.currentScreen != null) return@on
+            if (mc.player?.isSneaking == false || mc.currentScreen != null || !render) return@on
 
             etherPos = getEtherPos(
                 if (useServerPosition) mc.player?.lastPos else mc.player?.pos,
@@ -115,7 +115,7 @@ object Etherwarp : Module(
         val player = mc.player ?: return EtherPos.NONE
         if (position == null) return EtherPos.NONE
         val eyeHeight = if (player.isSneaking) {
-            if (LocationUtils.currentArea.isArea(Island.Galatea)) 1.27 else 1.54 // Use modern sneak height in Galatea
+            if (LocationUtils.currentArea.isArea(Island.Galatea, Island.ThePark)) 1.27 else 1.54 // Use modern sneak height in Galatea
         } else 1.62
 
         val startPos = position.addVec(y = eyeHeight)

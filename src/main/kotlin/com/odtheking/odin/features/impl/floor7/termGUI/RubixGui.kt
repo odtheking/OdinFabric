@@ -15,7 +15,7 @@ object RubixGui : TermGui() {
             val clicksRequired = if (amount < 3) amount else amount - 5
             if (clicksRequired == 0) return@forEach
 
-            val (slotX, slotY) = renderSlot(index, getColor(clicksRequired), getColor(if (amount < 3) clicksRequired + 1 else clicksRequired - 1))
+            val (slotX, slotY) = renderSlot(index, getColor(clicksRequired))
             val slotSize = 55f * TerminalSolver.customTermSize
             val fontSize = 30f * TerminalSolver.customTermSize
 

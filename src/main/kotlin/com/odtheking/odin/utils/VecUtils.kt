@@ -58,17 +58,8 @@ fun BlockPos.rotateToNorth(rotation: Rotations): BlockPos =
         else -> this
     }
 
-fun BlockPos.addRotationCoords(rotation: Rotations, x: Int, z: Int): BlockPos =
-    when (rotation) {
-        Rotations.NORTH -> BlockPos(this.x + x, this.y, this.z + z)
-        Rotations.SOUTH -> BlockPos(this.x - x, this.y, this.z - z)
-        Rotations.WEST ->  BlockPos(this.x + z, this.y, this.z - x)
-        Rotations.EAST ->  BlockPos(this.x - z, this.y, this.z + x)
-        else -> this
-    }
-
 fun isXZInterceptable(box: Box, range: Double, pos: Vec3d, yaw: Float, pitch: Float): Boolean {
-    val start = getPositionEyes(pos)
+    val start = pos.addVec(y = (mc.player?.eyeY ?: 0.0))
     val goal = start.add(getLook(yaw, pitch).multiply(range))
 
     return isVecInZ(start.intermediateWithXValue(goal, box.minX), box) ||
@@ -76,9 +67,6 @@ fun isXZInterceptable(box: Box, range: Double, pos: Vec3d, yaw: Float, pitch: Fl
             isVecInX(start.intermediateWithZValue(goal, box.minZ), box) ||
             isVecInX(start.intermediateWithZValue(goal, box.maxZ), box)
 }
-
-private fun getPositionEyes(pos: Vec3d): Vec3d =
-    Vec3d(pos.x, pos.y + (mc.player?.eyeY ?: 0.0), pos.z) // Add eye height like old getPositionEyes
 
 private fun getLook(yaw: Float, pitch: Float): Vec3d {
     val f2 = -cos(-pitch * 0.017453292f).toDouble()

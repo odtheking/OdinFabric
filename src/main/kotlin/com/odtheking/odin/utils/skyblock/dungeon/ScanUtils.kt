@@ -27,10 +27,14 @@ object ScanUtils {
 
     private var lastRoomPos: Vec2 = Vec2(0, 0)
     private val roomList: Set<RoomData> = loadRoomData()
+    private val coreToRoomData: Map<Int, RoomData> =
+        roomList.flatMap { room -> room.cores.map { core -> core to room } }.toMap()
     var currentRoom: Room? = null
         private set
     var passedRooms: MutableSet<Room> = mutableSetOf()
         private set
+
+    private val mutableBlockPos = BlockPos.Mutable()
 
     private fun loadRoomData(): Set<RoomData> {
         return try {
@@ -87,8 +91,8 @@ object ScanUtils {
         }
     }
 
-    private fun updateRotation(room: Room) {
-        val roomHeight = getTopLayerOfRoom(room.roomComponents.first().vec2)
+    private fun updateRotation(room: Room, roomHeight: Int) {
+        room.roomHeight = roomHeight
         if (room.data.name == "Fairy") { // Fairy room doesn't have a clay block so we need to set it manually
             room.clayPos = room.roomComponents.firstOrNull()?.let { BlockPos(it.x - 15, roomHeight, it.z - 15) } ?: return
             room.rotation = Rotations.SOUTH
@@ -107,29 +111,34 @@ object ScanUtils {
         } ?: Rotations.NONE // Rotation isn't found if we can't find the clay block
     }
 
-    private fun scanRoom(vec2: Vec2): Room? =
-        getCore(vec2).let { core ->
-            getRoomData(core)?.let {
-                Room(data = it, roomComponents = findRoomComponentsRecursively(vec2, it.cores))
-            }?.apply { updateRotation(this) }
+    fun scanRoom(vec2: Vec2): Room? {
+        val roomHeight = getTopLayerOfRoom(vec2)
+        return getCore(vec2, roomHeight).let { core ->
+            getRoomData(core)?.let { roomData ->
+                Room(data = roomData, roomComponents = findRoomComponentsRecursively(vec2, roomData.cores, roomHeight))
+            }?.apply { updateRotation(this, roomHeight) }
         }
+    }
 
-    private fun findRoomComponentsRecursively(vec2: Vec2, cores: List<Int>, visited: MutableSet<Vec2> = mutableSetOf(), tiles: MutableSet<RoomComponent> = mutableSetOf()): MutableSet<RoomComponent> {
+    private fun findRoomComponentsRecursively(vec2: Vec2, cores: List<Int>, roomHeight: Int, visited: MutableSet<Vec2> = mutableSetOf(), tiles: MutableSet<RoomComponent> = mutableSetOf()): MutableSet<RoomComponent> {
         if (vec2 in visited) return tiles else visited.add(vec2)
-        tiles.add(RoomComponent(vec2.x, vec2.z, getCore(vec2).takeIf { it in cores } ?: return tiles))
+
+        val core = getCore(vec2, roomHeight)
+        if (core !in cores) return tiles
+
+        tiles.add(RoomComponent(vec2.x, vec2.z, core))
         horizontals.forEach { facing ->
             findRoomComponentsRecursively(
                 Vec2(
                     vec2.x + ((if (facing.axis == Axis.X) facing.offsetX else 0) shl ROOM_SIZE_SHIFT),
                     vec2.z + ((if (facing.axis == Axis.Z) facing.offsetZ else 0) shl ROOM_SIZE_SHIFT)
-                ), cores, visited, tiles
+                ), cores, roomHeight, visited, tiles
             )
         }
         return tiles
     }
 
-    fun getRoomData(hash: Int): RoomData? =
-        roomList.find { hash in it.cores }
+    fun getRoomData(hash: Int): RoomData? = coreToRoomData[hash]
 
     fun getRoomCenter(posX: Int, posZ: Int): Vec2 {
         val roomX = (posX - START + (1 shl (ROOM_SIZE_SHIFT - 1))) shr ROOM_SIZE_SHIFT
@@ -137,13 +146,14 @@ object ScanUtils {
         return Vec2(((roomX shl ROOM_SIZE_SHIFT) + START), ((roomZ shl ROOM_SIZE_SHIFT) + START))
     }
 
-    fun getCore(vec2: Vec2): Int {
+    fun getCore(vec2: Vec2, height: Int? = null): Int {
         val sb = StringBuilder(150)
-        val height = getTopLayerOfRoom(vec2)
-        sb.append(CharArray(140 - height) { '0' })
+        val roomHeight = height ?: getTopLayerOfRoom(vec2)
+        sb.append(CharArray(140 - roomHeight) { '0' })
         var bedrock = 0
-        for (y in height downTo 12) {
-            val id = mc.world?.getBlockState(BlockPos(vec2.x, y, vec2.z))?.block
+        for (y in roomHeight downTo 12) {
+            mutableBlockPos.set(vec2.x, y, vec2.z)
+            val id = mc.world?.getBlockState(mutableBlockPos)?.block
             if (id == Blocks.AIR && bedrock >= 2 && y < 69) {
                 sb.append(CharArray(y - 11) { '0' })
                 break
@@ -161,7 +171,8 @@ object ScanUtils {
 
     fun getTopLayerOfRoom(vec2: Vec2): Int {
         for (y in 140 downTo 12) {
-            val block = mc.world?.getBlockState(BlockPos(vec2.x, y, vec2.z))?.block
+            mutableBlockPos.set(vec2.x, y, vec2.z)
+            val block = mc.world?.getBlockState(mutableBlockPos)?.block
             if (block != Blocks.AIR) return if (block == Blocks.GOLD_BLOCK) y - 1 else y
         }
         return 0

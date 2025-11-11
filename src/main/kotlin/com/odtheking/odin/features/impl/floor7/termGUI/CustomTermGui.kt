@@ -5,7 +5,6 @@ import com.odtheking.odin.events.GuiEvent
 import com.odtheking.odin.features.impl.floor7.TerminalSolver
 import com.odtheking.odin.features.impl.floor7.TerminalSolver.hideClicked
 import com.odtheking.odin.utils.Color
-import com.odtheking.odin.utils.ui.animations.ColorAnimation
 import com.odtheking.odin.utils.ui.isAreaHovered
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
 import net.minecraft.client.gui.screen.Screen
@@ -15,7 +14,6 @@ import kotlin.math.floor
 abstract class TermGui {
     protected val itemIndexMap: MutableMap<Int, Box> = mutableMapOf()
     inline val currentSolution get() = TerminalSolver.currentTerm?.solution.orEmpty()
-    val colorAnimations = mutableMapOf<Int, ColorAnimation>()
 
     abstract fun renderTerminal(slotCount: Int)
 
@@ -32,7 +30,7 @@ abstract class TermGui {
         NVGRenderer.rect(backgroundStartX, backgroundStartY, backgroundWidth, backgroundHeight, TerminalSolver.backgroundColor.rgba, 12f)
     }
 
-    protected fun renderSlot(index: Int, startColor: Color, endColor: Color): Pair<Float, Float> {
+    protected fun renderSlot(index: Int, color: Color): Pair<Float, Float> {
         val slotSize = 55f * TerminalSolver.customTermSize
         val totalSlotSpace = slotSize + TerminalSolver.gap * TerminalSolver.customTermSize
 
@@ -41,25 +39,18 @@ abstract class TermGui {
 
         itemIndexMap[index] = Box(x, y, slotSize, slotSize)
 
-        val colorAnim = colorAnimations.getOrPut(index) { ColorAnimation(250) }
 
-        NVGRenderer.rect(floor(x), floor(y), ceil(slotSize), ceil(slotSize), colorAnim.get(startColor, endColor, true).rgba, TerminalSolver.roundness)
+        NVGRenderer.rect(floor(x), floor(y), ceil(slotSize), ceil(slotSize), color.rgba, TerminalSolver.roundness)
         return x to y
     }
 
     fun mouseClicked(screen: Screen, button: Int) {
         getHoveredItem()?.let { slot ->
             TerminalSolver.currentTerm?.let {
-                if (System.currentTimeMillis() - it.timeOpened >= 350 && !GuiEvent.CustomTermGuiClick(screen, slot, button).postAndCatch() && it.canClick(slot, button)) {
+                if (System.currentTimeMillis() - it.timeOpened >= 350 && !GuiEvent.CustomTermGuiClick(screen, slot, button).postAndCatch() && it.canClick(slot, button))
                     it.click(slot, button, hideClicked && !it.isClicked)
-                    if (TerminalSolver.customAnimations) colorAnimations[slot]?.start()
-                }
             }
         }
-    }
-
-    fun closeGui() {
-        colorAnimations.clear()
     }
 
     open fun render() {

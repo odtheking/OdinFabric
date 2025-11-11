@@ -5,10 +5,10 @@ import com.google.gson.reflect.TypeToken
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.utils.Color
-import com.odtheking.odin.utils.addRotationCoords
 import com.odtheking.odin.utils.equalsOneOf
 import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
+import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.block.Blocks
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket
@@ -38,16 +38,15 @@ object BoulderSolver {
     fun onRoomEnter(event: RoomEnterEvent) {
         val room = event.room ?: return reset()
         if (room.data.name != "Boulder") return reset()
-        val roomComponent = room.roomComponents.firstOrNull() ?: return reset()
         var str = ""
-        for (z in -3..2) {
-            for (x in -3..3) {
-                roomComponent.blockPos.addRotationCoords(room.rotation, x * 3, z * 3).let { str += if (mc.world?.getBlockState(it.down(4))?.block == Blocks.AIR) "0" else "1" }
+        for (z in 24 downTo 9 step 3) {
+            for (x in 24 downTo 6 step 3) {
+                str += if (mc.world?.getBlockState(room.getRealCoords(BlockPos(x, 66, z)))?.block == Blocks.AIR) "0" else "1"
             }
         }
         currentPositions = solutions[str]?.map { sol ->
-            val render = roomComponent.blockPos.addRotationCoords(room.rotation, sol[0], sol[1]).down(5)
-            val click = roomComponent.blockPos.addRotationCoords(room.rotation, sol[2], sol[3]).down(5)
+            val render = room.getRealCoords(BlockPos(sol[0], 65, sol[1]))
+            val click = room.getRealCoords(BlockPos(sol[2], 65, sol[3]))
             BoxPosition(render, click)
         }?.toMutableList() ?: return
     }
