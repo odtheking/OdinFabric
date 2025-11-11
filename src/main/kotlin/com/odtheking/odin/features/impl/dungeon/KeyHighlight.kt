@@ -41,12 +41,12 @@ object KeyHighlight : Module(
 
         on<RenderEvent.Last> {
             if (currentKey == null || currentKey?.entity == null) return@on
-            currentKey.let { keyType ->
-                if (keyType!!.entity?.isAlive == false) {
+            currentKey?.let { keyType ->
+                if (keyType.entity?.isAlive == false) {
                     currentKey = null
                     return@on
                 }
-                context.drawWireFrameBox(AABB.unitCubeFromLowerCorner(keyType.entity!!.position().add(-0.5, 1.0, -0.5)), keyType.color(), depth = true)
+                context.drawWireFrameBox(AABB.unitCubeFromLowerCorner(keyType.entity?.position()?.add(-0.5, 1.0, -0.5)), keyType.color(), depth = true)
             }
         }
 

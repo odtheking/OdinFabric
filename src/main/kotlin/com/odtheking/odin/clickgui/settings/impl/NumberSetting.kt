@@ -54,7 +54,7 @@ class NumberSetting<E>(
         }
 
     private val sliderAnim = LinearAnimation<Float>(100)
-    private val handler = HoverHandler(0, 150)
+    private val handler = HoverHandler(150)
 
     private var displayValue = getDisplay()
     private var prevLocation = 0f

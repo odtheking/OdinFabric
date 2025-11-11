@@ -86,9 +86,9 @@ object PositionalMessages : Module(
     private fun handleInString(posMessage: PosMessage) {
         if (mc.player == null) return
         val msgSent = sentMessages.getOrDefault(posMessage, false)
-        if (mc.player != null && AABB(posMessage.x, posMessage.y, posMessage.z, posMessage.x2 ?: return, posMessage.y2 ?: return, posMessage.z2 ?: return).contains(mc.player!!.position())) {
+        if (mc.player != null && AABB(posMessage.x, posMessage.y, posMessage.z, posMessage.x2 ?: return, posMessage.y2 ?: return, posMessage.z2 ?: return).contains(mc.player?.position())) {
             if (!msgSent) Timer().schedule(posMessage.delay) {
-                if (AABB(posMessage.x, posMessage.y, posMessage.z, posMessage.x2, posMessage.y2, posMessage.z2).contains(mc.player!!.position()))
+                if (AABB(posMessage.x, posMessage.y, posMessage.z, posMessage.x2, posMessage.y2, posMessage.z2).contains(mc.player?.position()))
                     sendCommand("pc ${posMessage.message}")
             }
             sentMessages[posMessage] = true

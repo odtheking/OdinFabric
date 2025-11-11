@@ -62,7 +62,7 @@ open class TerminalHandler(val type: TerminalTypes) {
             ).postAndCatch()
             return
         }
-        mc.gameMode?.handleInventoryMouseClick(screenHandler.containerId, slotIndex, button, if (button == GLFW.GLFW_MOUSE_BUTTON_3) ClickType.CLONE else ClickType.PICKUP, mc.player!!)
+        mc.gameMode?.handleInventoryMouseClick(screenHandler.containerId, slotIndex, button, if (button == GLFW.GLFW_MOUSE_BUTTON_3) ClickType.CLONE else ClickType.PICKUP, mc.player)
     }
 
     fun canClick(slotIndex: Int, button: Int, needed: Int = solution.count { it == slotIndex }): Boolean = when {

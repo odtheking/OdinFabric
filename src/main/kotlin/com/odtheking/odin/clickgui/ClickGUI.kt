@@ -133,7 +133,7 @@ object ClickGUI : Screen(Component.literal("Click GUI")) {
     data class Description(var text: String, var x: Float, var y: Float, var hoverHandler: HoverHandler) {
 
         fun render() {
-            if (text.isEmpty() || hoverHandler.percent() <= 0) return
+            if (text.isEmpty() || hoverHandler.percent() < 100) return
             val area = NVGRenderer.wrappedTextBounds(text, 300f, 16f, NVGRenderer.defaultFont)
             NVGRenderer.rect(x, y, area[2] - area[0] + 16f, area[3] - area[1] + 16f, gray38.rgba, 5f)
             NVGRenderer.hollowRect(

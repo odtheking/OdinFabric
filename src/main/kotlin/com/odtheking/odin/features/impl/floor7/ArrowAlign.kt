@@ -8,8 +8,6 @@ import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onSend
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.addVec
-import com.odtheking.odin.utils.component1
-import com.odtheking.odin.utils.component2
 import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
@@ -29,17 +27,19 @@ object ArrowAlign : Module(
     private val blockWrong by BooleanSetting("Block Wrong Clicks", false, desc = "Blocks wrong clicks, shift will override this.")
     private val invertSneak by BooleanSetting("Invert Sneak", false, desc = "Only block wrong clicks whilst sneaking, instead of whilst standing").withDependency { blockWrong }
 
-    private val frameGridCorner = BlockPos(-2, 120, 75)
+
     private val recentClickTimestamps = mutableMapOf<Int, Long>()
     private val clicksRemaining = mutableMapOf<Int, Int>()
     private var currentFrameRotations: List<Int>? = null
     private var targetSolution: List<Int>? = null
+    private val frameGridCorner = BlockPos(-2, 120, 75)
+    private val centerBlock = BlockPos(0, 120, 77)
 
     init {
         TickTask(1) {
             if (DungeonUtils.getF7Phase() != M7Phases.P3) return@TickTask
             clicksRemaining.clear()
-            if ((mc.player?.position()?.distanceTo(Vec3(0.0, 120.0, 77.0)) ?: return@TickTask) > 200) {
+            if ((mc.player?.blockPosition()?.distSqr(centerBlock) ?: return@TickTask) > 200) {
                 currentFrameRotations = null
                 targetSolution = null
                 return@TickTask
@@ -101,9 +101,8 @@ object ArrowAlign : Module(
                 }
                 context.drawText(
                     Component.literal("§$colorCode$clickNeeded").visualOrderText,
-                    getFramePositionFromIndex(index.toInt()).center.addVec(y = 0.1, x = -0.3),
-                    1f,
-                    false
+                    getFramePositionFromIndex(index).center.addVec(y = 0.1, x = -0.3),
+                    1f, false
                 )
             }
         }

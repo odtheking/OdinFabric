@@ -38,8 +38,8 @@ object DragonCheck {
         val sprayedEntity = mc.level?.getEntity(packet.entity) as? ArmorStand ?: return
 
         WitherDragonsEnum.entries.forEach { dragon ->
-            if (dragon.entity == null) return@forEach
-            if (dragon.isSprayed || dragon.state != WitherDragonState.ALIVE || sprayedEntity.distanceTo(dragon.entity!!) > 8) return@forEach
+            val entity = dragon.entity ?: return@forEach
+            if (dragon.isSprayed || dragon.state != WitherDragonState.ALIVE || sprayedEntity.distanceTo(entity) > 8) return@forEach
 
             if (WitherDragons.sendSpray) {
                 modMessage("§${dragon.colorCode}${dragon.name} §fdragon was sprayed in §c${(WitherDragons.currentTick - dragon.spawnedTime).let { 

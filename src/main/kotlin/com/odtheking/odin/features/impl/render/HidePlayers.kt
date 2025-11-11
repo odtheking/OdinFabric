@@ -4,8 +4,6 @@ import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.NumberSetting
 import com.odtheking.odin.features.Module
-import com.odtheking.odin.utils.skyblock.Island
-import com.odtheking.odin.utils.skyblock.LocationUtils
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.player.Player
 
@@ -18,7 +16,7 @@ object HidePlayers : Module(
 
     @JvmStatic
     fun shouldRenderPlayer(entity: Entity): Boolean {
-        if (!enabled || entity !is Player || entity.uuid.version() != 4 || entity == mc.player || LocationUtils.currentArea.isArea(Island.SinglePlayer)) return true
+        if (!enabled || entity !is Player || entity.uuid.version() != 4 || entity == mc.player) return true
         return if (hideAll) false else entity.distanceToSqr(mc.player) > (distance * distance)
     }
 }

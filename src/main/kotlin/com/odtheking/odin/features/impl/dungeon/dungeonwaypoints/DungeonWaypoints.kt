@@ -95,7 +95,6 @@ object DungeonWaypoints : Module(
         }
 
         on<RenderEvent.Last> {
-            if (mc.level == null) return@on
             if (DungeonUtils.inBoss || !DungeonUtils.inDungeons) return@on
             val room = DungeonUtils.currentRoom ?: return@on
 
@@ -115,7 +114,7 @@ object DungeonWaypoints : Module(
 
             reachPosition?.takeIf { allowEdits }?.let { pos ->
                 val aabb = if (!useBlockSize) AABB(pos).deflate((1.0 - size) / 2.0) else
-                    mc.level!!.getBlockState(pos)?.getShape(mc.level!!, pos)?.singleEncompassing()
+                    mc.level?.getBlockState(pos)?.getShape(mc.level, pos)?.singleEncompassing()
                         ?.takeIf { !it.isEmpty }?.bounds()?.move(pos) ?: AABB(pos)
 
                 context.drawStyledBox(aabb, reachColor, style = if (filled) 0 else 1, depthCheck)
@@ -123,7 +122,6 @@ object DungeonWaypoints : Module(
         }
 
         on<InputEvent> {
-            if (mc.level == null) return@on
             if (!allowEdits || key.value != GLFW.GLFW_MOUSE_BUTTON_RIGHT || mc.screen != null) return@on
             val room = DungeonUtils.currentRoom ?: return@on
             mc.player?.mainHandItem?.isEtherwarpItem()?.let { item ->
@@ -139,7 +137,7 @@ object DungeonWaypoints : Module(
 
             val aabb =
                 if (!useBlockSize) AABB(pos).deflate((1.0 - size) / 2.0)
-                else mc.level!!.getBlockState(pos)?.getShape(mc.level!!, pos)?.singleEncompassing()?.takeIf { !it.isEmpty }?.bounds() ?: AABB(pos)
+                else mc.level?.getBlockState(pos)?.getShape(mc.level, pos)?.singleEncompassing()?.takeIf { !it.isEmpty }?.bounds() ?: AABB(pos)
 
             val waypoints = getWaypoints(room)
 

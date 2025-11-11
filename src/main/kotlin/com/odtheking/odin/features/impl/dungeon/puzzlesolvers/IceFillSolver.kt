@@ -4,7 +4,6 @@ import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.odtheking.odin.OdinMod.logger
 import com.odtheking.odin.OdinMod.mc
-import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.modMessage
@@ -13,9 +12,9 @@ import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.Rotations
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
-import net.minecraft.world.level.block.Blocks
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Vec3i
+import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.phys.Vec3
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
@@ -52,12 +51,7 @@ object IceFillSolver {
     }
 
     private fun scanAllFloors(pos: BlockPos, rotation: Rotations, optimizePatterns: Boolean) {
-        listOf(pos, pos.offset(transformTo(
-            Vec3i(
-                5,
-                1,
-                0
-            ), rotation)), pos.offset(transformTo(Vec3i(12, 2, 0), rotation))).forEachIndexed { floorIndex, startPosition ->
+        listOf(pos, pos.offset(transformTo(Vec3i(5, 1, 0), rotation)), pos.offset(transformTo(Vec3i(12, 2, 0), rotation))).forEachIndexed { floorIndex, startPosition ->
             val floorHeight = representativeFloors[floorIndex]
             val startTime = System.nanoTime()
 

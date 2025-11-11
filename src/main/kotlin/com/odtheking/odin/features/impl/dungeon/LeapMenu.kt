@@ -74,7 +74,7 @@ object LeapMenu : Module(
                         else -> ((mc.window.height - (boxHeight * 2f)) / 8f)
                     }
 
-                    val expandValue = hoverHandler[index].anim.get(0f, 15f, !hoverHandler[index].hasStarted)
+                    val expandValue = hoverHandler[index].anim.get(0f, 15f, !hoverHandler[index].isHovered)
                     NVGRenderer.rect(x - expandValue ,y - expandValue, boxWidth + expandValue * 2, boxHeight + expandValue * 2, (if (colorStyle) player.clazz.color else backgroundColor).rgba, 12f)
                     imageCacheMap.getOrPut(player.locationSkin.path) {
                         NVGRenderer.createNVGImage((mc.textureManager?.getTexture(player.locationSkin)?.texture as? GlTexture)?.glId() ?: 0, 64, 64)
@@ -131,14 +131,13 @@ object LeapMenu : Module(
         }
     }
 
-
     private fun leapTo(name: String, screenHandler: AbstractContainerScreen<*>) {
         if (mc.player == null || mc.gameMode == null) return
         val index = screenHandler.menu.slots.subList(11, 16).firstOrNull {
             it.item?.hoverName?.string?.substringAfter(' ').equals(name.noControlCodes, ignoreCase = true)
         }?.index ?: return modMessage("Can't find player $name. This shouldn't be possible! are you nicked?")
         modMessage("Teleporting to $name.")
-        mc.gameMode!!.handleInventoryMouseClick(screenHandler.menu.containerId, index, 0, ClickType.PICKUP, mc.player!!)
+        mc.gameMode?.handleInventoryMouseClick(screenHandler.menu.containerId, index, 0, ClickType.PICKUP, mc.player)
     }
 
     /*private val leapTeammates: MutableList<DungeonPlayer> = mutableListOf(

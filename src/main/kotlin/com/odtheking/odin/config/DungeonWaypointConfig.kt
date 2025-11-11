@@ -121,15 +121,14 @@ object DungeonWaypointConfig {
             val filled = jsonObj["filled"].asBoolean
             val depth = jsonObj["depth"].asBoolean
 
-            val box = if (jsonObj.has("aabb")) context.deserialize<AABB>(jsonObj["aabb"], AABB::class.java)
-            else context.deserialize(jsonObj["box"], AABB::class.java)
+            val aabb = context.deserialize<AABB>(jsonObj["aabb"], AABB::class.java)
 
             val title = jsonObj["title"]?.asString?.ifBlank { null }
             val waypointType = jsonObj["type"]?.asString?.let {
                 runCatching { DungeonWaypoints.WaypointType.valueOf(it) }.getOrNull()
             }
 
-            val waypoint = DungeonWaypoint(blockPos, color, filled, depth, box, title, type = waypointType)
+            val waypoint = DungeonWaypoint(blockPos, color, filled, depth, aabb, title, type = waypointType)
 
             if (waypointType == null && jsonObj.has("secret") && jsonObj["secret"]?.asBoolean == true)
                 waypoint.type = DungeonWaypoints.WaypointType.SECRET

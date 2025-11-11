@@ -43,7 +43,7 @@ class SelectorSetting(
 
     private val elementWidths by lazy { options.map { NVGRenderer.textWidth(it, 16f, NVGRenderer.defaultFont) } }
     private val settingAnim = EaseInOutAnimation(200)
-    private val hover = HoverHandler(0, 150)
+    private val hover = HoverHandler(150)
     private val defaultHeight = Panel.HEIGHT
     private var extended = false
 

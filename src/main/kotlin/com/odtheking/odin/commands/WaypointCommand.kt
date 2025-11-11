@@ -36,10 +36,7 @@ val waypointCommand = Commodore("odwaypoint") {
         }
 
         runs { name: String, x: Int?, y: Int?, z: Int? ->
-            val pos = mc.player?.blockPosition() ?: return@runs
-            val posX = pos.x
-            val posY = pos.y
-            val posZ = pos.z
+            val (posX, posY, posZ)= mc.player?.blockPosition() ?: return@runs
             Waypoints.addTempWaypoint(name, x ?: posX, y ?: posY, z ?: posZ)
         }
 

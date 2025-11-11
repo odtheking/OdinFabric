@@ -94,7 +94,7 @@ object BloodCamp : Module(
             if (mc.level == null) return@onReceive
             if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
 
-            val entity = getEntity(mc.level!!) as? ArmorStand ?: return@onReceive
+            val entity = getEntity(mc.level) as? ArmorStand ?: return@onReceive
             if (currentWatcherEntity?.let { it.distanceTo(entity) <= 20 } != true || entity.getItemBySlot(EquipmentSlot.HEAD).item != Items.PLAYER_HEAD || entity.getItemBySlot(EquipmentSlot.HEAD)?.texture !in allowedMobSkulls) return@onReceive
 
             val packetVector = Vec3(
@@ -173,7 +173,7 @@ object BloodCamp : Module(
 
         onReceive<ClientboundRemoveEntitiesPacket> {
             if (currentWatcherEntity == null) return@onReceive
-            entityIds.find { mc.level?.getEntity(it) == currentWatcherEntity }?.let { currentWatcherEntity = null }
+            if (entityIds.any { it == currentWatcherEntity?.id }) currentWatcherEntity = null
         }
 
         TickTask(0, true) {
@@ -199,7 +199,7 @@ object BloodCamp : Module(
         on<RenderEvent.Last> {
             if (!DungeonUtils.inDungeons || DungeonUtils.inBoss || !bloodAssist) return@on
 
-            renderDataMap.forEach { entity, renderData ->
+            renderDataMap.forEach { (entity, renderData) ->
                 val (_, started, firstSpawn) = entityDataMap[entity]?.takeUnless { !entity.isAlive } ?: return@forEach
 
                 val (currVector, endVector, endVecUpdated, speedVectors) = renderData

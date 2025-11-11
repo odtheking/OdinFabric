@@ -66,12 +66,11 @@ object SecretClicked : Module(
         }
 
         on<RenderEvent.Last> {
-            if (mc.level == null) return@on
             if (!boxes || !DungeonUtils.inDungeons || (DungeonUtils.inBoss && !boxInBoss) || clickedSecretsList.isEmpty()) return@on
 
             clickedSecretsList.forEach { secret ->
                 val currentColor = if (secret.locked) lockedColor else color
-                val box = mc.level?.getBlockState(secret.pos)?.getShape(mc.level!!, secret.pos)?.singleEncompassing()
+                val box = mc.level?.getBlockState(secret.pos)?.getShape(mc.level, secret.pos)?.singleEncompassing()
                     ?.takeIf { !it.isEmpty }?.bounds()?.move(secret.pos) ?: AABB(secret.pos)
                 context.drawStyledBox(box, currentColor, style, depthCheck)
             }

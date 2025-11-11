@@ -14,11 +14,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
-import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket
-import net.minecraft.network.protocol.game.ClientboundSoundPacket
-import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
-import net.minecraft.network.protocol.game.ClientboundTakeItemEntityPacket
-import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket
+import net.minecraft.network.protocol.game.*
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.entity.item.ItemEntity
 
@@ -58,7 +54,7 @@ object EventDispatcher {
             if (mc.player == null) return@onReceive
             if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
             val itemEntity = mc.level?.getEntity(itemId) as? ItemEntity ?: return@onReceive
-            if (itemEntity.item?.hoverName?.string?.containsOneOf(dungeonItemDrops, true) == true && itemEntity.distanceTo(mc.player!!) <= 6)
+            if (itemEntity.item?.hoverName?.string?.containsOneOf(dungeonItemDrops, true) == true && itemEntity.distanceTo(mc.player ?: return@onReceive) <= 6)
                 SecretPickupEvent.Item(itemEntity).postAndCatch()
         }
 
@@ -67,7 +63,7 @@ object EventDispatcher {
             if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
             entityIds.forEach { id ->
                 val entity = mc.level?.getEntity(id) as? ItemEntity ?: return@forEach
-                if (entity.item?.hoverName?.string?.containsOneOf(dungeonItemDrops, true) == true && entity.distanceTo(mc.player!!) <= 6)
+                if (entity.item?.hoverName?.string?.containsOneOf(dungeonItemDrops, true) == true && entity.distanceTo(mc.player ?: return@onReceive) <= 6)
                     SecretPickupEvent.Item(entity).postAndCatch()
             }
         }
