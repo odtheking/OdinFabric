@@ -36,6 +36,8 @@ class NVGSpecialRenderer(vertexConsumers: MultiBufferSource.BufferSource)
         state.renderContent()
         NVGRenderer.endFrame()
         GlStateManager._disableDepthTest()
+        GlStateManager._enableBlend()
+        GlStateManager._blendFuncSeparate(770, 771, 1, 0)
     }
 
     override fun getTranslateY(height: Int, windowScaleFactor: Int): Float = height / 2f
