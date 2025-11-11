@@ -124,7 +124,7 @@ open class TermSimGUI(
 
     protected fun Slot.setSlot(stack: ItemStack) {
         PacketEvent.Receive(ClientboundContainerSetSlotPacket(-2, 0, index, stack)).postAndCatch()
-        setSlot(stack)
+        set(stack)
     }
 
     protected fun playTermSimSound() {
