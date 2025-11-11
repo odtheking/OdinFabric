@@ -68,7 +68,7 @@ fun BlockPos.addRotationCoords(rotation: Rotations, x: Int, z: Int): BlockPos =
     }
 
 fun isXZInterceptable(box: AABB, range: Double, pos: Vec3, yaw: Float, pitch: Float): Boolean {
-    val start = getPositionEyes(pos)
+    val start = pos.addVec(y = (mc.player?.eyeY ?: 0.0))
     val goal = start.add(getLook(yaw, pitch).multiply(range, range, range))
 
     return isVecInZ(start.intermediateWithXValue(goal, box.minX), box) ||
@@ -76,9 +76,6 @@ fun isXZInterceptable(box: AABB, range: Double, pos: Vec3, yaw: Float, pitch: Fl
             isVecInX(start.intermediateWithZValue(goal, box.minZ), box) ||
             isVecInX(start.intermediateWithZValue(goal, box.maxZ), box)
 }
-
-private fun getPositionEyes(pos: Vec3): Vec3 =
-    Vec3(pos.x, pos.y + (mc.player?.eyeY ?: 0.0), pos.z) // Add eye height like old getPositionEyes
 
 private fun getLook(yaw: Float, pitch: Float): Vec3 {
     val f2 = -cos(-pitch * 0.017453292f).toDouble()

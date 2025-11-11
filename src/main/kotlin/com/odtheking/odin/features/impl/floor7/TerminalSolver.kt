@@ -32,7 +32,7 @@ object TerminalSolver : Module(
     name = "Terminal Solver",
     description = "Renders solution for terminals in floor 7."
 ) {
-    private val debug by BooleanSetting("Debug Messages", false, desc = "Enables debug messages for the terminal solver.")
+    private val debug by BooleanSetting("Debug", false, desc = ".")
     val renderType by SelectorSetting("Mode", "Normal", arrayListOf("Normal", "Custom GUI"), desc = "How the terminal solver should render.")
     private val cancelToolTip by BooleanSetting("Stop Tooltips", true, desc = "Stops rendering tooltips in terminals.").withDependency { renderType != 1 }
     val hideClicked by BooleanSetting("Hide Clicked", false, desc = "Visually hides your first click before a gui updates instantly to improve perceived response time. Does not affect actual click time.")
@@ -42,7 +42,6 @@ object TerminalSolver : Module(
     val showNumbers by BooleanSetting("Show Numbers", true, desc = "Shows numbers in the order terminal.")
     private val terminalReloadThreshold by NumberSetting("Reload Threshold", 600, 300, 1000, 10, unit = "ms", desc = "The amount of time in seconds before the terminal reloads.")
     val customTermSize by NumberSetting("Custom Term Size", 1f, 0.5f, 3f, 0.1f, desc = "The size of the custom terminal GUI.").withDependency { renderType == 1 }
-    val customAnimations by BooleanSetting("Custom Animations", true, desc = "Enables animations for the custom terminal gui.").withDependency { renderType == 1 }
     val roundness by NumberSetting("Roundness", 9f, 0f, 15f, 1f, desc = "The roundness of the custom terminal gui.").withDependency { renderType == 1 }
     val gap by NumberSetting("Gap", 5f, 0f, 15f, 1f, desc = "The gap between the slots in the custom terminal gui.").withDependency { renderType == 1 }
 
@@ -251,7 +250,6 @@ object TerminalSolver : Module(
             EventBus.unsubscribe(it)
             devMessage("§cLeft terminal: §6${it.type.name}")
             TerminalEvent.Closed(it).postAndCatch()
-            currentTerm?.type?.getGUI()?.closeGui()
             currentTerm = null
         }
     }

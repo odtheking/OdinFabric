@@ -107,8 +107,8 @@ val devCommand = Commodore("oddev") {
     }
 
     literal("roomdata").runs {
-        val room = DungeonUtils.currentRoom
         val player = mc.player ?: return@runs
+        val room = ScanUtils.scanRoom(getRoomCenter(player.x.toInt(), player.z.toInt()))
         val roomCenter = getRoomCenter(player.x.toInt(), player.z.toInt())
         val core = ScanUtils.getCore(roomCenter)
         modMessage(
@@ -118,9 +118,18 @@ val devCommand = Commodore("oddev") {
             Core: $core
             Rotation: ${room?.rotation ?: "NONE"}
             Positions: ${room?.roomComponents?.joinToString { "(${it.x}, ${it.z})" } ?: "None"}
-            Height: ${room?.roomComponents?.firstOrNull()?.let { ScanUtils.getTopLayerOfRoom(it.vec2) } ?: "Unknown"}
+            Height: ${ScanUtils.getTopLayerOfRoom(roomCenter)}
             """.trimIndent(), "")
         setClipboardContent(core.toString())
         modMessage("§aCopied $core to clipboard!")
+    }
+
+    literal("relative").runs {
+        mc.hitResult?.let {
+            if (it !is BlockHitResult) return@runs
+            DungeonUtils.currentRoom?.getRelativeCoords(it.blockPos)?.let { vec2 ->
+                modMessage("Relative coords: ${vec2.x}, ${vec2.z}")
+            }
+        }
     }
 }

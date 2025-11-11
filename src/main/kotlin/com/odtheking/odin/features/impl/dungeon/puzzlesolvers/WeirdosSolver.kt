@@ -2,10 +2,11 @@ package com.odtheking.odin.features.impl.dungeon.puzzlesolvers
 
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.utils.Color
-import com.odtheking.odin.utils.addRotationCoords
 import com.odtheking.odin.utils.playSoundAtPlayer
 import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
+import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
+import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRelativeCoords
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.core.BlockPos
 import net.minecraft.sounds.SoundEvents
@@ -21,7 +22,8 @@ object WeirdosSolver {
         if (solutions.none { it.matches(msg) } && wrong.none { it.matches(msg) }) return
         val correctNPC = mc.level?.entitiesForRendering()?.find { it is ArmorStand && it.name.string == npc } ?: return
         val room = DungeonUtils.currentRoom ?: return
-        val pos = BlockPos(correctNPC.x.toInt() - 1, 69, correctNPC.z.toInt() -1).addRotationCoords(room.rotation, -1, 0)
+        val relativePos = room.getRelativeCoords(BlockPos(correctNPC.x.toInt() - 1, 69, correctNPC.z.toInt() - 1))
+        val pos = room.getRealCoords(relativePos.add(-1, 0, 0))
 
         if (solutions.any { it.matches(msg) }) {
             correctPos = pos

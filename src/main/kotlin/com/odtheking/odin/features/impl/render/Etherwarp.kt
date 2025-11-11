@@ -59,7 +59,7 @@ object Etherwarp : Module(
         }
 
         on<RenderEvent.Last> {
-            if (mc.player?.isCrouching == false || mc.screen != null) return@on
+            if (mc.player?.isCrouching == false || mc.screen != null || !render) return@on
 
             etherPos = getEtherPos(
                 if (useServerPosition) mc.player?.lastPos else mc.player?.position(),
@@ -107,27 +107,27 @@ object Etherwarp : Module(
     }
 
     fun getEtherPos(
-        position: Vec3?,
+        position: Vec3d?,
         distance: Double,
         returnEnd: Boolean = false,
         etherWarp: Boolean = false
     ): EtherPos {
         val player = mc.player ?: return EtherPos.NONE
         if (position == null) return EtherPos.NONE
-        val eyeHeight = if (player.isCrouching) {
+        val eyeHeight = if (player.isSneaking) {
             if (LocationUtils.currentArea.isArea(Island.Galatea)) 1.27 else 1.54 // Use modern sneak height in Galatea
         } else 1.62
 
         val startPos = position.addVec(y = eyeHeight)
-        val endPos = player.lookAngle?.multiply(distance, distance, distance)?.add(startPos) ?: return EtherPos.NONE
-        return traverseVoxels(startPos, endPos, etherWarp).takeUnless { it == EtherPos.NONE && returnEnd } ?: EtherPos(true, BlockPos.containing(endPos), null)
+        val endPos = player.rotationVector?.multiply(distance)?.add(startPos) ?: return EtherPos.NONE
+        return traverseVoxels(startPos, endPos, etherWarp).takeUnless { it == EtherPos.NONE && returnEnd } ?: EtherPos(true, BlockPos.ofFloored(endPos), null)
     }
 
     /**
      * Traverses voxels from start to end and returns the first non-air block it hits.
      * @author Bloom
      */
-    private fun traverseVoxels(start: Vec3, end: Vec3, etherWarp: Boolean): EtherPos {
+    private fun traverseVoxels(start: Vec3d, end: Vec3d, etherWarp: Boolean): EtherPos {
         val (x0, y0, z0) = start
         val (x1, y1, z1) = end
 
@@ -156,40 +156,40 @@ object Etherwarp : Module(
 
         repeat(1000) {
             val blockPos = BlockPos(x.toInt(), y.toInt(), z.toInt())
-            val chunk = mc.level?.getChunk(
-                SectionPos.blockToSectionCoord(blockPos.x),
-                SectionPos.blockToSectionCoord(blockPos.z)
+            val chunk = mc.world?.getChunk(
+                ChunkSectionPos.getSectionCoord(blockPos.x),
+                ChunkSectionPos.getSectionCoord(blockPos.z)
             ) ?: return EtherPos.NONE
             val currentBlock = chunk.getBlockState(blockPos).takeIf { it.block is Block } ?: return EtherPos.NONE
 
-            val currentBlockId = Block.getId(currentBlock.block.defaultBlockState())
+            val currentBlockId = Block.getRawIdFromState(currentBlock.block.defaultState)
 
             if ((!validEtherwarpFeetIds.get(currentBlockId) && etherWarp) || (currentBlockId != 0 && !etherWarp)) {
                 if (!etherWarp && validEtherwarpFeetIds.get(currentBlockId)) return EtherPos(
                     false,
                     blockPos,
-                    currentBlock.block.defaultBlockState()
+                    currentBlock.block.defaultState
                 )
 
-                val footBlockId = Block.getId(
+                val footBlockId = Block.getRawIdFromState(
                     chunk.getBlockState(
                         BlockPos(
                             blockPos.x,
                             blockPos.y + 1,
                             blockPos.z
                         )
-                    ).block.defaultBlockState()
+                    ).block.defaultState
                 )
                 if (!validEtherwarpFeetIds.get(footBlockId)) return EtherPos(false, blockPos, currentBlock)
 
-                val headBlockId = Block.getId(
+                val headBlockId = Block.getRawIdFromState(
                     chunk.getBlockState(
                         BlockPos(
                             blockPos.x,
                             blockPos.y + 2,
                             blockPos.z
                         )
-                    ).block.defaultBlockState()
+                    ).block.defaultState
                 )
                 if (!validEtherwarpFeetIds.get(headBlockId)) return EtherPos(false, blockPos, currentBlock)
 
@@ -223,21 +223,21 @@ object Etherwarp : Module(
         ButtonBlock::class, CarpetBlock::class, SkullBlock::class,
         WallSkullBlock::class, LadderBlock::class, SaplingBlock::class,
         FlowerBlock::class, StemBlock::class, CropBlock::class,
-        RailBlock::class, SnowLayerBlock::class,
-        TripWireBlock::class, TripWireHookBlock::class, FireBlock::class,
+        RailBlock::class, SnowBlock::class,
+        TripwireBlock::class, TripwireHookBlock::class, FireBlock::class,
         AirBlock::class, TorchBlock::class, FlowerPotBlock::class,
-        TallFlowerBlock::class, TallGrassBlock::class, BushBlock::class,
+        TallFlowerBlock::class, ShortPlantBlock::class, BushBlock::class,
         SeagrassBlock::class, TallSeagrassBlock::class, SugarCaneBlock::class,
-        LiquidBlock::class, VineBlock::class, MushroomBlock::class,
-        PistonHeadBlock::class, WoolCarpetBlock::class, WebBlock::class,
+        FluidBlock::class, VineBlock::class, MushroomPlantBlock::class,
+        PistonHeadBlock::class, DyedCarpetBlock::class, CobwebBlock::class,
         DryVegetationBlock::class, SmallDripleafBlock::class, LeverBlock::class,
-        NetherWartBlock::class, NetherPortalBlock::class, RedStoneWireBlock::class,
+        NetherWartBlock::class, NetherPortalBlock::class, RedstoneWireBlock::class,
         ComparatorBlock::class, RedstoneTorchBlock::class, RepeaterBlock::class, VineBlock::class
     )
 
     private val validEtherwarpFeetIds = BitSet(0).apply {
-        BuiltInRegistries.BLOCK.forEach { block ->
-            if (validTypes.any { it.isInstance(block) }) set(Block.getId(block.defaultBlockState()))
+        Registries.BLOCK.forEach { block ->
+            if (validTypes.any { it.isInstance(block) }) set(Block.getRawIdFromState(block.defaultState))
         }
     }
 }

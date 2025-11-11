@@ -35,7 +35,7 @@ object DungeonWaypoints : Module(
     private var allowEdits by BooleanSetting("Allow Edits", false, desc = "Allows you to edit waypoints.")
     private var allowMidair by BooleanSetting("Allow Midair", false, desc = "Allows waypoints to be placed midair if they reach the end of distance without hitting a block.").withDependency { allowEdits }
     private var reachColor by ColorSetting("Reach Color", Color(0, 255, 213, 0.43f), true, desc = "Color of the reach box highlight.").withDependency { allowEdits }
-    private val allowTextEdit by BooleanSetting("Allow Text Edit", true, desc = "Allows you to set the text of a waypoint while sneaking.")
+    private val allowTextEdit by BooleanSetting("Allow Text Edit", true, desc = "Allows you to set the text of a waypoint while sneaking.").withDependency { allowEdits }
 
     private val renderTitle by BooleanSetting("Render Title", true, desc = "Renders the titles of waypoints")
     private val titleScale by NumberSetting("Title Scale", 1f, 0.1f, 4f, increment = 0.1f, desc = "The scale of the titles of waypoints.").withDependency { renderTitle }

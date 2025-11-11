@@ -46,7 +46,7 @@ object EventDispatcher {
         }
 
         ClientReceiveMessageEvents.ALLOW_GAME.register { text, overlay ->
-            if (overlay) return@register false
+            if (overlay) return@register true
             !ChatManager.shouldCancelMessage(text)
         }
 
