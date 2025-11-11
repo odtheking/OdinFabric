@@ -39,9 +39,9 @@ open class TermSimGUI(
         else if (size <= 36) MenuType.GENERIC_9x4
         else if (size <= 45) MenuType.GENERIC_9x5
         else MenuType.GENERIC_9x6,
-        0, Inventory(mc.player, PlayerEquipment(mc.player)), inv, size / 9
+        0, Inventory(mc.player!!, PlayerEquipment(mc.player!!)), inv, size / 9
     ),
-    Inventory(mc.player, PlayerEquipment(mc.player)),
+    Inventory(mc.player!!, PlayerEquipment(mc.player!!)),
     Component.literal(name)
 ) {
     val blackPane = ItemStack(Items.BLACK_STAINED_GLASS_PANE).apply { set(DataComponents.CUSTOM_NAME, Component.literal("")) }

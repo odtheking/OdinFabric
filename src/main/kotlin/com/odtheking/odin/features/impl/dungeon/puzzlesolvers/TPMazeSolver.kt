@@ -33,7 +33,6 @@ object TPMazeSolver {
     }
 
     private fun getCorrectPortals(pos: Vec3, yaw: Float, pitch: Float) {
-        if (mc.player == null) return
         if (correctPortals.isEmpty()) correctPortals = correctPortals.plus(tpPads)
 
         correctPortals = correctPortals.filter {
@@ -41,7 +40,7 @@ object TPMazeSolver {
             isXZInterceptable(
                 AABB(it.x.toDouble(), it.y.toDouble(), it.z.toDouble(), it.x + 1.0, it.y + 4.0, it.z + 1.0).inflate(0.75, 0.0, 0.75),
                 32.0, pos, yaw, pitch
-            ) && !AABB(it).inflate(.5, .0, .5).intersects(mc.player?.boundingBox)
+            ) && !AABB(it).inflate(.5, .0, .5).intersects(mc.player?.boundingBox ?: return@filter false)
         }
     }
 

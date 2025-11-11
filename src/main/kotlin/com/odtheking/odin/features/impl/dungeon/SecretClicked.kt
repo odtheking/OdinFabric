@@ -10,6 +10,7 @@ import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.Colors
+import com.odtheking.odin.utils.getBlockBounds
 import com.odtheking.odin.utils.handlers.LimitedTickTask
 import com.odtheking.odin.utils.playSoundAtPlayer
 import com.odtheking.odin.utils.render.drawStyledBox
@@ -41,7 +42,7 @@ object SecretClicked : Module(
 
     private val chimeInBoss by BooleanSetting("Chime In Boss", false, desc = "Prevent playing the sound if in boss room.").withDependency { chimeDropdownSetting && chime }
 
-    private data class Secret(val pos: BlockPos, var locked: Boolean = false)
+    private data class Secret(val aabb: AABB, var locked: Boolean = false)
     private val clickedSecretsList = CopyOnWriteArrayList<Secret>()
     private var lastPlayed = System.currentTimeMillis()
 
@@ -70,9 +71,7 @@ object SecretClicked : Module(
 
             clickedSecretsList.forEach { secret ->
                 val currentColor = if (secret.locked) lockedColor else color
-                val box = mc.level?.getBlockState(secret.pos)?.getShape(mc.level, secret.pos)?.singleEncompassing()
-                    ?.takeIf { !it.isEmpty }?.bounds()?.move(secret.pos) ?: AABB(secret.pos)
-                context.drawStyledBox(box, currentColor, style, depthCheck)
+                context.drawStyledBox(secret.aabb, currentColor, style, depthCheck)
             }
         }
 
@@ -88,8 +87,8 @@ object SecretClicked : Module(
     }
 
     private fun secretBox(pos: BlockPos) {
-        if (!boxes || (DungeonUtils.inBoss && !boxInBoss) || clickedSecretsList.any { it.pos == pos }) return
-        clickedSecretsList.add(Secret(pos))
+        if (!boxes || (DungeonUtils.inBoss && !boxInBoss) || clickedSecretsList.any { it.aabb.intersects(pos) }) return
+        clickedSecretsList.add(Secret(pos.getBlockBounds()?.move(pos) ?: AABB(pos)))
         LimitedTickTask(timeToStay * 20, 1) { clickedSecretsList.removeFirstOrNull() }
     }
 }

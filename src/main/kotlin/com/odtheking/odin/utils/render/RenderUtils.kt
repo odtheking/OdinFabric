@@ -149,11 +149,14 @@ fun WorldRenderContext.drawText(text: FormattedCharSequence?, pos: Vec3, scale: 
 
     val consumers = MultiBufferSource.immediate(ALLOCATOR)
 
-    mc.font.drawInBatch(
-        text, -mc.font.width(text) / 2f, 0f, -1, true, matrix, consumers,
-        if (depth) Font.DisplayMode.NORMAL else Font.DisplayMode.SEE_THROUGH,
-        0, LightTexture.FULL_BRIGHT
-    )
+    mc.font?.let {
+        it.drawInBatch(
+            text, -it.width(text) / 2f, 0f, -1, true, matrix, consumers,
+            if (depth) Font.DisplayMode.NORMAL else Font.DisplayMode.SEE_THROUGH,
+            0, LightTexture.FULL_BRIGHT
+        )
+    }
+
     consumers.endBatch()
     stack.popPose()
 }

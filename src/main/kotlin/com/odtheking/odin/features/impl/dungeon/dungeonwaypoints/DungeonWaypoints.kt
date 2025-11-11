@@ -114,8 +114,7 @@ object DungeonWaypoints : Module(
 
             reachPosition?.takeIf { allowEdits }?.let { pos ->
                 val aabb = if (!useBlockSize) AABB(pos).deflate((1.0 - size) / 2.0) else
-                    mc.level?.getBlockState(pos)?.getShape(mc.level, pos)?.singleEncompassing()
-                        ?.takeIf { !it.isEmpty }?.bounds()?.move(pos) ?: AABB(pos)
+                    pos.getBlockBounds()?.move(pos) ?: AABB(pos)
 
                 context.drawStyledBox(aabb, reachColor, style = if (filled) 0 else 1, depthCheck)
             }
@@ -135,9 +134,7 @@ object DungeonWaypoints : Module(
             val pos = reachPosition ?: return@on
             val blockPos = room.getRelativeCoords(pos)
 
-            val aabb =
-                if (!useBlockSize) AABB(pos).deflate((1.0 - size) / 2.0)
-                else mc.level?.getBlockState(pos)?.getShape(mc.level, pos)?.singleEncompassing()?.takeIf { !it.isEmpty }?.bounds() ?: AABB(pos)
+            val aabb = if (!useBlockSize) AABB(pos).deflate((1.0 - size) / 2.0) else pos.getBlockBounds() ?: AABB(pos)
 
             val waypoints = getWaypoints(room)
 

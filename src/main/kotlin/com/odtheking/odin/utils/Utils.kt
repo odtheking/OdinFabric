@@ -4,11 +4,14 @@ package com.odtheking.odin.utils
 
 import com.odtheking.odin.OdinMod
 import com.odtheking.odin.OdinMod.mc
+import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.ClickEvent
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.HoverEvent
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EquipmentSlot
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.inventory.ClickType
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
 import java.util.*
@@ -147,4 +150,15 @@ fun romanToInt(s: String): Int {
         }
         result + (romanMap[s.last()] ?: 0)
     }
+}
+
+fun BlockPos.getBlockBounds() =
+    mc.level?.let { level ->
+        level.getBlockState(this)?.getShape(level, this)?.singleEncompassing()
+            ?.takeIf { !it.isEmpty }?.bounds()
+    }
+
+
+fun Player.clickSlot(containerId: Int, slotIndex: Int, button: Int = 0, clickType: ClickType = ClickType.PICKUP) {
+    mc.gameMode?.handleInventoryMouseClick(containerId, slotIndex, button, clickType, this)
 }

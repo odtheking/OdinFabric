@@ -19,7 +19,6 @@ import com.odtheking.odin.utils.ui.rendering.NVGRenderer
 import com.odtheking.odin.utils.ui.rendering.NVGSpecialRenderer
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.resources.ResourceLocation
-import net.minecraft.world.inventory.ClickType
 import org.lwjgl.glfw.GLFW
 
 object LeapMenu : Module(
@@ -132,12 +131,11 @@ object LeapMenu : Module(
     }
 
     private fun leapTo(name: String, screenHandler: AbstractContainerScreen<*>) {
-        if (mc.player == null || mc.gameMode == null) return
         val index = screenHandler.menu.slots.subList(11, 16).firstOrNull {
             it.item?.hoverName?.string?.substringAfter(' ').equals(name.noControlCodes, ignoreCase = true)
         }?.index ?: return modMessage("Can't find player $name. This shouldn't be possible! are you nicked?")
+        mc.player?.clickSlot(screenHandler.menu.containerId, index)
         modMessage("Teleporting to $name.")
-        mc.gameMode?.handleInventoryMouseClick(screenHandler.menu.containerId, index, 0, ClickType.PICKUP, mc.player)
     }
 
     /*private val leapTeammates: MutableList<DungeonPlayer> = mutableListOf(

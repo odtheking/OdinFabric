@@ -17,6 +17,6 @@ object HidePlayers : Module(
     @JvmStatic
     fun shouldRenderPlayer(entity: Entity): Boolean {
         if (!enabled || entity !is Player || entity.uuid.version() != 4 || entity == mc.player) return true
-        return if (hideAll) false else entity.distanceToSqr(mc.player) > (distance * distance)
+        return if (hideAll) false else entity.distanceToSqr(mc.player ?: return true) > (distance * distance)
     }
 }

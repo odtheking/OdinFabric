@@ -8,6 +8,7 @@ import com.odtheking.odin.events.TerminalEvent
 import com.odtheking.odin.events.core.EventBus
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.impl.floor7.termsim.TermSimGUI
+import com.odtheking.odin.utils.clickSlot
 import com.odtheking.odin.utils.equalsOneOf
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
@@ -62,7 +63,7 @@ open class TerminalHandler(val type: TerminalTypes) {
             ).postAndCatch()
             return
         }
-        mc.gameMode?.handleInventoryMouseClick(screenHandler.containerId, slotIndex, button, if (button == GLFW.GLFW_MOUSE_BUTTON_3) ClickType.CLONE else ClickType.PICKUP, mc.player)
+        mc.player?.clickSlot(screenHandler.containerId, slotIndex, button, if (button == GLFW.GLFW_MOUSE_BUTTON_3) ClickType.CLONE else ClickType.PICKUP)
     }
 
     fun canClick(slotIndex: Int, button: Int, needed: Int = solution.count { it == slotIndex }): Boolean = when {

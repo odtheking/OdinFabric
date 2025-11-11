@@ -91,10 +91,10 @@ object BloodCamp : Module(
 
     init {
         onReceive<ClientboundMoveEntityPacket> {
-            if (mc.level == null) return@onReceive
+            val level = mc.level ?: return@onReceive
             if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
 
-            val entity = getEntity(mc.level) as? ArmorStand ?: return@onReceive
+            val entity = getEntity(level) as? ArmorStand ?: return@onReceive
             if (currentWatcherEntity?.let { it.distanceTo(entity) <= 20 } != true || entity.getItemBySlot(EquipmentSlot.HEAD).item != Items.PLAYER_HEAD || entity.getItemBySlot(EquipmentSlot.HEAD)?.texture !in allowedMobSkulls) return@onReceive
 
             val packetVector = Vec3(

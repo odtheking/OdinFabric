@@ -8,11 +8,11 @@ import com.odtheking.odin.clickgui.settings.impl.ListSetting
 import com.odtheking.odin.events.GuiEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
+import com.odtheking.odin.utils.clickSlot
 import com.odtheking.odin.utils.itemUUID
 import com.odtheking.odin.utils.loreString
 import com.odtheking.odin.utils.modMessage
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
-import net.minecraft.world.inventory.ClickType
 import org.lwjgl.glfw.GLFW
 
 object PetKeybinds : Module(
@@ -76,14 +76,11 @@ object PetKeybinds : Module(
 
         if (screen.menu.slots[index].item?.loreString?.contains("Click to despawn!") == true && unequipKeybind.value != keyCode) {
             modMessage("§cThat pet is already equipped!")
-            if (closeIfAlreadyEquipped) {
-                index = 49
-            } else if (nounequip) {
-                return false
-            }
+            if (closeIfAlreadyEquipped) index = 49
+            else if (nounequip) return false
         }
 
-        mc.gameMode?.handleInventoryMouseClick(screen.menu.containerId, index, GLFW.GLFW_MOUSE_BUTTON_1, ClickType.PICKUP, mc.player)
+        mc.player?.clickSlot(screen.menu.containerId, index)
         return true
     }
 }

@@ -7,9 +7,9 @@ import com.odtheking.odin.clickgui.settings.impl.KeybindSetting
 import com.odtheking.odin.events.GuiEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
+import com.odtheking.odin.utils.clickSlot
 import com.odtheking.odin.utils.modMessage
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
-import net.minecraft.world.inventory.ClickType
 import org.lwjgl.glfw.GLFW
 
 object WardrobeKeybinds : Module(
@@ -67,7 +67,7 @@ object WardrobeKeybinds : Module(
             }
         }
 
-        mc.gameMode?.handleInventoryMouseClick(screen.menu.containerId, index, GLFW.GLFW_MOUSE_BUTTON_1, ClickType.PICKUP, mc.player)
+        mc.player?.clickSlot(screen.menu.containerId, index)
         return true
     }
 }

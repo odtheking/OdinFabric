@@ -69,9 +69,7 @@ object Etherwarp : Module(
             if (etherPos?.succeeded != true && !renderFail) return@on
             val color = if (etherPos?.succeeded == true) color else failColor
             etherPos?.pos?.let { pos ->
-                val box = if (fullBlock) AABB(pos) else
-                    mc.level?.getBlockState(pos)?.getShape(mc.level, pos)?.singleEncompassing()
-                        ?.takeIf { !it.isEmpty }?.bounds()?.move(pos) ?: AABB(pos)
+                val box = if (fullBlock) AABB(pos) else pos.getBlockBounds()?.move(pos) ?: AABB(pos)
 
                 context.drawStyledBox(box, color, renderStyle, depth)
             }

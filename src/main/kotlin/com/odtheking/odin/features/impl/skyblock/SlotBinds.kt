@@ -10,6 +10,7 @@ import com.odtheking.odin.events.core.EventPriority
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Colors
+import com.odtheking.odin.utils.clickSlot
 import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.render.drawLine
 import net.minecraft.client.gui.screens.Screen
@@ -41,7 +42,7 @@ object SlotBinds : Module(
                 else -> return@on
             }
 
-            mc.gameMode?.handleInventoryMouseClick(screen.menu.containerId, from, to % 36, ClickType.SWAP, mc.player)
+            mc.player?.clickSlot(screen.menu.containerId, from, to % 36, ClickType.SWAP)
             cancel()
         }
 
