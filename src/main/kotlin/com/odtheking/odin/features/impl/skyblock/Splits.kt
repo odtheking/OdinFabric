@@ -6,7 +6,7 @@ import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.PersonalBest
 import com.odtheking.odin.utils.formatTime
-import com.odtheking.odin.utils.render.drawString
+import com.odtheking.odin.utils.render.drawStringExtension
 import com.odtheking.odin.utils.render.getStringWidth
 import com.odtheking.odin.utils.skyblock.SplitsManager.currentSplits
 import com.odtheking.odin.utils.skyblock.SplitsManager.getAndUpdateSplitsTimes
@@ -19,7 +19,7 @@ object Splits : Module(
     private val hud by HUD("Splits Display HUD", "Shows timers for each split.") { example ->
         if (example) {
             repeat(5) { i ->
-                drawString("Split $i: 0h 00m 00s" + if (showTickTime) " §7(§80s§7)" else "", 1, 1 + i * 9, Colors.WHITE.rgba)
+                drawStringExtension("Split $i: 0h 00m 00s" + if (showTickTime) " §7(§80s§7)" else "", 1, 1 + i * 9, Colors.WHITE.rgba)
             }
             return@HUD getStringWidth("Split 0: 0h 00m 00s" + if (showTickTime) " (0s)" else "") + 2 to 9 * 5
         }
@@ -31,20 +31,20 @@ object Splits : Module(
 
         currentSplits.splits.dropLast(1).forEachIndexed { index, split ->
             val time = formatTime(if (index >= times.size) 0 else times[index], numbersAfterDecimal)
-            drawString(split.name, 1, 1 + index * 9, Colors.WHITE.rgba)
+            drawStringExtension(split.name, 1, 1 + index * 9, Colors.WHITE.rgba)
 
             val displayText = if (showTickTime && index < tickTimes.size) "$time §7(§8${(tickTimes[index] / 20f).toFixed()}§7)" else time
 
-            drawString(displayText, maxWidth + 5, 1 + index * 9, Colors.WHITE.rgba)
+            drawStringExtension(displayText, maxWidth + 5, 1 + index * 9, Colors.WHITE.rgba)
         }
 
         if (bossEntrySplit && currentSplits.splits.size > 3) {
-            drawString("§9Boss Entry", 1, 1 + (currentSplits.splits.size - 1) * 9, Colors.WHITE.rgba)
+            drawStringExtension("§9Boss Entry", 1, 1 + (currentSplits.splits.size - 1) * 9, Colors.WHITE.rgba)
 
             val totalTime = formatTime(times.take(3).sum(), numbersAfterDecimal)
             val displayText = if (showTickTime) "$totalTime §7(§8${(tickTimes.take(3).sum() / 20f).toFixed()}§7)" else totalTime
 
-            drawString(displayText, maxWidth + 5, 1 + (currentSplits.splits.size - 1) * 9, Colors.WHITE.rgba)
+            drawStringExtension(displayText, maxWidth + 5, 1 + (currentSplits.splits.size - 1) * 9, Colors.WHITE.rgba)
         }
 
         getStringWidth("Split 0: 0h 00m 00s" + if (showTickTime) " (0h 00m 00s)" else "") + 2 to 9 * (currentSplits.splits.size + (if (bossEntrySplit) 1 else 0))

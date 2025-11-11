@@ -4,11 +4,11 @@ import com.odtheking.odin.OdinMod.mc
 
 inline val mouseX: Float
     get() =
-        mc.mouse.x.toFloat()
+        mc.mouseHandler.xpos().toFloat()
 
 inline val mouseY: Float
     get() =
-        mc.mouse.y.toFloat()
+        mc.mouseHandler.ypos().toFloat()
 
 fun isAreaHovered(x: Float, y: Float, w: Float, h: Float): Boolean =
     mouseX in x..(x + w) && mouseY in y..(y + h)

@@ -1,38 +1,38 @@
 package com.odtheking.odin.utils.render
 
-import net.minecraft.client.render.RenderLayer
-import net.minecraft.client.render.RenderLayer.MultiPhase
-import net.minecraft.client.render.RenderPhase
+import net.minecraft.client.renderer.RenderType
+import net.minecraft.client.renderer.entity.layers.RenderLayer
+
 
 object CustomRenderLayer {
 
-    val LINE_LIST: RenderLayer = RenderLayer.of(
-        "line-list", RenderLayer.DEFAULT_BUFFER_SIZE,
+    val LINE_LIST:RenderType = RenderType.create(
+        "line-list", RenderType.TRANSIENT_BUFFER_SIZE,
         CustomRenderPipelines.LINE_LIST,
-        RenderLayer.MultiPhaseParameters.builder()
-            .layering(RenderPhase.VIEW_OFFSET_Z_LAYERING)
-            .build(false)
+       RenderType.CompositeState.builder()
+            .setLayeringState(RenderType.VIEW_OFFSET_Z_LAYERING)
+            .createCompositeState(false)
     )
 
-    val LINE_LIST_ESP: RenderLayer = RenderLayer.of(
-        "line-list-esp", RenderLayer.DEFAULT_BUFFER_SIZE,
+    val LINE_LIST_ESP: RenderType = RenderType.create(
+        "line-list-esp", RenderType.TRANSIENT_BUFFER_SIZE,
         CustomRenderPipelines.LINE_LIST_ESP,
-        RenderLayer.MultiPhaseParameters.builder().build(false)
+       RenderType.CompositeState.builder().createCompositeState(false)
     )
 
-    val TRIANGLE_STRIP: MultiPhase = RenderLayer.of(
-        "triangle_strip", RenderLayer.DEFAULT_BUFFER_SIZE,
+    val TRIANGLE_STRIP: RenderType.CompositeRenderType = RenderType.create(
+        "triangle_strip", RenderType.TRANSIENT_BUFFER_SIZE,
         false, true,
         CustomRenderPipelines.TRIANGLE_STRIP,
-        RenderLayer.MultiPhaseParameters.builder()
-            .layering(RenderPhase.VIEW_OFFSET_Z_LAYERING)
-            .build(false)
+       RenderType.CompositeState.builder()
+            .setLayeringState(RenderType.VIEW_OFFSET_Z_LAYERING)
+            .createCompositeState(false)
     )
 
-    val TRIANGLE_STRIP_ESP: MultiPhase = RenderLayer.of(
-        "triangle_strip_esp", RenderLayer.DEFAULT_BUFFER_SIZE,
+    val TRIANGLE_STRIP_ESP: RenderType.CompositeRenderType = RenderType.create(
+        "triangle_strip_esp",RenderType.TRANSIENT_BUFFER_SIZE,
         false, true,
         CustomRenderPipelines.TRIANGLE_STRIP_ESP,
-        RenderLayer.MultiPhaseParameters.builder().build(false)
+        RenderType.CompositeState.builder().createCompositeState(false)
     )
 }

@@ -10,10 +10,10 @@ import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
-import net.minecraft.block.Blocks
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket
-import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.Box
+import net.minecraft.core.BlockPos
+import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket
+import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.phys.AABB
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 
@@ -41,7 +41,7 @@ object BoulderSolver {
         var str = ""
         for (z in 24 downTo 9 step 3) {
             for (x in 24 downTo 6 step 3) {
-                str += if (mc.world?.getBlockState(room.getRealCoords(BlockPos(x, 66, z)))?.block == Blocks.AIR) "0" else "1"
+                str += if (mc.level?.getBlockState(room.getRealCoords(BlockPos(x, 66, z)))?.block == Blocks.AIR) "0" else "1"
             }
         }
         currentPositions = solutions[str]?.map { sol ->
@@ -54,15 +54,15 @@ object BoulderSolver {
     fun onRenderWorld(context: WorldRenderContext, showAllBoulderClicks: Boolean, boulderStyle: Int, boulderColor: Color) {
         if (DungeonUtils.currentRoomName != "Boulder" || currentPositions.isEmpty()) return
         if (showAllBoulderClicks) currentPositions.forEach {
-            context.drawStyledBox(Box(it.render), boulderColor, boulderStyle)
+            context.drawStyledBox(AABB(it.render), boulderColor, boulderStyle)
         } else currentPositions.firstOrNull()?.let {
-            context.drawStyledBox(Box(it.render), boulderColor, boulderStyle)
+            context.drawStyledBox(AABB(it.render), boulderColor, boulderStyle)
         }
     }
 
-    fun playerInteract(event: PlayerInteractBlockC2SPacket) {
-        if (mc.world?.getBlockState(event.blockHitResult.blockPos).equalsOneOf(Blocks.OAK_SIGN, Blocks.STONE_BUTTON))
-            currentPositions.remove(currentPositions.firstOrNull { it.click == event.blockHitResult.blockPos })
+    fun playerInteract(event: ServerboundUseItemOnPacket) {
+        if (mc.level?.getBlockState(event.hitResult.blockPos).equalsOneOf(Blocks.OAK_SIGN, Blocks.STONE_BUTTON))
+            currentPositions.remove(currentPositions.firstOrNull { it.click == event.hitResult.blockPos })
     }
 
     fun reset() {

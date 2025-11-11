@@ -16,12 +16,12 @@ import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRelativeCoords
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.Room
-import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket
-import net.minecraft.text.Text
-import net.minecraft.util.hit.BlockHitResult
-import net.minecraft.util.hit.HitResult
-import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.Box
+import net.minecraft.core.BlockPos
+import net.minecraft.network.chat.Component
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket
+import net.minecraft.world.phys.AABB
+import net.minecraft.world.phys.BlockHitResult
+import net.minecraft.world.phys.HitResult
 import org.lwjgl.glfw.GLFW
 
 /**
@@ -82,7 +82,7 @@ object DungeonWaypoints : Module(
             SecretWaypoints.resetSecrets()
         }
 
-        onReceive<PlayerPositionLookS2CPacket> {
+        onReceive<ClientboundPlayerPositionPacket> {
             SecretWaypoints.onEtherwarp(this)
         }
 
@@ -104,28 +104,27 @@ object DungeonWaypoints : Module(
                 for (waypoint in room.waypoints) {
                     if (waypoint.isClicked || waypoint.title == null) continue
 
-                    val pos = waypoint.blockPos.toCenterPos().add(0.0, 0.1 * titleScale, 0.0)
+                    val pos = waypoint.blockPos.center.add(0.0, 0.1 * titleScale, 0.0)
                     context.drawText(
-                        Text.of(waypoint.title).asOrderedText(),
+                        Component.literal(waypoint.title).visualOrderText,
                         pos, titleScale, waypoint.depth
                     )
                 }
             }
 
             reachPosition?.takeIf { allowEdits }?.let { pos ->
-                val box = if (!useBlockSize) Box(pos).contract((1.0 - size) / 2.0) else
-                    mc.world?.getBlockState(pos)?.getOutlineShape(mc.world, pos)?.asCuboid()
-                        ?.takeIf { !it.isEmpty }?.boundingBox?.offset(pos) ?: Box(pos)
+                val aabb = if (!useBlockSize) AABB(pos).deflate((1.0 - size) / 2.0) else
+                    pos.getBlockBounds()?.move(pos) ?: AABB(pos)
 
-                context.drawStyledBox(box, reachColor, style = if (filled) 0 else 1, depthCheck)
+                context.drawStyledBox(aabb, reachColor, style = if (filled) 0 else 1, depthCheck)
             }
         }
 
         on<InputEvent> {
-            if (!allowEdits || key.code != GLFW.GLFW_MOUSE_BUTTON_RIGHT || mc.currentScreen != null) return@on
+            if (!allowEdits || key.value != GLFW.GLFW_MOUSE_BUTTON_RIGHT || mc.screen != null) return@on
             val room = DungeonUtils.currentRoom ?: return@on
-            mc.player?.mainHandStack?.isEtherwarpItem()?.let { item ->
-                Etherwarp.getEtherPos(mc.player?.pos, 56.0 + item.getInt("tuned_transmission", 0))
+            mc.player?.mainHandItem?.isEtherwarpItem()?.let { item ->
+                Etherwarp.getEtherPos(mc.player?.position(), 56.0 + item.getInt("tuned_transmission").orElse(0))
                 .takeIf { it.succeeded && it.pos != null }
                 ?.also {
                     lastEtherTime = System.currentTimeMillis()
@@ -135,18 +134,16 @@ object DungeonWaypoints : Module(
             val pos = reachPosition ?: return@on
             val blockPos = room.getRelativeCoords(pos)
 
-            val box =
-                if (!useBlockSize) Box(pos).contract((1.0 - size) / 2.0)
-                else mc.world?.getBlockState(pos)?.getOutlineShape(mc.world, pos)?.asCuboid()?.takeIf { !it.isEmpty }?.boundingBox ?: Box(pos)
+            val aabb = if (!useBlockSize) AABB(pos).deflate((1.0 - size) / 2.0) else pos.getBlockBounds() ?: AABB(pos)
 
             val waypoints = getWaypoints(room)
 
-            if (allowTextEdit && mc.player?.isSneaking == true) {
+            if (allowTextEdit && mc.player?.isCrouching == true) {
                 TextPromptScreen.setCallback { text ->
                     waypoints.removeIf { it.blockPos == blockPos }
                     waypoints.add(
                         DungeonWaypoint(
-                            blockPos, selectedColor.copy(), filled, depthCheck, box,
+                            blockPos, selectedColor.copy(), filled, depthCheck, aabb,
                             text, WaypointType.getByInt(waypointType)
                         )
                     )
@@ -163,7 +160,7 @@ object DungeonWaypoints : Module(
             } else {
                 waypoints.add(
                     DungeonWaypoint(
-                        blockPos, selectedColor.copy(), filled, depthCheck, box,
+                        blockPos, selectedColor.copy(), filled, depthCheck, aabb,
                         type = WaypointType.getByInt(waypointType)
                     )
                 )
@@ -176,9 +173,9 @@ object DungeonWaypoints : Module(
 
     private inline val reachPosition: BlockPos?
         get() {
-            val hitResult = mc.crosshairTarget
+            val hitResult = mc.hitResult
             return when {
-                hitResult?.type == HitResult.Type.MISS && !allowMidair -> Etherwarp.getEtherPos(mc.player?.pos, 5.0).pos
+                hitResult?.type == HitResult.Type.MISS && !allowMidair -> Etherwarp.getEtherPos(mc.player?.position(), 5.0).pos
                 hitResult is BlockHitResult -> hitResult.blockPos
                 else -> null
             }
@@ -190,7 +187,7 @@ object DungeonWaypoints : Module(
                 addAll(waypoints.map { waypoint ->
                     DungeonWaypoint(
                         getRealCoords(waypoint.blockPos), waypoint.color, waypoint.filled, waypoint.depth,
-                        waypoint.box, waypoint.title, waypoint.type
+                        waypoint.aabb, waypoint.title, waypoint.type
                     )
                 })
             }
@@ -215,7 +212,7 @@ object DungeonWaypoints : Module(
     data class DungeonWaypoint(
         val blockPos: BlockPos, val color: Color,
         val filled: Boolean, val depth: Boolean,
-        val box: Box, val title: String? = null,
+        val aabb: AABB, val title: String? = null,
         var type: WaypointType? = null,
         @Transient var isClicked: Boolean = false,
     ) {

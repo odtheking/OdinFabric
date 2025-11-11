@@ -14,7 +14,7 @@ import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.handlers.MobCache
 import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.renderBoundingBox
-import net.minecraft.world.RaycastContext
+import net.minecraft.world.level.ClipContext
 
 object CustomHighlight : Module(
     name = "Custom Highlight",
@@ -34,10 +34,10 @@ object CustomHighlight : Module(
             entities.forEach { entity ->
                 val boundingBox = entity.renderBoundingBox
                 val color = highlightMap[entity.displayName?.string] ?: color
-                val canSee = mc.player?.canSee(
+                val canSee = mc.player?.hasLineOfSight(
                     entity,
-                    RaycastContext.ShapeType.VISUAL,
-                    RaycastContext.FluidHandling.NONE,
+                    ClipContext.Block.VISUAL,
+                    ClipContext.Fluid.NONE,
                     entity.eyeY
                 ) ?: false
 

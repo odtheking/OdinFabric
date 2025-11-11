@@ -7,11 +7,11 @@ import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.utils.handlers.LimitedTickTask
 import com.odtheking.odin.utils.handlers.TickTask
-import net.minecraft.entity.attribute.EntityAttributes
-import net.minecraft.entity.decoration.ArmorStandEntity
-import net.minecraft.entity.mob.GiantEntity
-import net.minecraft.entity.mob.MagmaCubeEntity
-import net.minecraft.network.packet.s2c.play.TeamS2CPacket
+import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket
+import net.minecraft.world.entity.ai.attributes.Attributes
+import net.minecraft.world.entity.decoration.ArmorStand
+import net.minecraft.world.entity.monster.Giant
+import net.minecraft.world.entity.monster.MagmaCube
 import kotlin.jvm.optionals.getOrNull
 
 object KuudraUtils {
@@ -19,13 +19,13 @@ object KuudraUtils {
     inline val inKuudra get() = LocationUtils.currentArea.isArea(Island.Kuudra)
 
     val freshers: MutableMap<String, Long?> = mutableMapOf()
-    val giantZombies: ArrayList<GiantEntity> = arrayListOf()
-    var kuudraEntity: MagmaCubeEntity? = null
+    val giantZombies: ArrayList<Giant> = arrayListOf()
+    var kuudraEntity: MagmaCube? = null
         private set
     var phase = 0
         private set
 
-    val buildingPiles = arrayListOf<ArmorStandEntity>()
+    val buildingPiles = arrayListOf<ArmorStand>()
     var playersBuildingAmount = 0
         private set
     var buildDonePercentage = 0
@@ -44,21 +44,21 @@ object KuudraUtils {
     init {
         TickTask(10) {
             if (!inKuudra) return@TickTask
-            val entities = mc.world?.entities ?: return@TickTask
+            val entities = mc.level?.entitiesForRendering() ?: return@TickTask
 
             giantZombies.clear()
             buildingPiles.clear()
 
             entities.forEach { entity ->
                 when (entity) {
-                    is GiantEntity ->
-                        if (entity.mainHandStack?.name?.string?.endsWith("Head") == true) giantZombies.add(entity)
+                    is Giant ->
+                        if (entity.mainHandItem?.hoverName?.string?.endsWith("Head") == true) giantZombies.add(entity)
 
-                    is MagmaCubeEntity ->
-                        if (entity.size == 30 && entity.getAttributeBaseValue(EntityAttributes.MAX_HEALTH) == 100000.0) kuudraEntity =
+                    is MagmaCube ->
+                        if (entity.size == 30 && entity.getAttributeBaseValue(Attributes.MAX_HEALTH) == 100000.0) kuudraEntity =
                             entity
 
-                    is ArmorStandEntity -> {
+                    is ArmorStand -> {
                         if (entity.name.string.matches(progressRegex)) buildingPiles.add(entity)
 
                         if (phase == 2) {
@@ -108,10 +108,10 @@ object KuudraUtils {
             }
         }
 
-        onReceive<TeamS2CPacket> {
+        onReceive<ClientboundSetPlayerTeamPacket> {
             if (!inKuudra) return@onReceive
-            val teamLine = team.getOrNull() ?: return@onReceive
-            val text = teamLine.prefix.string?.plus(teamLine.suffix.string) ?: return@onReceive
+            val teamLine = parameters.getOrNull() ?: return@onReceive
+            val text = teamLine.playerPrefix.string?.plus(teamLine.playerSuffix.string) ?: return@onReceive
 
             tierRegex.find(text)?.groupValues?.get(1)?.let { kuudraTier = it.toInt() }
         }

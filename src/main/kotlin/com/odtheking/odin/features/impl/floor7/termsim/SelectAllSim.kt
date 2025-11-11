@@ -4,14 +4,14 @@ import com.odtheking.odin.events.TerminalEvent
 import com.odtheking.odin.features.impl.floor7.TerminalSolver
 import com.odtheking.odin.features.impl.floor7.terminalhandler.TerminalTypes
 import com.odtheking.odin.utils.modMessage
-import net.minecraft.component.DataComponentTypes
-import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
-import net.minecraft.registry.Registries
-import net.minecraft.screen.slot.Slot
-import net.minecraft.util.DyeColor
-import net.minecraft.util.Identifier
+import net.minecraft.core.component.DataComponents
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.inventory.Slot
+import net.minecraft.world.item.DyeColor
+import net.minecraft.world.item.Item
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
 import kotlin.math.floor
 
 class SelectAllSim(
@@ -37,33 +37,33 @@ class SelectAllSim(
 
     private fun getPossibleItems(color: DyeColor): List<Item> {
         return listOf(
-            Registries.ITEM.get(Identifier.of("minecraft", "${color.name.lowercase()}_stained_glass")),
-            Registries.ITEM.get(Identifier.of("minecraft", "${color.name.lowercase()}_wool")),
-            Registries.ITEM.get(Identifier.of("minecraft", "${color.name.lowercase()}_concrete")),
+            BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("minecraft", "${color.name.lowercase()}_stained_glass")).get().value(),
+            BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("minecraft", "${color.name.lowercase()}_wool")).get().value(),
+            BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("minecraft", "${color.name.lowercase()}_concrete")).get().value(),
             when (color) {
                 DyeColor.WHITE -> Items.BONE_MEAL
                 DyeColor.BLUE -> Items.LAPIS_LAZULI
                 DyeColor.BLACK -> Items.INK_SAC
                 DyeColor.BROWN -> Items.COCOA_BEANS
-                else -> Registries.ITEM.get(Identifier.of("minecraft", "${color.name.lowercase()}_dye"))
+                else -> BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("minecraft", "${color.name.lowercase()}_dye")).get().value()
             }
         )
     }
 
     override fun slotClick(slot: Slot, button: Int) {
-        val stack = slot.stack ?: return
+        val stack = slot.item ?: return
         val possibleItems = getPossibleItems(color)
         if (!possibleItems.contains(stack.item)) return modMessage("§cThat item is not: ${color.name.uppercase()}!")
 
         createNewGui {
             if (it == slot) {
-                stack.apply { set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true) }
-            } else it.stack
+                stack.apply { set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true) }
+            } else it.item
         }
 
         playTermSimSound()
 
-        if (guiInventorySlots.none { it?.stack?.hasGlint() == false && possibleItems.contains(it.stack?.item) })
+        if (guiInventorySlots.none { it?.item?.hasFoil() == false && possibleItems.contains(it.item?.item) })
             TerminalSolver.lastTermOpened?.let { TerminalEvent.Solved(it).postAndCatch() }
     }
 }

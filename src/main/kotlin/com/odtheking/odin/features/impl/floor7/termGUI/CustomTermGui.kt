@@ -7,7 +7,7 @@ import com.odtheking.odin.features.impl.floor7.TerminalSolver.hideClicked
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.ui.isAreaHovered
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
-import net.minecraft.client.gui.screen.Screen
+import net.minecraft.client.gui.screens.Screen
 import kotlin.math.ceil
 import kotlin.math.floor
 

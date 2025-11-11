@@ -9,43 +9,43 @@ import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onSend
 import com.odtheking.odin.features.impl.floor7.TerminalSounds
 import com.odtheking.odin.utils.handlers.LimitedTickTask
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen
-import net.minecraft.component.DataComponentTypes
-import net.minecraft.entity.player.PlayerEquipment
-import net.minecraft.entity.player.PlayerInventory
-import net.minecraft.inventory.SimpleInventory
-import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
-import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket
-import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket
-import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket
-import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket
-import net.minecraft.screen.GenericContainerScreenHandler
-import net.minecraft.screen.ScreenHandlerType
-import net.minecraft.screen.slot.Slot
-import net.minecraft.screen.slot.SlotActionType
-import net.minecraft.sound.SoundEvents
-import net.minecraft.text.Text
+import net.minecraft.client.gui.screens.inventory.ContainerScreen
+import net.minecraft.core.component.DataComponents
+import net.minecraft.network.chat.Component
+import net.minecraft.network.protocol.game.ClientboundContainerClosePacket
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
+import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket
+import net.minecraft.network.protocol.game.ServerboundContainerClickPacket
+import net.minecraft.sounds.SoundEvents
+import net.minecraft.world.SimpleContainer
+import net.minecraft.world.entity.player.Inventory
+import net.minecraft.world.entity.player.PlayerEquipment
+import net.minecraft.world.inventory.ChestMenu
+import net.minecraft.world.inventory.ClickType
+import net.minecraft.world.inventory.MenuType
+import net.minecraft.world.inventory.Slot
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
 
 open class TermSimGUI(
     val name: String,
     val size: Int,
-    private val inv: SimpleInventory = SimpleInventory(size)
-) : GenericContainerScreen(
-    GenericContainerScreenHandler(
-        if (size <= 9) ScreenHandlerType.GENERIC_9X1
-        else if (size <= 18) ScreenHandlerType.GENERIC_9X2
-        else if (size <= 27) ScreenHandlerType.GENERIC_9X3
-        else if (size <= 36) ScreenHandlerType.GENERIC_9X4
-        else if (size <= 45) ScreenHandlerType.GENERIC_9X5
-        else ScreenHandlerType.GENERIC_9X6,
-        0, PlayerInventory(mc.player, PlayerEquipment(mc.player)), inv, size / 9
+    private val inv: SimpleContainer = SimpleContainer(size)
+) : ContainerScreen(
+    ChestMenu(
+        if (size <= 9) MenuType.GENERIC_9x1
+        else if (size <= 18) MenuType.GENERIC_9x2
+        else if (size <= 27) MenuType.GENERIC_9x3
+        else if (size <= 36) MenuType.GENERIC_9x4
+        else if (size <= 45) MenuType.GENERIC_9x5
+        else MenuType.GENERIC_9x6,
+        0, Inventory(mc.player!!, PlayerEquipment(mc.player!!)), inv, size / 9
     ),
-    PlayerInventory(mc.player, PlayerEquipment(mc.player)),
-    Text.literal(name)
+    Inventory(mc.player!!, PlayerEquipment(mc.player!!)),
+    Component.literal(name)
 ) {
-    val blackPane = ItemStack(Items.BLACK_STAINED_GLASS_PANE).apply { set(DataComponentTypes.CUSTOM_NAME, Text.literal("")) }
-    val guiInventorySlots get() = handler?.slots?.subList(0, size) ?: emptyList()
+    val blackPane = ItemStack(Items.BLACK_STAINED_GLASS_PANE).apply { set(DataComponents.CUSTOM_NAME, Component.literal("")) }
+    val guiInventorySlots get() = menu?.slots?.subList(0, size) ?: emptyList()
     private var doesAcceptClick = true
     protected var ping = 0L
 
@@ -63,10 +63,10 @@ open class TermSimGUI(
 
     open fun slotClick(slot: Slot, button: Int) {}
 
-    override fun close() {
+    override fun onClose() {
         EventBus.unsubscribe(this)
         doesAcceptClick = true
-        super.close()
+        super.onClose()
     }
 
     override fun init() {
@@ -81,54 +81,55 @@ open class TermSimGUI(
 
     init {
         on<TerminalEvent.Solved> {
-            if (mc.currentScreen !== this@TermSimGUI) return@on
-            PacketEvent.Receive(CloseScreenS2CPacket(-2)).postAndCatch()
+            if (mc.screen !== this@TermSimGUI) return@on
+            PacketEvent.Receive(ClientboundContainerClosePacket(-2)).postAndCatch()
             StartGUI.open(ping)
         }
 
-        onSend<ClickSlotC2SPacket>  (EventPriority.LOW) {
-            if (mc.currentScreen !== this@TermSimGUI) return@onSend
-            delaySlotClick(guiInventorySlots.getOrNull(slot.toInt()) ?: return@onSend, button.toInt())
+        onSend<ServerboundContainerClickPacket>  (EventPriority.LOW) {
+            if (mc.screen !== this@TermSimGUI) return@onSend
+            delaySlotClick(guiInventorySlots.getOrNull(slotNum.toInt()) ?: return@onSend, buttonNum.toInt())
             it.cancel()
         }
     }
 
 //    @EventHandler(priority = EventPriority.LOWEST)
 //    fun onPacketReceive(event: PacketEvent.Receive) {
-//        val packet = event.packet as? ScreenHandlerSlotUpdateS2CPacket ?: return
-//        if (OdinMain.mc.currentScreen !== this || packet.func_149175_c() == -2 || event.packet.func_149173_d() !in 0 until size) return
+//        val packet = event.packet as? ClientboundContainerSetSlotPacket ?: return
+//        if (OdinMain.mc.screen !== this || packet.func_149175_c() == -2 || event.packet.func_149173_d() !in 0 until size) return
 //        packet.func_149174_e()?.let { mc.thePlayer?.inventoryContainer?.putStackInSlot(packet.func_149173_d(), it) }
 //        event.isCanceled = true
 //     }
 
     private fun delaySlotClick(slot: Slot, button: Int) {
-        if (mc.currentScreen == StartGUI) return slotClick(slot, button)
-        if (!doesAcceptClick || slot.inventory != inv || slot.stack?.item == Items.BLACK_STAINED_GLASS_PANE) return
+        if (mc.screen == StartGUI) return slotClick(slot, button)
+        if (!doesAcceptClick || slot.container != inv || slot.item?.item == Items.BLACK_STAINED_GLASS_PANE) return
         doesAcceptClick = false
         LimitedTickTask((ping / 50).toInt().coerceAtLeast(1), 1) {
-            if (mc.currentScreen != this) return@LimitedTickTask
+            if (mc.screen != this) return@LimitedTickTask
             doesAcceptClick = true
             slotClick(slot, button)
         }
     }
 
-    override fun onMouseClick(slot: Slot?, slotId: Int, button: Int, actionType: SlotActionType?) {
-        slot?.let { delaySlotClick(it, slotId) }
+
+    override fun slotClicked(slot: Slot, slotId: Int, button: Int, actionType: ClickType) {
+        delaySlotClick(slot, slotId)
     }
 
     protected fun createNewGui(block: (Slot) -> ItemStack) {
-        PacketEvent.Receive(OpenScreenS2CPacket(0, ScreenHandlerType.GENERIC_9X3, Text.literal(name))).postAndCatch()
+        PacketEvent.Receive(ClientboundOpenScreenPacket(0, MenuType.GENERIC_9x3, Component.literal(name))).postAndCatch()
         guiInventorySlots.forEach { it.setSlot(block(it)) }
     }
 
     protected fun Slot.setSlot(stack: ItemStack) {
-        PacketEvent.Receive(ScreenHandlerSlotUpdateS2CPacket(-2, 0, id, stack)).postAndCatch()
-        setStack(stack)
+        PacketEvent.Receive(ClientboundContainerSetSlotPacket(-2, 0, index, stack)).postAndCatch()
+        set(stack)
     }
 
     protected fun playTermSimSound() {
         if (!TerminalSounds.enabled || !TerminalSounds.clickSounds) mc.player?.playSound(
-            SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP,
+            SoundEvents.EXPERIENCE_ORB_PICKUP,
             1f, 1f
         )
     }

@@ -2,30 +2,30 @@ package com.odtheking.odin.utils
 
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.features.impl.render.ClickGUIModule
-import net.minecraft.text.ClickEvent
-import net.minecraft.text.HoverEvent
-import net.minecraft.text.Style
-import net.minecraft.text.Text
-import net.minecraft.util.Formatting
+import net.minecraft.ChatFormatting
+import net.minecraft.network.chat.ClickEvent
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.HoverEvent
+import net.minecraft.network.chat.Style
 
 fun sendChatMessage(message: Any) {
-    mc.player?.networkHandler?.sendChatMessage(message.toString())
+    mc.player?.connection?.sendChat(message.toString())
 }
 
 fun sendCommand(command: String) {
-    mc.player?.networkHandler?.sendChatCommand(command)
+    mc.player?.connection?.sendCommand(command)
 }
 
 fun modMessage(message: Any?, prefix: String = "§3Odin §8»§r ", chatStyle: Style? = null) {
-    val text = Text.literal("$prefix$message")
+    val text = Component.literal("$prefix$message")
     chatStyle?.let { text.setStyle(chatStyle) }
-    mc.inGameHud?.chatHud?.addMessage(text)
+    mc.gui?.chat?.addMessage(text)
 }
 
-fun modMessage(message: Text, prefix: String = "§3Odin §8»§r ", chatStyle: Style? = null) {
-    val text = Text.literal(prefix).append(message)
+fun modMessage(message: Component, prefix: String = "§3Odin §8»§r ", chatStyle: Style? = null) {
+    val text = Component.literal(prefix).append(message)
     chatStyle?.let { text.setStyle(chatStyle) }
-    mc.inGameHud?.chatHud?.addMessage(text)
+    mc.gui?.chat?.addMessage(text)
 }
 
 fun devMessage(message: Any?) {
@@ -43,6 +43,6 @@ fun createClickStyle(value: String): Style {
     return Style.EMPTY
         .withClickEvent(ClickEvent.RunCommand(value))
         .withHoverEvent(
-            HoverEvent.ShowText(Text.literal(value).styled { it.withColor(Formatting.YELLOW) })
+            HoverEvent.ShowText(Component.literal(value).withStyle { it.withColor(ChatFormatting.YELLOW) })
         )
 }

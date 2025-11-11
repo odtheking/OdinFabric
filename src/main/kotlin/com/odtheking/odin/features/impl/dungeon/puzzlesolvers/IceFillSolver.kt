@@ -11,14 +11,14 @@ import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.Room
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
-import net.minecraft.block.Blocks
-import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.Vec3d
+import net.minecraft.core.BlockPos
+import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.phys.Vec3
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 
 object IceFillSolver {
-    private var currentPatterns: ArrayList<Vec3d> = ArrayList()
+    private var currentPatterns: ArrayList<Vec3> = ArrayList()
 
     private val gson = GsonBuilder().setPrettyPrinting().create()
     private val isr = this::class.java.getResourceAsStream("/assets/odin/puzzles/IceFillFloors.json")
@@ -52,7 +52,7 @@ object IceFillSolver {
                     val patterns = if (optimizePatterns) iceFillFloors.hard else iceFillFloors.easy
 
                     patterns[index][patternIndex].toMutableList().let { pattern ->
-                        currentPatterns.addAll(pattern.map { Vec3d(getRealCoords(it)).add(0.5, 0.1, 0.5) })
+                        currentPatterns.addAll(pattern.map { Vec3(getRealCoords(it)).add(0.5, 0.1, 0.5) })
                     }
 
                     return@forEach
@@ -63,7 +63,7 @@ object IceFillSolver {
     }
 
     private fun Room.isRealAir(pos: BlockPos): Boolean =
-        mc.world?.getBlockState(getRealCoords(pos))?.block == Blocks.AIR
+        mc.level?.getBlockState(getRealCoords(pos))?.block == Blocks.AIR
 
     fun reset() {
         currentPatterns.clear()

@@ -15,8 +15,8 @@ import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.render.drawCustomBeacon
 import com.odtheking.odin.utils.sendChatMessage
-import net.minecraft.text.Text
-import net.minecraft.util.math.BlockPos
+import net.minecraft.network.chat.Component
+import net.minecraft.core.BlockPos
 import org.lwjgl.glfw.GLFW
 import kotlin.math.abs
 
@@ -31,7 +31,7 @@ object Waypoints : Module(
     private val pingLocationToggle by BooleanSetting("Ping Waypoint", false, desc = "Adds a waypoint at the location you are looking at.").withDependency { pingLocationDropDown }
     private val pingLocation by KeybindSetting("Ping Keybind", GLFW.GLFW_KEY_UNKNOWN, desc = "Sends the location you are looking at as coords in chat for waypoints.").onPress {
         if (!pingLocationToggle) return@onPress
-        Etherwarp.getEtherPos(mc.player?.pos, pingDistance).pos?.let { pos ->
+        Etherwarp.getEtherPos(mc.player?.position(), pingDistance).pos?.let { pos ->
             addTempWaypoint("§fWaypoint", pos.x, pos.y, pos.z, pingWaypointTime)
             if (sendPingedLocation) sendChatMessage("x: ${pos.x}, y: ${pos.y}, z: ${pos.z}")
         }
@@ -60,7 +60,7 @@ object Waypoints : Module(
 
         on<RenderEvent.Last> {
             temporaryWaypoints.removeAll {
-                context.drawCustomBeacon(Text.of(it.name).asOrderedText(), it.blockPos, it.color)
+                context.drawCustomBeacon(Component.literal(it.name).visualOrderText, it.blockPos, it.color)
                 System.currentTimeMillis() > it.timeAdded + it.duration
             }
         }

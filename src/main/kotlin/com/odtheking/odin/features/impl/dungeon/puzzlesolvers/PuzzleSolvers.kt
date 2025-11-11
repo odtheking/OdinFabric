@@ -16,11 +16,11 @@ import com.odtheking.odin.utils.sendCommand
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.RoomType
-import net.minecraft.block.Blocks
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket
-import net.minecraft.network.packet.s2c.play.BlockEventS2CPacket
-import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket
-import net.minecraft.util.math.BlockPos
+import net.minecraft.core.BlockPos
+import net.minecraft.network.protocol.game.ClientboundBlockEventPacket
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket
+import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket
+import net.minecraft.world.level.block.Blocks
 
 object PuzzleSolvers : Module(
     name = "Puzzle Solvers",
@@ -132,7 +132,7 @@ object PuzzleSolvers : Module(
             if (beamsSolver) BeamsSolver.onBlockChange(this)
         }
 
-        onReceive<PlayerPositionLookS2CPacket> {
+        onReceive<ClientboundPlayerPositionPacket> {
             if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
             if (tpMaze) TPMazeSolver.tpPacket(this)
         }
@@ -143,7 +143,7 @@ object PuzzleSolvers : Module(
             if (quizSolver) QuizSolver.onMessage(value)
         }
 
-        onReceive<BlockEventS2CPacket> {
+        onReceive<ClientboundBlockEventPacket> {
             if (!DungeonUtils.inDungeons || DungeonUtils.inBoss || block != Blocks.CHERRY_LOG) return@onReceive
             val room = DungeonUtils.currentRoom?.takeIf { room -> room.data.type == RoomType.PUZZLE } ?: return@onReceive
 
@@ -157,7 +157,7 @@ object PuzzleSolvers : Module(
             }.takeIf { !it } ?: onPuzzleComplete(room.data.name)
         }
 
-        onSend<PlayerInteractBlockC2SPacket> {
+        onSend<ServerboundUseItemOnPacket> {
             if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onSend
             if (waterSolver) WaterSolver.waterInteract(this)
             if (boulderSolver) BoulderSolver.playerInteract(this)

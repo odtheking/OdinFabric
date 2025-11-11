@@ -13,8 +13,8 @@ import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.modMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.Box
+import net.minecraft.core.BlockPos
+import net.minecraft.world.phys.AABB
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
@@ -25,13 +25,13 @@ import kotlin.io.encoding.Base64
 
 object DungeonWaypointConfig {
     private val gson = GsonBuilder()
-        .registerTypeAdapter(Box::class.java, BoxDeserializer())
+        .registerTypeAdapter(AABB::class.java, BoxDeserializer())
         .registerTypeAdapter(DungeonWaypoint::class.java, DungeonWaypointDeserializer())
         .setPrettyPrinting().create()
 
     var waypoints: MutableMap<String, MutableList<DungeonWaypoint>> = mutableMapOf()
 
-    private val configFile = File(mc.runDirectory, "config/odin/dungeon-waypoint-config.json").apply {
+    private val configFile = File(mc.gameDirectory, "config/odin/dungeon-waypoint-config.json").apply {
         try {
             parentFile?.mkdirs()
             createNewFile()
@@ -121,15 +121,14 @@ object DungeonWaypointConfig {
             val filled = jsonObj["filled"].asBoolean
             val depth = jsonObj["depth"].asBoolean
 
-            val box = if (jsonObj.has("aabb")) context.deserialize<Box>(jsonObj["aabb"], Box::class.java)
-            else context.deserialize(jsonObj["box"], Box::class.java)
+            val aabb = context.deserialize<AABB>(jsonObj["aabb"], AABB::class.java)
 
             val title = jsonObj["title"]?.asString?.ifBlank { null }
             val waypointType = jsonObj["type"]?.asString?.let {
                 runCatching { DungeonWaypoints.WaypointType.valueOf(it) }.getOrNull()
             }
 
-            val waypoint = DungeonWaypoint(blockPos, color, filled, depth, box, title, type = waypointType)
+            val waypoint = DungeonWaypoint(blockPos, color, filled, depth, aabb, title, type = waypointType)
 
             if (waypointType == null && jsonObj.has("secret") && jsonObj["secret"]?.asBoolean == true)
                 waypoint.type = DungeonWaypoints.WaypointType.SECRET
@@ -138,8 +137,8 @@ object DungeonWaypointConfig {
         }
     }
 
-    private class BoxDeserializer : JsonDeserializer<Box> {
-        override fun deserialize(json: JsonElement, type: Type, context: JsonDeserializationContext): Box {
+    private class BoxDeserializer : JsonDeserializer<AABB> {
+        override fun deserialize(json: JsonElement, type: Type, context: JsonDeserializationContext): AABB {
             val jsonObj = json.asJsonObject
 
             if (jsonObj.has("minX")) {
@@ -150,7 +149,7 @@ object DungeonWaypointConfig {
                 val maxY = jsonObj["maxY"].asDouble
                 val maxZ = jsonObj["maxZ"].asDouble
 
-                return Box(minX, minY, minZ, maxX, maxY, maxZ)
+                return AABB(minX, minY, minZ, maxX, maxY, maxZ)
             }
 
             if (jsonObj.has("field_72340_a")) {
@@ -161,10 +160,10 @@ object DungeonWaypointConfig {
                 val maxY = jsonObj["field_72337_e"].asDouble
                 val maxZ = jsonObj["field_72334_f"].asDouble
 
-                return Box(minX, minY, minZ, maxX, maxY, maxZ)
+                return AABB(minX, minY, minZ, maxX, maxY, maxZ)
             }
 
-            return Box(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+            return AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
         }
     }
 }

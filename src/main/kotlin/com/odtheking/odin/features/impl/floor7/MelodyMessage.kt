@@ -12,7 +12,7 @@ import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.sendCommand
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
-import net.minecraft.item.Items
+import net.minecraft.world.item.Items
 
 object MelodyMessage : Module(
     name = "Melody Message",
@@ -27,7 +27,7 @@ object MelodyMessage : Module(
 
     init {
         TickTask(5) {
-            if (DungeonUtils.getF7Phase() != M7Phases.P3 || TerminalSolver.currentTerm?.type != TerminalTypes.MELODY || mc.currentScreen is TermSimGUI || !melodyProgress) return@TickTask
+            if (DungeonUtils.getF7Phase() != M7Phases.P3 || TerminalSolver.currentTerm?.type != TerminalTypes.MELODY || mc.screen is TermSimGUI || !melodyProgress) return@TickTask
 
             val greenClayIndices = claySlots.keys.filter { index -> TerminalSolver.currentTerm?.items?.get(index) == Items.GREEN_TERRACOTTA }.ifEmpty { return@TickTask }
 
@@ -36,7 +36,7 @@ object MelodyMessage : Module(
         }
 
         on<TerminalEvent.Opened> {
-            if (DungeonUtils.getF7Phase() != M7Phases.P3 || terminal.type != TerminalTypes.MELODY || mc.currentScreen is TermSimGUI) return@on
+            if (DungeonUtils.getF7Phase() != M7Phases.P3 || terminal.type != TerminalTypes.MELODY || mc.screen is TermSimGUI) return@on
             if (sendMelodyMessage) sendCommand("pc $melodyMessage")
             if (melodySendCoords) sendCommand("od sendcoords")
 

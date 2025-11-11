@@ -12,10 +12,10 @@ import com.odtheking.odin.utils.isItem
 import com.odtheking.odin.utils.render.drawStringWidth
 import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.skyblock.LocationUtils
-import net.minecraft.entity.EquipmentSlot
-import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket
-import net.minecraft.sound.SoundEvents
-import net.minecraft.util.math.Box
+import net.minecraft.network.protocol.game.ClientboundSoundPacket
+import net.minecraft.sounds.SoundEvents
+import net.minecraft.world.entity.EquipmentSlot
+import net.minecraft.world.phys.AABB
 
 object SpringBoots : Module(
     name = "Spring Boots",
@@ -26,7 +26,7 @@ object SpringBoots : Module(
         var width = 1
         width += drawStringWidth("Height: ", width, 1, Colors.MINECRAFT_LIGHT_PURPLE, true)
         width += drawStringWidth(getColor(blockAmount), width, 1, Colors.WHITE, true)
-        width to mc.textRenderer.fontHeight
+        width to mc.font.lineHeight
     }
 
     private val pitchSet = setOf(0.82539684f, 0.8888889f, 0.93650794f, 1.0476191f, 1.1746032f, 1.3174603f, 1.7777778f)
@@ -35,18 +35,18 @@ object SpringBoots : Module(
     private var lowCount = 0
 
     init {
-        onReceive<PlaySoundS2CPacket> {
+        onReceive<ClientboundSoundPacket> {
             if (!LocationUtils.isInSkyblock) return@onReceive
-            val id = sound.value().id
+            val id = sound.value().location
 
             when {
-                SoundEvents.BLOCK_NOTE_BLOCK_PLING.matchesId(id) && mc.player?.isSneaking == true && EquipmentSlot.FEET isItem "SPRING_BOOTS" ->
+                SoundEvents.NOTE_BLOCK_PLING.`is`(id) && mc.player?.isCrouching == true && EquipmentSlot.FEET isItem "SPRING_BOOTS" ->
                     when (pitch) {
                         0.6984127f -> lowCount = (lowCount + 1).coerceAtMost(2)
                         in pitchSet -> highCount++
                     }
 
-                SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH.id == id && pitch.equalsOneOf(0.0952381f, 1.6984127f) -> {
+                SoundEvents.FIREWORK_ROCKET_LAUNCH.location == id && pitch.equalsOneOf(0.0952381f, 1.6984127f) -> {
                     highCount = 0
                     lowCount = 0
                 }
@@ -56,7 +56,7 @@ object SpringBoots : Module(
         }
 
         on<TickEvent.End> {
-            if (!LocationUtils.isInSkyblock || mc.player?.isSneaking == true || !(EquipmentSlot.FEET isItem "SPRING_BOOTS")) return@on
+            if (!LocationUtils.isInSkyblock || mc.player?.isCrouching == true || !(EquipmentSlot.FEET isItem "SPRING_BOOTS")) return@on
             highCount = 0
             lowCount = 0
             blockAmount = 0f
@@ -64,7 +64,7 @@ object SpringBoots : Module(
 
         on<RenderEvent.Last> {
             if (!LocationUtils.isInSkyblock || blockAmount == 0f) return@on
-            mc.player?.pos?.addVec(y = blockAmount)?.let { context.drawWireFrameBox(Box.from(it), Colors.MINECRAFT_RED) }
+            mc.player?.position()?.addVec(y = blockAmount)?.let { context.drawWireFrameBox(AABB.unitCubeFromLowerCorner(it), Colors.MINECRAFT_RED) }
         }
     }
 

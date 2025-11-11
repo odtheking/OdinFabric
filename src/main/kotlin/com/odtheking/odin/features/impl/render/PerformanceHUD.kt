@@ -9,7 +9,7 @@ import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.ServerUtils
 import com.odtheking.odin.utils.render.drawStringWidth
 import com.odtheking.odin.utils.toFixed
-import net.minecraft.client.gui.DrawContext
+import net.minecraft.client.gui.GuiGraphics
 
 object PerformanceHUD : Module(
     name = "Performance HUD",
@@ -29,7 +29,7 @@ object PerformanceHUD : Module(
 
         var width = 1
         var height = 1
-        val lineHeight = mc.textRenderer.fontHeight
+        val lineHeight = mc.font.lineHeight
 
         fun renderMetric(label: String, value: String) {
             val w = drawText(this, label, value, if (direction == HORIZONTAL) width else 1, height)
@@ -41,13 +41,13 @@ object PerformanceHUD : Module(
         }
 
         if (showTPS) renderMetric("TPS: ", "${ServerUtils.averageTps.toFixed(1)} ")
-        if (showFPS) renderMetric("FPS: ", "${mc.currentFps} ")
+        if (showFPS) renderMetric("FPS: ", "${mc.fps} ")
         if (showPing) renderMetric("Ping: ", "${ServerUtils.averagePing}ms ")
 
         width to if (direction == HORIZONTAL) lineHeight else height
     }
 
-    private fun drawText(context: DrawContext, name: String, value: String, x: Int, y: Int): Int {
+    private fun drawText(context: GuiGraphics, name: String, value: String, x: Int, y: Int): Int {
         var width = 0
         width += context.drawStringWidth(name, x, y, nameColor, true)
         width += context.drawStringWidth(value, x + width, y, valueColor, true)

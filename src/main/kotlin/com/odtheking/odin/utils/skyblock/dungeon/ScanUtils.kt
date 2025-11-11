@@ -15,10 +15,9 @@ import com.odtheking.odin.utils.skyblock.Island
 import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonListener.inBoss
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.*
-import net.minecraft.block.Blocks
-import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.Direction
-import net.minecraft.util.math.Direction.Axis
+import net.minecraft.core.BlockPos
+import net.minecraft.core.Direction
+import net.minecraft.world.level.block.Blocks
 import java.io.FileNotFoundException
 
 object ScanUtils {
@@ -34,7 +33,7 @@ object ScanUtils {
     var passedRooms: MutableSet<Room> = mutableSetOf()
         private set
 
-    private val mutableBlockPos = BlockPos.Mutable()
+    private val mutableBlockPos = BlockPos.MutableBlockPos()
 
     private fun loadRoomData(): Set<RoomData> {
         return try {
@@ -59,7 +58,7 @@ object ScanUtils {
 
     init {
         on<TickEvent.End> {
-            if (mc.world == null || mc.player == null) return@on
+            if (mc.level == null || mc.player == null) return@on
 
             if ((!DungeonUtils.inDungeons && !LocationUtils.currentArea.isArea(Island.SinglePlayer)) || inBoss) {
                 currentRoom?.let { RoomEnterEvent(null).postAndCatch() }
@@ -101,9 +100,9 @@ object ScanUtils {
         room.rotation = Rotations.entries.dropLast(1).find { rotation ->
             room.roomComponents.any { component ->
                 BlockPos(component.x + rotation.x, roomHeight, component.z + rotation.z).let { blockPos ->
-                    mc.world?.getBlockState(blockPos)?.block == Blocks.BLUE_TERRACOTTA && (room.roomComponents.size == 1 || horizontals.all { facing ->
-                        mc.world?.getBlockState(
-                            blockPos.add((if (facing.axis == Axis.X) facing.offsetX else 0), 0, (if (facing.axis == Axis.Z) facing.offsetZ else 0))
+                    mc.level?.getBlockState(blockPos)?.block == Blocks.BLUE_TERRACOTTA && (room.roomComponents.size == 1 || horizontals.all { facing ->
+                        mc.level?.getBlockState(
+                            blockPos.offset((if (facing.axis == Direction.Axis.X) facing.stepX else 0), 0, (if (facing.axis == Direction.Axis.Z) facing.stepZ else 0))
                         )?.block?.equalsOneOf(Blocks.AIR, Blocks.BLUE_TERRACOTTA) == true
                     }).also { isCorrectClay -> if (isCorrectClay) room.clayPos = blockPos }
                 }
@@ -130,8 +129,8 @@ object ScanUtils {
         horizontals.forEach { facing ->
             findRoomComponentsRecursively(
                 Vec2(
-                    vec2.x + ((if (facing.axis == Axis.X) facing.offsetX else 0) shl ROOM_SIZE_SHIFT),
-                    vec2.z + ((if (facing.axis == Axis.Z) facing.offsetZ else 0) shl ROOM_SIZE_SHIFT)
+                    vec2.x + ((if (facing.axis == Direction.Axis.X) facing.stepX else 0) shl ROOM_SIZE_SHIFT),
+                    vec2.z + ((if (facing.axis == Direction.Axis.Z) facing.stepZ else 0) shl ROOM_SIZE_SHIFT)
                 ), cores, roomHeight, visited, tiles
             )
         }
@@ -153,7 +152,7 @@ object ScanUtils {
         var bedrock = 0
         for (y in roomHeight downTo 12) {
             mutableBlockPos.set(vec2.x, y, vec2.z)
-            val id = mc.world?.getBlockState(mutableBlockPos)?.block
+            val id = mc.level?.getBlockState(mutableBlockPos)?.block
             if (id == Blocks.AIR && bedrock >= 2 && y < 69) {
                 sb.append(CharArray(y - 11) { '0' })
                 break
@@ -172,7 +171,7 @@ object ScanUtils {
     fun getTopLayerOfRoom(vec2: Vec2): Int {
         for (y in 140 downTo 12) {
             mutableBlockPos.set(vec2.x, y, vec2.z)
-            val block = mc.world?.getBlockState(mutableBlockPos)?.block
+            val block = mc.level?.getBlockState(mutableBlockPos)?.block
             if (block != Blocks.AIR) return if (block == Blocks.GOLD_BLOCK) y - 1 else y
         }
         return 0

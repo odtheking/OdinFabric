@@ -4,7 +4,7 @@ import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.utils.logError
-import net.minecraft.network.packet.s2c.common.CommonPingS2CPacket
+import net.minecraft.network.protocol.common.ClientboundPingPacket
 import java.util.concurrent.CopyOnWriteArrayList
 
 open class TickTask(
@@ -66,7 +66,7 @@ object TickTasks {
             for (task in clientTickTasks) task.run()
         }
 
-        onReceive<CommonPingS2CPacket> {
+        onReceive<ClientboundPingPacket> {
             for (task in serverTickTasks) task.run()
         }
     }

@@ -16,8 +16,8 @@ import com.odtheking.odin.utils.render.drawCustomBeacon
 import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.skyblock.Supply
-import net.minecraft.text.Text
-import net.minecraft.util.math.BlockPos
+import net.minecraft.network.chat.Component
+import net.minecraft.core.BlockPos
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -58,7 +58,7 @@ object SupplyHelper : Module(
                 Supply.entries.forEach { type ->
                     if (type.equalsOneOf(Supply.None, Supply.Square) || !type.isActive) return@forEach
                     context.drawCustomBeacon(
-                        Text.of("§ePlace Here!").asOrderedText(),
+                        Component.literal("§ePlace Here!").visualOrderText,
                         type.dropOffSpot,
                         if (NoPre.missing == type) Colors.MINECRAFT_GREEN else Colors.MINECRAFT_RED,
                         increase = false, distance = false
@@ -69,8 +69,8 @@ object SupplyHelper : Module(
             if (suppliesWaypoints) {
                 KuudraUtils.giantZombies.forEach {
                     context.drawCustomBeacon(
-                        Text.of("Pick Up!").asOrderedText(),
-                        BlockPos((it.x + (3.7 * cos((it.yaw + 130) * (Math.PI / 180)))).toInt(), 73, ((it.z + (3.7 * sin((it.yaw + 130) * (Math.PI / 180)))).toInt())),
+                        Component.literal("Pick Up!").visualOrderText,
+                        BlockPos((it.x + (3.7 * cos((it.yRot + 130) * (Math.PI / 180)))).toInt(), 73, ((it.z + (3.7 * sin((it.yRot + 130) * (Math.PI / 180)))).toInt())),
                         supplyWaypointColor, increase = false
                     )
                 }
@@ -79,8 +79,8 @@ object SupplyHelper : Module(
             if (renderArea) {
                 Supply.entries.forEach { type ->
                     context.drawText(
-                        Text.of("§e${type.name}").asOrderedText(),
-                        type.pickUpSpot.toCenterPos(), 2f, true
+                        Component.literal("§e${type.name}").visualOrderText,
+                        type.pickUpSpot.center, 2f, true
                     )
                 }
             }

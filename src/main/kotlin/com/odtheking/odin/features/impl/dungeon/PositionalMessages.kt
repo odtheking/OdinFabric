@@ -15,10 +15,10 @@ import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.sendCommand
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket
-import net.minecraft.text.Text
-import net.minecraft.util.math.Box
-import net.minecraft.util.math.Vec3d
+import net.minecraft.network.chat.Component
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket
+import net.minecraft.world.phys.AABB
+import net.minecraft.world.phys.Vec3
 import java.util.*
 import kotlin.concurrent.schedule
 
@@ -39,7 +39,7 @@ object PositionalMessages : Module(
     private val sentMessages = mutableMapOf<PosMessage, Boolean>()
 
     init {
-        onSend<PlayerMoveC2SPacket> {
+        onSend<ServerboundMovePlayerPacket> {
             posMessageSend()
         }
 
@@ -47,14 +47,14 @@ object PositionalMessages : Module(
             if (!showPositions || (onlyDungeons && !DungeonUtils.inDungeons)) return@on
             posMessageStrings.forEach { message ->
                 if (message.distance != null) {
-                    context.drawCylinder(Vec3d(message.x, message.y, message.z), message.distance.toFloat(), cylinderHeight.toFloat(), color = message.color, depth = depthCheck)
-                    if (displayMessage) context.drawText(Text.of(message.message).asOrderedText(), Vec3d(message.x, message.y + 1, message.z), messageSize, depthCheck)
+                    context.drawCylinder(Vec3(message.x, message.y, message.z), message.distance.toFloat(), cylinderHeight.toFloat(), color = message.color, depth = depthCheck)
+                    if (displayMessage) context.drawText(Component.literal(message.message).visualOrderText, Vec3(message.x, message.y + 1, message.z), messageSize, depthCheck)
                 } else {
-                    val box = Box(message.x, message.y, message.z, message.x2 ?: return@forEach, message.y2 ?: return@forEach,message.z2  ?: return@forEach)
+                    val box = AABB(message.x, message.y, message.z, message.x2 ?: return@forEach, message.y2 ?: return@forEach,message.z2  ?: return@forEach)
                     context.drawWireFrameBox(box, message.color, depth = depthCheck)
                     if (!displayMessage) return@forEach
-                    val center = Vec3d((message.x + message.x2) / 2, (message.y + message.y2) / 2, (message.z + message.z2) / 2)
-                    context.drawText(Text.of(message.message).asOrderedText(), center.add(0.0, 1.0, 0.0), messageSize, depthCheck)
+                    val center = Vec3((message.x + message.x2) / 2, (message.y + message.y2) / 2, (message.z + message.z2) / 2)
+                    context.drawText(Component.literal(message.message).visualOrderText, center.add(0.0, 1.0, 0.0), messageSize, depthCheck)
                 }
             }
         }
@@ -74,9 +74,9 @@ object PositionalMessages : Module(
     private fun handleAtString(posMessage: PosMessage) {
         val msgSent = sentMessages.getOrDefault(posMessage, false)
         val player = mc.player ?: return
-        if (player.squaredDistanceTo(posMessage.x, posMessage.y, posMessage.z) <= (posMessage.distance ?: return)) {
+        if (player.distanceToSqr(posMessage.x, posMessage.y, posMessage.z) <= (posMessage.distance ?: return)) {
             if (!msgSent) Timer().schedule(posMessage.delay) {
-                if (player.squaredDistanceTo(posMessage.x, posMessage.y, posMessage.z) <= posMessage.distance)
+                if (player.distanceToSqr(posMessage.x, posMessage.y, posMessage.z) <= posMessage.distance)
                     sendCommand("pc ${posMessage.message}")
             }
             sentMessages[posMessage] = true
@@ -84,10 +84,11 @@ object PositionalMessages : Module(
     }
 
     private fun handleInString(posMessage: PosMessage) {
+        val position = mc.player?.position() ?: return
         val msgSent = sentMessages.getOrDefault(posMessage, false)
-        if (mc.player != null && Box(posMessage.x, posMessage.y, posMessage.z, posMessage.x2 ?: return, posMessage.y2 ?: return, posMessage.z2 ?: return).contains(mc.player?.pos)) {
+        if (mc.player != null && AABB(posMessage.x, posMessage.y, posMessage.z, posMessage.x2 ?: return, posMessage.y2 ?: return, posMessage.z2 ?: return).contains(position)) {
             if (!msgSent) Timer().schedule(posMessage.delay) {
-                if (Box(posMessage.x, posMessage.y, posMessage.z, posMessage.x2, posMessage.y2, posMessage.z2).contains(mc.player?.pos))
+                if (AABB(posMessage.x, posMessage.y, posMessage.z, posMessage.x2, posMessage.y2, posMessage.z2).contains(position))
                     sendCommand("pc ${posMessage.message}")
             }
             sentMessages[posMessage] = true
