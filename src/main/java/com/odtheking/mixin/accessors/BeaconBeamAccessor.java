@@ -1,17 +1,17 @@
 package com.odtheking.mixin.accessors;
 
-import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.blockentity.BeaconRenderer;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(BeaconBlockEntityRenderer.class)
+@Mixin(BeaconRenderer.class)
 public interface BeaconBeamAccessor {
-    @Invoker("renderBeam")
+    @Invoker("submitBeaconBeam")
     static void invokeRenderBeam(
-            MatrixStack matrices, OrderedRenderCommandQueue queue, Identifier textureId, float beamHeight, float beamRotationDegrees, int minHeight, int maxHeight, int color, float innerScale, float outerScale
+            PoseStack matrices, SubmitNodeCollector queue, ResourceLocation textureId, float beamHeight, float beamRotationDegrees, int minHeight, int maxHeight, int color, float innerScale, float outerScale
     ) {
         throw new UnsupportedOperationException();
     }

@@ -12,11 +12,10 @@ import com.odtheking.odin.utils.renderPos
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import com.odtheking.odin.utils.toFixed
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
-import net.minecraft.world.level.block.Blocks
-import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket
-import net.minecraft.network.chat.Component
 import net.minecraft.core.BlockPos
+import net.minecraft.network.chat.Component
+import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket
+import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.phys.Vec3
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets

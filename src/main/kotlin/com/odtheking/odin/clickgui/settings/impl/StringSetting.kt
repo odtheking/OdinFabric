@@ -10,9 +10,9 @@ import com.odtheking.odin.features.impl.render.ClickGUIModule
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.ui.TextInputHandler
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
-import net.minecraft.client.gui.Click
-import net.minecraft.client.input.CharInput
-import net.minecraft.client.input.KeyInput
+import net.minecraft.client.input.CharacterEvent
+import net.minecraft.client.input.KeyEvent
+import net.minecraft.client.input.MouseButtonEvent
 
 class StringSetting(
     name: String,
@@ -49,20 +49,20 @@ class StringSetting(
         return getHeight()
     }
 
-    override fun mouseClicked(mouseX: Float, mouseY: Float, click: Click): Boolean {
+    override fun mouseClicked(mouseX: Float, mouseY: Float, click: MouseButtonEvent): Boolean {
         return if (click.button() == 0) textInputHandler.mouseClicked(mouseX, mouseY, click)
         else false
     }
 
-    override fun mouseReleased(click: Click) {
+    override fun mouseReleased(click: MouseButtonEvent) {
         textInputHandler.mouseReleased()
     }
 
-    override fun keyPressed(input: KeyInput): Boolean {
+    override fun keyPressed(input: KeyEvent): Boolean {
         return textInputHandler.keyPressed(input)
     }
 
-    override fun keyTyped(input: CharInput): Boolean {
+    override fun keyTyped(input: CharacterEvent): Boolean {
         return textInputHandler.keyTyped(input)
     }
 

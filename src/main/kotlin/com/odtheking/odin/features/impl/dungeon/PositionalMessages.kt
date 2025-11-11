@@ -48,7 +48,7 @@ object PositionalMessages : Module(
             posMessageStrings.forEach { message ->
                 if (message.distance != null) {
                     drawCylinder(Vec3(message.x, message.y, message.z), message.distance.toFloat(), cylinderHeight.toFloat(), color = message.color, depth = depthCheck)
-                    if (displayMessage) context.drawText(Component.literal(message.message).visualOrderText, Vec3(message.x, message.y + 1, message.z), messageSize, depthCheck)
+                    if (displayMessage) drawText(Component.literal(message.message).visualOrderText, Vec3(message.x, message.y + 1, message.z), messageSize, depthCheck)
                 } else {
                     val box = AABB(message.x, message.y, message.z, message.x2 ?: return@forEach, message.y2 ?: return@forEach,message.z2  ?: return@forEach)
                     drawWireFrameBox(box, message.color, depth = depthCheck)

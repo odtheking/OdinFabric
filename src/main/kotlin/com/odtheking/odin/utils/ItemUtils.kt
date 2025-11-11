@@ -13,6 +13,7 @@ import net.minecraft.world.item.component.CustomData
 import net.minecraft.world.item.component.ItemLore
 import net.minecraft.world.item.component.ResolvableProfile
 import java.util.*
+import kotlin.text.set
 
 const val ID = "id"
 const val UUID_STRING = "uuid"
@@ -43,7 +44,7 @@ inline val ItemStack.loreString: List<String>
 
 val ItemStack.texture: String?
     get() =
-        get(DataComponents.PROFILE)?.gameProfile()?.properties?.get("textures")?.firstOrNull()?.value
+        get(DataComponents.PROFILE)?.partialProfile()?.properties?.get("textures")?.firstOrNull()?.value
 
 enum class ItemRarity(
     val loreName: String,
@@ -79,12 +80,10 @@ fun createSkullStack(textureHash: String): ItemStack {
         "textures",
         Base64.getEncoder().encodeToString("{\"textures\":{\"SKIN\":{\"url\":\"http://textures.minecraft.net/texture/$textureHash\"}}}".toByteArray())
     )
-    val profile = ResolvableProfile(
-        Optional.empty(),
-        Optional.empty(),
-        properties
-    )
-    stack.set(DataComponents.PROFILE, profile)
+    val multimap = ImmutableMultimap.builder<String, Property>().put("textures", property).build()
+    val gameProfile = GameProfile(UUID.randomUUID(), "_", PropertyMap(multimap))
+
+    stack.set(DataComponents.PROFILE, ResolvableProfile.createResolved(gameProfile))
     return stack
 }
 

@@ -13,6 +13,9 @@ import com.odtheking.odin.utils.ui.rendering.NVGRenderer
 import com.odtheking.odin.utils.ui.rendering.NVGSpecialRenderer
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.screens.Screen
+import net.minecraft.client.input.CharacterEvent
+import net.minecraft.client.input.KeyEvent
+import net.minecraft.client.input.MouseButtonEvent
 import net.minecraft.network.chat.Component
 import kotlin.math.sign
 import com.odtheking.odin.utils.ui.mouseX as odinMouseX
@@ -67,36 +70,39 @@ object ClickGUI : Screen(Component.literal("Click GUI")) {
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)
     }
 
-    override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
-        SearchBar.mouseClicked(odinMouseX, odinMouseY, click)
+    override fun mouseClicked(
+        mouseButtonEvent: MouseButtonEvent,
+        bl: Boolean
+    ): Boolean {
+        SearchBar.mouseClicked(odinMouseX, odinMouseY, mouseButtonEvent)
         for (i in panels.size - 1 downTo 0) {
-            if (panels[i].mouseClicked(odinMouseX, odinMouseY, click)) return true
+            if (panels[i].mouseClicked(odinMouseX, odinMouseY, mouseButtonEvent)) return true
         }
-        return super.mouseClicked(click, doubled)
+        return super.mouseClicked(mouseButtonEvent, bl)
     }
 
-    override fun mouseReleased(click: Click): Boolean {
+    override fun mouseReleased(mouseButtonEvent: MouseButtonEvent): Boolean {
         SearchBar.mouseReleased()
         for (i in panels.size - 1 downTo 0) {
-            panels[i].mouseReleased(click)
+            panels[i].mouseReleased(mouseButtonEvent)
         }
-        return super.mouseReleased(click)
+        return super.mouseReleased(mouseButtonEvent)
     }
 
-    override fun charTyped(input: CharInput): Boolean {
-        SearchBar.keyTyped(input)
+    override fun charTyped(characterEvent: CharacterEvent): Boolean {
+        SearchBar.keyTyped(characterEvent)
         for (i in panels.size - 1 downTo 0) {
-            if (panels[i].keyTyped(input)) return true
+            if (panels[i].keyTyped(characterEvent)) return true
         }
-        return super.charTyped(input)
+        return super.charTyped(characterEvent)
     }
 
-    override fun keyPressed(input: KeyInput): Boolean {
-        SearchBar.keyPressed(input)
+    override fun keyPressed(keyEvent: KeyEvent): Boolean {
+        SearchBar.keyPressed(keyEvent)
         for (i in panels.size - 1 downTo 0) {
-            if (panels[i].keyPressed(input)) return true
+            if (panels[i].keyPressed(keyEvent)) return true
         }
-        return super.keyPressed(input)
+        return super.keyPressed(keyEvent)
     }
 
     override fun init() {

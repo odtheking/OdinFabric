@@ -11,14 +11,13 @@ import com.odtheking.odin.utils.Color.Companion.multiplyAlpha
 import com.odtheking.odin.utils.addVec
 import com.odtheking.odin.utils.translate
 import com.odtheking.odin.utils.unaryMinus
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.client.gui.Font
 import net.minecraft.client.renderer.LightTexture
 import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.client.renderer.ShapeRenderer
-import net.minecraft.client.renderer.blockentity.BeaconRenderer
 import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.Component
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.util.FormattedCharSequence
 import net.minecraft.util.FormattedCharSequence.composite
 import net.minecraft.world.phys.AABB
@@ -29,15 +28,17 @@ import kotlin.math.pow
 
 private val ALLOCATOR = ByteBufferBuilder(1536)
 
+private val BEAM_TEXTURE = ResourceLocation.withDefaultNamespace("textures/entity/beacon_beam.png")
+
 fun RenderEvent.drawLine(points: Collection<Vec3>, color: Color, depth: Boolean, thickness: Float = 3f) {
     if (points.size < 2) return
-    val matrix = matrixStack() ?: return
-    val bufferSource = consumers() as? MultiBufferSource.BufferSource ?: return
+    val matrix = context.matrices() ?: return
+    val bufferSource = context.consumers() as? MultiBufferSource.BufferSource ?: return
     val layer = if (depth) CustomRenderLayer.LINE_LIST else CustomRenderLayer.LINE_LIST_ESP
     RenderSystem.lineWidth(thickness)
 
     matrix.pushPose()
-    with(camera().position) { matrix.translate(-x, -y, -z) }
+    with(context.gameRenderer().mainCamera.position) { matrix.translate(-x, -y, -z) }
 
     val pointList = points.toList()
     for (i in 0 until pointList.size - 1) {
@@ -59,16 +60,16 @@ fun RenderEvent.drawLine(points: Collection<Vec3>, color: Color, depth: Boolean,
 }
 
 fun RenderEvent.drawWireFrameBox(aabb: AABB, color: Color, thickness: Float = 5f, depth: Boolean = false) {
-    val matrix = matrixStack() ?: return
-    val bufferSource = consumers() as? MultiBufferSource.BufferSource ?: return
+    val matrix = context.matrices() ?: return
+    val bufferSource = context.consumers() as? MultiBufferSource.BufferSource ?: return
     val layer = if (depth) CustomRenderLayer.LINE_LIST else CustomRenderLayer.LINE_LIST_ESP
-    val camera = camera() ?: return
+    val camera = context.gameRenderer().mainCamera ?: return
     RenderSystem.lineWidth((thickness / camera.position.distanceToSqr(aabb.center).pow(0.15)).toFloat())
 
     matrix.pushPose()
     with(camera.position) { matrix.translate(-x, -y, -z) }
     ShapeRenderer.renderLineBox(
-        matrix,
+        matrix.last(),
         bufferSource.getBuffer(layer),
         aabb,
         color.redFloat,
@@ -81,22 +82,22 @@ fun RenderEvent.drawWireFrameBox(aabb: AABB, color: Color, thickness: Float = 5f
     bufferSource.endBatch(layer)
 }
 
-fun RenderEvent.drawFilledBox(box: AABB, color: Color, depth: Boolean = false) {
-    val matrix = matrixStack() ?: return
-    val bufferSource = consumers() as? MultiBufferSource.BufferSource ?: return
+fun RenderEvent.drawFilledBox(aabb: AABB, color: Color, depth: Boolean = false) {
+    val matrix = context.matrices() ?: return
+    val bufferSource = context.consumers() as? MultiBufferSource.BufferSource ?: return
     val layer = if (depth) CustomRenderLayer.TRIANGLE_STRIP else CustomRenderLayer.TRIANGLE_STRIP_ESP
 
     matrix.pushPose()
-    with(camera().position) { matrix.translate(-x, -y, -z) }
+    with(context.gameRenderer().mainCamera.position) { matrix.translate(-x, -y, -z) }
     ShapeRenderer.addChainedFilledBoxVertices(
         matrix,
         bufferSource.getBuffer(layer),
-        box.minX,
-        box.minY,
-        box.minZ,
-        box.maxX,
-        box.maxY,
-        box.maxZ,
+        aabb.minX,
+        aabb.minY,
+        aabb.minZ,
+        aabb.maxX,
+        aabb.maxY,
+        aabb.maxZ,
         color.redFloat,
         color.greenFloat,
         color.blueFloat,
@@ -124,9 +125,10 @@ fun RenderEvent.drawStyledBox(
 }
 
 fun RenderEvent.drawBeaconBeam(position: BlockPos, color: Color) {
-    val matrix = matrixStack() ?: return
-    val bufferSource = consumers() as? MultiBufferSource.BufferSource ?: return
-    val camera = camera()?.position ?: return
+    if (mc.level == null) return
+
+    val matrix = context.matrices()
+    val camera = context.gameRenderer().mainCamera?.position ?: return
 
     matrix.pushPose()
     matrix.translate(position.x - camera.x, position.y - camera.y, position.z - camera.z)
@@ -135,10 +137,10 @@ fun RenderEvent.drawBeaconBeam(position: BlockPos, color: Color) {
 
     BeaconBeamAccessor.invokeRenderBeam(
         matrix,
-        mc.gameRenderer.entityRenderDispatcher.queue,
+        mc.gameRenderer.featureRenderDispatcher.submitNodeStorage,
         BEAM_TEXTURE,
         1f,
-        mc.world!!.time.toFloat(),
+        mc.level!!.gameTime.toFloat(),
         0,
         319,
         color.rgba,
@@ -149,12 +151,14 @@ fun RenderEvent.drawBeaconBeam(position: BlockPos, color: Color) {
 }
 
 fun RenderEvent.drawText(text: FormattedCharSequence?, pos: Vec3, scale: Float, depth: Boolean) {
-    val stack = matrixStack() ?: return
+    val stack = context.matrices() ?: return
+
+    val camera = context.gameRenderer().mainCamera ?: return
 
     stack.pushPose()
     val matrix = stack.last().pose()
     with(scale * 0.025f) {
-        matrix.translate(pos.toVector3f()).translate(-camera().position).rotate(camera().rotation()).scale(this, -this, this)
+        matrix.translate(pos.toVector3f()).translate(-camera.position).rotate(camera.rotation()).scale(this, -this, this)
     }
 
     val consumers = MultiBufferSource.immediate(ALLOCATOR)
@@ -200,10 +204,10 @@ fun RenderEvent.drawCylinder(
     thickness: Float = 5f,
     depth: Boolean = false
 ) {
-    val matrix = matrixStack() ?: return
-    val bufferSource = consumers() as? MultiBufferSource.BufferSource ?: return
+    val matrix = context.matrices() ?: return
+    val bufferSource = context.consumers() as? MultiBufferSource.BufferSource ?: return
     val layer = if (depth) CustomRenderLayer.LINE_LIST else CustomRenderLayer.LINE_LIST_ESP
-    val camera = camera()?.position ?: return
+    val camera = context.gameRenderer().mainCamera?.position ?: return
 
     matrix.pushPose()
     matrix.translate(center.x - camera.x, center.y - camera.y, center.z - camera.z)
@@ -237,9 +241,9 @@ fun RenderEvent.drawBoxes(
 ) {
     if (waypoints.isEmpty()) return
 
-    val matrix = matrixStack() ?: return
-    val bufferSource = consumers() as? MultiBufferSource.BufferSource ?: return
-    val camera = camera()?.position ?: return
+    val matrix = context.matrices() ?: return
+    val bufferSource = context.consumers() as? MultiBufferSource.BufferSource ?: return
+    val camera = context.gameRenderer().mainCamera?.position ?: return
 
     matrix.pushPose()
     matrix.translate(-camera.x, -camera.y, -camera.z)
@@ -264,7 +268,7 @@ fun RenderEvent.drawBoxes(
             val layer = if (depth) CustomRenderLayer.LINE_LIST else CustomRenderLayer.LINE_LIST_ESP
             RenderSystem.lineWidth((3f / camera.distanceToSqr(aabb.center).pow(0.15)).toFloat())
             ShapeRenderer.renderLineBox(
-                matrix,
+                matrix.last(),
                 bufferSource.getBuffer(layer),
                 aabb,
                 color.redFloat, color.greenFloat, color.blueFloat, color.alphaFloat

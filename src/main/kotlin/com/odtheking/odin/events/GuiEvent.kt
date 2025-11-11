@@ -3,6 +3,8 @@ package com.odtheking.odin.events
 import com.odtheking.odin.events.core.CancellableEvent
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.screens.Screen
+import net.minecraft.client.input.KeyEvent
+import net.minecraft.client.input.MouseButtonEvent
 import net.minecraft.world.inventory.Slot
 
 abstract class GuiEvent(val screen: Screen) : CancellableEvent() {
@@ -13,9 +15,9 @@ abstract class GuiEvent(val screen: Screen) : CancellableEvent() {
 
     class SlotClick(screen: Screen, val slotId: Int, val button: Int) : GuiEvent(screen)
 
-    class MouseClick(screen: Screen, val mouseX: Int, val mouseY: Int, val button: Int) : GuiEvent(screen)
+    class MouseClick(screen: Screen, val click: MouseButtonEvent, val doubled: Boolean) : GuiEvent(screen)
 
-    class KeyPress(screen: Screen, val input: KeyInput) : GuiEvent(screen)
+    class KeyPress(screen: Screen, val input: KeyEvent) : GuiEvent(screen)
 
     class Draw(screen: Screen, val guiGraphics: GuiGraphics, val mouseX: Int, val mouseY: Int) : GuiEvent(screen)
 

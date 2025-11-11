@@ -6,6 +6,8 @@ import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.components.EditBox
 import net.minecraft.client.gui.screens.Screen
+import net.minecraft.client.input.CharacterEvent
+import net.minecraft.client.input.KeyEvent
 import net.minecraft.network.chat.Component
 import org.lwjgl.glfw.GLFW
 
@@ -39,13 +41,13 @@ object TextPromptScreen : Screen(Component.literal("Enter Waypoint Text")) {
         context.drawCenteredString(font, title, width / 2, height / 2 - 40, Colors.WHITE.rgba)
     }
 
-    override fun keyPressed(input: KeyInput): Boolean {
+    override fun keyPressed(input: KeyEvent): Boolean {
         if (input.key == GLFW.GLFW_KEY_ESCAPE) {
             mc.setScreen(null)
             return true
         }
 
-        if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+        if (input.key == GLFW.GLFW_KEY_ENTER || input.key == GLFW.GLFW_KEY_KP_ENTER) {
             callback.invoke(textField.value)
             mc.setScreen(null)
             return true
@@ -54,7 +56,7 @@ object TextPromptScreen : Screen(Component.literal("Enter Waypoint Text")) {
         return super.keyPressed(input)
     }
 
-    override fun charTyped(input: CharInput): Boolean {
+    override fun charTyped(input: CharacterEvent): Boolean {
         return super.charTyped(input)
     }
 

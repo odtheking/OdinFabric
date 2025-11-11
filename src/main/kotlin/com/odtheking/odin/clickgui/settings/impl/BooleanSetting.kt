@@ -10,7 +10,7 @@ import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.ui.animations.LinearAnimation
 import com.odtheking.odin.utils.ui.isAreaHovered
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
-import net.minecraft.client.gui.Click
+import net.minecraft.client.input.MouseButtonEvent
 
 class BooleanSetting(
     name: String,
@@ -55,7 +55,7 @@ class BooleanSetting(
         return height
     }
 
-    override fun mouseClicked(mouseX: Float, mouseY: Float, click: Click): Boolean {
+    override fun mouseClicked(mouseX: Float, mouseY: Float, click: MouseButtonEvent): Boolean {
         return if (click.button() != 0 || !isHovered) false
         else {
             toggleAnimation.start()

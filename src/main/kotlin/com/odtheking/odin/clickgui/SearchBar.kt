@@ -5,9 +5,9 @@ import com.odtheking.odin.features.impl.render.ClickGUIModule
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.ui.TextInputHandler
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
-import net.minecraft.client.gui.Click
-import net.minecraft.client.input.CharInput
-import net.minecraft.client.input.KeyInput
+import net.minecraft.client.input.CharacterEvent
+import net.minecraft.client.input.KeyEvent
+import net.minecraft.client.input.MouseButtonEvent
 
 object SearchBar {
 
@@ -41,7 +41,7 @@ object SearchBar {
         textInputHandler.draw(mouseX, mouseY)
     }
 
-    fun mouseClicked(mouseX: Float, mouseY: Float, click: Click): Boolean {
+    fun mouseClicked(mouseX: Float, mouseY: Float, click: MouseButtonEvent): Boolean {
         return textInputHandler.mouseClicked(mouseX, mouseY, click)
     }
 
@@ -49,11 +49,11 @@ object SearchBar {
         textInputHandler.mouseReleased()
     }
 
-    fun keyPressed(input: KeyInput): Boolean {
+    fun keyPressed(input: KeyEvent): Boolean {
         return textInputHandler.keyPressed(input)
     }
 
-    fun keyTyped(input: CharInput): Boolean {
+    fun keyTyped(input: CharacterEvent): Boolean {
         return textInputHandler.keyTyped(input)
     }
 }

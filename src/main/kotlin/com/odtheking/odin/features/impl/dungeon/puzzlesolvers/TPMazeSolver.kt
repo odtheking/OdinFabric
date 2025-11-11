@@ -10,7 +10,6 @@ import com.odtheking.odin.utils.isXZInterceptable
 import com.odtheking.odin.utils.render.drawFilledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.core.BlockPos
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket
 import net.minecraft.world.phys.AABB
@@ -49,9 +48,9 @@ object TPMazeSolver {
         if (DungeonUtils.currentRoomName != "Teleport Maze") return
         tpPads.forEach {
             when (it) {
-                in correctPortals -> drawFilledBox(AABB(it), if (correctPortals.size == 1) mazeColorOne else mazeColorMultiple, depth = false)
-                in visited -> drawFilledBox(AABB(it), mazeColorVisited, depth = true)
-                else -> drawFilledBox(AABB(it), Colors.WHITE.withAlpha(0.5f), depth = true)
+                in correctPortals -> event.drawFilledBox(AABB(it), if (correctPortals.size == 1) mazeColorOne else mazeColorMultiple, depth = false)
+                in visited -> event.drawFilledBox(AABB(it), mazeColorVisited, depth = true)
+                else -> event.drawFilledBox(AABB(it), Colors.WHITE.withAlpha(0.5f), depth = true)
             }
         }
     }

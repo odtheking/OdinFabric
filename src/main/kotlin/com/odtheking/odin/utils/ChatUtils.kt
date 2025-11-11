@@ -19,14 +19,14 @@ fun sendCommand(command: String) {
 fun modMessage(message: Any?, prefix: String = "§3Odin §8»§r ", chatStyle: Style? = null) {
     val text = Component.literal("$prefix$message")
     chatStyle?.let { text.setStyle(chatStyle) }
-    if (mc.isOnThread) mc.gui?.chat?.addMessage(text)
+    if (mc.isSameThread) mc.gui?.chat?.addMessage(text)
     else mc.execute { mc.gui?.chat?.addMessage(text) }
 }
 
 fun modMessage(message: Component, prefix: String = "§3Odin §8»§r ", chatStyle: Style? = null) {
     val text = Component.literal(prefix).append(message)
     chatStyle?.let { text.setStyle(chatStyle) }
-    if (mc.isOnThread) mc.gui?.chat?.addMessage(text)
+    if (mc.isSameThread) mc.gui?.chat?.addMessage(text)
     else mc.execute { mc.gui?.chat?.addMessage(text) }
 }
 

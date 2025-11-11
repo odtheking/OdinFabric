@@ -11,8 +11,8 @@ import com.odtheking.odin.features.impl.render.ClickGUIModule
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.ui.isAreaHovered
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
-import net.minecraft.client.gui.Click
-import net.minecraft.client.input.KeyInput
+import net.minecraft.client.input.KeyEvent
+import net.minecraft.client.input.MouseButtonEvent
 import org.lwjgl.glfw.GLFW
 
 class KeybindSetting(
@@ -54,9 +54,9 @@ class KeybindSetting(
         return height
     }
 
-    override fun mouseClicked(mouseX: Float, mouseY: Float, click: Click): Boolean {
+    override fun mouseClicked(mouseX: Float, mouseY: Float, click: MouseButtonEvent): Boolean {
         if (listening) {
-            key = InputConstants.Type.MOUSE.getOrCreate(mouseButton)
+            key = InputConstants.Type.MOUSE.getOrCreate(click.button())
             listening = false
             return true
         } else if (click.button() == 0 && isHovered) {
@@ -66,13 +66,13 @@ class KeybindSetting(
         return false
     }
 
-    override fun keyPressed(input: KeyInput): Boolean {
+    override fun keyPressed(input: KeyEvent): Boolean {
         if (!listening) return false
 
-        when (keyCode) {
+        when (input.key) {
             GLFW.GLFW_KEY_ESCAPE, GLFW.GLFW_KEY_BACKSPACE -> key = InputConstants.UNKNOWN
             GLFW.GLFW_KEY_ENTER -> listening = false
-            else -> key = InputConstants.getKey(keyCode, scanCode)
+            else -> key = InputConstants.getKey(input)
         }
 
         listening = false
@@ -85,7 +85,7 @@ class KeybindSetting(
     }
 
     fun isDown(): Boolean =
-        value != InputConstants.UNKNOWN && InputConstants.isKeyDown(mc.window.window, value.value)
+        value != InputConstants.UNKNOWN && InputConstants.isKeyDown(mc.window, value.value)
 
     override val isHovered: Boolean
         get() =

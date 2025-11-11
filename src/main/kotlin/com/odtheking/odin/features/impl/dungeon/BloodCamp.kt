@@ -216,8 +216,8 @@ object BloodCamp : Module(
                 renderData.lastPingPoint = pingPoint
 
                 val boxOffset = Vec3(boxSize / -2.0, 1.5, boxSize / -2.0)
-                val pingAABB = AABB(boxSize, boxSize, boxSize, 0.0, 0.0, 0.0).move(boxOffset.add(calcEndVector(pingPoint, renderData.lastPingPoint, context.tickCounter().gameTimeDeltaTicks, !interpolation)))
-                val endAABB = AABB(boxSize, boxSize, boxSize, 0.0, 0.0, 0.0).move(boxOffset.add(calcEndVector(endPoint, renderData.lastEndPoint, context.tickCounter().gameTimeDeltaTicks, !interpolation)))
+                val pingAABB = AABB(boxSize, boxSize, boxSize, 0.0, 0.0, 0.0).move(boxOffset.add(calcEndVector(pingPoint, renderData.lastPingPoint, context.gameRenderer().mainCamera.partialTickTime, !interpolation)))
+                val endAABB = AABB(boxSize, boxSize, boxSize, 0.0, 0.0, 0.0).move(boxOffset.add(calcEndVector(endPoint, renderData.lastEndPoint, context.gameRenderer().mainCamera.partialTickTime, !interpolation)))
 
                 val time = getTime(firstSpawn,  currentTickTime - started)
 

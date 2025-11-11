@@ -30,34 +30,34 @@ object RenderTest : Module(
             if (mc.player == null) return@on
 
             drawWireFrameBox(
-                box = mc.player!!.boundingBox.expand(2.0, 2.0, 2.0),
+                aabb = mc.player!!.boundingBox.inflate(2.0, 2.0, 2.0),
                 color = Color(0x7eb4c7ff),
             )
 
             drawLine(
                 points = listOf(
-                    mc.player!!.eyePos,
-                    mc.player!!.eyePos.add(0.0, 5.0, 0.0)
+                    mc.player!!.eyePosition,
+                    mc.player!!.eyePosition.add(0.0, 5.0, 0.0)
                 ),
                 color = Color(0x7eb4c7ff),
                 depth = false,
             )
 
             drawCylinder(
-                center = mc.player!!.entityPos,
+                center = mc.player!!.position(),
                 radius = 1f,
                 height = 1f,
                 color = Color(0x7eb4c7ff),
             )
 
             drawStyledBox(
-                box = mc.player!!.boundingBox.expand(1.0, 1.0, 1.0),
+                aabb = mc.player!!.boundingBox.inflate(1.0, 1.0, 1.0),
                 color = Color(0x7eb4c7ff),
                 style = boxStyle,
             )
 
             drawFilledBox(
-                box = mc.player!!.boundingBox.expand(0.5, 0.5, 0.5),
+                aabb = mc.player!!.boundingBox.inflate(0.5, 0.5, 0.5),
                 color = Color(0x7eb4c7ff),
             )
         }

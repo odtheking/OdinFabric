@@ -112,9 +112,9 @@ object LeapMenu : Module(
 
         on<GuiEvent.KeyPress> {
             val chest = (screen as? AbstractContainerScreen<*>) ?: return@on
-            if (!useNumberKeys || chest.title?.string?.equalsOneOf("Spirit Leap", "Teleport to Player") == false || keybindList.none { it.value == keyCode } || leapTeammates.isEmpty()) return@on
+            if (!useNumberKeys || chest.title?.string?.equalsOneOf("Spirit Leap", "Teleport to Player") == false || keybindList.none { it.value == key } || leapTeammates.isEmpty()) return@on
 
-            val index = keybindList.indexOfFirst { it.value == keyCode }
+            val index = keybindList.indexOfFirst { it.value == key }
             val playerToLeap = if (index + 1 > leapTeammates.size) return@on else leapTeammates[index]
             if (playerToLeap == EMPTY) return@on
             if (playerToLeap.isDead) return@on modMessage("This player is dead, can't leap.")

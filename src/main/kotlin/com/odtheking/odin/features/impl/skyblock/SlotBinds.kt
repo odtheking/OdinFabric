@@ -31,7 +31,7 @@ object SlotBinds : Module(
 
     init {
         on<GuiEvent.SlotClick> (EventPriority.HIGHEST) {
-            if (!Screen.hasShiftDown() || screen !is InventoryScreen) return@on
+            if (!mc.hasShiftDown() || screen !is InventoryScreen) return@on
             val clickedSlot = (screen as AbstractContainerScreenAccessor).hoveredSlot?.index?.takeIf { it in 5 until 45 }
                 ?: return@on modMessage("§cYou must be hovering over a valid slot (5–44).")
             val boundSlot = slotBinds[clickedSlot] ?: return@on
@@ -47,7 +47,7 @@ object SlotBinds : Module(
         }
 
         on<GuiEvent.KeyPress> {
-            if (screen !is InventoryScreen || keyCode != setNewSlotbind.value) return@on
+            if (screen !is InventoryScreen || input.key != setNewSlotbind.value) return@on
             val clickedSlot = (screen as AbstractContainerScreenAccessor).hoveredSlot?.index?.takeIf { it in 5 until 45 } ?: return@on
 
             cancel()
@@ -82,7 +82,7 @@ object SlotBinds : Module(
                 screen.menu.getSlot(slot)?.let { it.x + screen.x + 8 to it.y + screen.y + 8 }
             } ?: return@on
 
-            if (previousSlot == null && !(mc.isShiftPressed)) return@on
+            if (previousSlot == null && !(mc.hasShiftDown())) return@on
 
             guiGraphics.drawLine(startX.toFloat(), startY.toFloat(), endX.toFloat(), endY.toFloat(), lineColor, 1f)
         }

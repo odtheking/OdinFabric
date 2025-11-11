@@ -14,9 +14,8 @@ import com.odtheking.odin.utils.ui.animations.EaseInOutAnimation
 import com.odtheking.odin.utils.ui.mouseX
 import com.odtheking.odin.utils.ui.mouseY
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
-import net.minecraft.client.gui.Click
-import net.minecraft.client.input.CharInput
-import net.minecraft.client.input.KeyInput
+import net.minecraft.client.input.CharacterEvent
+import net.minecraft.client.input.MouseButtonEvent
 import kotlin.math.floor
 
 /**
@@ -69,9 +68,9 @@ class ModuleButton(val module: Module, val panel: Panel) {
         return totalHeight
     }
 
-    fun mouseClicked(mouseX: Float, mouseY: Float, button: Int): Boolean {
+    fun mouseClicked(mouseX: Float, mouseY: Float, click: MouseButtonEvent): Boolean {
         if (hover.isHovered) {
-            if (button == 0) {
+            if (click.button() == 0) {
                 colorAnim.start()
                 module.toggle()
                 return true
@@ -90,14 +89,14 @@ class ModuleButton(val module: Module, val panel: Panel) {
         return false
     }
 
-    fun mouseReleased(click: Click) {
+    fun mouseReleased(click: MouseButtonEvent) {
         if (!extended) return
         for (setting in representableSettings) {
             if (setting.isVisible) setting.mouseReleased(click)
         }
     }
 
-    fun keyTyped(input: CharInput): Boolean {
+    fun keyTyped(input: CharacterEvent): Boolean {
         if (!extended) return false
         for (setting in representableSettings) {
             if (setting.isVisible && setting.keyTyped(input)) return true
@@ -105,7 +104,7 @@ class ModuleButton(val module: Module, val panel: Panel) {
         return false
     }
 
-    fun keyPressed(input: KeyInput): Boolean {
+    fun keyPressed(input: net.minecraft.client.input.KeyEvent): Boolean {
         if (!extended) return false
         for (setting in representableSettings) {
             if (setting.isVisible && setting.keyPressed(input)) return true

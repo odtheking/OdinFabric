@@ -13,7 +13,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents
 import net.minecraft.network.protocol.game.*
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.entity.item.ItemEntity
@@ -41,7 +41,7 @@ object EventDispatcher {
             mc.level?.let { TickEvent.End().postAndCatch() }
         }
 
-        WorldRenderEvents.AFTER_TRANSLUCENT.register { context ->
+        WorldRenderEvents.END_MAIN.register { context ->
             mc.level?.let { RenderEvent.Last(context).postAndCatch() }
         }
 

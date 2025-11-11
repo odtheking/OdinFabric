@@ -116,7 +116,7 @@ object DungeonWaypoints : Module(
                 val aabb = if (!useBlockSize) AABB(pos).deflate((1.0 - size) / 2.0) else
                     pos.getBlockBounds()?.move(pos) ?: AABB(pos)
 
-                context.drawStyledBox(aabb, reachColor, style = if (filled) 0 else 1, depthCheck)
+                drawStyledBox(aabb, reachColor, style = if (filled) 0 else 1, depthCheck)
             }
         }
 

@@ -8,10 +8,10 @@ import com.odtheking.odin.features.impl.render.ClickGUIModule
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.ui.isAreaHovered
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
-import net.minecraft.client.gui.Click
-import net.minecraft.client.input.CharInput
-import net.minecraft.client.input.KeyInput
 import net.fabricmc.loader.api.FabricLoader
+import net.minecraft.client.input.CharacterEvent
+import net.minecraft.client.input.KeyEvent
+import net.minecraft.client.input.MouseButtonEvent
 import kotlin.math.floor
 
 /**
@@ -103,7 +103,7 @@ class Panel(private val category: Category) {
         return true
     }
 
-    fun mouseClicked(mouseX: Float, mouseY: Float, click: Click): Boolean {
+    fun mouseClicked(mouseX: Float, mouseY: Float, click: MouseButtonEvent): Boolean {
         if (isAreaHovered(panelSetting.x, panelSetting.y, WIDTH, HEIGHT)) {
             if (click.button() == 0) {
                 deltaX = (panelSetting.x - mouseX)
@@ -123,7 +123,7 @@ class Panel(private val category: Category) {
         return false
     }
 
-    fun mouseReleased(click: Click) {
+    fun mouseReleased(click: MouseButtonEvent) {
         dragging = false
 
         if (panelSetting.extended)
@@ -133,7 +133,7 @@ class Panel(private val category: Category) {
             }
     }
 
-    fun keyTyped(input: CharInput): Boolean {
+    fun keyTyped(input: CharacterEvent): Boolean {
         if (!panelSetting.extended) return false
 
         return moduleButtons.reversed().any {
@@ -142,7 +142,7 @@ class Panel(private val category: Category) {
         }
     }
 
-    fun keyPressed(input: KeyInput): Boolean {
+    fun keyPressed(input: KeyEvent): Boolean {
         if (!panelSetting.extended) return false
 
         return moduleButtons.reversed().any {

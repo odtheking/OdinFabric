@@ -7,7 +7,7 @@ import com.odtheking.odin.utils.ui.HoverHandler
 import com.odtheking.odin.utils.ui.animations.LinearAnimation
 import com.odtheking.odin.utils.ui.isAreaHovered
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
-import net.minecraft.client.gui.Click
+import net.minecraft.client.input.MouseButtonEvent
 
 /**
  * A setting intended to show or hide other settings in the GUI.
@@ -47,7 +47,7 @@ class DropdownSetting(
         return height
     }
 
-    override fun mouseClicked(mouseX: Float, mouseY: Float, click: Click): Boolean {
+    override fun mouseClicked(mouseX: Float, mouseY: Float, click: MouseButtonEvent): Boolean {
         if (click.button() != 0 || !isHovered) return false
         enabled = !enabled
         toggleAnimation.start()

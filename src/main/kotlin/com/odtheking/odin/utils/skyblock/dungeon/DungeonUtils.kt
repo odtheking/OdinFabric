@@ -205,7 +205,7 @@ object DungeonUtils {
                         name,
                         DungeonClass.entries.find { it.name == clazz } ?: continue,
                         clazzLvl = romanToInt(clazzLevel),
-                        mc.connection?.getPlayerInfo(name)?.skin?.texture
+                        mc.connection?.getPlayerInfo(name)?.skin?.body?.id()
                             ?: ResourceLocation.withDefaultNamespace("textures/entity/steve.png"),
                         mc.level?.players()?.find { it.name?.string == name } ?: mc.player,
                         false))
@@ -230,7 +230,7 @@ object DungeonUtils {
         return when {
             state.block.equalsOneOf(Blocks.CHEST, Blocks.TRAPPED_CHEST, Blocks.LEVER) -> true
             state.block is SkullBlock ->
-                (mc.level?.getBlockEntity(pos) as? SkullBlockEntity)?.ownerProfile?.id?.getOrNull()
+                (mc.level?.getBlockEntity(pos) as? SkullBlockEntity)?.ownerProfile?.partialProfile()?.id
                     ?.toString()?.equalsOneOf(WITHER_ESSENCE_ID, REDSTONE_KEY) ?: false
 
             else -> false
