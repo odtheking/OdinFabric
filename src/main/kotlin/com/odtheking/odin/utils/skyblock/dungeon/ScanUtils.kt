@@ -33,7 +33,7 @@ object ScanUtils {
     var passedRooms: MutableSet<Room> = mutableSetOf()
         private set
 
-    private val mutableBlockPos = BlockPos.Mutable()
+    private val mutableBlockPos = BlockPos.MutableBlockPos()
 
     private fun loadRoomData(): Set<RoomData> {
         return try {

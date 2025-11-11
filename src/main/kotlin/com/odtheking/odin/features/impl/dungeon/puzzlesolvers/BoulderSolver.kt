@@ -5,15 +5,15 @@ import com.google.gson.reflect.TypeToken
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.utils.Color
-import com.odtheking.odin.utils.addRotationCoords
 import com.odtheking.odin.utils.equalsOneOf
 import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
+import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
-import net.minecraft.block.Blocks
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket
-import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.Box
+import net.minecraft.core.BlockPos
+import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket
+import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.phys.AABB
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 

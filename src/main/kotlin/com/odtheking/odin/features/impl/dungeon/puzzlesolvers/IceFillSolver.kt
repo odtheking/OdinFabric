@@ -1,7 +1,6 @@
 package com.odtheking.odin.features.impl.dungeon.puzzlesolvers
 
 import com.google.gson.GsonBuilder
-import com.google.gson.reflect.TypeToken
 import com.odtheking.odin.OdinMod.logger
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.RoomEnterEvent
@@ -13,7 +12,6 @@ import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.Room
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.core.BlockPos
-import net.minecraft.core.Vec3i
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.phys.Vec3
 import java.io.InputStreamReader
@@ -54,7 +52,7 @@ object IceFillSolver {
                     val patterns = if (optimizePatterns) iceFillFloors.hard else iceFillFloors.easy
 
                     patterns[index][patternIndex].toMutableList().let { pattern ->
-                        currentPatterns.addAll(pattern.map { Vec3d(getRealCoords(it)).add(0.5, 0.1, 0.5) })
+                        currentPatterns.addAll(pattern.map { Vec3(getRealCoords(it)).add(0.5, 0.1, 0.5) })
                     }
 
                     return@forEach
