@@ -4,38 +4,38 @@ import com.google.common.collect.ImmutableMultimap
 import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
 import com.mojang.authlib.properties.PropertyMap
-import net.minecraft.component.DataComponentTypes
-import net.minecraft.component.type.LoreComponent
-import net.minecraft.component.type.NbtComponent
-import net.minecraft.component.type.ProfileComponent
-import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
-import net.minecraft.nbt.NbtCompound
-import net.minecraft.text.Text
+import net.minecraft.core.component.DataComponents
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.chat.Component
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
+import net.minecraft.world.item.component.CustomData
+import net.minecraft.world.item.component.ItemLore
+import net.minecraft.world.item.component.ResolvableProfile
 import java.util.*
 
 const val ID = "id"
 const val UUID_STRING = "uuid"
 
-inline val ItemStack.customData: NbtCompound
+inline val ItemStack.customData: CompoundTag
     get() =
-        getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT).copyNbt()
+        getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag()
 
 inline val ItemStack.itemId: String
     get() =
-        customData.getString(ID, "")
+        customData.getString(ID).orElse("")
 
-inline val NbtCompound.itemId: String
+inline val CompoundTag.itemId: String
     get() =
-        getString(ID, "")
+        getString(ID).orElse("")
 
 inline val ItemStack.itemUUID: String
     get() =
-        customData.getString(UUID_STRING, "")
+        customData.getString(UUID_STRING).orElse("")
 
-inline val ItemStack.lore: List<Text>
+inline val ItemStack.lore: List<Component>
     get() =
-        getOrDefault(DataComponentTypes.LORE, LoreComponent.DEFAULT).styledLines()
+        getOrDefault(DataComponents.LORE, ItemLore.EMPTY).styledLines()
 
 inline val ItemStack.loreString: List<String>
     get() =
@@ -43,7 +43,7 @@ inline val ItemStack.loreString: List<String>
 
 val ItemStack.texture: String?
     get() =
-        get(DataComponentTypes.PROFILE)?.gameProfile?.properties?.get("textures")?.firstOrNull()?.value
+        get(DataComponents.PROFILE)?.gameProfile()?.properties?.get("textures")?.firstOrNull()?.value
 
 enum class ItemRarity(
     val loreName: String,
@@ -79,14 +79,16 @@ fun createSkullStack(textureHash: String): ItemStack {
         "textures",
         Base64.getEncoder().encodeToString("{\"textures\":{\"SKIN\":{\"url\":\"http://textures.minecraft.net/texture/$textureHash\"}}}".toByteArray())
     )
-    val multimap = ImmutableMultimap.builder<String, Property>().put("textures", property).build()
-    val gameProfile = GameProfile(UUID.randomUUID(), "_", PropertyMap(multimap))
-
-    stack.set(DataComponentTypes.PROFILE, ProfileComponent.ofStatic(gameProfile))
+    val profile = ResolvableProfile(
+        Optional.empty(),
+        Optional.empty(),
+        properties
+    )
+    stack.set(DataComponents.PROFILE, profile)
     return stack
 }
 
-fun ItemStack.isEtherwarpItem(): NbtCompound? =
+fun ItemStack.isEtherwarpItem(): CompoundTag? =
     customData.takeIf {
-        it.getInt("ethermerge", 0) == 1 || it.itemId == "ETHERWARP_CONDUIT"
+        it.getInt("ethermerge").orElse(0) == 1 || it.itemId == "ETHERWARP_CONDUIT"
     }

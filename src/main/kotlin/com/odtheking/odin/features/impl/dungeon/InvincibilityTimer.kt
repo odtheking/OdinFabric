@@ -12,8 +12,8 @@ import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.render.ItemStateRenderer
 import com.odtheking.odin.utils.render.drawStringWidth
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
-import net.minecraft.entity.EquipmentSlot
-import net.minecraft.item.ItemStack
+import net.minecraft.world.entity.EquipmentSlot
+import net.minecraft.world.item.ItemStack
 
 object InvincibilityTimer : Module(
     name = "Invincibility Timer",
@@ -49,8 +49,8 @@ object InvincibilityTimer : Module(
             ItemStateRenderer.draw(this, type.itemStack, 0, -1 + index * 14)
             val y = index * 14 + 3
 
-            if (type == InvincibilityType.BONZO && mc.player?.getEquippedStack(EquipmentSlot.HEAD)?.itemId?.equalsOneOf("BONZO_MASK", "STARRED_BONZO_MASK") == true ||
-                type == InvincibilityType.SPIRIT && mc.player?.getEquippedStack(EquipmentSlot.HEAD)?.itemId?.equalsOneOf("SPIRIT_MASK", "STARRED_SPIRIT_MASK") == true) {
+            if (type == InvincibilityType.BONZO && mc.player?.getItemBySlot(EquipmentSlot.HEAD)?.itemId?.equalsOneOf("BONZO_MASK", "STARRED_BONZO_MASK") == true ||
+                type == InvincibilityType.SPIRIT && mc.player?.getItemBySlot(EquipmentSlot.HEAD)?.itemId?.equalsOneOf("SPIRIT_MASK", "STARRED_SPIRIT_MASK") == true) {
                 fill(13, y, 14, y + 8, equippedMaskColor.rgba)
             }
             drawStringWidth(

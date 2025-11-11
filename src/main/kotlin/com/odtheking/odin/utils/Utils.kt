@@ -4,13 +4,16 @@ package com.odtheking.odin.utils
 
 import com.odtheking.odin.OdinMod
 import com.odtheking.odin.OdinMod.mc
-import net.minecraft.entity.Entity
-import net.minecraft.entity.EquipmentSlot
-import net.minecraft.text.ClickEvent
-import net.minecraft.text.HoverEvent
-import net.minecraft.text.Text
-import net.minecraft.util.math.Box
-import net.minecraft.util.math.Vec3d
+import net.minecraft.core.BlockPos
+import net.minecraft.network.chat.ClickEvent
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.HoverEvent
+import net.minecraft.world.entity.Entity
+import net.minecraft.world.entity.EquipmentSlot
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.inventory.ClickType
+import net.minecraft.world.phys.AABB
+import net.minecraft.world.phys.Vec3
 import java.util.*
 
 val FORMATTING_CODE_PATTERN = Regex("§[0-9a-fk-or]", RegexOption.IGNORE_CASE)
@@ -64,7 +67,7 @@ fun logError(throwable: Throwable, context: Any) {
         "${OdinMod.version} Caught an ${throwable::class.simpleName ?: "error"} at ${context::class.simpleName}."
     OdinMod.logger.error(message, throwable)
 
-    modMessage(Text.literal("$message §cPlease click this message to copy and send it in the Odin discord!").styled {
+    modMessage(Component.literal("$message §cPlease click this message to copy and send it in the Odin discord!").withStyle {
         it
             .withClickEvent(
                 ClickEvent.RunCommand(
@@ -73,13 +76,13 @@ fun logError(throwable: Throwable, context: Any) {
                     }```"
                 )
             )
-            .withHoverEvent(HoverEvent.ShowText(Text.literal("§6Click to copy the error to your clipboard.")))
+            .withHoverEvent(HoverEvent.ShowText(Component.literal("§6Click to copy the error to your clipboard.")))
     })
 }
 
 fun setClipboardContent(string: String) {
     try {
-        mc.keyboard?.clipboard = string.ifEmpty { " " }
+        mc.keyboardHandler?.clipboard = string.ifEmpty { " " }
     } catch (e: Exception) {
         OdinMod.logger.error("Failed to set Clipboard Content", e)
     }
@@ -104,30 +107,30 @@ fun formatTime(time: Long, decimalPlaces: Int = 2): String {
 
 inline val Entity.renderX: Double
     get() =
-        lastX + (x - lastX) * mc.renderTickCounter.getTickProgress(true)
+        xo + (x - xo) * mc.deltaTracker.getGameTimeDeltaPartialTick(true)
 
 inline val Entity.renderY: Double
     get() =
-        lastY + (y - lastY) * mc.renderTickCounter.getTickProgress(true)
+        yo + (y - yo) * mc.deltaTracker.getGameTimeDeltaPartialTick(true)
 
 inline val Entity.renderZ: Double
     get() =
-        lastZ + (z - lastZ) * mc.renderTickCounter.getTickProgress(true)
+        zo + (z - zo) * mc.deltaTracker.getGameTimeDeltaPartialTick(true)
 
-inline val Entity.renderPos: Vec3d
+inline val Entity.renderPos: Vec3
     get() =
-        Vec3d(renderX, renderY, renderZ)
+        Vec3(renderX, renderY, renderZ)
 
-inline val Entity.lastPos: Vec3d
+inline val Entity.lastPos: Vec3
     get() =
-        Vec3d(lastX, lastY, lastZ)
+        Vec3(xo, yo, zo)
 
-inline val Entity.renderBoundingBox: Box
+inline val Entity.renderBoundingBox: AABB
     get() =
-        boundingBox.offset(renderX - x, renderY - y, renderZ - z)
+        boundingBox.move(renderX - x, renderY - y, renderZ - z)
 
 infix fun EquipmentSlot.isItem(itemId: String): Boolean =
-    mc.player?.getEquippedStack(this)?.itemId == itemId
+    mc.player?.getItemBySlot(this)?.itemId == itemId
 
 fun fillItemFromSack(amount: Int, itemId: String, sackName: String, sendMessage: Boolean) {
     val needed = mc.player?.inventory?.find { it?.itemId == itemId }?.count ?: 0
@@ -147,4 +150,15 @@ fun romanToInt(s: String): Int {
         }
         result + (romanMap[s.last()] ?: 0)
     }
+}
+
+fun BlockPos.getBlockBounds() =
+    mc.level?.let { level ->
+        level.getBlockState(this)?.getShape(level, this)?.singleEncompassing()
+            ?.takeIf { !it.isEmpty }?.bounds()
+    }
+
+
+fun Player.clickSlot(containerId: Int, slotIndex: Int, button: Int = 0, clickType: ClickType = ClickType.PICKUP) {
+    mc.gameMode?.handleInventoryMouseClick(containerId, slotIndex, button, clickType, this)
 }

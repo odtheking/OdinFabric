@@ -10,7 +10,7 @@ import com.odtheking.odin.utils.modMessage
 
 val petCommand = Commodore("petkeys") {
     literal("add").runs {
-        val petID = if (mc.player?.mainHandStack?.itemId == "PET") mc.player?.mainHandStack?.itemUUID else null
+        val petID = if (mc.player?.mainHandItem?.itemId == "PET") mc.player?.mainHandItem?.itemUUID else null
         if (petID == null) return@runs modMessage("§cYou can only add pets to the pet list!")
         if (petList.size >= 9) return@runs modMessage("§cYou cannot add more than 9 pets to the list. Remove a pet using §e/petkeys remove §cor clear the list using §e/petkeys clear§c.")
         if (petID in petList) return@runs modMessage("§cThis pet is already in the list!")
@@ -22,7 +22,7 @@ val petCommand = Commodore("petkeys") {
 
     literal("petpos").runs {
         val petID =
-            if (mc.player?.mainHandStack?.itemId == "PET") mc.player?.mainHandStack?.itemUUID else return@runs modMessage(
+            if (mc.player?.mainHandItem?.itemId == "PET") mc.player?.mainHandItem?.itemUUID else return@runs modMessage(
                 "§cThis is not a pet!"
             )
         if (petID !in petList) return@runs modMessage("§cThis pet is not in the list!")
@@ -31,7 +31,7 @@ val petCommand = Commodore("petkeys") {
 
     literal("remove").runs {
         val petID =
-            if (mc.player?.mainHandStack?.itemId == "PET") mc.player?.mainHandStack?.itemUUID else return@runs modMessage(
+            if (mc.player?.mainHandItem?.itemId == "PET") mc.player?.mainHandItem?.itemUUID else return@runs modMessage(
                 "§cThis is not a pet!"
             )
         if (petID !in petList) return@runs modMessage("§cThis pet is not in the list!")

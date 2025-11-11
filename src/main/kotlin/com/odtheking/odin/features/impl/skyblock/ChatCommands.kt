@@ -10,7 +10,7 @@ import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.handlers.LimitedTickTask
 import com.odtheking.odin.utils.skyblock.LocationUtils
-import net.minecraft.sound.SoundEvents
+import net.minecraft.sounds.SoundEvents
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.random.Random
@@ -116,10 +116,10 @@ object ChatCommands : Module(
             "racism" -> if (racism) channelMessage("$name is ${Random.nextInt(1, 101)}% racist. Racism is not allowed!", name, channel)
             "ping" -> if (ping) channelMessage("Current Ping: ${ServerUtils.currentPing}ms", name, channel)
             "tps" -> if (tps) channelMessage("Current TPS: ${ServerUtils.averageTps.toFixed(1)}", name, channel)
-            "fps" -> if (fps) channelMessage("Current FPS: ${mc.currentFps}", name, channel)
+            "fps" -> if (fps) channelMessage("Current FPS: ${mc.fps}", name, channel)
             "time" -> if (time) channelMessage("Current Time: ${ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z"))}", name, channel)
             "location" -> if (location) channelMessage("Current Location: ${LocationUtils.currentArea.displayName}", name, channel)
-            "holding" -> if (holding) channelMessage("Holding: ${mc.player?.mainHandStack?.name?.string?.noControlCodes ?: "Nothing :("}", name, channel)
+            "holding" -> if (holding) channelMessage("Holding: ${mc.player?.mainHandItem?.hoverName?.string?.noControlCodes ?: "Nothing :("}", name, channel)
 
             // party commands
 
@@ -152,7 +152,7 @@ object ChatCommands : Module(
             "invite", "inv" -> if (invite && channel == ChatChannel.PRIVATE) {
                 if (autoConfirm) return sendCommand("p invite $name")
                 modMessage("§aClick on this message to invite $name to your party!", chatStyle = createClickStyle("/party invite $name"))
-                playSoundAtPlayer(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value())
+                playSoundAtPlayer(SoundEvents.NOTE_BLOCK_PLING.value())
             }
         }
     }

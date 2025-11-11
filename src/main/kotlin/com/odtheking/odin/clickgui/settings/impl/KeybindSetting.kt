@@ -2,6 +2,7 @@ package com.odtheking.odin.clickgui.settings.impl
 
 import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
+import com.mojang.blaze3d.platform.InputConstants
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.clickgui.ClickGUI.gray38
 import com.odtheking.odin.clickgui.settings.RenderableSetting
@@ -12,32 +13,31 @@ import com.odtheking.odin.utils.ui.isAreaHovered
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
 import net.minecraft.client.gui.Click
 import net.minecraft.client.input.KeyInput
-import net.minecraft.client.util.InputUtil
 import org.lwjgl.glfw.GLFW
 
 class KeybindSetting(
     name: String,
-    override val default: InputUtil.Key,
+    override val default: InputConstants.Key,
     desc: String
-) : RenderableSetting<InputUtil.Key>(name, desc), Saving {
+) : RenderableSetting<InputConstants.Key>(name, desc), Saving {
 
-    constructor(name: String, defaultKeyCode: Int, desc: String = "") : this(name, InputUtil.Type.KEYSYM.createFromCode(defaultKeyCode), desc)
+    constructor(name: String, defaultKeyCode: Int, desc: String = "") : this(name, InputConstants.Type.KEYSYM.getOrCreate(defaultKeyCode), desc)
 
-    override var value: InputUtil.Key = default
+    override var value: InputConstants.Key = default
     var onPress: (() -> Unit)? = null
     private var keyNameWidth = -1f
 
-    private var key: InputUtil.Key
+    private var key: InputConstants.Key
         get() = value
         set(newKey) {
             if (newKey == value) return
             value = newKey
-            keyNameWidth = NVGRenderer.textWidth(value.localizedText.string, 16f, NVGRenderer.defaultFont)
+            keyNameWidth = NVGRenderer.textWidth(value.displayName.string, 16f, NVGRenderer.defaultFont)
         }
 
     override fun render(x: Float, y: Float, mouseX: Float, mouseY: Float): Float {
         super.render(x, y, mouseX, mouseY)
-        if (keyNameWidth < 0) keyNameWidth = NVGRenderer.textWidth(value.localizedText.string, 16f, NVGRenderer.defaultFont)
+        if (keyNameWidth < 0) keyNameWidth = NVGRenderer.textWidth(value.displayName.string, 16f, NVGRenderer.defaultFont)
         val height = getHeight()
 
         val rectX = x + width - 20 - keyNameWidth
@@ -49,14 +49,14 @@ class KeybindSetting(
         NVGRenderer.hollowRect(rectX - 1, rectY - 1, rectWidth + 2f, rectHeight + 2f, 1.5f, ClickGUIModule.clickGUIColor.rgba, 4f)
 
         NVGRenderer.text(name, x + 6f, y + height / 2f - 8f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
-        NVGRenderer.text(value.localizedText.string, rectX + (rectWidth - keyNameWidth) / 2, rectY + rectHeight / 2 - 8f, 16f, if (listening) Colors.MINECRAFT_YELLOW.rgba else Colors.WHITE.rgba, NVGRenderer.defaultFont)
+        NVGRenderer.text(value.displayName.string, rectX + (rectWidth - keyNameWidth) / 2, rectY + rectHeight / 2 - 8f, 16f, if (listening) Colors.MINECRAFT_YELLOW.rgba else Colors.WHITE.rgba, NVGRenderer.defaultFont)
 
         return height
     }
 
     override fun mouseClicked(mouseX: Float, mouseY: Float, click: Click): Boolean {
         if (listening) {
-            key = InputUtil.Type.MOUSE.createFromCode(click.button())
+            key = InputConstants.Type.MOUSE.getOrCreate(mouseButton)
             listening = false
             return true
         } else if (click.button() == 0 && isHovered) {
@@ -69,10 +69,10 @@ class KeybindSetting(
     override fun keyPressed(input: KeyInput): Boolean {
         if (!listening) return false
 
-        when (input.keycode) {
-            GLFW.GLFW_KEY_ESCAPE, GLFW.GLFW_KEY_BACKSPACE -> key = InputUtil.UNKNOWN_KEY
+        when (keyCode) {
+            GLFW.GLFW_KEY_ESCAPE, GLFW.GLFW_KEY_BACKSPACE -> key = InputConstants.UNKNOWN
             GLFW.GLFW_KEY_ENTER -> listening = false
-            else -> key = InputUtil.fromKeyCode(input)
+            else -> key = InputConstants.getKey(keyCode, scanCode)
         }
 
         listening = false
@@ -85,16 +85,16 @@ class KeybindSetting(
     }
 
     fun isDown(): Boolean =
-        value != InputUtil.UNKNOWN_KEY && InputUtil.isKeyPressed(mc.window, value.code)
+        value != InputConstants.UNKNOWN && InputConstants.isKeyDown(mc.window.window, value.value)
 
     override val isHovered: Boolean
         get() =
             isAreaHovered(lastX + width - 20 - keyNameWidth, lastY + getHeight() / 2f - 10f, keyNameWidth + 12f, 22f)
 
-    override fun write(): JsonElement = JsonPrimitive(value.translationKey)
+    override fun write(): JsonElement = JsonPrimitive(value.name)
 
     override fun read(element: JsonElement) {
-        element.asString?.let { value = InputUtil.fromTranslationKey(it) }
+        element.asString?.let { value = InputConstants.getKey(it) }
     }
 
     override fun reset() {

@@ -12,12 +12,12 @@ import com.odtheking.odin.utils.handlers.LimitedTickTask
 import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
-import net.minecraft.block.Block
-import net.minecraft.block.Blocks
-import net.minecraft.entity.effect.StatusEffects
-import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket
-import net.minecraft.util.math.BlockPos
+import net.minecraft.core.BlockPos
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
+import net.minecraft.world.effect.MobEffects
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.block.Blocks
 
 object LividSolver : Module(
     name = "Livid Solver",
@@ -29,21 +29,21 @@ object LividSolver : Module(
     init {
         on<BlockUpdateEvent> {
             if (!DungeonUtils.inBoss || !DungeonUtils.isFloor(5) || pos != woolLocation) return@on
-            currentLivid = Livid.entries.find { livid -> livid.wool.defaultState == updated.block.defaultState } ?: return@on
-            LimitedTickTask((mc.player?.getStatusEffect(StatusEffects.BLINDNESS)?.duration ?: 0) - 20, 1) {
+            currentLivid = Livid.entries.find { livid -> livid.wool.defaultBlockState() == updated.block.defaultBlockState() } ?: return@on
+            LimitedTickTask((mc.player?.getEffect(MobEffects.BLINDNESS)?.duration ?: 0) - 20, 1) {
                 modMessage("Found Livid: §${currentLivid.colorCode}${currentLivid.entityName}")
             }
         }
 
-        onReceive<EntityTrackerUpdateS2CPacket> {
+        onReceive<ClientboundSetEntityDataPacket> {
             if (!DungeonUtils.inBoss || !DungeonUtils.isFloor(5)) return@onReceive
-            LimitedTickTask((mc.player?.getStatusEffect(StatusEffects.BLINDNESS)?.duration ?: 0) - 20, 1) {
-                currentLivid.entity = (mc.world?.getEntityById(id) as? PlayerEntity)?.takeIf { it.name.string == "${currentLivid.entityName} Livid" } ?: return@LimitedTickTask
+            LimitedTickTask((mc.player?.getEffect(MobEffects.BLINDNESS)?.duration ?: 0) - 20, 1) {
+                currentLivid.entity = (mc.level?.getEntity(id) as? Player)?.takeIf { it.name.string == "${currentLivid.entityName} Livid" } ?: return@LimitedTickTask
             }
         }
 
         on<RenderEvent.Last> {
-            if (!DungeonUtils.inBoss || !DungeonUtils.isFloor(5) || mc.player?.getStatusEffect(StatusEffects.BLINDNESS) != null) return@on
+            if (!DungeonUtils.inBoss || !DungeonUtils.isFloor(5) || mc.player?.getEffect(MobEffects.BLINDNESS) != null) return@on
             currentLivid.entity?.let { entity ->
                 drawWireFrameBox(entity.boundingBox, currentLivid.color, depth = true)
             }
@@ -66,6 +66,6 @@ object LividSolver : Module(
         FROG("Frog", '2', Colors.MINECRAFT_DARK_GREEN, Blocks.GREEN_WOOL),
         HOCKEY("Hockey", 'c', Colors.MINECRAFT_RED, Blocks.RED_WOOL);
 
-        var entity: PlayerEntity? = null
+        var entity: Player? = null
     }
 }

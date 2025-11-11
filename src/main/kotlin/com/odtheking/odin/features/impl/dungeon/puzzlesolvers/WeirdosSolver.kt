@@ -3,14 +3,17 @@ package com.odtheking.odin.features.impl.dungeon.puzzlesolvers
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.utils.Color
-import com.odtheking.odin.utils.addRotationCoords
 import com.odtheking.odin.utils.playSoundAtPlayer
 import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
-import net.minecraft.entity.decoration.ArmorStandEntity
-import net.minecraft.sound.SoundEvents
-import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.Box
+import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
+import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRelativeCoords
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
+import net.minecraft.core.BlockPos
+import net.minecraft.core.Vec3i
+import net.minecraft.sounds.SoundEvents
+import net.minecraft.world.entity.decoration.ArmorStand
+import net.minecraft.world.phys.AABB
 import java.util.concurrent.CopyOnWriteArraySet
 
 object WeirdosSolver {
@@ -19,21 +22,22 @@ object WeirdosSolver {
 
     fun onNPCMessage(npc: String, msg: String) {
         if (solutions.none { it.matches(msg) } && wrong.none { it.matches(msg) }) return
-        val correctNPC = mc.world?.entities?.find { it is ArmorStandEntity && it.name.string == npc } ?: return
+        val correctNPC = mc.level?.entitiesForRendering()?.find { it is ArmorStand && it.name.string == npc } ?: return
         val room = DungeonUtils.currentRoom ?: return
-        val pos = BlockPos(correctNPC.x.toInt() - 1, 69, correctNPC.z.toInt() -1).addRotationCoords(room.rotation, -1, 0)
+        val relativePos = room.getRelativeCoords(BlockPos(correctNPC.x.toInt() - 1, 69, correctNPC.z.toInt() - 1))
+        val pos = room.getRealCoords(relativePos.subtract(Vec3i(-1, 0, 0)))
 
         if (solutions.any { it.matches(msg) }) {
             correctPos = pos
-            playSoundAtPlayer(SoundEvents.ENTITY_FIREWORK_ROCKET_LARGE_BLAST, 2f, 1f)
+            playSoundAtPlayer(SoundEvents.FIREWORK_ROCKET_LARGE_BLAST, 2f, 1f)
         } else wrongPositions.add(pos)
     }
 
     fun onRenderWorld(event: RenderEvent, weirdosColor: Color, weirdosWrongColor: Color, weirdosStyle: Int) {
         if (DungeonUtils.currentRoomName != "Three Weirdos") return
-        correctPos?.let { event.drawStyledBox(Box(it), weirdosColor, weirdosStyle) }
+        correctPos?.let { event.drawStyledBox(AABB(it), weirdosColor, weirdosStyle) }
         wrongPositions.forEach {
-            event.drawStyledBox(Box(it), weirdosWrongColor, weirdosStyle)
+            event.drawStyledBox(AABB(it), weirdosWrongColor, weirdosStyle)
         }
     }
 

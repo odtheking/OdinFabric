@@ -16,7 +16,7 @@ object Config {
 
     private val gson = GsonBuilder().setPrettyPrinting().create()
 
-    private val configFile = File(mc.runDirectory, "config/odin/odin-config.json").apply {
+    private val configFile = File(mc.gameDirectory, "config/odin/odin-config.json").apply {
         try {
             parentFile.mkdirs()
             createNewFile()

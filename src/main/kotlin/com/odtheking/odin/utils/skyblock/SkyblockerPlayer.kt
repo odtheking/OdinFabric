@@ -3,8 +3,8 @@ package com.odtheking.odin.utils.skyblock
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.utils.noControlCodes
-import net.minecraft.entity.attribute.EntityAttributes
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
+import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
+import net.minecraft.world.entity.ai.attributes.Attributes
 import kotlin.math.floor
 
 object SkyblockPlayer {
@@ -36,7 +36,7 @@ object SkyblockPlayer {
     var effectiveHP: Int = 0
 
     init {
-        onReceive<GameMessageS2CPacket> {
+        onReceive<ClientboundSystemChatPacket> {
             if (!overlay) return@onReceive
             val msg = content?.string?.noControlCodes ?: return@onReceive
 
@@ -59,7 +59,7 @@ object SkyblockPlayer {
 
             effectiveHP = (currentHealth * (1 + currentDefense / 100))
             currentSpeed = floor(
-                (mc.player?.getAttributeInstance(EntityAttributes.MOVEMENT_SPEED)?.baseValue?.toFloat() ?: 0f) * 1000f
+                (mc.player?.getAttribute(Attributes.MOVEMENT_SPEED)?.baseValue?.toFloat() ?: 0f) * 1000f
             ).toInt()
         }
     }

@@ -1,7 +1,6 @@
 package com.odtheking.odin.features.impl.floor7.termGUI
 
 import com.odtheking.odin.features.impl.floor7.TerminalSolver
-import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.equalsOneOf
 
 object StartsWithGui : TermGui() {
@@ -10,11 +9,8 @@ object StartsWithGui : TermGui() {
         renderBackground(slotCount, 7)
 
         for (index in 9..slotCount) {
-            if ((index % 9).equalsOneOf(0, 8)) continue
-            val inSolution = index in currentSolution
-            val startColor = if (inSolution) TerminalSolver.startsWithColor else Colors.TRANSPARENT
-            val endColor = if (inSolution) TerminalSolver.startsWithColor else TerminalSolver.startsWithColor
-            if (colorAnimations[index] != null || inSolution) renderSlot(index, startColor, endColor)
+            if ((index % 9).equalsOneOf(0, 8) || index !in currentSolution) continue
+            renderSlot(index, TerminalSolver.startsWithColor)
         }
     }
 }

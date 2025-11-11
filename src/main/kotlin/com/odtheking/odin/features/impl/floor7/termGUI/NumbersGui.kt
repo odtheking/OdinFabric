@@ -24,7 +24,7 @@ object NumbersGui : TermGui() {
                 else -> Colors.TRANSPARENT
             }
 
-            val (slotX, slotY) = renderSlot(index, color, TerminalSolver.orderColor)
+            val (slotX, slotY) = renderSlot(index, color)
             val slotSize = 55f * TerminalSolver.customTermSize
             val fontSize = 30f * TerminalSolver.customTermSize
 

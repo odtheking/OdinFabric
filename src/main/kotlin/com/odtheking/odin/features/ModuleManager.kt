@@ -17,9 +17,9 @@ import com.odtheking.odin.features.impl.skyblock.*
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements
-import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.render.RenderTickCounter
-import net.minecraft.util.Identifier
+import net.minecraft.client.DeltaTracker
+import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.resources.ResourceLocation
 
 /**
  * # Module Manager
@@ -28,7 +28,7 @@ import net.minecraft.util.Identifier
  */
 object ModuleManager {
 
-    private val HUD_LAYER: Identifier = Identifier.of(OdinMod.MOD_ID, "odin_hud")
+    private val HUD_LAYER: ResourceLocation = ResourceLocation.fromNamespaceAndPath(OdinMod.MOD_ID, "odin_hud")
     private val keybindSettingsCache = mutableListOf<KeybindSetting>()
     val hudSettingsCache = mutableListOf<HUDSetting>()
 
@@ -69,22 +69,22 @@ object ModuleManager {
 
         on<InputEvent> {
             for (setting in keybindSettingsCache) {
-                if (setting.value.code == key.code) setting.onPress?.invoke()
+                if (setting.value.value == key.value) setting.onPress?.invoke()
             }
         }
 
         HudElementRegistry.attachElementBefore(VanillaHudElements.SLEEP, HUD_LAYER, ModuleManager::render)
     }
 
-    fun render(context: DrawContext, tickCounter: RenderTickCounter) {
-        if (mc.world == null || mc.player == null || mc.currentScreen == HudManager) return
-        context.matrices.pushMatrix()
-        val sf = mc.window.scaleFactor.toFloat()
-        context.matrices?.scale(1f / sf, 1f / sf)
+    fun render(context: GuiGraphics, tickCounter: DeltaTracker) {
+        if (mc.level == null || mc.player == null || mc.screen == HudManager) return
+        context.pose().pushMatrix()
+        val sf = mc.window.guiScale.toFloat()
+        context.pose().scale(1f / sf, 1f / sf)
         for (hudSettings in hudSettingsCache) {
             if (hudSettings.isEnabled) hudSettings.value.draw(context, false)
         }
-        context.matrices?.popMatrix()
+        context.pose().popMatrix()
     }
 
     fun getModuleByName(name: String?): Module? = modules.firstOrNull { it.name.equals(name, true) }

@@ -9,13 +9,13 @@ import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.addVec
-import com.odtheking.odin.utils.render.drawString
+import com.odtheking.odin.utils.render.drawStringExtension
 import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.render.getStringWidth
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.toFixed
-import net.minecraft.text.Text
+import net.minecraft.network.chat.Component
 
 object KuudraInfo : Module(
     name = "Kuudra Info",
@@ -30,9 +30,9 @@ object KuudraInfo : Module(
         if (!example && !KuudraUtils.inKuudra) return@HUD 0 to 0
         val string = if (example) "§a99.975M/240M§c❤" else getCurrentHealthDisplay(KuudraUtils.kuudraEntity?.health ?: return@HUD 0 to 0)
 
-        drawString(string, 1, 1)
+        drawStringExtension(string, 1, 1)
 
-        getStringWidth(string) + 2 to mc.textRenderer.fontHeight
+        getStringWidth(string) + 2 to mc.font.lineHeight
     }
 
     init {
@@ -45,8 +45,8 @@ object KuudraInfo : Module(
 
                 if (kuudraHPDisplay) {
                     drawText(
-                        Text.of(getCurrentHealthDisplay(it.health)).asOrderedText(),
-                        it.entityPos.add(it.rotationVector.multiply(13.0).addVec(y = 10.0)), healthSize, depth = true
+                        Component.literal(getCurrentHealthDisplay(it.health)).visualOrderText,
+                        it.position().add(it.lookAngle.multiply(13.0, 13.0, 13.0).addVec(y = 10.0)), healthSize, depth = true
                     )
                 }
             }

@@ -37,7 +37,7 @@ class ModuleButton(val module: Module, val panel: Panel) {
             colorAnim.get(ClickGUIModule.clickGUIColor, gray26, module.enabled).brighter(1 + hover.percent() / 500f)
 
     private val nameWidth = NVGRenderer.textWidth(module.name, 18f, NVGRenderer.defaultFont)
-    private val hoverHandler = HoverHandler(750, 200)
+    private val hoverHandler = HoverHandler(750)
     private val extendAnim = EaseInOutAnimation(250)
     private val hover = HoverHandler(250)
     var extended = false
@@ -46,7 +46,7 @@ class ModuleButton(val module: Module, val panel: Panel) {
         hoverHandler.handle(x, y, Panel.WIDTH, Panel.HEIGHT - 1)
         hover.handle(x, y, Panel.WIDTH, Panel.HEIGHT - 1)
 
-        if (hoverHandler.percent() > 0 && y >= panel.panelSetting.y + Panel.HEIGHT)
+        if (hoverHandler.percent() >= 100 && y >= panel.panelSetting.y + Panel.HEIGHT)
             ClickGUI.setDescription(module.description, x + Panel.WIDTH + 10f, y, hoverHandler)
 
         NVGRenderer.rect(x, y, Panel.WIDTH, Panel.HEIGHT, color.rgba)
@@ -69,9 +69,9 @@ class ModuleButton(val module: Module, val panel: Panel) {
         return totalHeight
     }
 
-    fun mouseClicked(mouseX: Float, mouseY: Float, click: Click): Boolean {
-        if (hover.hasStarted) {
-            if (click.button() == 0) {
+    fun mouseClicked(mouseX: Float, mouseY: Float, button: Int): Boolean {
+        if (hover.isHovered) {
+            if (button == 0) {
                 colorAnim.start()
                 module.toggle()
                 return true

@@ -34,7 +34,7 @@ object MelodyGui : TermGui() {
                 else -> Colors.gray26
             }
 
-            renderSlot(index, color, color)
+            renderSlot(index, color)
         }
     }
 }

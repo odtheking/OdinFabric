@@ -9,14 +9,14 @@ import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.render.drawStringWidth
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.toFixed
-import net.minecraft.block.Blocks
-import net.minecraft.util.math.BlockPos
+import net.minecraft.core.BlockPos
+import net.minecraft.world.level.block.Blocks
 
 object SpiritBear : Module(
     name = "Spirit Bear",
     description = "Displays the current state of Spirit Bear."
 ) {
-    private val hud by HUD("Hud", "Displays the current state of Spirit Bear in the HUD.", false) { example ->
+    private val hud by HUD("Spirit Bear", "Displays the current state of Spirit Bear in the HUD.", false) { example ->
         when {
             example -> "§e1.45s"
             !DungeonUtils.isFloor(4) || !DungeonUtils.inBoss -> null

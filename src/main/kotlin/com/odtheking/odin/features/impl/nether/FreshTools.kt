@@ -4,7 +4,7 @@ import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
-import com.odtheking.odin.utils.render.drawString
+import com.odtheking.odin.utils.render.drawStringExtension
 import com.odtheking.odin.utils.render.drawStringWidth
 import com.odtheking.odin.utils.sendCommand
 import com.odtheking.odin.utils.skyblock.KuudraUtils
@@ -22,10 +22,10 @@ object FreshTools : Module(
         var maxWidth = 0
 
         if (example) {
-            drawString("§6Player1§f: 9s", 1, yOffset)
-            yOffset += mc.textRenderer.fontHeight
+            drawStringExtension("§6Player1§f: 9s", 1, yOffset)
+            yOffset += mc.font.lineHeight
             maxWidth = drawStringWidth("§6Player2§f: 5s", 1, yOffset)
-            yOffset += mc.textRenderer.fontHeight
+            yOffset += mc.font.lineHeight
         } else {
             KuudraUtils.freshers.forEach { fresher ->
                 val timeLeft = fresher.value?.let { (10000L - (System.currentTimeMillis() - it)) }?.takeIf { it > 0 }
@@ -33,7 +33,7 @@ object FreshTools : Module(
                 val text = "§6${fresher.key}§f: ${(timeLeft / 1000f).toFixed()}s"
                 val width = drawStringWidth(text, 1, yOffset)
                 maxWidth = maxOf(maxWidth, width + 2)
-                yOffset += mc.textRenderer.fontHeight
+                yOffset += mc.font.lineHeight
             }
         }
 

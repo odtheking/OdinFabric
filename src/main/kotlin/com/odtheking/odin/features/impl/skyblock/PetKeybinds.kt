@@ -8,11 +8,11 @@ import com.odtheking.odin.clickgui.settings.impl.ListSetting
 import com.odtheking.odin.events.GuiEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
+import com.odtheking.odin.utils.clickSlot
 import com.odtheking.odin.utils.itemUUID
 import com.odtheking.odin.utils.loreString
 import com.odtheking.odin.utils.modMessage
-import net.minecraft.client.gui.screen.ingame.HandledScreen
-import net.minecraft.screen.slot.SlotActionType
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import org.lwjgl.glfw.GLFW
 
 object PetKeybinds : Module(
@@ -42,48 +42,45 @@ object PetKeybinds : Module(
 
     init {
         on<GuiEvent.MouseClick> {
-            if (screen is HandledScreen<*> && onClick(screen, click.button())) cancel()
+            if (screen is AbstractContainerScreen<*> && onClick(screen, button)) cancel()
         }
 
         on<GuiEvent.KeyPress> {
-            if (screen is HandledScreen<*> && onClick(screen, input.keycode)) cancel()
+            if (screen is AbstractContainerScreen<*> && onClick(screen, keyCode)) cancel()
         }
     }
 
-    private fun onClick(screen: HandledScreen<*>, keyCode: Int): Boolean {
+    private fun onClick(screen: AbstractContainerScreen<*>, keyCode: Int): Boolean {
         val (current, total) = petsRegex.find(screen.title?.string ?: "")?.destructured?.let {
             (it.component1().toIntOrNull() ?: 1) to (it.component2().toIntOrNull() ?: 1)
         } ?: return false
 
         var index = when (keyCode) {
-            nextPageKeybind.code -> if (current < total) 53 else return false.also { modMessage("§cYou are already on the last page.") }
-            previousPageKeybind.code -> if (current > 1) 45 else return false.also { modMessage("§cYou are already on the first page.") }
-            unequipKeybind.code ->
-                screen.screenHandler.slots.subList(10, 43)
-                    .indexOfFirst { it.stack?.loreString?.contains("Click to despawn!") == true }
+            nextPageKeybind.value -> if (current < total) 53 else return false.also { modMessage("§cYou are already on the last page.") }
+            previousPageKeybind.value -> if (current > 1) 45 else return false.also { modMessage("§cYou are already on the first page.") }
+            unequipKeybind.value ->
+                screen.menu.slots.subList(10, 43)
+                    .indexOfFirst { it.item?.loreString?.contains("Click to despawn!") == true }
                     .takeIf { it != -1 }?.plus(10) ?: return false.also { modMessage("§cCouldn't find equipped pet") }
 
             else -> {
                 val petIndex =
-                    arrayOf(pet1, pet2, pet3, pet4, pet5, pet6, pet7, pet8, pet9).indexOfFirst { it.code == keyCode }
+                    arrayOf(pet1, pet2, pet3, pet4, pet5, pet6, pet7, pet8, pet9).indexOfFirst { it.value == keyCode }
                         .takeIf { it != -1 } ?: return false
                 petList.getOrNull(petIndex)?.let { uuid ->
-                    screen.screenHandler.slots.subList(10, 43).indexOfFirst { it?.stack?.itemUUID == uuid }
+                    screen.menu.slots.subList(10, 43).indexOfFirst { it?.item?.itemUUID == uuid }
                 }?.takeIf { it != -1 }?.plus(10)
                     ?: return false.also { modMessage("§cCouldn't find matching pet or there is no pet in that position.") }
             }
         }
 
-        if (screen.screenHandler.slots[index].stack?.loreString?.contains("Click to despawn!") == true && unequipKeybind.code != keyCode) {
+        if (screen.menu.slots[index].item?.loreString?.contains("Click to despawn!") == true && unequipKeybind.value != keyCode) {
             modMessage("§cThat pet is already equipped!")
-            if (closeIfAlreadyEquipped) {
-                index = 49
-            } else if (nounequip) {
-                return false
-            }
+            if (closeIfAlreadyEquipped) index = 49
+            else if (nounequip) return false
         }
 
-        mc.interactionManager?.clickSlot(screen.screenHandler.syncId, index, GLFW.GLFW_MOUSE_BUTTON_1, SlotActionType.PICKUP, mc.player)
+        mc.player?.clickSlot(screen.menu.containerId, index)
         return true
     }
 }

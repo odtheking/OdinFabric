@@ -1,14 +1,14 @@
 package com.odtheking.odin.features.impl.render
 
 import com.google.gson.JsonParser
+import com.mojang.blaze3d.vertex.PoseStack
 import com.odtheking.odin.OdinMod
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.*
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.*
 import kotlinx.coroutines.launch
-import net.minecraft.client.render.entity.state.PlayerEntityRenderState
-import net.minecraft.client.util.math.MatrixStack
+import net.minecraft.client.renderer.entity.state.PlayerRenderState
 
 object PlayerSize : Module(
     name = "Player Size",
@@ -33,7 +33,7 @@ object PlayerSize : Module(
         OdinMod.scope.launch {
             modMessage(
                 sendDataToServer(
-                    body = "${mc.player?.name?.literalString}, [${devWingsColor.red},${devWingsColor.green},${devWingsColor.blue}], [$devSizeX,$devSizeY,$devSizeZ], $devWings, , $passcode",
+                    body = "${mc.player?.name?.tryCollapseToString()}, [${devWingsColor.red},${devWingsColor.green},${devWingsColor.blue}], [$devSizeX,$devSizeY,$devSizeZ], $devWings, , $passcode",
                     "https://tj4yzotqjuanubvfcrfo7h5qlq0opcyk.lambda-url.eu-north-1.on.aws/"
                 )
             )
@@ -43,7 +43,7 @@ object PlayerSize : Module(
 
 
     var randoms: HashMap<String, RandomPlayer> = HashMap()
-    val isRandom get() = randoms.containsKey(mc.session?.username)
+    val isRandom get() = randoms.containsKey(mc.user.name)
 
     data class RandomPlayer(
         val scale: Triple<Float, Float, Float>,
@@ -54,8 +54,8 @@ object PlayerSize : Module(
     )
 
     @JvmStatic
-    fun preRenderCallbackScaleHook(entityRenderer: PlayerEntityRenderState, matrix: MatrixStack) {
-        if (enabled && entityRenderer.playerName?.string == mc.player?.name?.string && !randoms.containsKey(entityRenderer.playerName?.string)) {
+    fun preRenderCallbackScaleHook(entityRenderer: PlayerRenderState, matrix: PoseStack) {
+        if (enabled && entityRenderer.name == mc.player?.name?.string && !randoms.containsKey(entityRenderer.name)) {
             if (devSizeY < 0) matrix.translate(0f, devSizeY * 2, 0f)
             matrix.scale(devSizeX, devSizeY, devSizeZ)
         }

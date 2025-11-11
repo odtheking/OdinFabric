@@ -15,9 +15,9 @@ import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.render.*
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
-import net.minecraft.entity.decoration.ArmorStandEntity
-import net.minecraft.text.Text
-import net.minecraft.util.math.Box
+import net.minecraft.world.entity.decoration.ArmorStand
+import net.minecraft.network.chat.Component
+import net.minecraft.world.phys.AABB
 
 object InactiveWaypoints : Module(
     name = "Inactive Waypoints",
@@ -37,14 +37,14 @@ object InactiveWaypoints : Module(
         if (!(DungeonUtils.inBoss && shouldRender) && !it) return@HUD 0 to 0
         val y = 1
         val width = drawStringWidth("§6Levers ${if (levers == 2) "§a" else "§c"}${levers}§8/§a2", 1, y, Colors.WHITE)
-        drawString("§6Terms ${if ((section == 2 && terminals == 5) || (section != 2 && terminals == 4)) "§a" else "§c"}${terminals}§8/§a${if (section == 2) 5 else 4}", 1, y + 10, Colors.WHITE.rgba)
-        drawString("§6Device ${if (device) "§a✔" else "§c✘"}", 1, y + 20, Colors.WHITE.rgba)
-        drawString("§6Gate ${if (gate) "§a✔" else "§c✘"}", 1, y + 30, Colors.WHITE.rgba)
+        drawStringExtension("§6Terms ${if ((section == 2 && terminals == 5) || (section != 2 && terminals == 4)) "§a" else "§c"}${terminals}§8/§a${if (section == 2) 5 else 4}", 1, y + 10, Colors.WHITE.rgba)
+        drawStringExtension("§6Device ${if (device) "§a✔" else "§c✘"}", 1, y + 20, Colors.WHITE.rgba)
+        drawStringExtension("§6Gate ${if (gate) "§a✔" else "§c✘"}", 1, y + 30, Colors.WHITE.rgba)
 
         width + 1 to 40
     }
 
-    private var inactiveList = setOf<ArmorStandEntity>()
+    private var inactiveList = setOf<ArmorStand>()
     private var firstInSection = false
     private var shouldRender = false
     private var isComplete = false
@@ -63,7 +63,7 @@ object InactiveWaypoints : Module(
     init {
         TickTask(10) {
             if (DungeonUtils.getF7Phase() != M7Phases.P3) return@TickTask
-            inactiveList = mc.world?.entities?.filterIsInstance<ArmorStandEntity>()?.filter {
+            inactiveList = mc.level?.entitiesForRendering()?.filterIsInstance<ArmorStand>()?.filter {
                 it.name.string.containsOneOf("Inactive", "Not Activated", "CLICK HERE", ignoreCase = true)
             }?.toSet().orEmpty()
         }
@@ -117,13 +117,13 @@ object InactiveWaypoints : Module(
             inactiveList.forEach {
                 val name = it.name.string
                 if ((name == "Inactive Terminal" && showTerminals) || (name == "Inactive" && showDevices) || (name == "Not Activated" && showLevers)) {
-                    val customName = Text.of(if (name == "Inactive Terminal") "Terminal" else if (name == "Inactive") "Device" else "Lever").asOrderedText()
+                    val customName = Component.literal(if (name == "Inactive Terminal") "Terminal" else if (name == "Inactive") "Device" else "Lever").visualOrderText
                     if (renderBox)
-                        drawWireFrameBox(Box.from(it.entityPos.addVec(-0.5, z = -0.5)), color, depth = depthCheck)
+                        drawWireFrameBox(AABB.unitCubeFromLowerCorner(it.position().addVec(-0.5, z = -0.5)), color, depth = depthCheck)
                     if (renderText)
-                        drawText(customName, it.entityPos.addVec(y = 2.0), 1.5f, true)
+                        drawText(customName, it.position().addVec(y = 2.0), 1.5f, true)
                     if (renderBeacon)
-                        drawBeaconBeam(it.blockPos, color)
+                        drawBeaconBeam(it.blockPosition(), color)
                 }
                 it.isCustomNameVisible = !hideDefault
             }

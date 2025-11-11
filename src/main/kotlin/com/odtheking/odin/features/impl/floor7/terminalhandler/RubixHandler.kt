@@ -1,14 +1,14 @@
 package com.odtheking.odin.features.impl.floor7.terminalhandler
 
-import net.minecraft.block.StainedGlassPaneBlock
-import net.minecraft.item.BlockItem
-import net.minecraft.item.ItemStack
-import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket
-import net.minecraft.util.DyeColor
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
+import net.minecraft.world.item.BlockItem
+import net.minecraft.world.item.DyeColor
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.block.StainedGlassPaneBlock
 
 class RubixHandler : TerminalHandler(TerminalTypes.RUBIX) {
 
-    override fun handleSlotUpdate(packet: ScreenHandlerSlotUpdateS2CPacket): Boolean {
+    override fun handleSlotUpdate(packet: ClientboundContainerSetSlotPacket): Boolean {
         if (items.lastOrNull() == null || packet.slot != type.windowSize - 1) return false
         solution.clear()
         solution.addAll(solveRubix(items))

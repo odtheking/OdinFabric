@@ -12,11 +12,12 @@ import com.odtheking.odin.utils.renderPos
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import com.odtheking.odin.utils.toFixed
-import net.minecraft.block.Blocks
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket
-import net.minecraft.text.Text
-import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.Vec3d
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
+import net.minecraft.world.level.block.Blocks
+import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket
+import net.minecraft.network.chat.Component
+import net.minecraft.core.BlockPos
+import net.minecraft.world.phys.Vec3
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 
@@ -40,10 +41,10 @@ object WaterSolver {
         val extendedSlots = WoolColor.entries.joinToString("") { if (it.isExtended) it.ordinal.toString() else "" }.takeIf { it.length == 3 } ?: return
 
         patternIdentifier = when {
-            mc.world?.getBlockState(getRealCoords(BlockPos(14, 77, 27)))?.block == Blocks.TERRACOTTA -> 0 // right block == clay
-            mc.world?.getBlockState(getRealCoords(BlockPos(16, 78, 27)))?.block == Blocks.EMERALD_BLOCK -> 1 // left block == emerald
-            mc.world?.getBlockState(getRealCoords(BlockPos(14, 78, 27)))?.block == Blocks.DIAMOND_BLOCK -> 2 // right block == diamond
-            mc.world?.getBlockState(getRealCoords(BlockPos(14, 78, 27)))?.block == Blocks.QUARTZ_BLOCK  -> 3 // right block == quartz
+            mc.level?.getBlockState(getRealCoords(BlockPos(14, 77, 27)))?.block == Blocks.TERRACOTTA -> 0 // right block == clay
+            mc.level?.getBlockState(getRealCoords(BlockPos(16, 78, 27)))?.block == Blocks.EMERALD_BLOCK -> 1 // left block == emerald
+            mc.level?.getBlockState(getRealCoords(BlockPos(14, 78, 27)))?.block == Blocks.DIAMOND_BLOCK -> 2 // right block == diamond
+            mc.level?.getBlockState(getRealCoords(BlockPos(14, 78, 27)))?.block == Blocks.QUARTZ_BLOCK  -> 3 // right block == quartz
             else -> return@with modMessage("§cFailed to get Water Board pattern. Was the puzzle already started?")
         }
 
@@ -75,11 +76,11 @@ object WaterSolver {
 
         if (showTracer) {
             val firstSolution = solutionList.firstOrNull()?.first ?: return
-            mc.player?.let { event.drawLine(listOf(it.renderPos, Vec3d(firstSolution.leverPos).add(.5, .5, .5)), color = tracerColorFirst, depth = true) }
+            mc.player?.let { event.drawLine(listOf(it.renderPos, Vec3(firstSolution.leverPos).add(.5, .5, .5)), color = tracerColorFirst, depth = true) }
 
             if (solutionList.size > 1 && firstSolution.leverPos != solutionList[1].first.leverPos) {
                 event.drawLine(
-                    listOf(Vec3d(firstSolution.leverPos).add(.5, .5, .5), Vec3d(solutionList[1].first.leverPos).add(.5, .5, .5)),
+                    listOf(Vec3(firstSolution.leverPos).add(.5, .5, .5), Vec3(solutionList[1].first.leverPos).add(.5, .5, .5)),
                     color = tracerColorSecond, depth = true
                 )
             }
@@ -89,21 +90,21 @@ object WaterSolver {
             times.drop(lever.i).forEachIndexed { index, time ->
                 val timeInTicks = (time * 20).toInt()
                 event.drawText(
-                    Text.of(when (openedWaterTicks) {
+                    Component.literal(when (openedWaterTicks) {
                         -1 if timeInTicks == 0 -> "§a§lCLICK ME!"
                         -1 -> "§e${time}s"
                         else -> (openedWaterTicks + timeInTicks - tickCounter).takeIf { it > 0 }?.let { "§e${(it / 20f).toFixed()}s" } ?: "§a§lCLICK ME!"
-                    }).asOrderedText(),
-                    Vec3d(lever.leverPos).add(0.5, (index + lever.i) * 0.5 + 1.5, 0.5),
+                    }).visualOrderText,
+                    Vec3(lever.leverPos).add(0.5, (index + lever.i) * 0.5 + 1.5, 0.5),
                     scale = 1f, true
                 )
             }
         }
     }
 
-    fun waterInteract(event: PlayerInteractBlockC2SPacket) {
+    fun waterInteract(event: ServerboundUseItemOnPacket) {
         if (solutions.isEmpty()) return
-        LeverBlock.entries.find { it.leverPos == event.blockHitResult.blockPos }?.let {
+        LeverBlock.entries.find { it.leverPos == event.hitResult.blockPos }?.let {
             if (it == LeverBlock.WATER && openedWaterTicks == -1) openedWaterTicks = tickCounter
             it.i++
         }
@@ -129,7 +130,7 @@ object WaterSolver {
         RED(BlockPos(15, 56, 15));
 
         inline val isExtended: Boolean get() =
-            DungeonUtils.currentRoom?.let { mc.world?.getBlockState(it.getRealCoords(relativePosition))?.block == Blocks.AIR } == false
+            DungeonUtils.currentRoom?.let { mc.level?.getBlockState(it.getRealCoords(relativePosition))?.block == Blocks.AIR } == false
     }
 
     private enum class LeverBlock(val relativePosition: BlockPos, var i: Int = 0) {

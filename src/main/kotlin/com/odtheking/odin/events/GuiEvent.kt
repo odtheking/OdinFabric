@@ -1,11 +1,9 @@
 package com.odtheking.odin.events
 
 import com.odtheking.odin.events.core.CancellableEvent
-import net.minecraft.client.gui.Click
-import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.screen.Screen
-import net.minecraft.client.input.KeyInput
-import net.minecraft.screen.slot.Slot
+import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.world.inventory.Slot
 
 abstract class GuiEvent(val screen: Screen) : CancellableEvent() {
 
@@ -15,17 +13,17 @@ abstract class GuiEvent(val screen: Screen) : CancellableEvent() {
 
     class SlotClick(screen: Screen, val slotId: Int, val button: Int) : GuiEvent(screen)
 
-    class MouseClick(screen: Screen, val click: Click, val doubled: Boolean) : GuiEvent(screen)
+    class MouseClick(screen: Screen, val mouseX: Int, val mouseY: Int, val button: Int) : GuiEvent(screen)
 
     class KeyPress(screen: Screen, val input: KeyInput) : GuiEvent(screen)
 
-    class Draw(screen: Screen, val drawContext: DrawContext, val mouseX: Int, val mouseY: Int) : GuiEvent(screen)
+    class Draw(screen: Screen, val guiGraphics: GuiGraphics, val mouseX: Int, val mouseY: Int) : GuiEvent(screen)
 
-    class DrawBackground(screen: Screen, val drawContext: DrawContext, val mouseX: Int, val mouseY: Int) : GuiEvent(screen)
+    class DrawBackground(screen: Screen, val guiGraphics: GuiGraphics, val mouseX: Int, val mouseY: Int) : GuiEvent(screen)
 
-    class DrawSlot(screen: Screen, val drawContext: DrawContext, val slot: Slot) : GuiEvent(screen)
+    class DrawSlot(screen: Screen, val guiGraphics: GuiGraphics, val slot: Slot) : GuiEvent(screen)
 
     class CustomTermGuiClick(screen: Screen, val slot: Int, val button: Int) : GuiEvent(screen)
 
-    class DrawTooltip(screen: Screen, val drawContext: DrawContext, val mouseX: Int, val mouseY: Int) : GuiEvent(screen)
+    class DrawTooltip(screen: Screen, val guiGraphics: GuiGraphics, val mouseX: Int, val mouseY: Int) : GuiEvent(screen)
 }

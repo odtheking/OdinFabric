@@ -18,17 +18,19 @@ import com.odtheking.odin.utils.skyblock.SkyblockPlayer
 import com.odtheking.odin.utils.skyblock.Supply
 import com.odtheking.odin.utils.skyblock.dungeon.Blessing
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
+import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRelativeCoords
 import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils
 import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils.getRoomCenter
 import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils.getRoomData
 import kotlinx.coroutines.launch
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
-import net.minecraft.text.Text
+import net.minecraft.network.chat.Component
+import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
+import net.minecraft.world.phys.BlockHitResult
 
 val devCommand = Commodore("oddev") {
 
     literal("getitem").runs {
-        modMessage("Item in hand: ${mc.player?.mainHandStack?.customData}")
+        modMessage("Item in hand: ${mc.player?.mainHandItem?.customData}")
     }
 
     literal("giveaotv").runs { tuners: Int? ->
@@ -41,7 +43,7 @@ val devCommand = Commodore("oddev") {
     }
 
     literal("simulate").runs { greedyString: GreedyString ->
-        PacketEvent.Receive(GameMessageS2CPacket(Text.of(greedyString.string), false)).postAndCatch()
+        PacketEvent.Receive(ClientboundSystemChatPacket(Component.literal(greedyString.string), false)).postAndCatch()
         modMessage("§8Simulated message: ${greedyString.string}")
     }
 
@@ -70,12 +72,12 @@ val devCommand = Commodore("oddev") {
                 "kuudra" -> """
                         |inKuudra: ${KuudraUtils.inKuudra}, tier: ${KuudraUtils.kuudraTier}, phase: ${KuudraUtils.phase}
                         |kuudraTeammates: ${KuudraUtils.freshers.map { it.key }}
-                        |giantZombies: ${KuudraUtils.giantZombies.joinToString { it.entityPos.toString() }}
+                        |giantZombies: ${KuudraUtils.giantZombies.joinToString { it.position().toString() }}
                         |supplies: ${Supply.entries.joinToString { "${it.name} -> ${it.isActive}" }}
                         |kuudraEntity: ${KuudraUtils.kuudraEntity}
                         |builders: ${KuudraUtils.playersBuildingAmount}
                         |build: ${KuudraUtils.buildDonePercentage}
-                        |buildingPiles: ${KuudraUtils.buildingPiles.joinToString { it.entityPos.toString() }}
+                        |buildingPiles: ${KuudraUtils.buildingPiles.joinToString { it.position().toString() }}
                         |missing: ${NoPre.missing}
                     """.trimIndent()
                 "dungeon" -> """
@@ -107,8 +109,8 @@ val devCommand = Commodore("oddev") {
     }
 
     literal("roomdata").runs {
-        val room = DungeonUtils.currentRoom
         val player = mc.player ?: return@runs
+        val room = ScanUtils.scanRoom(getRoomCenter(player.x.toInt(), player.z.toInt()))
         val roomCenter = getRoomCenter(player.x.toInt(), player.z.toInt())
         val core = ScanUtils.getCore(roomCenter)
         modMessage(
@@ -118,9 +120,18 @@ val devCommand = Commodore("oddev") {
             Core: $core
             Rotation: ${room?.rotation ?: "NONE"}
             Positions: ${room?.roomComponents?.joinToString { "(${it.x}, ${it.z})" } ?: "None"}
-            Height: ${room?.roomComponents?.firstOrNull()?.let { ScanUtils.getTopLayerOfRoom(it.vec2) } ?: "Unknown"}
+            Height: ${ScanUtils.getTopLayerOfRoom(roomCenter)}
             """.trimIndent(), "")
         setClipboardContent(core.toString())
         modMessage("§aCopied $core to clipboard!")
+    }
+
+    literal("relative").runs {
+        mc.hitResult?.let {
+            if (it !is BlockHitResult) return@runs
+            DungeonUtils.currentRoom?.getRelativeCoords(it.blockPos)?.let { vec2 ->
+                modMessage("Relative coords: ${vec2.x}, ${vec2.z}")
+            }
+        }
     }
 }

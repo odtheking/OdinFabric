@@ -4,9 +4,9 @@ import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
-import net.minecraft.entity.Entity
-import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket
-import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
+import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket
+import net.minecraft.world.entity.Entity
 import java.util.concurrent.CopyOnWriteArrayList
 
 class MobCache(
@@ -19,7 +19,7 @@ class MobCache(
     }
 
     fun addEntityToCache(entityID: Int) {
-        val entity = mc.world?.getEntityById(entityID + entityOffset()) ?: return
+        val entity = mc.level?.getEntity(entityID + entityOffset()) ?: return
         if (!this.any { it.id == entity.id }) {
             if (maxSize != 0 && size >= maxSize) removeAt(0)
             add(entity)
@@ -53,7 +53,7 @@ object MobCaches {
             val toRemove = mutableListOf<Int>()
 
             mobProcessQueue.forEach {
-                val entity = mc.world?.getEntityById(it) ?: return@forEach
+                val entity = mc.level?.getEntity(it) ?: return@forEach
                 toRemove.add(it)
 
                 mobCaches.forEach { cache ->
@@ -62,11 +62,11 @@ object MobCaches {
             }
         }
 
-        onReceive<EntitySpawnS2CPacket> {
-            mobProcessQueue.add(entityId)
+        onReceive<ClientboundAddEntityPacket> {
+            mobProcessQueue.add(id)
         }
 
-        onReceive<EntitiesDestroyS2CPacket> {
+        onReceive<ClientboundRemoveEntitiesPacket> {
             entityIds.forEach { id ->
                 mobProcessQueue.removeIf { it == id }
 

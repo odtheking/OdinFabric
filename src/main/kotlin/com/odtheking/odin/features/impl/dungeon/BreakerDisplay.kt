@@ -8,7 +8,7 @@ import com.odtheking.odin.utils.lore
 import com.odtheking.odin.utils.noControlCodes
 import com.odtheking.odin.utils.render.drawStringWidth
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
-import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 
 object BreakerDisplay : Module(
     name = "Breaker Display",
@@ -24,9 +24,9 @@ object BreakerDisplay : Module(
     }
 
     init {
-        onReceive<ScreenHandlerSlotUpdateS2CPacket> {
-            if (stack?.itemId != "DUNGEONBREAKER" || !DungeonUtils.inDungeons) return@onReceive
-            stack?.lore?.firstNotNullOfOrNull { chargesRegex.find(it.string.noControlCodes) }?.let { match ->
+        onReceive<ClientboundContainerSetSlotPacket> {
+            if (item?.itemId != "DUNGEONBREAKER" || !DungeonUtils.inDungeons) return@onReceive
+            item?.lore?.firstNotNullOfOrNull { chargesRegex.find(it.string.noControlCodes) }?.let { match ->
                 charges = match.groupValues[1].toIntOrNull() ?: 0
                 max = match.groupValues[2].toIntOrNull() ?: 0
             }

@@ -13,7 +13,7 @@ abstract class RenderableSetting<T>(
     description: String
 ) : Setting<T>(name, description) {
 
-    private val hoverHandler = HoverHandler(750, 200)
+    private val hoverHandler = HoverHandler(750)
     protected val width = Panel.WIDTH
     protected var lastX = 0f
     protected var lastY = 0f
