@@ -35,7 +35,7 @@ object EventBus {
 
     fun <T : Event> post(event: T) {
         val profiler = Profiler.get()
-        profiler.push(event::class.simpleName ?: "Event")
+        profiler.push("Odin: ${event::class.simpleName}")
         try {
             invokers[event::class]?.invoke(event, profiler)
         } finally {
@@ -115,7 +115,7 @@ object EventBus {
             return object : Invoker {
                 override fun invoke(event: Event, profiler: ProfilerFiller) {
                     for (listener in listeners) {
-                        profiler.push("Odin: ${listener.subscriberName}")
+                        profiler.push(listener.subscriberName)
                         try {
                             listener.invoke(event)
                         } finally {

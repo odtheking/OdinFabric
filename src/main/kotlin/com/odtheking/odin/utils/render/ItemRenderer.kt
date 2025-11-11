@@ -44,7 +44,7 @@ class ItemStateRenderer(vertexConsumers: MultiBufferSource.BufferSource)
         state.submitBlitToCurrentLayer(
             BlitRenderState(
                 RenderPipelines.GUI_TEXTURED_PREMULTIPLIED_ALPHA, textureView,
-                element.pose(), element.x1(), element.y1(), element.x1() + 16, element.y1() + 16,
+                element.pose(), element.x0(), element.y0(), element.x0() + 16, element.y0() + 16,
                 0.0f, 1.0f, 1.0f, 0.0f, -1, element.scissorArea(), null
             )
         )
