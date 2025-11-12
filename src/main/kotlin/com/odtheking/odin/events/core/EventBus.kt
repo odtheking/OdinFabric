@@ -6,22 +6,21 @@ import net.minecraft.util.profiling.Profiler
 import net.minecraft.util.profiling.ProfilerFiller
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
-import kotlin.reflect.KClass
 
 object EventBus {
 
     @JvmField
-    internal val listenerArrays = ConcurrentHashMap<KClass<out Event>, AtomicReference<Array<ListenerEntry<*>>>>()
+    internal val listenerArrays = ConcurrentHashMap<Class<out Event>, AtomicReference<Array<ListenerEntry<*>>>>()
     @JvmField
-    internal val invokers = ConcurrentHashMap<KClass<out Event>, Invoker>()
+    internal val invokers = ConcurrentHashMap<Class<out Event>, Invoker>()
     @JvmField
     internal val activeSubscribers = ConcurrentHashMap.newKeySet<Any>()
     @JvmField
-    internal val subscriberClasses = ConcurrentHashMap<Any, KClass<*>>()
+    internal val subscriberClasses = ConcurrentHashMap<Any, Class<*>>()
 
     fun subscribe(subscriber: Any) {
         if (activeSubscribers.add(subscriber)) {
-            subscriberClasses[subscriber] = subscriber::class
+            subscriberClasses[subscriber] = subscriber::class.java
             rebuildAffectedCaches(subscriber)
         }
     }
@@ -37,15 +36,15 @@ object EventBus {
         val profiler = Profiler.get()
         profiler.push("Odin: ${event::class.simpleName}")
         try {
-            invokers[event::class]?.invoke(event, profiler)
+            invokers[event::class.java]?.invoke(event, profiler)
         } finally {
             profiler.pop()
         }
     }
 
     fun <T : Event> registerListener(
-        subscriber: KClass<*>,
-        eventClass: KClass<T>,
+        subscriber: Class<*>,
+        eventClass: Class<T>,
         priority: Int,
         ignoreCancelled: Boolean,
         handler: (T) -> Unit
@@ -60,14 +59,14 @@ object EventBus {
     }
 
     private fun rebuildAffectedCaches(subscriber: Any) {
-        val subscriberClass = subscriber::class
+        val subscriberClass = subscriber::class.java
         for ((eventClass, ref) in listenerArrays) {
             val listeners = ref.get()
             if (listeners.any { it.subscriber == subscriberClass }) rebuildInvoker(eventClass, listeners)
         }
     }
 
-    private fun rebuildInvoker(eventClass: KClass<out Event>, allListeners: Array<ListenerEntry<*>>) {
+    private fun rebuildInvoker(eventClass: Class<out Event>, allListeners: Array<ListenerEntry<*>>) {
         val activeSubscriberClasses = activeSubscribers.mapNotNull { subscriberClasses[it] }.toSet()
         @Suppress("UNCHECKED_CAST")
         val activeListeners = allListeners
@@ -84,7 +83,7 @@ object EventBus {
     }
 
     data class ListenerEntry<T : Event>(
-        val subscriber: KClass<*>,
+        val subscriber: Class<*>,
         val listener: EventListener<T>
     )
 
@@ -132,13 +131,13 @@ inline fun <reified T : Event> Any.on(
     priority: Int = 0,
     ignoreCancelled: Boolean = false,
     noinline handler: T.() -> Unit
-) = EventBus.registerListener(this::class, T::class, priority, ignoreCancelled) { it.handler() }
+) = EventBus.registerListener(this::class.java, T::class.java, priority, ignoreCancelled) { it.handler() }
 
 inline fun <reified P : Packet<*>> Any.onReceive(
     priority: Int = 0,
     ignoreCancelled: Boolean = false,
     noinline handler: P.(PacketEvent.Receive) -> Unit
-) = EventBus.registerListener(this::class, PacketEvent.Receive::class, priority, ignoreCancelled) {
+) = EventBus.registerListener(this::class.java, PacketEvent.Receive::class.java, priority, ignoreCancelled) {
     (it.packet as? P)?.handler(it)
 }
 
@@ -146,6 +145,6 @@ inline fun <reified P : Packet<*>> Any.onSend(
     priority: Int = 0,
     ignoreCancelled: Boolean = false,
     noinline handler: P.(PacketEvent.Send) -> Unit
-) = EventBus.registerListener(this::class, PacketEvent.Send::class, priority, ignoreCancelled) {
+) = EventBus.registerListener(this::class.java, PacketEvent.Send::class.java, priority, ignoreCancelled) {
     (it.packet as? P)?.handler(it)
 }

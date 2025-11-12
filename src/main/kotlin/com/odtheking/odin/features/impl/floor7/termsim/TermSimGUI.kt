@@ -86,7 +86,7 @@ open class TermSimGUI(
             StartGUI.open(ping)
         }
 
-        onSend<ServerboundContainerClickPacket>  (EventPriority.LOW) {
+        onSend<ServerboundContainerClickPacket> (EventPriority.LOW) {
             if (mc.screen !== this@TermSimGUI) return@onSend
             delaySlotClick(guiInventorySlots.getOrNull(slotNum.toInt()) ?: return@onSend, buttonNum.toInt())
             it.cancel()
