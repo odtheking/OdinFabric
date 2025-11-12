@@ -7,19 +7,16 @@ import com.odtheking.odin.features.impl.floor7.DragonPriority.displaySpawningDra
 import com.odtheking.odin.features.impl.floor7.DragonPriority.findPriority
 import com.odtheking.odin.features.impl.floor7.WitherDragons.currentTick
 import com.odtheking.odin.features.impl.floor7.WitherDragons.priorityDragon
-import com.odtheking.odin.features.impl.floor7.WitherDragons.sendArrowHit
 import com.odtheking.odin.features.impl.floor7.WitherDragons.sendSpawned
 import com.odtheking.odin.features.impl.floor7.WitherDragons.sendSpawning
 import com.odtheking.odin.features.impl.floor7.WitherDragons.sendTime
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Colors
-import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.modMessage
-import com.odtheking.odin.utils.toFixed
-import net.minecraft.world.entity.boss.enderdragon.EnderDragon
-import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket
 import net.minecraft.core.BlockPos
 import net.minecraft.core.particles.ParticleTypes
+import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.phys.AABB
 
 enum class WitherDragonsEnum(
@@ -36,8 +33,7 @@ enum class WitherDragonsEnum(
     var entity: EnderDragon? = null,
     var isSprayed: Boolean = false,
     var spawnedTime: Long = 0,
-    val skipKillTime: Int = 0,
-    val arrowsHit: HashMap<String, ArrowsHit> = HashMap()
+    val skipKillTime: Int = 0
 ) {
     Red(BlockPos(27, 14, 59), AABB(14.5, 13.0, 45.5, 39.5, 28.0, 70.5), 'c', Colors.MINECRAFT_RED, 24.0..30.0, 56.0..62.0, skipKillTime = 50),
     Orange(BlockPos(85, 14, 56), AABB(72.0, 8.0, 47.0, 102.0, 28.0, 77.0), '6', Colors.MINECRAFT_GOLD, 82.0..88.0, 53.0..59.0, skipKillTime = 62),
@@ -54,21 +50,6 @@ enum class WitherDragonsEnum(
         this.entityId = entityId
         spawnedTime = currentTick
         isSprayed = false
-        arrowsHit.clear()
-
-        if (sendArrowHit && WitherDragons.enabled) {
-            TickTask(skipKillTime) {
-                if (entity?.isAlive == true)
-                    modMessage("§fArrows Hit on §${colorCode}${name}§f in §c${(skipKillTime / 20f).toFixed(2)}s§7: ${
-                        arrowsHit.entries.joinToString(", ") { 
-                            "§f${it.key}§7: §6${it.value.good}${it.value.late.let { late -> 
-                                if (late > 0) " §8(§7${late}§8)" else "" 
-                            }}§7" 
-                        }
-                    }.")
-
-            }
-        }
 
         if (sendSpawned && WitherDragons.enabled) {
             val numberSuffix = when (timesSpawned) {
@@ -88,21 +69,10 @@ enum class WitherDragonsEnum(
         entity = null
         if (!deathless) lastDragonDeath = this
 
-        if (sendArrowHit && WitherDragons.enabled && currentTick - spawnedTime < skipKillTime) {
-            modMessage("§fArrows Hit on §${colorCode}${name}§7: ${
-                arrowsHit.entries.joinToString(", ") { 
-                    "§f${it.key}§7: §6${it.value.good}${it.value.late.let { late -> 
-                        if (late > 0) " §8(§7${late}§8)" else "" 
-                    }}§7" 
-                }
-            }.")
-        }
-
         if (priorityDragon == this) priorityDragon = None
 
-        if (sendTime && WitherDragons.enabled) {
-            WitherDragons.dragonPBs.time(name, ((currentTick - spawnedTime) / 20f), "s§7!", "§${colorCode}${name} §7was alive for §6")
-        }
+        if (sendTime && WitherDragons.enabled)
+            WitherDragons.dragonPBs.time(name, (currentTick - spawnedTime) / 20f, "s§7!", "§${colorCode}${name} §7was alive for §6")
     }
 
     fun updateEntity(entityId: Int) {
@@ -134,8 +104,6 @@ enum class WitherDragonsEnum(
         }
     }
 }
-
-data class ArrowsHit(var good: Int = 0, var late: Int = 0)
 
 enum class WitherDragonState {
     SPAWNING,
