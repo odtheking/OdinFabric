@@ -9,9 +9,9 @@ import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.alert
 import com.odtheking.odin.utils.render.drawCustomBeacon
-import com.odtheking.odin.utils.render.drawStringExtension
 import com.odtheking.odin.utils.render.drawText
-import com.odtheking.odin.utils.render.getStringWidth
+import com.odtheking.odin.utils.render.text
+import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import net.minecraft.network.chat.Component
 import net.minecraft.world.phys.Vec3
@@ -23,12 +23,12 @@ object BuildHelper : Module(
     private val buildHelperDraw by BooleanSetting("Render on Ballista", false, desc = "Draws the build information on the ballista.")
     private val unfinishedWaypoints by BooleanSetting("Unfinished Waypoints", true, desc = "Draws waypoints over the unfinished piles.")
     private val hideDefaultTag by BooleanSetting("Hide Default Tag", true, desc = "Hides the default tag for unfinished piles.").withDependency { unfinishedWaypoints }
-    private val hud by HUD("Build helper", "Shows information about the build progress.") { example ->
+    private val hud by HUD(name, "Shows information about the build progress.") { example ->
         if (!example && (!KuudraUtils.inKuudra || KuudraUtils.phase != 2)) return@HUD 0 to 0
-        drawStringExtension("§bFreshers: ${colorBuilders(KuudraUtils.freshers.size)}", 1, 1)
-        drawStringExtension("§bBuilders: ${colorBuilders(KuudraUtils.playersBuildingAmount)}", 1, 10)
-        drawStringExtension("§bBuild: ${colorBuild(KuudraUtils.buildDonePercentage)}%", 1, 19)
-        getStringWidth("Freshers: 0") + 2 to mc.font.lineHeight * 3
+        val width = textDim("§bFreshers: ${colorBuilders(KuudraUtils.freshers.size)}", 0, 0).first
+        text("§bBuilders: ${colorBuilders(KuudraUtils.playersBuildingAmount)}", 0, 9)
+        text("§bBuild: ${colorBuild(KuudraUtils.buildDonePercentage)}%", 0, 18)
+        width to mc.font.lineHeight * 3
     }
 
     private val stunNotificationNumber by NumberSetting("Stun Percent", 93f, 0, 100, desc = "The build % to notify at (set to 0 to disable).", unit = "%")

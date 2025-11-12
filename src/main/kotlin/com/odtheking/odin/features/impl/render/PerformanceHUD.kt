@@ -7,7 +7,7 @@ import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.ServerUtils
-import com.odtheking.odin.utils.render.drawStringWidth
+import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.toFixed
 import net.minecraft.client.gui.GuiGraphics
 
@@ -24,7 +24,7 @@ object PerformanceHUD : Module(
 
     private const val HORIZONTAL = 0
 
-    private val hud by HUD("Performance HUD", "Shows performance information on the screen.") {
+    private val hud by HUD(name, "Shows performance information on the screen.", false) {
         if (!showFPS && !showTPS && !showPing) return@HUD 0 to 0
 
         var width = 1
@@ -32,7 +32,7 @@ object PerformanceHUD : Module(
         val lineHeight = mc.font.lineHeight
 
         fun renderMetric(label: String, value: String) {
-            val w = drawText(this, label, value, if (direction == HORIZONTAL) width else 1, height)
+            val w = drawText(label, value, if (direction == HORIZONTAL) width else 1, height)
             if (direction == HORIZONTAL) width += w
             else {
                 width = maxOf(width, w)
@@ -47,10 +47,10 @@ object PerformanceHUD : Module(
         width to if (direction == HORIZONTAL) lineHeight else height
     }
 
-    private fun drawText(context: GuiGraphics, name: String, value: String, x: Int, y: Int): Int {
+    private fun GuiGraphics.drawText(name: String, value: String, x: Int, y: Int): Int {
         var width = 0
-        width += context.drawStringWidth(name, x, y, nameColor, true)
-        width += context.drawStringWidth(value, x + width, y, valueColor, true)
+        width += textDim(name, x, y, nameColor, true).first
+        width += textDim(value, x + width, y, valueColor, true).first
         return width
     }
 }

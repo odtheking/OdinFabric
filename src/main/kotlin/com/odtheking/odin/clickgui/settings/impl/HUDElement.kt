@@ -25,7 +25,7 @@ open class HudElement(
         val (width, height) = context.render(example).let { (w, h) -> w to h }
 
         context.pose().popMatrix()
-        if (example) context.hollowFill(x, y, (width * scale).toInt(), (height * scale).toInt(), if (isHovered()) 2 else 1, Colors.WHITE)
+        if (example) context.hollowFill(x - 1, y - 1, (width * scale).toInt(), (height * scale).toInt(), if (isHovered()) 2 else 1, Colors.WHITE)
 
         this.width = width
         this.height = height

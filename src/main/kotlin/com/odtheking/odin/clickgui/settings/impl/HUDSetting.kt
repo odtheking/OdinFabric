@@ -34,7 +34,7 @@ class HUDSetting(
         description: String,
         module: Module,
         draw: GuiGraphics.(Boolean) -> Pair<Int, Int>
-    ) : this(name, HudElement(x, y, scale, toggleable, draw), toggleable, description, module)
+    ) : this(name, HudElement(x, y, scale, !toggleable, draw), toggleable, description, module)
 
     override val default: HudElement = hud
     override var value: HudElement = default

@@ -10,6 +10,7 @@ import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.handlers.LimitedTickTask
 import com.odtheking.odin.utils.skyblock.LocationUtils
+import com.odtheking.odin.utils.skyblock.PartyUtils
 import net.minecraft.sounds.SoundEvents
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -31,7 +32,7 @@ object ChatCommands : Module(
     private val odin by BooleanSetting("Odin", true, desc = "Sends the odin discord link.").withDependency { showSettings }
     private val boop by BooleanSetting("Boop", true, desc = "Executes the /boop command.").withDependency { showSettings }
     private val kick by BooleanSetting("Kick", true, desc = "Executes the /p kick command.").withDependency { showSettings }
-    private val coinFlip by BooleanSetting("Coinflip (cf)", true, desc = "Sends the result of a coinflip..").withDependency { showSettings }
+    private val coinFlip by BooleanSetting("Coinflip (cf)", true, desc = "Sends the result of a coinflip.").withDependency { showSettings }
     private val eightBall by BooleanSetting("Eightball", true, desc = "Sends a random 8ball response.").withDependency { showSettings }
     private val dice by BooleanSetting("Dice", true, desc = "Rolls a dice.").withDependency { showSettings }
     private val partyTransfer by BooleanSetting("Party transfer (pt)", false, desc = "Executes the /party transfer command.").withDependency { showSettings }
@@ -109,7 +110,7 @@ object ChatCommands : Module(
             "odin", "od" -> if (odin) channelMessage("Odin! https://discord.gg/2nCbC9hkxT", name, channel)
             "coords", "co" -> if (coords) channelMessage(getPositionString(), name, channel)
 
-            "boop" -> if (boop) words.getOrNull(1)?.let { sendCommand("boop $it") }
+            "boop" if (boop) -> words.getOrNull(1)?.let { sendCommand("boop $it") }
             "cf" -> if (coinFlip) channelMessage(if (Math.random() < 0.5) "heads" else "tails", name, channel)
             "8ball" -> if (eightBall) channelMessage(responses.random(), name, channel)
             "dice" -> if (dice) channelMessage((1..6).random(), name, channel)
@@ -124,25 +125,25 @@ object ChatCommands : Module(
             // party commands
 
             "warp", "w" ->
-                if (channel == ChatChannel.PARTY && partyWarp) sendCommand("party warp")
+                if (channel == ChatChannel.PARTY && partyWarp && PartyUtils.isLeader()) sendCommand("party warp")
 
             "allinvite", "allinv" ->
-                if (channel == ChatChannel.PARTY && partyAllInvite) sendCommand("party settings allinvite")
+                if (channel == ChatChannel.PARTY && partyAllInvite && PartyUtils.isLeader()) sendCommand("party settings allinvite")
 
             "pt", "ptme", "transfer" ->
-                if (channel == ChatChannel.PARTY && partyTransfer) sendCommand("party transfer $name")
+                if (channel == ChatChannel.PARTY && partyTransfer && PartyUtils.isLeader()) sendCommand("party transfer ${findPartyMember(name)}")
 
             "promote" ->
-                if (channel == ChatChannel.PARTY && partyPromote) sendCommand("party promote $name")
+                if (channel == ChatChannel.PARTY && partyPromote && PartyUtils.isLeader()) sendCommand("party promote ${findPartyMember(name)}")
 
             "demote" ->
-                if (channel == ChatChannel.PARTY && partyDemote) sendCommand("party demote $name")
+                if (channel == ChatChannel.PARTY && partyDemote && PartyUtils.isLeader()) sendCommand("party demote $${findPartyMember(name)}")
 
             "kick", "k" ->
-                if (channel == ChatChannel.PARTY && kick) words.getOrNull(1)?.let { sendCommand("p kick $it") }
+                if (channel == ChatChannel.PARTY && kick && PartyUtils.isLeader()) sendCommand("p kick ${findPartyMember(name)}")
 
             "f1", "f2", "f3", "f4", "f5", "f6", "f7", "m1", "m2", "m3", "m4", "m5", "m6", "m7", "t1", "t2", "t3", "t4", "t5" -> {
-                if (!queInstance || channel != ChatChannel.PARTY) return
+                if (!queInstance || channel != ChatChannel.PARTY || !PartyUtils.isLeader()) return
                 modMessage("§8Entering -> §e${words[0].capitalizeFirst()}")
                 sendCommand("odin ${words[0].lowercase()}")
             }
@@ -156,6 +157,9 @@ object ChatCommands : Module(
             }
         }
     }
+
+    private fun findPartyMember(partialName: String): String =
+        PartyUtils.members.find { it.contains(partialName, true) } ?: partialName
 
     private fun channelMessage(message: Any, name: String, channel: ChatChannel) {
         when (channel) {

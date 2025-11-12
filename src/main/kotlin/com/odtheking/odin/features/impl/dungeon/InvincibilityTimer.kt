@@ -10,7 +10,7 @@ import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.render.ItemStateRenderer
-import com.odtheking.odin.utils.render.drawStringWidth
+import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.world.item.ItemStack
@@ -27,9 +27,8 @@ object InvincibilityTimer : Module(
     private val showBonzo by BooleanSetting("Show Bonzo Mask", true, desc = "Shows the Bonzo Mask in the HUD.")
     private val showPhoenix by BooleanSetting("Show Phoenix Pet", true, desc = "Shows the Phoenix Pet in the HUD.")
 
-    private val hud by HUD("Invincibility HUD", "Shows the invincibility time in the HUD.") { example ->
+    private val hud by HUD(name, "Shows the invincibility time in the HUD.") { example ->
         if ((!DungeonUtils.inDungeons && !example) || (showOnlyInBoss && !DungeonUtils.inBoss)) return@HUD 0 to 0
-        var width = 0
 
         val visibleTypes = InvincibilityType.entries.filter { type ->
             when (type) {
@@ -45,6 +44,8 @@ object InvincibilityTimer : Module(
             } || example)
         }.ifEmpty { return@HUD 0 to 0 }
 
+        var width = 0
+
         visibleTypes.forEachIndexed { index, type ->
             ItemStateRenderer.draw(this, type.itemStack, 0, -1 + index * 14)
             val y = index * 14 + 3
@@ -53,7 +54,7 @@ object InvincibilityTimer : Module(
                 type == InvincibilityType.SPIRIT && mc.player?.getItemBySlot(EquipmentSlot.HEAD)?.itemId?.equalsOneOf("SPIRIT_MASK", "STARRED_SPIRIT_MASK") == true) {
                 fill(13, y, 14, y + 8, equippedMaskColor.rgba)
             }
-            drawStringWidth(
+            textDim(
                 text = when {
                     type.activeTime > 0 -> "${(type.activeTime / 20f).toFixed()}s"
                     type.currentCooldown > 0 -> "${(type.currentCooldown / 20f).toFixed()}s"
@@ -62,7 +63,7 @@ object InvincibilityTimer : Module(
                 16, y,
                 if (type.activeTime == 0 && type.currentCooldown == 0) Colors.MINECRAFT_GREEN
                 else if (type.activeTime > 0) Colors.MINECRAFT_GOLD else Colors.MINECRAFT_RED
-            ).let { if (it > width) width = it }
+            ).first.let { if (it > width) width = it }
         }
 
         width + 20 to visibleTypes.size * 14

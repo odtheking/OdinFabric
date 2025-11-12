@@ -1,12 +1,11 @@
 package com.odtheking.odin.utils.render
 
 import net.minecraft.client.renderer.RenderType
-import net.minecraft.client.renderer.entity.layers.RenderLayer
 
 
 object CustomRenderLayer {
 
-    val LINE_LIST:RenderType = RenderType.create(
+    val LINE_LIST: RenderType = RenderType.create(
         "line-list", RenderType.TRANSIENT_BUFFER_SIZE,
         CustomRenderPipelines.LINE_LIST,
        RenderType.CompositeState.builder()

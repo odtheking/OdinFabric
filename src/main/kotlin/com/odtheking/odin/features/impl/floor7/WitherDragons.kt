@@ -13,16 +13,16 @@ import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.handlers.TickTask
-import com.odtheking.odin.utils.render.drawStringWidth
 import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.render.drawWireFrameBox
+import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
-import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
-import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
 import net.minecraft.network.chat.Component
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
+import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket
 
 object WitherDragons : Module(
     name = "Wither Dragons",
@@ -33,12 +33,11 @@ object WitherDragons : Module(
     private val dragonTimerStyle by SelectorSetting("Timer Style", "Milliseconds", arrayListOf("Milliseconds", "Seconds", "Ticks"), desc = "The style of the dragon timer.").withDependency { dragonTimer && dragonTimerDropDown }
     private val showSymbol by BooleanSetting("Timer Symbol", true, desc = "Displays a symbol for the timer.").withDependency { dragonTimer && dragonTimerDropDown }
     private val hud by HUD("Dragon Timer HUD", "Displays the dragon timer in the HUD.") { example ->
-        if (example) (drawStringWidth("§5P §a4.5s", 1, 1, Colors.WHITE) + 2) to 10
+        if (example) textDim("§5P §a4.5s", 0, 0, Colors.WHITE)
         else {
             priorityDragon.takeIf { it != WitherDragonsEnum.None }?.let { dragon ->
                 if (dragon.state != WitherDragonState.SPAWNING || dragon.timeToSpawn <= 0) return@HUD 0 to 0
-                val width = drawStringWidth("§${dragon.colorCode}${dragon.name.first()}: ${getDragonTimer(dragon.timeToSpawn)}", 1, 1, Colors.WHITE)
-                (width + 2) to 10
+                textDim("§${dragon.colorCode}${dragon.name.first()}: ${getDragonTimer(dragon.timeToSpawn)}", 0, 0, Colors.WHITE)
             } ?: (0 to 0)
         }
     }.withDependency { dragonTimerDropDown }
