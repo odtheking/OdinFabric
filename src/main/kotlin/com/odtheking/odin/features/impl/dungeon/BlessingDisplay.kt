@@ -6,8 +6,8 @@ import com.odtheking.odin.clickgui.settings.impl.ColorSetting
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Colors
-import com.odtheking.odin.utils.render.drawStringExtension
 import com.odtheking.odin.utils.render.getStringWidth
+import com.odtheking.odin.utils.render.text
 import com.odtheking.odin.utils.skyblock.dungeon.Blessing
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 
@@ -24,7 +24,7 @@ object BlessingDisplay : Module(
     private val life by BooleanSetting("Life Blessing", false, desc = "Displays the life blessing.")
     private val lifeColor by ColorSetting("Life Color", Colors.MINECRAFT_RED, true, desc = "The color of the life blessing.").withDependency { life }
     private val wisdom by BooleanSetting("Wisdom Blessing", false, desc = "Displays the wisdom blessing.")
-    private val wisdomColor by ColorSetting("Wisdom Color", Colors.MINECRAFT_BLUE, true, desc = "The color of the wisdom blessing.").withDependency { wisdom }
+    private val wisdomColor by ColorSetting("Wisdom Color", Colors.MINECRAFT_AQUA, true, desc = "The color of the wisdom blessing.").withDependency { wisdom }
 
     private data class BlessingData(val type: Blessing, val enabled: () -> Boolean, val color: () -> Color)
     private val blessings = listOf(
@@ -35,12 +35,12 @@ object BlessingDisplay : Module(
         BlessingData(Blessing.WISDOM, { wisdom }, { wisdomColor })
     )
 
-    private val hud by HUD("Blessing HUD", "Displays the current active blessings of the dungeon.") { example ->
+    private val hud by HUD(name, "Displays the current active blessings of the dungeon.", false) { example ->
         if (!DungeonUtils.inDungeons && !example) return@HUD 0 to 0
         (0..5).reduce { acc, index ->
-            val blessing = blessings[index - 1].takeIf { it.enabled.invoke() } ?: return@reduce acc
+            val blessing = blessings[index - 1].takeIf { it.enabled() } ?: return@reduce acc
             val level = if (example) 19 else if (blessing.type.current > 0) blessing.type.current else return@reduce acc
-            drawStringExtension("${blessing.type.displayString} §a$level§r", 1, 1 + 10 * acc, blessing.color.invoke().rgba)
+            text("${blessing.type.displayString} §a$level§r", 0, 9 * acc, blessing.color())
             acc + 1
         }.let { getStringWidth("Power: 19") to 1 + 10 * it }
     }

@@ -3,6 +3,7 @@ package com.odtheking.odin.features.impl.floor7.termsim
 import com.odtheking.odin.events.TerminalEvent
 import com.odtheking.odin.features.impl.floor7.TerminalSolver
 import com.odtheking.odin.features.impl.floor7.terminalhandler.TerminalTypes
+import com.odtheking.odin.utils.hasGlint
 import com.odtheking.odin.utils.modMessage
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.BuiltInRegistries
@@ -26,19 +27,19 @@ class StartsWithSim(private val letter: String = listOf("A", "B", "C", "G", "D",
     }
 
     override fun slotClick(slot: Slot, button: Int) = with(slot.item) {
-        if (hoverName.string?.startsWith(letter, true) == false || hasFoil()) return modMessage("§cThat item does not start with: \'$letter\'!")
+        if (hoverName.string?.startsWith(letter, true) == false || hasGlint()) return modMessage("§cThat item does not start with: \'$letter\'!")
 
-        createNewGui { if (it == slot && it.item != null) ItemStack(item).apply { set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true) } else it.item }
+        createNewGui { if (it == slot) apply { set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, false) } else it.item }
         playTermSimSound()
-        if (guiInventorySlots.none { it?.item?.hoverName?.string?.startsWith(letter, true) == true && !it.item.hasFoil() })
+        if (guiInventorySlots.none { it?.item?.hoverName?.string?.startsWith(letter, true) == true && !it.item.hasGlint() })
             TerminalSolver.lastTermOpened?.let { TerminalEvent.Solved(it).postAndCatch() }
     }
 
     private fun getLetterItemStack(filterNot: Boolean = false): ItemStack {
         val matchingItem = BuiltInRegistries.ITEM
             .filter { item ->
-                val id = BuiltInRegistries.ITEM.getId(item).toString().substringAfter(':')
-                id.startsWith(letter, ignoreCase = true) != filterNot && !id.contains("pane", ignoreCase = true)
+                val id = item?.name?.string ?: return@filter false
+                id.startsWith(letter, true) != filterNot && !id.contains("pane", true)
             }.random()
 
         return ItemStack(matchingItem)

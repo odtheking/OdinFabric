@@ -5,8 +5,6 @@ import com.google.common.primitives.SignedBytes
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.events.TerminalEvent
-import com.odtheking.odin.events.core.EventBus
-import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.impl.floor7.termsim.TermSimGUI
 import com.odtheking.odin.utils.clickSlot
 import com.odtheking.odin.utils.equalsOneOf
@@ -14,7 +12,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.HashedStack
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
-import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket
 import net.minecraft.world.inventory.ClickType
 import net.minecraft.world.item.ItemStack
@@ -27,27 +24,22 @@ open class TerminalHandler(val type: TerminalTypes) {
     val timeOpened = System.currentTimeMillis()
     var isClicked = false
 
-    init {
-        @Suppress("LeakingThis")
-        EventBus.subscribe(this)
+    fun setSlot(packet: ClientboundContainerSetSlotPacket) {
+        if (packet.slot !in 0 until type.windowSize) return
+        items[packet.slot] = packet.item
+        if (handleSlotUpdate(packet)) TerminalEvent.Updated(this@TerminalHandler).postAndCatch()
+    }
 
-        onReceive<ClientboundContainerSetSlotPacket> {
-            if (slot !in 0 until type.windowSize) return@onReceive
-            items[slot] = item
-            if (handleSlotUpdate(this)) TerminalEvent.Updated(this@TerminalHandler).postAndCatch()
-        }
-
-        onReceive<ClientboundOpenScreenPacket> {
-            isClicked = false
-            items.fill(null)
-        }
+    fun openScreen() {
+        isClicked = false
+        items.fill(null)
     }
 
     open fun handleSlotUpdate(packet: ClientboundContainerSetSlotPacket): Boolean = false
 
     open fun simulateClick(slotIndex: Int, clickType: Int) {}
 
-    fun click(slotIndex: Int, button: Int, simulateClick: Boolean = true) {
+    open fun click(slotIndex: Int, button: Int, simulateClick: Boolean = true) {
         if (mc.player == null) return
         if (simulateClick) simulateClick(slotIndex, button)
         isClicked = true

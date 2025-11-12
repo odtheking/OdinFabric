@@ -10,13 +10,13 @@ import kotlin.math.ceil
 import kotlin.math.hypot
 import kotlin.math.max
 
-fun GuiGraphics.drawStringExtension(text: String, x: Int, y: Int, color: Int = Colors.WHITE.rgba, shadow: Boolean = true) {
-    this.drawString(mc.font, text, x, y, color, shadow)
+fun GuiGraphics.text(text: String, x: Int, y: Int, color: Color = Colors.WHITE, shadow: Boolean = true) {
+    this.drawString(mc.font, text, x, y, color.rgba, shadow)
 }
 
-fun GuiGraphics.drawStringWidth(text: String, x: Int, y: Int, color: Color = Colors.WHITE, shadow: Boolean = true): Int {
-    drawStringExtension(text, x, y, color.rgba, shadow)
-    return mc.font.width(text)
+fun GuiGraphics.textDim(text: String, x: Int, y: Int, color: Color = Colors.WHITE, shadow: Boolean = true): Pair<Int, Int> {
+    text(text, x, y, color, shadow)
+    return mc.font.width(text) to mc.font.lineHeight
 }
 
 fun getStringWidth(text: String): Int = mc.font.width(text)

@@ -19,10 +19,7 @@ import com.odtheking.odin.utils.ui.rendering.NVGSpecialRenderer
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.network.HashedStack
-import net.minecraft.network.protocol.game.ClientboundContainerClosePacket
-import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket
-import net.minecraft.network.protocol.game.ServerboundContainerClickPacket
-import net.minecraft.network.protocol.game.ServerboundContainerClosePacket
+import net.minecraft.network.protocol.game.*
 import net.minecraft.world.inventory.ClickType
 import net.minecraft.world.item.DyeColor
 import org.lwjgl.glfw.GLFW
@@ -78,7 +75,10 @@ object TerminalSolver : Module(
 
     init {
         onReceive<ClientboundOpenScreenPacket> {
-            currentTerm?.let { if (!it.isClicked && mc.screen !is TermSimGUI) leftTerm() }
+            currentTerm?.let {
+                if (!it.isClicked && mc.screen !is TermSimGUI) leftTerm()
+                it.openScreen()
+            }
             val windowName = title.string
             val newTermType = TerminalTypes.entries.find { terminal -> windowName.startsWith(terminal.windowName) }?.takeIf { it != currentTerm?.type } ?: return@onReceive
 
@@ -103,6 +103,10 @@ object TerminalSolver : Module(
                 TerminalEvent.Opened(it).postAndCatch()
                 lastTermOpened = it
             }
+        }
+
+        onReceive<ClientboundContainerSetSlotPacket> {
+            currentTerm?.setSlot(this)
         }
 
         onReceive<ClientboundContainerClosePacket> {

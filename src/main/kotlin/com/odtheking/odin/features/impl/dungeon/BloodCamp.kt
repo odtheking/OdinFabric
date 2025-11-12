@@ -42,9 +42,9 @@ object BloodCamp : Module(
     private val partyMoveTime by BooleanSetting("Party Move Message", false, desc = "Sends a message indicating when the watcher will move to party members.").withDependency { movePrediction && predictionDropdown }
     private val killTitle by BooleanSetting("Kill Title", true, desc = "Shows a title for when to kill the initial spawns.").withDependency { movePrediction && predictionDropdown }
 
-    private val moveTimer by HUD("Move Hud", "Displays the time until the watcher moves.") { example ->
-        if (example) return@HUD drawStringWidth("Move Timer: 0.50s", 1, 1, Colors.MINECRAFT_RED) + 2 to 10
-        finalTime?.let { drawStringWidth("Move Timer: ${((it - normalTickTime) * 0.05).toFixed()}s", 1, 1, Colors.MINECRAFT_RED) to 10 } ?: return@HUD 0 to 0
+    private val moveTimer by HUD("Move HUD", "Displays the time until the watcher moves.") { example ->
+        if (example) return@HUD textDim("Move Timer: 0.50s", 0, 0, Colors.MINECRAFT_RED)
+        finalTime?.let { textDim("Move Timer: ${((it - normalTickTime) * 0.05).toFixed()}s", 0, 0, Colors.MINECRAFT_RED) } ?: return@HUD 0 to 0
     }.withDependency { movePrediction && predictionDropdown }
 
     private val assistDropdown by DropdownSetting("Blood Assist Dropdown", true)
@@ -53,8 +53,8 @@ object BloodCamp : Module(
     private val timerHud by HUD("Timer Hud", "Displays the time left for each mob to spawn.") { example ->
         if ((!bloodAssist || (!DungeonUtils.inDungeons || DungeonUtils.inBoss)) && !example) return@HUD 0 to 0
         if (example) {
-            drawStringExtension("1.15s", 1, 1, Colors.MINECRAFT_RED.rgba)
-            drawStringExtension("2.15s", 1, 12, Colors.MINECRAFT_GREEN.rgba)
+            text("1.15s", 0, 0, Colors.MINECRAFT_RED)
+            textDim("2.15s", 0, 9, Colors.MINECRAFT_GREEN).first
         } else {
             renderDataMap.entries.sortedBy { it.value.time }.fold(0) { acc, data ->
                 val time = data.takeUnless { !it.key.isAlive }?.value?.time ?: return@fold acc
@@ -64,11 +64,11 @@ object BloodCamp : Module(
                     time in 0f..0.5f -> Colors.MINECRAFT_RED
                     else -> Colors.MINECRAFT_AQUA
                 }
-                drawStringExtension("${time.toFixed()}s", 1, 1 + 10 * acc, color.rgba)
+                text("${time.toFixed()}s", 0, 9 * acc, color)
                 acc + 1
             }
-        }
-        getStringWidth("2.15s") to 20
+            getStringWidth("2.15s")
+        } to 18
     }.withDependency { bloodAssist && assistDropdown }
 
     private val pboxColor by ColorSetting("Spawn Color", Colors.MINECRAFT_RED, true, desc = "Color for Spawn render box. Set alpha to 0 to disable.").withDependency { bloodAssist && assistDropdown}

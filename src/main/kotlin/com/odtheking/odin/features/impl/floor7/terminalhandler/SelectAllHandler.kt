@@ -1,5 +1,6 @@
 package com.odtheking.odin.features.impl.floor7.terminalhandler
 
+import com.odtheking.odin.utils.hasGlint
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.world.item.DyeColor
 import net.minecraft.world.item.ItemStack
@@ -20,7 +21,7 @@ class SelectAllHandler(private val color: DyeColor): TerminalHandler(TerminalTyp
 
     private fun solveSelectAll(items: Array<ItemStack?>, color: DyeColor): List<Int> {
         return items.mapIndexedNotNull { index, item ->
-            if (item?.hasFoil() == false &&
+            if (item?.hasGlint() == false &&
                 item.item != Items.BLACK_STAINED_GLASS_PANE &&
                 (item.item.name?.string?.startsWith(color.name.replace("_", " "), ignoreCase = true) == true ||
                 when (color) {

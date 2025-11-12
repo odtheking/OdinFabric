@@ -36,7 +36,6 @@ object NVGRenderer {
     private var drawing: Boolean = false
     private var vg = -1L
 
-
     init {
         vg = nvgCreate(NVG_ANTIALIAS or NVG_STENCIL_STROKES)
         require(vg != -1L) { "Failed to initialize NanoVG" }
@@ -212,7 +211,7 @@ object NVGRenderer {
         nvgFontSize(vg, size)
         color(-16777216)
         nvgFillColor(vg, nvgColor)
-        nvgText(vg, round(x + 3f), round(y + 3f), text)
+        nvgText(vg, round(x + 2f), round(y + 2f), text)
 
         color(color)
         nvgFillColor(vg, nvgColor)

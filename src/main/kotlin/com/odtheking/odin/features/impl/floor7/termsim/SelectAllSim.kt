@@ -3,6 +3,7 @@ package com.odtheking.odin.features.impl.floor7.termsim
 import com.odtheking.odin.events.TerminalEvent
 import com.odtheking.odin.features.impl.floor7.TerminalSolver
 import com.odtheking.odin.features.impl.floor7.terminalhandler.TerminalTypes
+import com.odtheking.odin.utils.hasGlint
 import com.odtheking.odin.utils.modMessage
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.BuiltInRegistries
@@ -63,7 +64,7 @@ class SelectAllSim(
 
         playTermSimSound()
 
-        if (guiInventorySlots.none { it?.item?.hasFoil() == false && possibleItems.contains(it.item?.item) })
+        if (guiInventorySlots.none { it?.item?.hasGlint() == false && possibleItems.contains(it.item?.item) })
             TerminalSolver.lastTermOpened?.let { TerminalEvent.Solved(it).postAndCatch() }
     }
 }

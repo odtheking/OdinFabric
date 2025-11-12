@@ -15,8 +15,8 @@ import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.render.*
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
-import net.minecraft.world.entity.decoration.ArmorStand
 import net.minecraft.network.chat.Component
+import net.minecraft.world.entity.decoration.ArmorStand
 import net.minecraft.world.phys.AABB
 
 object InactiveWaypoints : Module(
@@ -35,13 +35,13 @@ object InactiveWaypoints : Module(
 
     private val hud by HUD("Term Info", "Shows information about the terminals, levers and devices in the dungeon.") {
         if (!(DungeonUtils.inBoss && shouldRender) && !it) return@HUD 0 to 0
-        val y = 1
-        val width = drawStringWidth("§6Levers ${if (levers == 2) "§a" else "§c"}${levers}§8/§a2", 1, y, Colors.WHITE)
-        drawStringExtension("§6Terms ${if ((section == 2 && terminals == 5) || (section != 2 && terminals == 4)) "§a" else "§c"}${terminals}§8/§a${if (section == 2) 5 else 4}", 1, y + 10, Colors.WHITE.rgba)
-        drawStringExtension("§6Device ${if (device) "§a✔" else "§c✘"}", 1, y + 20, Colors.WHITE.rgba)
-        drawStringExtension("§6Gate ${if (gate) "§a✔" else "§c✘"}", 1, y + 30, Colors.WHITE.rgba)
+        val y = 0
+        val width = textDim("§6Levers ${if (levers == 2) "§a" else "§c"}${levers}§8/§a2", 0, y, Colors.WHITE).first
+        text("§6Terms ${if ((section == 2 && terminals == 5) || (section != 2 && terminals == 4)) "§a" else "§c"}${terminals}§8/§a${if (section == 2) 5 else 4}", 0, y + 9, Colors.WHITE)
+        text("§6Device ${if (device) "§a✔" else "§c✘"}", 0, y + 18, Colors.WHITE)
+        text("§6Gate ${if (gate) "§a✔" else "§c✘"}", 0, y + 27, Colors.WHITE)
 
-        width + 1 to 40
+        width to 36
     }
 
     private var inactiveList = setOf<ArmorStand>()

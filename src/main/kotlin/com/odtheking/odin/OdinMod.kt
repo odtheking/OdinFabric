@@ -10,10 +10,7 @@ import com.odtheking.odin.utils.handlers.MobCaches
 import com.odtheking.odin.utils.handlers.TickTasks
 import com.odtheking.odin.utils.render.ItemStateRenderer
 import com.odtheking.odin.utils.sendDataToServer
-import com.odtheking.odin.utils.skyblock.KuudraUtils
-import com.odtheking.odin.utils.skyblock.LocationUtils
-import com.odtheking.odin.utils.skyblock.SkyblockPlayer
-import com.odtheking.odin.utils.skyblock.SplitsManager
+import com.odtheking.odin.utils.skyblock.*
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonListener
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils
@@ -57,7 +54,7 @@ object OdinMod : ClientModInitializer {
             this, LocationUtils, TickTasks, KuudraUtils,
             SkyblockPlayer, MobCaches, ServerUtils,
             EventDispatcher, ModuleManager, DungeonListener,
-            ScanUtils, DungeonUtils, SplitsManager
+            ScanUtils, DungeonUtils, SplitsManager, PartyUtils
         ).forEach { EventBus.subscribe(it) }
 
         SpecialGuiElementRegistry.register { context ->

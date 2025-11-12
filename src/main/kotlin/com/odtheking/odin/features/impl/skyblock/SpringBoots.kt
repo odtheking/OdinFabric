@@ -9,8 +9,8 @@ import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.addVec
 import com.odtheking.odin.utils.equalsOneOf
 import com.odtheking.odin.utils.isItem
-import com.odtheking.odin.utils.render.drawStringWidth
 import com.odtheking.odin.utils.render.drawWireFrameBox
+import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.LocationUtils
 import net.minecraft.network.protocol.game.ClientboundSoundPacket
 import net.minecraft.sounds.SoundEvents
@@ -24,8 +24,8 @@ object SpringBoots : Module(
     private val hud by HUD("Spring Boots", "Shows how high you will jump.") {
         if (blockAmount == 0f && !it) return@HUD 0 to 0
         var width = 1
-        width += drawStringWidth("Height: ", width, 1, Colors.MINECRAFT_LIGHT_PURPLE, true)
-        width += drawStringWidth(getColor(blockAmount), width, 1, Colors.WHITE, true)
+        width += textDim("Height: ", width, 1, Colors.MINECRAFT_LIGHT_PURPLE, true).first
+        width += textDim(getColor(blockAmount), width, 1, Colors.WHITE, true).first
         width to mc.font.lineHeight
     }
 

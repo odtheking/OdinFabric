@@ -39,7 +39,7 @@ object HudManager : Screen(Component.literal("HUD Manager")) {
             if (!hud.value.isHovered()) continue
             context.pose().pushMatrix()
             context.pose().translate(
-                (hud.value.x + hud.value.width * hud.value.scale + 10.0).toFloat(),
+                (hud.value.x + hud.value.width * hud.value.scale + 10f),
                 hud.value.y.toFloat(),
             )
             context.pose().scale(2f, 2f)
