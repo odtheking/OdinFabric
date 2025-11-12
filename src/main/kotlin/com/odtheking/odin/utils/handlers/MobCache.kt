@@ -14,16 +14,32 @@ class MobCache(
     private val entityOffset: () -> Int = { 0 },
     val predicate: (Entity) -> Boolean = { true }
 ) : CopyOnWriteArrayList<Entity>() {
+    private val entityIds = hashSetOf<Int>()
+
     init {
         MobCaches.registerMobCache(this)
     }
 
     fun addEntityToCache(entityID: Int) {
         val entity = mc.level?.getEntity(entityID + entityOffset()) ?: return
-        if (!this.any { it.id == entity.id }) {
-            if (maxSize != 0 && size >= maxSize) removeAt(0)
+        if (entityIds.add(entity.id)) {
+            if (maxSize != 0 && size >= maxSize) {
+                val removed = removeAt(0)
+                entityIds.remove(removed.id)
+            }
             add(entity)
         }
+    }
+
+    fun removeEntityById(entityID: Int) {
+        if (entityIds.remove(entityID)) {
+            removeIf { it.id == entityID }
+        }
+    }
+
+    override fun clear() {
+        super.clear()
+        entityIds.clear()
     }
 
     fun getClosestEntity(): Entity? {
@@ -46,38 +62,49 @@ class MobCache(
 
 object MobCaches {
     private val mobCaches = CopyOnWriteArrayList<MobCache>()
-    private val mobProcessQueue = CopyOnWriteArrayList<Int>()
+    private val mobProcessQueue = hashSetOf<Int>()
+    private val queueLock = Any()
 
     init {
         TickTask(20) {
-            val toRemove = mutableListOf<Int>()
+            val level = mc.level ?: return@TickTask
+            val toProcess = synchronized(queueLock) {
+                mobProcessQueue.toList().also { mobProcessQueue.clear() }
+            }
 
-            mobProcessQueue.forEach {
-                val entity = mc.level?.getEntity(it) ?: return@forEach
-                toRemove.add(it)
+            for (entityId in toProcess) {
+                val entity = level.getEntity(entityId) ?: continue
 
-                mobCaches.forEach { cache ->
-                    if (cache.predicate(entity)) cache.addEntityToCache(it)
+                for (cache in mobCaches) {
+                    if (cache.predicate(entity)) cache.addEntityToCache(entityId)
                 }
             }
         }
 
         onReceive<ClientboundAddEntityPacket> {
-            mobProcessQueue.add(id)
+            synchronized(queueLock) {
+                mobProcessQueue.add(id)
+            }
         }
 
         onReceive<ClientboundRemoveEntitiesPacket> {
-            entityIds.forEach { id ->
-                mobProcessQueue.removeIf { it == id }
+            synchronized(queueLock) {
+                entityIds.forEach { id ->
+                    mobProcessQueue.remove(id)
+                }
+            }
 
-                mobCaches.forEach { cache ->
-                    cache.removeIf { it.id == id }
+            mobCaches.forEach { cache ->
+                entityIds.forEach { id ->
+                    cache.removeEntityById(id)
                 }
             }
         }
 
         on<WorldLoadEvent> {
-            mobProcessQueue.clear()
+            synchronized(queueLock) {
+                mobProcessQueue.clear()
+            }
 
             mobCaches.forEach { it.clear() }
         }
