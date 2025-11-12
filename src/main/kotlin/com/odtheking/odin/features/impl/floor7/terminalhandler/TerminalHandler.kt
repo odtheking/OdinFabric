@@ -47,7 +47,7 @@ open class TerminalHandler(val type: TerminalTypes) {
 
     open fun simulateClick(slotIndex: Int, clickType: Int) {}
 
-    fun click(slotIndex: Int, button: Int, simulateClick: Boolean = true) {
+    open fun click(slotIndex: Int, button: Int, simulateClick: Boolean = true) {
         if (mc.player == null) return
         if (simulateClick) simulateClick(slotIndex, button)
         isClicked = true
