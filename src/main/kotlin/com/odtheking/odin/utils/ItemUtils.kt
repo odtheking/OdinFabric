@@ -95,3 +95,6 @@ fun ItemStack.isEtherwarpItem(): CompoundTag? =
     customData.takeIf {
         it.getInt("ethermerge").orElse(0) == 1 || it.itemId == "ETHERWARP_CONDUIT"
     }
+
+fun ItemStack.hasGlint(): Boolean =
+    componentsPatch.get(DataComponents.ENCHANTMENT_GLINT_OVERRIDE)?.isPresent == true
