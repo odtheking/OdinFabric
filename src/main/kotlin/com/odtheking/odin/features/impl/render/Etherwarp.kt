@@ -62,7 +62,7 @@ object Etherwarp : Module(
             if (mc.player?.isCrouching == false || mc.screen != null || !render) return@on
 
             etherPos = getEtherPos(
-                if (useServerPosition) mc.player?.lastPos else mc.player?.position(),
+                if (useServerPosition) mc.player?.oldPosition() else mc.player?.position(),
                 56.0 + (mc.player?.mainHandItem?.isEtherwarpItem()?.getInt("tuned_transmission")?.orElse(0) ?: return@on),
                 etherWarp = true
             )

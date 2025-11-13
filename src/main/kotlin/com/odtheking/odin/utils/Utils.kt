@@ -121,10 +121,6 @@ inline val Entity.renderPos: Vec3
     get() =
         Vec3(renderX, renderY, renderZ)
 
-inline val Entity.lastPos: Vec3
-    get() =
-        Vec3(xo, yo, zo)
-
 inline val Entity.renderBoundingBox: AABB
     get() =
         boundingBox.move(renderX - x, renderY - y, renderZ - z)

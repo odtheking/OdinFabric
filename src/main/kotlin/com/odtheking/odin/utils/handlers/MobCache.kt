@@ -23,40 +23,18 @@ class MobCache(
     fun addEntityToCache(entityID: Int) {
         val entity = mc.level?.getEntity(entityID + entityOffset()) ?: return
         if (entityIds.add(entity.id)) {
-            if (maxSize != 0 && size >= maxSize) {
-                val removed = removeAt(0)
-                entityIds.remove(removed.id)
-            }
+            if (maxSize != 0 && size >= maxSize) entityIds.remove(removeAt(0).id)
             add(entity)
         }
     }
 
     fun removeEntityById(entityID: Int) {
-        if (entityIds.remove(entityID)) {
-            removeIf { it.id == entityID }
-        }
+        if (entityIds.remove(entityID)) removeIf { it.id == entityID }
     }
 
     override fun clear() {
         super.clear()
         entityIds.clear()
-    }
-
-    fun getClosestEntity(): Entity? {
-        var closestDistance = Float.MAX_VALUE
-        var closestEntity: Entity? = null
-
-        for (entity in this) {
-            val player = mc.player ?: continue
-            val distance = player.distanceTo(entity)
-
-            if (distance < closestDistance) {
-                closestEntity = entity
-                closestDistance = distance
-            }
-        }
-
-        return closestEntity
     }
 }
 

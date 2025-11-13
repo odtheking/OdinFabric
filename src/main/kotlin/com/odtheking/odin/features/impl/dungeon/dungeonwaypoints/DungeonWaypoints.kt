@@ -46,7 +46,7 @@ object DungeonWaypoints : Module(
     private val colorPallet by SelectorSetting("Color pallet", "None", arrayListOf("None", "Aqua", "Magenta", "Yellow", "Lime", "Red"), desc = "The color pallet of the next waypoint you place.").withDependency { settingsDropDown }
     var color by ColorSetting("Color", Colors.MINECRAFT_GREEN, true, desc = "The color of the next waypoint you place.").withDependency { colorPallet == 0 && settingsDropDown }
     var filled by BooleanSetting("Filled", false, desc = "If the next waypoint you place should be 'filled'.").withDependency { settingsDropDown }
-    var depthCheck by BooleanSetting("Depth check", false, desc = "Whether the next waypoint you place should be visible through walls.").withDependency { settingsDropDown }
+    var depthCheck by BooleanSetting("Depth check", false, desc = "Whether the next waypoint you place should have a depth check.").withDependency { settingsDropDown }
     var useBlockSize by BooleanSetting("Use block size", true, desc = "Use the size of the block you click for waypoint size.").withDependency { settingsDropDown }
     var size by NumberSetting("Size", 1.0, .1, 1.0, 0.01, desc = "The size of the next waypoint you place.").withDependency { !useBlockSize && settingsDropDown }
 
