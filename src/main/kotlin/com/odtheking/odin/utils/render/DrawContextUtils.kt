@@ -11,7 +11,7 @@ import kotlin.math.hypot
 import kotlin.math.max
 
 fun GuiGraphics.text(text: String, x: Int, y: Int, color: Color = Colors.WHITE, shadow: Boolean = true) {
-    this.drawString(mc.font, text, x, y, color.rgba, shadow)
+    drawString(mc.font, text, x, y, color.rgba, shadow)
 }
 
 fun GuiGraphics.textDim(text: String, x: Int, y: Int, color: Color = Colors.WHITE, shadow: Boolean = true): Pair<Int, Int> {
