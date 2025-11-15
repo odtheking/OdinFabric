@@ -52,6 +52,7 @@ object StartGUI : TermSimGUI(
                     modMessage("§cAre you sure you want to reset your PBs? Click again to confirm.")
                     areYouSure = true
                     LimitedTickTask(60, 1) {
+                        if (!areYouSure) return@LimitedTickTask
                         modMessage("§aPBs reset cancelled.")
                         areYouSure = false
                     }
