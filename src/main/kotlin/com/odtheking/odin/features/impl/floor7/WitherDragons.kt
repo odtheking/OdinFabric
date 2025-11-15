@@ -112,7 +112,7 @@ object WitherDragons : Module(
             if (dragonHealth) {
                 DragonCheck.dragonEntityList.forEach { dragon ->
                     if (dragon.health > 0) {
-                        context.drawText(
+                        drawText(
                             Component.literal(colorHealth(dragon.health)).visualOrderText,
                             dragon.position(), 5f, false
                         )
@@ -122,14 +122,14 @@ object WitherDragons : Module(
 
             WitherDragonsEnum.entries.forEach { dragon ->
                 if (dragonTimer && dragon.state == WitherDragonState.SPAWNING && dragon.timeToSpawn > 0) {
-                    context.drawText(
+                    drawText(
                         Component.literal("§${dragon.colorCode}${dragon.name.first()}: ${getDragonTimer(dragon.timeToSpawn)}").visualOrderText,
                         dragon.spawnPos.center, 5f, false
                     )
                 }
 
                 if (dragonBoxes && dragon.state != WitherDragonState.DEAD)
-                    context.drawWireFrameBox(dragon.aabbDimensions, dragon.color, depth = true)
+                    drawWireFrameBox(dragon.aabbDimensions, dragon.color, depth = true)
             }
         }
 

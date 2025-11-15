@@ -41,7 +41,7 @@ object CustomHighlight : Module(
                     entity.eyeY
                 ) ?: false
 
-                context.drawStyledBox(boundingBox, color.multiplyAlpha(0.5f), renderStyle, !canSee)
+                drawStyledBox(boundingBox, color.multiplyAlpha(0.5f), renderStyle, !canSee)
             }
         }
     }

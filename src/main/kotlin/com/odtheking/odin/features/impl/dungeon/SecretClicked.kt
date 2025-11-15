@@ -71,7 +71,7 @@ object SecretClicked : Module(
 
             clickedSecretsList.forEach { secret ->
                 val currentColor = if (secret.locked) lockedColor else color
-                context.drawStyledBox(secret.aabb, currentColor, style, depthCheck)
+                drawStyledBox(secret.aabb, currentColor, style, depthCheck)
             }
         }
 

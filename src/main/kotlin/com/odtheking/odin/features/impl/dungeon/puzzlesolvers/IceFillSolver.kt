@@ -3,6 +3,7 @@ package com.odtheking.odin.features.impl.dungeon.puzzlesolvers
 import com.google.gson.GsonBuilder
 import com.odtheking.odin.OdinMod.logger
 import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.modMessage
@@ -10,7 +11,6 @@ import com.odtheking.odin.utils.render.drawLine
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.Room
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.core.BlockPos
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.phys.Vec3
@@ -35,10 +35,10 @@ object IceFillSolver {
         }
     }
 
-    fun onRenderWorld(context: WorldRenderContext, color: Color) {
+    fun onRenderWorld(event: RenderEvent, color: Color) {
         if (currentPatterns.isEmpty() || DungeonUtils.currentRoomName != "Ice Fill") return
 
-        context.drawLine(currentPatterns, color, true)
+        event.drawLine(currentPatterns, color, true)
     }
 
     fun onRoomEnter(event: RoomEnterEvent, optimizePatterns: Boolean) = with (event.room) {
