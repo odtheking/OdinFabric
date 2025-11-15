@@ -6,17 +6,17 @@ import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.handlers.TickTask
-import com.odtheking.odin.utils.render.drawStringWidth
+import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.toFixed
-import net.minecraft.block.Blocks
-import net.minecraft.util.math.BlockPos
+import net.minecraft.core.BlockPos
+import net.minecraft.world.level.block.Blocks
 
 object SpiritBear : Module(
     name = "Spirit Bear",
     description = "Displays the current state of Spirit Bear."
 ) {
-    private val hud by HUD("Hud", "Displays the current state of Spirit Bear in the HUD.", false) { example ->
+    private val hud by HUD(name, "Displays the current state of Spirit Bear in the HUD.", false) { example ->
         when {
             example -> "§e1.45s"
             !DungeonUtils.isFloor(4) || !DungeonUtils.inBoss -> null
@@ -24,7 +24,7 @@ object SpiritBear : Module(
             timer > 0 -> "§e${(timer / 20f).toFixed()}s"
             else -> "§aAlive!"
         }?.let { text ->
-            drawStringWidth("§6Spirit Bear: $text", 1, 1, Colors.WHITE) + 2 to 10
+            textDim("§6Spirit Bear: $text", 0, 0, Colors.WHITE)
         } ?: (0 to 0)
     }
 

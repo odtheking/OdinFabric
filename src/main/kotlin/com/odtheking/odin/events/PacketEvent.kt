@@ -1,7 +1,7 @@
 package com.odtheking.odin.events
 
 import com.odtheking.odin.events.core.CancellableEvent
-import net.minecraft.network.packet.Packet
+import net.minecraft.network.protocol.Packet
 
 abstract class PacketEvent(val packet: Packet<*>) : CancellableEvent() {
 

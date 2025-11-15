@@ -5,22 +5,22 @@ import com.odtheking.odin.clickgui.settings.impl.HudElement
 import com.odtheking.odin.config.Config
 import com.odtheking.odin.features.ModuleManager.hudSettingsCache
 import com.odtheking.odin.utils.Colors
-import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.screen.Screen
-import net.minecraft.text.Text
+import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.network.chat.Component
 import org.lwjgl.glfw.GLFW
 import kotlin.math.sign
 import com.odtheking.odin.utils.ui.mouseX as odinMouseX
 import com.odtheking.odin.utils.ui.mouseY as odinMouseY
 
-object HudManager : Screen(Text.of("HUD Manager")) {
+object HudManager : Screen(Component.literal("HUD Manager")) {
 
     private var dragging: HudElement? = null
 
     private var deltaX = 0f
     private var deltaY = 0f
 
-    override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, deltaTicks: Float) {
+    override fun render(context: GuiGraphics, mouseX: Int, mouseY: Int, deltaTicks: Float) {
         super.render(context, mouseX, mouseY, deltaTicks)
 
         dragging?.let {
@@ -28,24 +28,24 @@ object HudManager : Screen(Text.of("HUD Manager")) {
             it.y = (odinMouseY + deltaY).coerceIn(0f, (mc.window.height - (it.height * it.scale))).toInt()
         }
 
-        context?.matrices?.pushMatrix()
-        val sf = mc.window.scaleFactor.toFloat()
-        context?.matrices?.scale(1f / sf, 1f / sf)
+        context.pose()?.pushMatrix()
+        val sf = mc.window.guiScale.toFloat()
+        context.pose().scale(1f / sf, 1f / sf)
 
         for (hud in hudSettingsCache) {
-            if (hud.isEnabled) hud.value.draw(context!!, true)
+            if (hud.isEnabled) hud.value.draw(context, true)
             if (!hud.value.isHovered()) continue
-            context?.matrices?.pushMatrix()
-            context?.matrices?.translate(
-                (hud.value.x + hud.value.width * hud.value.scale + 10.0).toFloat(),
+            context.pose().pushMatrix()
+            context.pose().translate(
+                (hud.value.x + hud.value.width * hud.value.scale + 10f),
                 hud.value.y.toFloat(),
             )
-            context?.matrices?.scale(2f, 2f)
-            context?.drawTextWithShadow(mc.textRenderer, Text.of(hud.name), 0, 0, Colors.WHITE.rgba)
-            context?.drawWrappedTextWithShadow(mc.textRenderer, Text.of(hud.description), 0, 10, 150, Colors.WHITE.rgba)
-            context?.matrices?.popMatrix()
+            context.pose().scale(2f, 2f)
+            context.drawString(mc.font, Component.literal(hud.name), 0, 0, Colors.WHITE.rgba)
+            context.drawWordWrap(mc.font, Component.literal(hud.description), 0, 10, 150, Colors.WHITE.rgba)
+            context.pose().popMatrix()
         }
-        context?.matrices?.popMatrix()
+        context.pose().popMatrix()
     }
 
     override fun mouseScrolled(
@@ -141,9 +141,9 @@ object HudManager : Screen(Text.of("HUD Manager")) {
         return super.keyPressed(keyCode, scanCode, modifiers)
     }
 
-    override fun close() {
+    override fun onClose() {
         Config.save()
-        super.close()
+        super.onClose()
     }
 
     fun resetHUDS() {
@@ -154,5 +154,5 @@ object HudManager : Screen(Text.of("HUD Manager")) {
         }
     }
 
-    override fun shouldPause(): Boolean = false
+    override fun isPauseScreen(): Boolean = false
 }

@@ -7,7 +7,7 @@ import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Colors
-import com.odtheking.odin.utils.render.drawStringWidth
+import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.sendCommand
 import com.odtheking.odin.utils.toFixed
 
@@ -17,9 +17,9 @@ object WarpCooldown : Module(
 ) {
     private val announceKick by BooleanSetting("Announce Kick", false, desc = "Announce when you get kicked from skyblock.")
     private val kickText by StringSetting("Kick Text", "Kicked!", desc = "The text sent in party chat when you get kicked from skyblock.").withDependency { announceKick }
-    private val hud by HUD("Warp Timer Hud", "Displays the warp timer in the HUD.") {
+    private val hud by HUD(name, "Displays the warp timer in the HUD.", false) {
         if (warpTimer - System.currentTimeMillis() <= 0 && !it) return@HUD 0 to 0
-        drawStringWidth("§eWarp: §a${if (it) "30" else ((warpTimer - System.currentTimeMillis()) / 1000f).toFixed()}s", 1, 1, Colors.WHITE) + 2 to 10
+        textDim("§eWarp: §a${if (it) "30" else ((warpTimer - System.currentTimeMillis()) / 1000f).toFixed()}s", 0, 0, Colors.WHITE)
     }
 
     private val enterRegex = Regex("^-*\\n\\[[^]]+] (\\w+) entered (?:MM )?\\w+ Catacombs, Floor (\\w+)!\\n-*$")

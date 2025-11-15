@@ -54,7 +54,7 @@ class NumberSetting<E>(
         }
 
     private val sliderAnim = LinearAnimation<Float>(100)
-    private val handler = HoverHandler(0, 150)
+    private val handler = HoverHandler(150)
 
     private var displayValue = getDisplay()
     private var prevLocation = 0f
@@ -135,8 +135,8 @@ class NumberSetting<E>(
 
     override fun write(): JsonElement = JsonPrimitive(value)
 
-    override fun read(element: JsonElement?) {
-        element?.asNumber?.let { value = it as E }
+    override fun read(element: JsonElement) {
+        element.asNumber?.let { value = it as E }
     }
 
     private fun roundToIncrement(x: Number): Double =

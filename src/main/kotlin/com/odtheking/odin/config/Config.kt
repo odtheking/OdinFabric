@@ -16,7 +16,7 @@ object Config {
 
     private val gson = GsonBuilder().setPrettyPrinting().create()
 
-    private val configFile = File(mc.runDirectory, "config/odin/odin-config.json").apply {
+    private val configFile = File(mc.gameDirectory, "config/odin/odin-config.json").apply {
         try {
             parentFile.mkdirs()
             createNewFile()
@@ -36,12 +36,9 @@ object Config {
                     val moduleObj = modules?.asJsonObject ?: continue
                     val module = ModuleManager.getModuleByName(moduleObj.get("name").asString) ?: continue
                     if (moduleObj.get("enabled").asBoolean != module.enabled) module.toggle()
-                    val settingsElement = moduleObj.get("settings")
-                    if (settingsElement?.isJsonObject != true) continue
-                    val settingObj = settingsElement.asJsonObject.entrySet()
+                    val settingObj = moduleObj.get("settings")?.takeIf { it.isJsonObject }?.asJsonObject?.entrySet() ?: continue
                     for ((key, value) in settingObj) {
-                        val setting = module.getSettingByName(key) ?: continue
-                        if (setting is Saving) setting.read(value)
+                        ((module.getSettingByName(key)) as? Saving)?.apply { read(value ?: continue) }
                     }
                 }
             }

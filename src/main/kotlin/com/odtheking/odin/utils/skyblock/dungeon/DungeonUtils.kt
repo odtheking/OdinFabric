@@ -9,12 +9,12 @@ import com.odtheking.odin.utils.rotateToNorth
 import com.odtheking.odin.utils.skyblock.Island
 import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.Room
-import net.minecraft.block.BlockState
-import net.minecraft.block.Blocks
-import net.minecraft.block.SkullBlock
-import net.minecraft.block.entity.SkullBlockEntity
-import net.minecraft.util.Identifier
-import net.minecraft.util.math.BlockPos
+import net.minecraft.core.BlockPos
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.level.block.SkullBlock
+import net.minecraft.world.level.block.entity.SkullBlockEntity
+import net.minecraft.world.level.block.state.BlockState
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -205,9 +205,9 @@ object DungeonUtils {
                         name,
                         DungeonClass.entries.find { it.name == clazz } ?: continue,
                         clazzLvl = romanToInt(clazzLevel),
-                        mc.networkHandler?.getPlayerListEntry(name)?.skinTextures?.texture
-                            ?: Identifier.of("textures/entity/steve.png"),
-                        mc.world?.players?.find { it.name?.string == name } ?: mc.player,
+                        mc.connection?.getPlayerInfo(name)?.skin?.texture
+                            ?: ResourceLocation.withDefaultNamespace("textures/entity/steve.png"),
+                        mc.level?.players()?.find { it.name?.string == name } ?: mc.player,
                         false))
         }
         return previousTeammates
@@ -230,13 +230,13 @@ object DungeonUtils {
         return when {
             state.block.equalsOneOf(Blocks.CHEST, Blocks.TRAPPED_CHEST, Blocks.LEVER) -> true
             state.block is SkullBlock ->
-                (mc.world?.getBlockEntity(pos) as? SkullBlockEntity)?.owner?.uuid?.getOrNull()
+                (mc.level?.getBlockEntity(pos) as? SkullBlockEntity)?.ownerProfile?.id?.getOrNull()
                     ?.toString()?.equalsOneOf(WITHER_ESSENCE_ID, REDSTONE_KEY) ?: false
 
             else -> false
         }
     }
 
-    fun Room.getRelativeCoords(pos: BlockPos) = pos.subtract(clayPos).rotateToNorth(rotation)
-    fun Room.getRealCoords(pos: BlockPos) = pos.rotateAroundNorth(rotation).add(clayPos.x, 0, clayPos.z)
+    fun Room.getRelativeCoords(pos: BlockPos) = pos.subtract(clayPos.atY(0)).rotateToNorth(rotation)
+    fun Room.getRealCoords(pos: BlockPos) = pos.rotateAroundNorth(rotation).offset(clayPos.x, 0, clayPos.z)
 }

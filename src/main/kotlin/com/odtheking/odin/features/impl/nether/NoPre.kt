@@ -11,7 +11,7 @@ import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.sendCommand
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.skyblock.Supply
-import net.minecraft.util.math.Vec3d
+import net.minecraft.world.phys.Vec3
 
 object NoPre : Module(
     name = "Pre-Spot Alert",
@@ -34,12 +34,12 @@ object NoPre : Module(
 
             when {
                 preRegex.matches(value) -> {
-                    val playerLocation = mc.player?.blockPos ?: return@on
+                    val playerLocation = mc.player?.blockPosition() ?: return@on
                     preSpot = when {
-                        Supply.Triangle.pickUpSpot.isWithinDistance(playerLocation, 15.0) -> Supply.Triangle
-                        Supply.X.pickUpSpot.isWithinDistance(playerLocation, 30.0) -> Supply.X
-                        Supply.Equals.pickUpSpot.isWithinDistance(playerLocation, 15.0) -> Supply.Equals
-                        Supply.Slash.pickUpSpot.isWithinDistance(playerLocation, 15.0) -> Supply.Slash
+                        Supply.Triangle.pickUpSpot.closerThan(playerLocation, 15.0) -> Supply.Triangle
+                        Supply.X.pickUpSpot.closerThan(playerLocation, 30.0) -> Supply.X
+                        Supply.Equals.pickUpSpot.closerThan(playerLocation, 15.0) -> Supply.Equals
+                        Supply.Slash.pickUpSpot.closerThan(playerLocation, 15.0) -> Supply.Slash
                         else -> Supply.None
                     }
                     modMessage(if (preSpot == Supply.None) "§cDidn't register your pre-spot because you didn't get there in time." else "Pre-spot: ${preSpot.name}")
@@ -51,12 +51,12 @@ object NoPre : Module(
                     var pre = false
                     var msg = ""
                     KuudraUtils.giantZombies.forEach { supply ->
-                        val supplyLoc = Vec3d(supply.x, 76.0, supply.z)
+                        val supplyLoc = Vec3(supply.x, 76.0, supply.z)
                         when {
-                            preSpot.pickUpSpot.isWithinDistance(supplyLoc, 18.0) -> pre = true
-                            preSpot == Supply.Triangle && Supply.Shop.pickUpSpot.isWithinDistance(supplyLoc, 18.0) -> second = true
-                            preSpot == Supply.X && Supply.xCannon.pickUpSpot.isWithinDistance(supplyLoc, 16.0) -> second = true
-                            preSpot == Supply.Slash && Supply.Square.pickUpSpot.isWithinDistance(supplyLoc, 20.0) -> second = true
+                            preSpot.pickUpSpot.closerToCenterThan(supplyLoc, 18.0) -> pre = true
+                            preSpot == Supply.Triangle && Supply.Shop.pickUpSpot.closerToCenterThan(supplyLoc, 18.0) -> second = true
+                            preSpot == Supply.X && Supply.xCannon.pickUpSpot.closerToCenterThan(supplyLoc, 16.0) -> second = true
+                            preSpot == Supply.Slash && Supply.Square.pickUpSpot.closerToCenterThan(supplyLoc, 20.0) -> second = true
                         }
                     }
                     if (second && pre) return@on

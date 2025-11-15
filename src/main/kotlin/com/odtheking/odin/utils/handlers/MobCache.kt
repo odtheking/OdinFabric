@@ -4,9 +4,9 @@ import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
-import net.minecraft.entity.Entity
-import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket
-import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
+import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket
+import net.minecraft.world.entity.Entity
 import java.util.concurrent.CopyOnWriteArrayList
 
 class MobCache(
@@ -14,70 +14,75 @@ class MobCache(
     private val entityOffset: () -> Int = { 0 },
     val predicate: (Entity) -> Boolean = { true }
 ) : CopyOnWriteArrayList<Entity>() {
+    private val entityIds = hashSetOf<Int>()
+
     init {
         MobCaches.registerMobCache(this)
     }
 
     fun addEntityToCache(entityID: Int) {
-        val entity = mc.world?.getEntityById(entityID + entityOffset()) ?: return
-        if (!this.any { it.id == entity.id }) {
-            if (maxSize != 0 && size >= maxSize) removeAt(0)
+        val entity = mc.level?.getEntity(entityID + entityOffset()) ?: return
+        if (entityIds.add(entity.id)) {
+            if (maxSize != 0 && size >= maxSize) entityIds.remove(removeAt(0).id)
             add(entity)
         }
     }
 
-    fun getClosestEntity(): Entity? {
-        var closestDistance = Float.MAX_VALUE
-        var closestEntity: Entity? = null
+    fun removeEntityById(entityID: Int) {
+        if (entityIds.remove(entityID)) removeIf { it.id == entityID }
+    }
 
-        for (entity in this) {
-            val player = mc.player ?: continue
-            val distance = player.distanceTo(entity)
-
-            if (distance < closestDistance) {
-                closestEntity = entity
-                closestDistance = distance
-            }
-        }
-
-        return closestEntity
+    override fun clear() {
+        super.clear()
+        entityIds.clear()
     }
 }
 
 object MobCaches {
     private val mobCaches = CopyOnWriteArrayList<MobCache>()
-    private val mobProcessQueue = CopyOnWriteArrayList<Int>()
+    private val mobProcessQueue = hashSetOf<Int>()
+    private val queueLock = Any()
 
     init {
         TickTask(20) {
-            val toRemove = mutableListOf<Int>()
+            val level = mc.level ?: return@TickTask
+            val toProcess = synchronized(queueLock) {
+                mobProcessQueue.toList().also { mobProcessQueue.clear() }
+            }
 
-            mobProcessQueue.forEach {
-                val entity = mc.world?.getEntityById(it) ?: return@forEach
-                toRemove.add(it)
+            for (entityId in toProcess) {
+                val entity = level.getEntity(entityId) ?: continue
 
-                mobCaches.forEach { cache ->
-                    if (cache.predicate(entity)) cache.addEntityToCache(it)
+                for (cache in mobCaches) {
+                    if (cache.predicate(entity)) cache.addEntityToCache(entityId)
                 }
             }
         }
 
-        onReceive<EntitySpawnS2CPacket> {
-            mobProcessQueue.add(entityId)
+        onReceive<ClientboundAddEntityPacket> {
+            synchronized(queueLock) {
+                mobProcessQueue.add(id)
+            }
         }
 
-        onReceive<EntitiesDestroyS2CPacket> {
-            entityIds.forEach { id ->
-                mobProcessQueue.removeIf { it == id }
+        onReceive<ClientboundRemoveEntitiesPacket> {
+            synchronized(queueLock) {
+                entityIds.forEach { id ->
+                    mobProcessQueue.remove(id)
+                }
+            }
 
-                mobCaches.forEach { cache ->
-                    cache.removeIf { it.id == id }
+            mobCaches.forEach { cache ->
+                entityIds.forEach { id ->
+                    cache.removeEntityById(id)
                 }
             }
         }
 
         on<WorldLoadEvent> {
-            mobProcessQueue.clear()
+            synchronized(queueLock) {
+                mobProcessQueue.clear()
+            }
 
             mobCaches.forEach { it.clear() }
         }

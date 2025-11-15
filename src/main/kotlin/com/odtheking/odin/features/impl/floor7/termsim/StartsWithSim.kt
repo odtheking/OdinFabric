@@ -3,11 +3,12 @@ package com.odtheking.odin.features.impl.floor7.termsim
 import com.odtheking.odin.events.TerminalEvent
 import com.odtheking.odin.features.impl.floor7.TerminalSolver
 import com.odtheking.odin.features.impl.floor7.terminalhandler.TerminalTypes
+import com.odtheking.odin.utils.hasGlint
 import com.odtheking.odin.utils.modMessage
-import net.minecraft.component.DataComponentTypes
-import net.minecraft.item.ItemStack
-import net.minecraft.registry.Registries
-import net.minecraft.screen.slot.Slot
+import net.minecraft.core.component.DataComponents
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.world.inventory.Slot
+import net.minecraft.world.item.ItemStack
 import kotlin.math.floor
 
 class StartsWithSim(private val letter: String = listOf("A", "B", "C", "G", "D", "M", "N", "R", "S", "T").random()) : TermSimGUI(
@@ -25,20 +26,20 @@ class StartsWithSim(private val letter: String = listOf("A", "B", "C", "G", "D",
         }
     }
 
-    override fun slotClick(slot: Slot, button: Int) = with(slot.stack) {
-        if (name.string?.startsWith(letter, true) == false || hasGlint()) return modMessage("§cThat item does not start with: \'$letter\'!")
+    override fun slotClick(slot: Slot, button: Int) = with(slot.item) {
+        if (hoverName.string?.startsWith(letter, true) == false || hasGlint()) return modMessage("§cThat item does not start with: \'$letter\'!")
 
-        createNewGui { if (it == slot && it.stack != null) ItemStack(item).apply { set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true) } else it.stack }
+        createNewGui { if (it == slot) apply { set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, false) } else it.item }
         playTermSimSound()
-        if (guiInventorySlots.none { it?.stack?.name?.string?.startsWith(letter, true) == true && !it.stack.hasGlint() })
+        if (guiInventorySlots.none { it?.item?.hoverName?.string?.startsWith(letter, true) == true && !it.item.hasGlint() })
             TerminalSolver.lastTermOpened?.let { TerminalEvent.Solved(it).postAndCatch() }
     }
 
     private fun getLetterItemStack(filterNot: Boolean = false): ItemStack {
-        val matchingItem = Registries.ITEM
+        val matchingItem = BuiltInRegistries.ITEM
             .filter { item ->
-                val id = Registries.ITEM.getId(item).path // e.g. "blue_wool"
-                id.startsWith(letter, ignoreCase = true) != filterNot && !id.contains("pane", ignoreCase = true)
+                val id = item?.name?.string ?: return@filter false
+                id.startsWith(letter, true) != filterNot && !id.contains("pane", true)
             }.random()
 
         return ItemStack(matchingItem)

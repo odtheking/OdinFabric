@@ -15,7 +15,7 @@ import com.odtheking.odin.utils.ui.HoverHandler
 import com.odtheking.odin.utils.ui.animations.LinearAnimation
 import com.odtheking.odin.utils.ui.isAreaHovered
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
-import net.minecraft.client.gui.DrawContext
+import net.minecraft.client.gui.GuiGraphics
 
 class HUDSetting(
     name: String,
@@ -33,8 +33,8 @@ class HUDSetting(
         toggleable: Boolean,
         description: String,
         module: Module,
-        draw: DrawContext.(Boolean) -> Pair<Int, Int>
-    ) : this(name, HudElement(x, y, scale, toggleable, draw), toggleable, description, module)
+        draw: GuiGraphics.(Boolean) -> Pair<Int, Int>
+    ) : this(name, HudElement(x, y, scale, !toggleable, draw), toggleable, description, module)
 
     override val default: HudElement = hud
     override var value: HudElement = default
@@ -93,7 +93,7 @@ class HUDSetting(
         return this
     }
 
-    override fun read(element: JsonElement?) {
+    override fun read(element: JsonElement) {
         if (element !is JsonObject) return
         value.x = element.get("x")?.asInt ?: value.x
         value.y = element.get("y")?.asInt ?: value.y

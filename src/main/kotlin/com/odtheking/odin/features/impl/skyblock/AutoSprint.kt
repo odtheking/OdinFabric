@@ -1,10 +1,10 @@
 package com.odtheking.odin.features.impl.skyblock
 
-import com.odtheking.mixin.accessors.KeyBindingAccessor
+import com.odtheking.mixin.accessors.KeyMappingAccessor
 import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
-import net.minecraft.client.option.KeyBinding
+import net.minecraft.client.KeyMapping
 
 object AutoSprint : Module(
     name = "Auto Sprint",
@@ -13,7 +13,7 @@ object AutoSprint : Module(
 
     init {
         on<TickEvent.End> {
-            KeyBinding.setKeyPressed((mc.options.sprintKey as KeyBindingAccessor).boundKey, true)
+            KeyMapping.set((mc.options.keySprint as KeyMappingAccessor).boundKey, true)
         }
     }
 }

@@ -51,6 +51,6 @@ object SearchBar {
     }
 
     fun keyTyped(typedChar: Char): Boolean {
-        return textInputHandler.keyTyped(typedChar)
+        return textInputHandler.charTyped(typedChar)
     }
 }

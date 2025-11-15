@@ -11,8 +11,8 @@ import com.odtheking.odin.utils.render.drawFilledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import com.odtheking.odin.utils.startsWithOneOf
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
-import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.Box
+import net.minecraft.core.BlockPos
+import net.minecraft.world.phys.AABB
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 
@@ -72,8 +72,8 @@ object QuizSolver {
         if (triviaAnswers == null || triviaOptions.isEmpty()) return
         triviaOptions.forEach { answer ->
             if (!answer.isCorrect) return@forEach
-            answer.blockPos?.add(0, -1, 0)?.let {
-                context.drawFilledBox(Box(it), quizColor, depth = quizDepth)
+            answer.blockPos?.offset(0, -1, 0)?.let {
+                context.drawFilledBox(AABB(it), quizColor, depth = quizDepth)
                 context.drawBeaconBeam(it, quizColor)
             }
         }

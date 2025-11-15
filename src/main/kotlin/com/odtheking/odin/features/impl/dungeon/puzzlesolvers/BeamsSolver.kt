@@ -16,9 +16,9 @@ import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
-import net.minecraft.block.Blocks
-import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.Box
+import net.minecraft.core.BlockPos
+import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.phys.AABB
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.ConcurrentHashMap
@@ -47,8 +47,8 @@ object BeamsSolver {
 
         currentLanternPairs.clear()
         lanternPairs.forEach { list ->
-            val pos = getRealCoords(BlockPos(list[0], list[1], list[2])).takeIf { mc.world?.getBlockState(it)?.block == Blocks.SEA_LANTERN } ?: return@forEach
-            val pos2 = getRealCoords(BlockPos(list[3], list[4], list[5])).takeIf { mc.world?.getBlockState(it)?.block == Blocks.SEA_LANTERN } ?: return@forEach
+            val pos = getRealCoords(BlockPos(list[0], list[1], list[2])).takeIf { mc.level?.getBlockState(it)?.block == Blocks.SEA_LANTERN } ?: return@forEach
+            val pos2 = getRealCoords(BlockPos(list[3], list[4], list[5])).takeIf { mc.level?.getBlockState(it)?.block == Blocks.SEA_LANTERN } ?: return@forEach
 
             currentLanternPairs[pos] = pos2 to colors[currentLanternPairs.size]
         }
@@ -60,11 +60,11 @@ object BeamsSolver {
         currentLanternPairs.entries.forEach { positions ->
             val color = positions.value.second.withAlpha(beamsAlpha)
 
-            context.drawStyledBox(Box(positions.key), color, depth = true, style = beamStyle)
-            context.drawStyledBox(Box(positions.value.first), color, depth = true, style = beamStyle)
+            context.drawStyledBox(AABB(positions.key), color, depth = true, style = beamStyle)
+            context.drawStyledBox(AABB(positions.value.first), color, depth = true, style = beamStyle)
 
             if (beamsTracer)
-                context.drawLine(listOf(positions.key.toCenterPos(), positions.value.first.toCenterPos()), color = color, depth = false)
+                context.drawLine(listOf(positions.key.center, positions.value.first.center), color = color, depth = false)
         }
     }
 

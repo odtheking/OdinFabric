@@ -5,7 +5,7 @@ import com.odtheking.odin.utils.Color.Companion.alpha
 import com.odtheking.odin.utils.Color.Companion.blue
 import com.odtheking.odin.utils.Color.Companion.green
 import com.odtheking.odin.utils.Color.Companion.red
-import net.minecraft.util.Identifier
+import net.minecraft.resources.ResourceLocation
 import org.lwjgl.nanovg.NVGColor
 import org.lwjgl.nanovg.NVGPaint
 import org.lwjgl.nanovg.NanoSVG.*
@@ -25,7 +25,7 @@ object NVGRenderer {
     private val nvgColor = NVGColor.malloc()
     private val nvgColor2: NVGColor = NVGColor.malloc()
 
-    val defaultFont = Font("Default", mc.resourceManager.getResource(Identifier.of("odin:font.ttf")).get().inputStream)
+    val defaultFont = Font("Default", mc.resourceManager.getResource(ResourceLocation.parse("odin:font.ttf")).get().open())
 
     private val fontMap = HashMap<Font, NVGFont>()
     private val fontBounds = FloatArray(4)
@@ -35,7 +35,6 @@ object NVGRenderer {
     private var scissor: Scissor? = null
     private var drawing: Boolean = false
     private var vg = -1L
-
 
     init {
         vg = nvgCreate(NVG_ANTIALIAS or NVG_STENCIL_STROKES)
@@ -212,7 +211,7 @@ object NVGRenderer {
         nvgFontSize(vg, size)
         color(-16777216)
         nvgFillColor(vg, nvgColor)
-        nvgText(vg, round(x + 3f), round(y + 3f), text)
+        nvgText(vg, round(x + 2f), round(y + 2f), text)
 
         color(color)
         nvgFillColor(vg, nvgColor)

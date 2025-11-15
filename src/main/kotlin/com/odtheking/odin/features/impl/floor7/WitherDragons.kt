@@ -11,18 +11,21 @@ import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
-import com.odtheking.odin.utils.*
+import com.odtheking.odin.utils.Colors
+import com.odtheking.odin.utils.PersonalBest
 import com.odtheking.odin.utils.handlers.TickTask
-import com.odtheking.odin.utils.render.drawStringWidth
+import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.render.drawWireFrameBox
+import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
-import net.minecraft.network.packet.s2c.play.EntityEquipmentUpdateS2CPacket
-import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket
-import net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket
-import net.minecraft.network.packet.s2c.play.ParticleS2CPacket
-import net.minecraft.text.Text
+import com.odtheking.odin.utils.toFixed
+import net.minecraft.network.chat.Component
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
+import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
+import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket
 
 object WitherDragons : Module(
     name = "Wither Dragons",
@@ -33,12 +36,11 @@ object WitherDragons : Module(
     private val dragonTimerStyle by SelectorSetting("Timer Style", "Milliseconds", arrayListOf("Milliseconds", "Seconds", "Ticks"), desc = "The style of the dragon timer.").withDependency { dragonTimer && dragonTimerDropDown }
     private val showSymbol by BooleanSetting("Timer Symbol", true, desc = "Displays a symbol for the timer.").withDependency { dragonTimer && dragonTimerDropDown }
     private val hud by HUD("Dragon Timer HUD", "Displays the dragon timer in the HUD.") { example ->
-        if (example) (drawStringWidth("§5P §a4.5s", 1, 1, Colors.WHITE) + 2) to 10
+        if (example) textDim("§5P §a4.5s", 0, 0, Colors.WHITE)
         else {
             priorityDragon.takeIf { it != WitherDragonsEnum.None }?.let { dragon ->
                 if (dragon.state != WitherDragonState.SPAWNING || dragon.timeToSpawn <= 0) return@HUD 0 to 0
-                val width = drawStringWidth("§${dragon.colorCode}${dragon.name.first()}: ${getDragonTimer(dragon.timeToSpawn)}", 1, 1, Colors.WHITE)
-                (width + 2) to 10
+                textDim("§${dragon.colorCode}${dragon.name.first()}: ${getDragonTimer(dragon.timeToSpawn)}", 0, 0, Colors.WHITE)
             } ?: (0 to 0)
         }
     }.withDependency { dragonTimerDropDown }
@@ -55,7 +57,6 @@ object WitherDragons : Module(
     val sendSpawning by BooleanSetting("Send Dragon Spawning", true, desc = "Sends a message when a dragon is spawning.").withDependency { dragonAlerts }
     val sendSpawned by BooleanSetting("Send Dragon Spawned", true, desc = "Sends a message when a dragon has spawned.").withDependency { dragonAlerts }
     val sendSpray by BooleanSetting("Send Ice Sprayed", true, desc = "Sends a message when a dragon has been ice sprayed.").withDependency { dragonAlerts }
-    val sendArrowHit by BooleanSetting("Send Arrows Hit", true, desc = "Sends a message when a dragon dies with how many arrows were hit.").withDependency { dragonAlerts }
 
     private val dragonHealth by BooleanSetting("Dragon Health", true, desc = "Displays the health of M7 dragons.")
 
@@ -74,19 +75,19 @@ object WitherDragons : Module(
     val dragonPBs = PersonalBest(this, "DragonPBs")
 
     init {
-        onReceive<ParticleS2CPacket> {
+        onReceive<ClientboundLevelParticlesPacket> {
             if (DungeonUtils.getF7Phase() == M7Phases.P5) handleSpawnPacket(this)
         }
 
-        onReceive<EntityEquipmentUpdateS2CPacket> {
+        onReceive<ClientboundSetEquipmentPacket> {
             if (DungeonUtils.getF7Phase() == M7Phases.P5) DragonCheck.dragonSprayed(this)
         }
 
-        onReceive<EntitySpawnS2CPacket> {
+        onReceive<ClientboundAddEntityPacket> {
             if (DungeonUtils.getF7Phase() == M7Phases.P5) DragonCheck.dragonSpawn(this)
         }
 
-        onReceive<EntityTrackerUpdateS2CPacket> {
+        onReceive<ClientboundSetEntityDataPacket> {
             if (DungeonUtils.getF7Phase() == M7Phases.P5) DragonCheck.dragonUpdate(this)
         }
 
@@ -112,8 +113,8 @@ object WitherDragons : Module(
                 DragonCheck.dragonEntityList.forEach { dragon ->
                     if (dragon.health > 0) {
                         context.drawText(
-                            Text.of(colorHealth(dragon.health)).asOrderedText(),
-                            dragon.pos.addVec(y = 1.5), 1f, false
+                            Component.literal(colorHealth(dragon.health)).visualOrderText,
+                            dragon.position(), 5f, false
                         )
                     }
                 }
@@ -122,13 +123,13 @@ object WitherDragons : Module(
             WitherDragonsEnum.entries.forEach { dragon ->
                 if (dragonTimer && dragon.state == WitherDragonState.SPAWNING && dragon.timeToSpawn > 0) {
                     context.drawText(
-                        Text.of("§${dragon.colorCode}${dragon.name.first()}: ${getDragonTimer(dragon.timeToSpawn)}").asOrderedText(),
-                        dragon.spawnPos.toCenterPos(), 1f, false
+                        Component.literal("§${dragon.colorCode}${dragon.name.first()}: ${getDragonTimer(dragon.timeToSpawn)}").visualOrderText,
+                        dragon.spawnPos.center, 5f, false
                     )
                 }
 
                 if (dragonBoxes && dragon.state != WitherDragonState.DEAD)
-                    context.drawWireFrameBox(dragon.boxesDimensions, dragon.color, depth = true)
+                    context.drawWireFrameBox(dragon.aabbDimensions, dragon.color, depth = true)
             }
         }
 

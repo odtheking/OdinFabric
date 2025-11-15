@@ -3,8 +3,8 @@ package com.odtheking.odin.utils.ui
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
-import net.minecraft.client.gui.screen.Screen
-import net.minecraft.util.StringHelper
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.util.StringUtil
 import org.lwjgl.glfw.GLFW
 import kotlin.math.max
 import kotlin.math.min
@@ -187,20 +187,20 @@ class TextInputHandler(
                 if (Screen.hasControlDown() && !Screen.hasShiftDown()) {
                     when (keyCode) {
                         GLFW.GLFW_KEY_V -> {
-                            mc.keyboard?.clipboard?.let { insert(it) }
+                            mc.keyboardHandler?.clipboard?.let { insert(it) }
                             true
                         }
 
                         GLFW.GLFW_KEY_C -> {
                             if (caret != selection) {
-                                mc.keyboard?.clipboard = text.substringSafe(caret, selection)
+                                mc.keyboardHandler?.clipboard = text.substringSafe(caret, selection)
                                 true
                             } else false
                         }
 
                         GLFW.GLFW_KEY_X -> {
                             if (caret != selection) {
-                                mc.keyboard?.clipboard = text.substringSafe(caret, selection)
+                                mc.keyboardHandler?.clipboard = text.substringSafe(caret, selection)
                                 deleteSelection()
                                 true
                             } else false
@@ -236,10 +236,10 @@ class TextInputHandler(
         return returnValue
     }
 
-    fun keyTyped(typedChar: Char): Boolean {
+    fun charTyped(typedChar: Char): Boolean {
         if (!listening) return false
 
-        insert(StringHelper.stripInvalidChars(typedChar.toString()))
+        insert(StringUtil.filterText(typedChar.toString()))
         return true
     }
 

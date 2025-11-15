@@ -1,12 +1,12 @@
 package com.odtheking.odin.features.impl.floor7.terminalhandler
 
-import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
-import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
 
 class PanesHandler: TerminalHandler(TerminalTypes.PANES) {
 
-    override fun handleSlotUpdate(packet: ScreenHandlerSlotUpdateS2CPacket): Boolean {
+    override fun handleSlotUpdate(packet: ClientboundContainerSetSlotPacket): Boolean {
         if (packet.slot != type.windowSize - 1) return false
         solution.clear()
         solution.addAll(solvePanes(items))

@@ -9,12 +9,12 @@ import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.alert
 import com.odtheking.odin.utils.render.drawCustomBeacon
-import com.odtheking.odin.utils.render.drawString
 import com.odtheking.odin.utils.render.drawText
-import com.odtheking.odin.utils.render.getStringWidth
+import com.odtheking.odin.utils.render.text
+import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.KuudraUtils
-import net.minecraft.text.Text
-import net.minecraft.util.math.Vec3d
+import net.minecraft.network.chat.Component
+import net.minecraft.world.phys.Vec3
 
 object BuildHelper : Module(
     name = "Build Helper",
@@ -23,12 +23,12 @@ object BuildHelper : Module(
     private val buildHelperDraw by BooleanSetting("Render on Ballista", false, desc = "Draws the build information on the ballista.")
     private val unfinishedWaypoints by BooleanSetting("Unfinished Waypoints", true, desc = "Draws waypoints over the unfinished piles.")
     private val hideDefaultTag by BooleanSetting("Hide Default Tag", true, desc = "Hides the default tag for unfinished piles.").withDependency { unfinishedWaypoints }
-    private val hud by HUD("Build helper", "Shows information about the build progress.") { example ->
+    private val hud by HUD(name, "Shows information about the build progress.") { example ->
         if (!example && (!KuudraUtils.inKuudra || KuudraUtils.phase != 2)) return@HUD 0 to 0
-        drawString("§bFreshers: ${colorBuilders(KuudraUtils.freshers.size)}", 1, 1)
-        drawString("§bBuilders: ${colorBuilders(KuudraUtils.playersBuildingAmount)}", 1, 10)
-        drawString("§bBuild: ${colorBuild(KuudraUtils.buildDonePercentage)}%", 1, 19)
-        getStringWidth("Freshers: 0") + 2 to mc.textRenderer.fontHeight * 3
+        val width = textDim("§bFreshers: ${colorBuilders(KuudraUtils.freshers.size)}", 0, 0).first
+        text("§bBuilders: ${colorBuilders(KuudraUtils.playersBuildingAmount)}", 0, 9)
+        text("§bBuild: ${colorBuild(KuudraUtils.buildDonePercentage)}%", 0, 18)
+        width to mc.font.lineHeight * 3
     }
 
     private val stunNotificationNumber by NumberSetting("Stun Percent", 93f, 0, 100, desc = "The build % to notify at (set to 0 to disable).", unit = "%")
@@ -39,16 +39,16 @@ object BuildHelper : Module(
             if (stunNotificationNumber != 0f && KuudraUtils.buildDonePercentage >= stunNotificationNumber) alert("§l§3Go to stun", false)
             if (buildHelperDraw)
                 context.drawText(
-                    Text.of("§bBuild §c${colorBuild(KuudraUtils.buildDonePercentage)}%").asOrderedText(),
-                    Vec3d(-101.5, 82.0, -105.5),
+                    Component.literal("§bBuild §c${colorBuild(KuudraUtils.buildDonePercentage)}%").visualOrderText,
+                    Vec3(-101.5, 82.0, -105.5),
                     3f,
                     false
                 )
 
             if (buildHelperDraw)
                 context.drawText(
-                    Text.of("§bBuilders ${colorBuilders(KuudraUtils.playersBuildingAmount)}").asOrderedText(),
-                    Vec3d(-101.5, 81.0, -105.5),
+                    Component.literal("§bBuilders ${colorBuilders(KuudraUtils.playersBuildingAmount)}").visualOrderText,
+                    Vec3(-101.5, 81.0, -105.5),
                     3f,
                     false
                 )
@@ -56,8 +56,8 @@ object BuildHelper : Module(
             if (unfinishedWaypoints)
                 KuudraUtils.buildingPiles.forEach {
                     context.drawCustomBeacon(
-                        it.name.asOrderedText(),
-                        it.blockPos,
+                        it.name.visualOrderText,
+                        it.blockPosition(),
                         Colors.MINECRAFT_DARK_RED,
                         increase = false,
                         distance = false

@@ -2,9 +2,9 @@ package com.odtheking.odin.utils
 
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.core.onReceive
-import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket
-import net.minecraft.network.packet.s2c.query.PingResultS2CPacket
-import net.minecraft.util.Util
+import net.minecraft.Util
+import net.minecraft.network.protocol.game.ClientboundSetTimePacket
+import net.minecraft.network.protocol.ping.ClientboundPongResponsePacket
 import kotlin.math.min
 
 object ServerUtils {
@@ -19,7 +19,7 @@ object ServerUtils {
         private set
 
     init {
-        onReceive<WorldTimeUpdateS2CPacket> {
+        onReceive<ClientboundSetTimePacket> {
             if (prevTime != 0L) {
                 averageTps = (20000f / (System.currentTimeMillis() - prevTime + 1)).coerceIn(0f, 20f)
             }
@@ -27,12 +27,12 @@ object ServerUtils {
             prevTime = System.currentTimeMillis()
         }
 
-        onReceive<PingResultS2CPacket> {
-            currentPing = (Util.getMeasuringTimeMs() - startTime).toInt().coerceAtLeast(0)
+        onReceive<ClientboundPongResponsePacket> {
+            currentPing = (Util.getMillis() - time).toInt().coerceAtLeast(0)
 
-            val pingLog = mc.debugHud.pingLog
+            val pingLog = mc.debugOverlay.pingLogger
 
-            val sampleSize = min(pingLog.length, 5)
+            val sampleSize = min(pingLog.size(), 5)
 
             if (sampleSize == 0) {
                 averagePing = currentPing

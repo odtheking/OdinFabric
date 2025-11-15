@@ -11,9 +11,9 @@ import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.sendCommand
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonListener
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
-import net.minecraft.entity.mob.ZombieEntity
-import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket
-import net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket
+import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
+import net.minecraft.world.entity.monster.Zombie
 
 object Mimic : Module(
     name = "Mimic",
@@ -30,18 +30,18 @@ object Mimic : Module(
     private val princeRegex = Regex("^A Prince falls\\. \\+1 Bonus Score$")
 
     init {
-        onReceive<EntitiesDestroyS2CPacket> {
+        onReceive<ClientboundRemoveEntitiesPacket> {
             if (!DungeonUtils.inDungeons || DungeonUtils.inBoss || DungeonUtils.mimicKilled) return@onReceive
             entityIds.forEach { id ->
-                val entity = mc.world?.getEntityById(id) ?: return@forEach
-                if (entity is ZombieEntity && entity.isBaby) mimicKilled()
+                val entity = mc.level?.getEntity(id) ?: return@forEach
+                if (entity is Zombie && entity.isBaby) mimicKilled()
             }
         }
 
-        onReceive<EntityTrackerUpdateS2CPacket> {
+        onReceive<ClientboundSetEntityDataPacket> {
             if (!DungeonUtils.inDungeons || DungeonUtils.inBoss || DungeonUtils.mimicKilled) return@onReceive
-            val entity = mc.world?.getEntityById(id) ?: return@onReceive
-            if (entity is ZombieEntity && entity.isBaby && entity.health <= 0f) mimicKilled()
+            val entity = mc.level?.getEntity(id) ?: return@onReceive
+            if (entity is Zombie && entity.isBaby && entity.health <= 0f) mimicKilled()
         }
 
         on<ChatPacketEvent> {

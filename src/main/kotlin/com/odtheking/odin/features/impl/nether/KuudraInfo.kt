@@ -9,13 +9,12 @@ import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.addVec
-import com.odtheking.odin.utils.render.drawString
 import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.render.drawWireFrameBox
-import com.odtheking.odin.utils.render.getStringWidth
+import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.toFixed
-import net.minecraft.text.Text
+import net.minecraft.network.chat.Component
 
 object KuudraInfo : Module(
     name = "Kuudra Info",
@@ -28,11 +27,7 @@ object KuudraInfo : Module(
     private val scaledHealth by BooleanSetting("Use Scaled", true, desc = "Use scaled health for the display meaning the health will update in tier 5 when below 25,000.").withDependency { kuudraHPDisplay }
     private val hud by HUD("Health Display", "Displays the current health of Kuudra.") { example ->
         if (!example && !KuudraUtils.inKuudra) return@HUD 0 to 0
-        val string = if (example) "§a99.975M/240M§c❤" else getCurrentHealthDisplay(KuudraUtils.kuudraEntity?.health ?: return@HUD 0 to 0)
-
-        drawString(string, 1, 1)
-
-        getStringWidth(string) + 2 to mc.textRenderer.fontHeight
+        textDim(if (example) "§a99.975M/240M§c❤" else getCurrentHealthDisplay(KuudraUtils.kuudraEntity?.health ?: return@HUD 0 to 0), 0, 0)
     }
 
     init {
@@ -45,8 +40,8 @@ object KuudraInfo : Module(
 
                 if (kuudraHPDisplay) {
                     context.drawText(
-                        Text.of(getCurrentHealthDisplay(it.health)).asOrderedText(),
-                        it.pos.add(it.rotationVector.multiply(13.0).addVec(y = 10.0)), healthSize, depth = true
+                        Component.literal(getCurrentHealthDisplay(it.health)).visualOrderText,
+                        it.position().add(it.lookAngle.multiply(13.0, 13.0, 13.0).addVec(y = 10.0)), healthSize, depth = true
                     )
                 }
             }

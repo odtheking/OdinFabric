@@ -6,10 +6,10 @@ import com.odtheking.odin.clickgui.settings.impl.ColorSetting
 import com.odtheking.odin.clickgui.settings.impl.DropdownSetting
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Colors
-import com.odtheking.odin.utils.render.drawStringWidth
+import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.odtheking.odin.utils.skyblock.SkyblockPlayer
-import net.minecraft.text.Text
+import net.minecraft.network.chat.Component
 import kotlin.math.abs
 
 enum class OverlayType {
@@ -46,7 +46,7 @@ object PlayerDisplay : Module(
             SkyblockPlayer.currentHealth != 0 && SkyblockPlayer.maxHealth != 0 -> SkyblockPlayer.currentHealth to SkyblockPlayer.maxHealth
             else -> return@HUD 0 to 0
         }
-        return@HUD drawStringWidth(generateText(text.first, text.second, "❤"), 1, 1, healthColor) + 2 to mc.textRenderer.fontHeight
+        return@HUD textDim(generateText(text.first, text.second, "❤"), 0, 0, healthColor)
     }
     private val healthColor by ColorSetting("Health Color", Colors.MINECRAFT_RED, true, "The color of the health text.")
 
@@ -63,7 +63,7 @@ object PlayerDisplay : Module(
 
             else -> return@HUD 0 to 0
         }
-        return@HUD drawStringWidth(text, 1, 1, manaColor) + 2 to mc.textRenderer.fontHeight
+        return@HUD textDim(text, 0, 0, manaColor)
     }
     private val manaColor by ColorSetting("Mana Color", Colors.MINECRAFT_AQUA, true, "The color of the mana text.")
 
@@ -74,7 +74,7 @@ object PlayerDisplay : Module(
             separateOverflow -> SkyblockPlayer.overflowMana
             else -> return@HUD 0 to 0
         }
-        return@HUD drawStringWidth(generateText(text, "ʬ", hideZeroSF), 1, 1, overflowManaColor) + 2 to mc.textRenderer.fontHeight
+        return@HUD textDim(generateText(text, "ʬ", hideZeroSF), 0, 0, overflowManaColor)
     }
     private val overflowManaColor by ColorSetting("Overflow Mana Color", Colors.MINECRAFT_DARK_AQUA, true, desc = "The color of the overflow mana text.")
 
@@ -85,18 +85,18 @@ object PlayerDisplay : Module(
             SkyblockPlayer.currentDefense != 0 -> SkyblockPlayer.currentDefense
             else -> return@HUD 0 to 0
         }
-        return@HUD drawStringWidth(generateText(text, "❈", true), 1, 1, defenseColor) + 2 to mc.textRenderer.fontHeight
+        return@HUD textDim(generateText(text, "❈", true), 0, 0, defenseColor)
     }
     private val defenseColor by ColorSetting("Defense Color", Colors.MINECRAFT_GREEN, true, desc = "The color of the defense text.")
 
-    private val eHPHud by HUD("EHP HUD", "Displays the player's effective health (EHP).") { example ->
+    private val ehpHud by HUD("EHP HUD", "Displays the player's effective health (EHP).") { example ->
         val text = when {
             example -> 1000000
             !LocationUtils.isInSkyblock -> return@HUD 0 to 0
             SkyblockPlayer.effectiveHP != 0 -> SkyblockPlayer.effectiveHP
             else -> return@HUD 0 to 0
         }
-        return@HUD drawStringWidth(generateText(text, "", true), 1, 1, ehpColor) + 2 to mc.textRenderer.fontHeight
+        return@HUD textDim(generateText(text, "", true), 0, 0, ehpColor)
     }
     private val ehpColor by ColorSetting("EHP", Colors.MINECRAFT_DARK_GREEN, true, "The color of the effective health text.")
 
@@ -106,14 +106,14 @@ object PlayerDisplay : Module(
     private val DEFENSE_REGEX = Regex("[\\d|,]+§a❈ Defense")
 
     @JvmStatic
-    fun modifyText(text: Text): Text {
+    fun modifyText(text: Component): Component {
         if (!enabled) return text
         var toReturn = text.string
         toReturn = if (hideHealth) toReturn.replace(HEALTH_REGEX, "") else toReturn
         toReturn = if (hideMana) toReturn.replace(MANA_REGEX, "") else toReturn
         toReturn = if (hideOverflow) toReturn.replace(OVERFLOW_MANA_REGEX, "") else toReturn
         toReturn = if (hideDefense) toReturn.replace(DEFENSE_REGEX, "") else toReturn
-        return Text.of(toReturn.trim())
+        return Component.literal(toReturn.trim())
     }
 
     private fun generateText(current: Int, max: Int, icon: String): String =

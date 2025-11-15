@@ -1,13 +1,14 @@
 package com.odtheking.odin.features.impl.floor7.terminalhandler
 
-import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
-import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket
-import net.minecraft.util.DyeColor
+import com.odtheking.odin.utils.hasGlint
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
+import net.minecraft.world.item.DyeColor
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
 
 class SelectAllHandler(private val color: DyeColor): TerminalHandler(TerminalTypes.SELECT) {
 
-    override fun handleSlotUpdate(packet: ScreenHandlerSlotUpdateS2CPacket): Boolean {
+    override fun handleSlotUpdate(packet: ClientboundContainerSetSlotPacket): Boolean {
         if (packet.slot != type.windowSize - 1) return false
         solution.clear()
         solution.addAll(solveSelectAll(items, color))
@@ -22,7 +23,7 @@ class SelectAllHandler(private val color: DyeColor): TerminalHandler(TerminalTyp
         return items.mapIndexedNotNull { index, item ->
             if (item?.hasGlint() == false &&
                 item.item != Items.BLACK_STAINED_GLASS_PANE &&
-                (item.item.name?.string?.startsWith(color.id.replace("_", " "), ignoreCase = true) == true ||
+                (item.item.name?.string?.startsWith(color.name.replace("_", " "), ignoreCase = true) == true ||
                 when (color) {
                     DyeColor.BLACK -> item.item == Items.INK_SAC
                     DyeColor.BLUE -> item.item == Items.LAPIS_LAZULI

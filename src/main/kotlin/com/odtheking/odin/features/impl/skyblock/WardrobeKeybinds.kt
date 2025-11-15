@@ -7,9 +7,9 @@ import com.odtheking.odin.clickgui.settings.impl.KeybindSetting
 import com.odtheking.odin.events.GuiEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
+import com.odtheking.odin.utils.clickSlot
 import com.odtheking.odin.utils.modMessage
-import net.minecraft.client.gui.screen.ingame.HandledScreen
-import net.minecraft.screen.slot.SlotActionType
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import org.lwjgl.glfw.GLFW
 
 object WardrobeKeybinds : Module(
@@ -38,36 +38,36 @@ object WardrobeKeybinds : Module(
 
     init {
         on<GuiEvent.MouseClick> {
-            if (screen is HandledScreen<*> && onClick(screen, button)) cancel()
+            if (screen is AbstractContainerScreen<*> && onClick(screen, button)) cancel()
         }
 
         on<GuiEvent.KeyPress> {
-            if (screen is HandledScreen<*> && onClick(screen, keyCode)) cancel()
+            if (screen is AbstractContainerScreen<*> && onClick(screen, keyCode)) cancel()
         }
     }
 
-    private fun onClick(screen: HandledScreen<*>, keyCode: Int): Boolean {
+    private fun onClick(screen: AbstractContainerScreen<*>, keyCode: Int): Boolean {
         val (current, total) = wardrobeRegex.find(screen.title?.string ?: "")?.destructured?.let {
             it.component1().toIntOrNull() to it.component2().toIntOrNull()
         } ?: return false
         if (current == null || total == null) return false
 
-        val equippedIndex = screen.screenHandler.slots.find { equippedRegex.matches(it.stack.name.string) }?.index
+        val equippedIndex = screen.menu.slots.find { equippedRegex.matches(it.item.hoverName.string) }?.index
 
         val index = when (keyCode) {
-            nextPageKeybind.code -> if (current < total) 53 else return false
-            previousPageKeybind.code -> if (current > 1) 45 else return false
-            unequipKeybind.code -> equippedIndex ?: return false
+            nextPageKeybind.value -> if (current < total) 53 else return false
+            previousPageKeybind.value -> if (current > 1) 45 else return false
+            unequipKeybind.value -> equippedIndex ?: return false
             else -> {
                 val keyIndex = arrayOf(wardrobe1, wardrobe2, wardrobe3, wardrobe4, wardrobe5, wardrobe6, wardrobe7, wardrobe8, wardrobe9)
-                    .indexOfFirst { it.code == keyCode }.takeIf { it != -1 } ?: return false
+                    .indexOfFirst { it.value == keyCode }.takeIf { it != -1 } ?: return false
 
                 if (equippedIndex == keyIndex + 36 && disallowUnequippingEquipped) return modMessage("§cArmor already equipped.").let { false }
                 keyIndex + 36
             }
         }
 
-        mc.interactionManager?.clickSlot(screen.screenHandler.syncId, index, GLFW.GLFW_MOUSE_BUTTON_1, SlotActionType.PICKUP, mc.player)
+        mc.player?.clickSlot(screen.menu.containerId, index)
         return true
     }
 }

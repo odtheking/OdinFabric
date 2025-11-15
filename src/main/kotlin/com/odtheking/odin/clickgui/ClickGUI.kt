@@ -11,9 +11,9 @@ import com.odtheking.odin.utils.ui.HoverHandler
 import com.odtheking.odin.utils.ui.animations.LinearAnimation
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
 import com.odtheking.odin.utils.ui.rendering.NVGSpecialRenderer
-import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.screen.Screen
-import net.minecraft.text.Text
+import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.network.chat.Component
 import kotlin.math.sign
 import com.odtheking.odin.utils.ui.mouseX as odinMouseX
 import com.odtheking.odin.utils.ui.mouseY as odinMouseY
@@ -27,7 +27,7 @@ import com.odtheking.odin.utils.ui.mouseY as odinMouseY
  * @author Stivais, Aton
  * @see [Panel]
  */
-object ClickGUI : Screen(Text.of("Click GUI")) {
+object ClickGUI : Screen(Component.literal("Click GUI")) {
 
     private val panels: ArrayList<Panel> = arrayListOf<Panel>().apply {
         if (Category.entries.any { ClickGUIModule.panelSetting[it] == null }) ClickGUIModule.resetPositions()
@@ -38,8 +38,8 @@ object ClickGUI : Screen(Text.of("Click GUI")) {
     val gray38 = Color(38, 38, 38)
     val gray26 = Color(26, 26, 26)
 
-    override fun render(context: DrawContext, mouseX: Int, mouseY: Int, deltaTicks: Float) {
-        NVGSpecialRenderer.draw(context, 0, 0, context.scaledWindowWidth, context.scaledWindowHeight) {
+    override fun render(context: GuiGraphics, mouseX: Int, mouseY: Int, deltaTicks: Float) {
+        NVGSpecialRenderer.draw(context, 0, 0, context.guiWidth(), context.guiHeight()) {
             if (openAnim.isAnimating()) {
                 NVGRenderer.translate(0f, openAnim.get(-10f, 0f))
                 NVGRenderer.globalAlpha(openAnim.get(0f, 1f))
@@ -104,7 +104,7 @@ object ClickGUI : Screen(Text.of("Click GUI")) {
         super.init()
     }
 
-    override fun close() {
+    override fun onClose() {
         for (panel in panels.filter { it.panelSetting.extended }.reversed()) {
             for (moduleButton in panel.moduleButtons.filter { it.extended }) {
                 for (setting in moduleButton.representableSettings) {
@@ -115,10 +115,10 @@ object ClickGUI : Screen(Text.of("Click GUI")) {
         }
         Config.save()
 
-        super.close()
+        super.onClose()
     }
 
-    override fun shouldPause(): Boolean = false
+    override fun isPauseScreen(): Boolean = false
 
     private var desc = Description("", 0f, 0f, HoverHandler(150))
 
@@ -133,7 +133,7 @@ object ClickGUI : Screen(Text.of("Click GUI")) {
     data class Description(var text: String, var x: Float, var y: Float, var hoverHandler: HoverHandler) {
 
         fun render() {
-            if (text.isEmpty() || hoverHandler.percent() <= 0) return
+            if (text.isEmpty() || hoverHandler.percent() < 100) return
             val area = NVGRenderer.wrappedTextBounds(text, 300f, 16f, NVGRenderer.defaultFont)
             NVGRenderer.rect(x, y, area[2] - area[0] + 16f, area[3] - area[1] + 16f, gray38.rgba, 5f)
             NVGRenderer.hollowRect(

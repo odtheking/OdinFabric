@@ -3,14 +3,14 @@ package com.odtheking.odin.features.impl.floor7.termsim
 import com.odtheking.odin.events.TerminalEvent
 import com.odtheking.odin.features.impl.floor7.TerminalSolver
 import com.odtheking.odin.features.impl.floor7.terminalhandler.TerminalTypes
-import net.minecraft.block.StainedGlassPaneBlock
-import net.minecraft.component.DataComponentTypes
-import net.minecraft.item.BlockItem
-import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
-import net.minecraft.screen.slot.Slot
-import net.minecraft.text.Text
-import net.minecraft.util.DyeColor
+import net.minecraft.core.component.DataComponents
+import net.minecraft.network.chat.Component
+import net.minecraft.world.inventory.Slot
+import net.minecraft.world.item.BlockItem
+import net.minecraft.world.item.DyeColor
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
+import net.minecraft.world.level.block.StainedGlassPaneBlock
 import kotlin.math.floor
 
 object RubixSim : TermSimGUI(
@@ -28,16 +28,16 @@ object RubixSim : TermSimGUI(
     }
 
     override fun slotClick(slot: Slot, button: Int) {
-        val current = order.find { it == ((slot.stack?.item as? BlockItem)?.block as? StainedGlassPaneBlock)?.color } ?: return
+        val current = order.find { it == ((slot.item?.item as? BlockItem)?.block as? StainedGlassPaneBlock)?.color } ?: return
         createNewGui {
             if (it == slot) {
                 if (button == 1) genStack(order.indexOf(current) - 1)
                 else genStack((order.indexOf(current) + 1) % order.size)
-            } else it.stack ?: blackPane
+            } else it.item ?: blackPane
         }
 
         playTermSimSound()
-        if (indices.all { guiInventorySlots[it]?.stack?.item == guiInventorySlots[12]?.stack?.item })
+        if (indices.all { guiInventorySlots[it]?.item?.item == guiInventorySlots[12]?.item?.item })
             TerminalSolver.lastTermOpened?.let { TerminalEvent.Solved(it).postAndCatch() }
     }
 
@@ -52,5 +52,5 @@ object RubixSim : TermSimGUI(
     }
 
     private fun genStack(meta: Int): ItemStack =
-        ItemStack(panes[if (meta in panes.indices) meta else panes.lastIndex]).apply { set(DataComponentTypes.CUSTOM_NAME, Text.literal("")) }
+        ItemStack(panes[if (meta in panes.indices) meta else panes.lastIndex]).apply { set(DataComponents.CUSTOM_NAME, Component.literal("")) }
 }

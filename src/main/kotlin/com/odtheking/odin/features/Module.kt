@@ -8,7 +8,7 @@ import com.odtheking.odin.clickgui.settings.impl.HUDSetting
 import com.odtheking.odin.events.core.EventBus
 import com.odtheking.odin.features.impl.render.ClickGUIModule
 import com.odtheking.odin.utils.modMessage
-import net.minecraft.client.gui.DrawContext
+import net.minecraft.client.gui.GuiGraphics
 import org.lwjgl.glfw.GLFW
 import kotlin.reflect.full.hasAnnotation
 
@@ -105,7 +105,7 @@ abstract class Module(
         x: Int = 10,
         y: Int = 10,
         scale: Float = 2f,
-        block: DrawContext.(example: Boolean) -> Pair<Int, Int>
+        block: GuiGraphics.(example: Boolean) -> Pair<Int, Int>
     ): HUDSetting = HUDSetting(name, x, y, scale, toggleable, desc, this, block)
 
     private companion object {

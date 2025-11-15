@@ -1,13 +1,13 @@
 package com.odtheking.odin.features.impl.floor7.terminalhandler
 
-import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
-import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
 
 class MelodyHandler: TerminalHandler(TerminalTypes.MELODY) {
 
-    override fun handleSlotUpdate(packet: ScreenHandlerSlotUpdateS2CPacket): Boolean {
-        return packet.stack?.let {
+    override fun handleSlotUpdate(packet: ClientboundContainerSetSlotPacket): Boolean {
+        return packet.item?.let {
             solution.clear()
             solution.addAll(solveMelody(items))
         } != null

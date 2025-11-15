@@ -7,8 +7,8 @@ import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.alert
 import com.odtheking.odin.utils.itemId
-import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket
-import net.minecraft.sound.SoundEvents
+import net.minecraft.network.protocol.game.ClientboundSoundPacket
+import net.minecraft.sounds.SoundEvents
 
 object Ragnarock : Module(
     name = "Ragnarock",
@@ -21,13 +21,13 @@ object Ragnarock : Module(
 
     init {
         on<ChatPacketEvent> {
-            if (castAlert && value.matches(cancelRegex)) alert("§aCasted Rag")
+            if (castAlert && value.matches(cancelRegex)) alert("§cRagnarock Cancelled!")
         }
 
-        onReceive<PlaySoundS2CPacket> {
-            if (cancelAlert && pitch == 1.4920635f && mc.player?.mainHandStack?.itemId == "RAGNAROCK_AXE" &&
-                SoundEvents.WOLF_SOUNDS.entries.any { it.value.deathSound.value().id == sound.value().id }
-            ) alert("§cRagnarock Cancelled!")
+        onReceive<ClientboundSoundPacket> {
+            if (cancelAlert && pitch == 1.4920635f && mc.player?.mainHandItem?.itemId == "RAGNAROCK_AXE" &&
+                SoundEvents.WOLF_SOUNDS.entries.any { it.value.deathSound.value().location == sound.value().location }
+            ) alert("§aCasted Rag")
         }
     }
 }

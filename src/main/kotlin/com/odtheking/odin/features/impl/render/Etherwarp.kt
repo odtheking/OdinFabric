@@ -8,26 +8,25 @@ import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.events.core.onSend
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.*
-import com.odtheking.odin.utils.Color.Companion.multiplyAlpha
 import com.odtheking.odin.utils.Color.Companion.withAlpha
-import com.odtheking.odin.utils.render.drawFilledBox
-import com.odtheking.odin.utils.render.drawWireFrameBox
+import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.skyblock.Island
 import com.odtheking.odin.utils.skyblock.LocationUtils
-import net.minecraft.block.*
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NbtCompound
-import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket
-import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket
-import net.minecraft.registry.Registries
-import net.minecraft.sound.SoundEvent
-import net.minecraft.sound.SoundEvents
-import net.minecraft.util.Identifier
-import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.Box
-import net.minecraft.util.math.ChunkSectionPos
-import net.minecraft.util.math.Vec3d
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.core.BlockPos
+import net.minecraft.core.SectionPos
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.network.protocol.game.ClientboundSoundPacket
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket
+import net.minecraft.network.protocol.game.ServerboundUseItemPacket
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.sounds.SoundEvent
+import net.minecraft.sounds.SoundEvents
+import net.minecraft.world.level.block.*
+import net.minecraft.world.level.block.piston.PistonHeadBlock
+import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.phys.AABB
+import net.minecraft.world.phys.Vec3
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.max
@@ -41,78 +40,62 @@ object Etherwarp : Module(
     private val color by ColorSetting("Color", Colors.MINECRAFT_GOLD.withAlpha(.5f), allowAlpha = true, desc = "Color of the box.").withDependency { render }
     private val renderFail by BooleanSetting("Show when failed", true, desc = "Shows the box even when the guess failed.").withDependency { render }
     private val failColor by ColorSetting("Fail Color", Colors.MINECRAFT_RED.withAlpha(.5f), allowAlpha = true, desc = "Color of the box if guess failed.").withDependency { renderFail }
-    private val renderStyle by SelectorSetting("Render Style", "Outline", listOf("Outline", "Filled", "Filled Outline"), desc = "Style of the box.").withDependency { render }
+    private val renderStyle by SelectorSetting("Render Style", "Outline", listOf("Filled", "Outline", "Filled Outline"), desc = "Style of the box.").withDependency { render }
     private val useServerPosition by BooleanSetting("Use Server Position", false, desc = "Uses the server position for etherwarp instead of the client position.").withDependency { render }
     private val fullBlock by BooleanSetting("Full Block", false, desc = "Renders the the 1x1x1 block instead of it's actual size.").withDependency { render }
+    private val depth by BooleanSetting("Depth", true, desc = "Renders the box through walls.").withDependency { render }
 
     private val dropdown by DropdownSetting("Sounds", false)
     private val sounds by BooleanSetting("Custom Sounds", false, desc = "Plays the selected custom sound when you etherwarp.").withDependency { dropdown }
     private val customSound by StringSetting("Custom Sound", "entity.experience_orb.pickup", desc = "Name of a custom sound to play.", length = 64).withDependency { sounds && dropdown }
-    private val reset by ActionSetting("Play sound", desc = "Plays the selected sound.") { playSoundAtPlayer(SoundEvent.of(Identifier.of(customSound))) }.withDependency { sounds && dropdown }
+    private val reset by ActionSetting("Play sound", desc = "Plays the selected sound.") { playSoundAtPlayer(SoundEvent.createVariableRangeEvent(ResourceLocation.withDefaultNamespace(customSound))) }.withDependency { sounds && dropdown }
 
     private var etherPos: EtherPos? = null
 
     init {
-        onReceive<PlaySoundS2CPacket> {
-            if (!sounds || sound.value() != SoundEvents.ENTITY_ENDER_DRAGON_HURT || volume != 1f || pitch != 0.53968257f) return@onReceive
-            mc.execute { playSoundAtPlayer(SoundEvent.of(Identifier.of(customSound))) }
+        onReceive<ClientboundSoundPacket> {
+            if (!sounds || sound.value() != SoundEvents.ENDER_DRAGON_HURT || volume != 1f || pitch != 0.53968257f) return@onReceive
+            mc.execute { playSoundAtPlayer(SoundEvent.createVariableRangeEvent(ResourceLocation.withDefaultNamespace(customSound))) }
             it.cancel()
         }
 
         on<RenderEvent.Last> {
-            if (mc.player?.isSneaking == false || mc.currentScreen != null) return@on
+            if (!Screen.hasShiftDown() || mc.screen != null || !render) return@on
 
             etherPos = getEtherPos(
-                if (useServerPosition) mc.player?.lastPos else mc.player?.pos,
-                56.0 + (mc.player?.mainHandStack?.isEtherwarpItem()?.getInt("tuned_transmission", 0) ?: return@on),
+                if (useServerPosition) mc.player?.oldPosition() else mc.player?.position(),
+                56.0 + (mc.player?.mainHandItem?.isEtherwarpItem()?.getInt("tuned_transmission")?.orElse(0) ?: return@on),
                 etherWarp = true
             )
             if (etherPos?.succeeded != true && !renderFail) return@on
             val color = if (etherPos?.succeeded == true) color else failColor
             etherPos?.pos?.let { pos ->
-                val box = if (fullBlock) Box(pos) else
-                    mc.world?.getBlockState(pos)?.getOutlineShape(mc.world, pos)?.asCuboid()
-                        ?.takeIf { !it.isEmpty }?.boundingBox?.offset(pos) ?: Box(pos)
+                val box = if (fullBlock) AABB(pos) else pos.getBlockBounds()?.move(pos) ?: AABB(pos)
 
-                when (renderStyle) {
-                    0 -> context.drawWireFrameBox(box, color)
-                    1 -> context.drawFilledBox(box, color)
-                    2 -> {
-                        context.drawWireFrameBox(box, color)
-                        context.drawFilledBox(box, color.multiplyAlpha(0.5f))
-                    }
-                }
+                context.drawStyledBox(box, color, renderStyle, depth)
             }
         }
 
-        onSend<PlayerInteractItemC2SPacket> {
-            if (!LocationUtils.currentArea.isArea(Island.SinglePlayer) || mc.player?.isSneaking == false || mc.player?.mainHandStack?.isEtherwarpItem() == null) return@onSend
+        onSend<ServerboundUseItemPacket> {
+            if (!LocationUtils.currentArea.isArea(Island.SinglePlayer) || !Screen.hasShiftDown() || mc.player?.mainHandItem?.isEtherwarpItem() == null) return@onSend
 
             etherPos?.pos?.let {
                 if (etherPos?.succeeded == false) return@onSend
-                mc.executeSync {
-                    mc.player?.networkHandler?.sendPacket(
-                        PlayerMoveC2SPacket.Full(
-                            it.x + 0.5,
-                            it.y + 1.05,
-                            it.z + 0.5,
-                            mc.player?.yaw ?: 0f,
-                            mc.player?.pitch ?: 0f,
-                            mc.player?.isOnGround ?: false,
-                            false
+                mc.executeIfPossible {
+                    mc.player?.connection?.send(
+                        ServerboundMovePlayerPacket.PosRot(
+                            it.x + 0.5, it.y + 1.05, it.z + 0.5, mc.player?.yRot ?: 0f,
+                            mc.player?.xRot ?: 0f, false, false
                         )
                     )
-                    mc.player?.setPosition(it.x + 0.5, it.y + 1.05, it.z + 0.5)
-                    mc.player?.setVelocity(0.0, 0.0, 0.0)
+                    mc.player?.setPos(it.x + 0.5, it.y + 1.05, it.z + 0.5)
+                    mc.player?.setDeltaMovement(0.0, 0.0, 0.0)
+                    if (sounds) mc.execute { playSoundAtPlayer(SoundEvent.createVariableRangeEvent(ResourceLocation.withDefaultNamespace(customSound))) }
+                    else mc.execute { playSoundAtPlayer(SoundEvents.ENDER_DRAGON_HURT, pitch = 0.53968257f) }
                 }
             }
         }
     }
-
-    private fun ItemStack.isEtherwarpItem(): NbtCompound? =
-        customData.takeIf {
-            it.getInt("ethermerge", 0) == 1 || it.itemId == "ETHERWARP_CONDUIT"
-        }
 
     data class EtherPos(val succeeded: Boolean, val pos: BlockPos?, val state: BlockState?) {
 
@@ -122,27 +105,27 @@ object Etherwarp : Module(
     }
 
     fun getEtherPos(
-        position: Vec3d?,
+        position: Vec3?,
         distance: Double,
         returnEnd: Boolean = false,
         etherWarp: Boolean = false
     ): EtherPos {
         val player = mc.player ?: return EtherPos.NONE
         if (position == null) return EtherPos.NONE
-        val eyeHeight = if (player.isSneaking) {
+        val eyeHeight = if (player.isCrouching) {
             if (LocationUtils.currentArea.isArea(Island.Galatea)) 1.27 else 1.54 // Use modern sneak height in Galatea
         } else 1.62
 
         val startPos = position.addVec(y = eyeHeight)
-        val endPos = player.rotationVector?.multiply(distance)?.add(startPos) ?: return EtherPos.NONE
-        return traverseVoxels(startPos, endPos, etherWarp).takeUnless { it == EtherPos.NONE && returnEnd } ?: EtherPos(true, endPos.toBlockPos(), null)
+        val endPos = player.lookAngle?.multiply(distance, distance, distance)?.add(startPos) ?: return EtherPos.NONE
+        return traverseVoxels(startPos, endPos, etherWarp).takeUnless { it == EtherPos.NONE && returnEnd } ?: EtherPos(true, BlockPos.containing(endPos), null)
     }
 
     /**
      * Traverses voxels from start to end and returns the first non-air block it hits.
      * @author Bloom
      */
-    private fun traverseVoxels(start: Vec3d, end: Vec3d, etherWarp: Boolean): EtherPos {
+    private fun traverseVoxels(start: Vec3, end: Vec3, etherWarp: Boolean): EtherPos {
         val (x0, y0, z0) = start
         val (x1, y1, z1) = end
 
@@ -171,40 +154,40 @@ object Etherwarp : Module(
 
         repeat(1000) {
             val blockPos = BlockPos(x.toInt(), y.toInt(), z.toInt())
-            val chunk = mc.world?.getChunk(
-                ChunkSectionPos.getSectionCoord(blockPos.x),
-                ChunkSectionPos.getSectionCoord(blockPos.z)
+            val chunk = mc.level?.getChunk(
+                SectionPos.blockToSectionCoord(blockPos.x),
+                SectionPos.blockToSectionCoord(blockPos.z)
             ) ?: return EtherPos.NONE
             val currentBlock = chunk.getBlockState(blockPos).takeIf { it.block is Block } ?: return EtherPos.NONE
 
-            val currentBlockId = Block.getRawIdFromState(currentBlock.block.defaultState)
+            val currentBlockId = Block.getId(currentBlock.block.defaultBlockState())
 
             if ((!validEtherwarpFeetIds.get(currentBlockId) && etherWarp) || (currentBlockId != 0 && !etherWarp)) {
                 if (!etherWarp && validEtherwarpFeetIds.get(currentBlockId)) return EtherPos(
                     false,
                     blockPos,
-                    currentBlock.block.defaultState
+                    currentBlock.block.defaultBlockState()
                 )
 
-                val footBlockId = Block.getRawIdFromState(
+                val footBlockId = Block.getId(
                     chunk.getBlockState(
                         BlockPos(
                             blockPos.x,
                             blockPos.y + 1,
                             blockPos.z
                         )
-                    ).block.defaultState
+                    ).block.defaultBlockState()
                 )
                 if (!validEtherwarpFeetIds.get(footBlockId)) return EtherPos(false, blockPos, currentBlock)
 
-                val headBlockId = Block.getRawIdFromState(
+                val headBlockId = Block.getId(
                     chunk.getBlockState(
                         BlockPos(
                             blockPos.x,
                             blockPos.y + 2,
                             blockPos.z
                         )
-                    ).block.defaultState
+                    ).block.defaultBlockState()
                 )
                 if (!validEtherwarpFeetIds.get(headBlockId)) return EtherPos(false, blockPos, currentBlock)
 
@@ -238,21 +221,21 @@ object Etherwarp : Module(
         ButtonBlock::class, CarpetBlock::class, SkullBlock::class,
         WallSkullBlock::class, LadderBlock::class, SaplingBlock::class,
         FlowerBlock::class, StemBlock::class, CropBlock::class,
-        RailBlock::class, SnowBlock::class,
-        TripwireBlock::class, TripwireHookBlock::class, FireBlock::class,
+        RailBlock::class, SnowLayerBlock::class,
+        TripWireBlock::class, TripWireHookBlock::class, FireBlock::class,
         AirBlock::class, TorchBlock::class, FlowerPotBlock::class,
-        TallFlowerBlock::class, ShortPlantBlock::class, BushBlock::class,
+        TallFlowerBlock::class, TallGrassBlock::class, BushBlock::class,
         SeagrassBlock::class, TallSeagrassBlock::class, SugarCaneBlock::class,
-        FluidBlock::class, VineBlock::class, MushroomPlantBlock::class,
-        PistonHeadBlock::class, DyedCarpetBlock::class, CobwebBlock::class,
+        LiquidBlock::class, VineBlock::class, MushroomBlock::class,
+        PistonHeadBlock::class, WoolCarpetBlock::class, WebBlock::class,
         DryVegetationBlock::class, SmallDripleafBlock::class, LeverBlock::class,
-        NetherWartBlock::class, NetherPortalBlock::class, RedstoneWireBlock::class,
+        NetherWartBlock::class, NetherPortalBlock::class, RedStoneWireBlock::class,
         ComparatorBlock::class, RedstoneTorchBlock::class, RepeaterBlock::class, VineBlock::class
     )
 
     private val validEtherwarpFeetIds = BitSet(0).apply {
-        Registries.BLOCK.forEach { block ->
-            if (validTypes.any { it.isInstance(block) }) set(Block.getRawIdFromState(block.defaultState))
+        BuiltInRegistries.BLOCK.forEach { block ->
+            if (validTypes.any { it.isInstance(block) }) set(Block.getId(block.defaultBlockState()))
         }
     }
 }

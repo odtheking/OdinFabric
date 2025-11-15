@@ -12,10 +12,9 @@ import com.odtheking.odin.utils.Color.Companion.multiplyAlpha
 import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.handlers.MobCache
-import com.odtheking.odin.utils.render.drawFilledBox
-import com.odtheking.odin.utils.render.drawWireFrameBox
+import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.renderBoundingBox
-import net.minecraft.world.RaycastContext
+import net.minecraft.world.level.ClipContext
 
 object CustomHighlight : Module(
     name = "Custom Highlight",
@@ -35,21 +34,14 @@ object CustomHighlight : Module(
             entities.forEach { entity ->
                 val boundingBox = entity.renderBoundingBox
                 val color = highlightMap[entity.displayName?.string] ?: color
-                val canSee = mc.player?.canSee(
+                val canSee = mc.player?.hasLineOfSight(
                     entity,
-                    RaycastContext.ShapeType.VISUAL,
-                    RaycastContext.FluidHandling.NONE,
+                    ClipContext.Block.VISUAL,
+                    ClipContext.Fluid.NONE,
                     entity.eyeY
                 ) ?: false
 
-                when (renderStyle) {
-                    0 -> context.drawWireFrameBox(boundingBox, color, depth = !canSee)
-                    1 -> context.drawFilledBox(boundingBox, color, depth = !canSee)
-                    2 -> {
-                        context.drawWireFrameBox(boundingBox, color, depth = !canSee)
-                        context.drawFilledBox(boundingBox, color.multiplyAlpha(0.5f), depth = !canSee)
-                    }
-                }
+                context.drawStyledBox(boundingBox, color.multiplyAlpha(0.5f), renderStyle, !canSee)
             }
         }
     }

@@ -13,10 +13,10 @@ import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.alert
 import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
-import net.minecraft.entity.Entity
-import net.minecraft.entity.decoration.ArmorStandEntity
-import net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket
-import net.minecraft.util.math.Box
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
+import net.minecraft.world.entity.Entity
+import net.minecraft.world.entity.decoration.ArmorStand
+import net.minecraft.world.phys.AABB
 
 object KeyHighlight : Module(
     name = "Key Highlight",
@@ -29,9 +29,9 @@ object KeyHighlight : Module(
     private var currentKey: KeyType? = null
 
     init {
-        onReceive<EntityTrackerUpdateS2CPacket> {
+        onReceive<ClientboundSetEntityDataPacket> {
             if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
-            val entity = mc.world?.getEntityById(id) as? ArmorStandEntity ?: return@onReceive
+            val entity = mc.level?.getEntity(id) as? ArmorStand ?: return@onReceive
             if (currentKey?.entity == entity) return@onReceive
             currentKey = KeyType.entries.find { it.displayName == entity.name?.string } ?: return@onReceive
             currentKey?.entity = entity
@@ -40,12 +40,14 @@ object KeyHighlight : Module(
         }
 
         on<RenderEvent.Last> {
+            if (currentKey == null || currentKey?.entity == null) return@on
             currentKey?.let { keyType ->
                 if (keyType.entity?.isAlive == false) {
                     currentKey = null
                     return@on
                 }
-                context.drawWireFrameBox(Box.from(keyType.entity?.pos?.add(-0.5, 1.0, -0.5)), keyType.color(), depth = true)
+                val position = keyType.entity?.position() ?: return@on
+                context.drawWireFrameBox(AABB.unitCubeFromLowerCorner(position.add(-0.5, 1.0, -0.5)), keyType.color(), depth = true)
             }
         }
 

@@ -10,9 +10,9 @@ import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.alert
 import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.modMessage
-import com.odtheking.odin.utils.render.drawString
-import com.odtheking.odin.utils.render.drawStringWidth
 import com.odtheking.odin.utils.render.getStringWidth
+import com.odtheking.odin.utils.render.text
+import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 
 object MapInfo : Module(
@@ -43,13 +43,13 @@ object MapInfo : Module(
         if (fullBackground) fill((-fullMargin).toInt(), 0, (fullWidth + (fullMargin * 2)).toInt(), 19, fullColor.rgba)
         val brWidth = getStringWidth(brText)
 
-        drawString(secretText, 1, 1, Colors.WHITE.rgba)
-        drawString(trText, fullWidth - 1 - getStringWidth(trText), 1, Colors.WHITE.rgba)
-        val unknownWidth = drawStringWidth(unknownSecretsText, 1, 10, Colors.WHITE)
+        text(secretText, 0, 0, Colors.WHITE)
+        text(trText, fullWidth - 1 - getStringWidth(trText), 1, Colors.WHITE)
+        val unknownWidth = textDim(unknownSecretsText, 1, 10, Colors.WHITE).first
         val centerX = (unknownWidth + 1 + (fullWidth - 1 - unknownWidth - brWidth) / 2) - getStringWidth(mimicText) / 2
-        drawString(mimicText, centerX, 10, Colors.WHITE.rgba)
-        drawString(brText, fullWidth - 1 - brWidth, 10, Colors.WHITE.rgba)
-        fullWidth to 19
+        text(mimicText, centerX, 10, Colors.WHITE)
+        text(brText, fullWidth - 1 - brWidth, 10, Colors.WHITE)
+        fullWidth to 18
     }
 
     private val alternate by BooleanSetting("Flip Crypts and Score", false, desc = "Flips crypts and score.").withDependency { fullHud.enabled }
@@ -70,8 +70,8 @@ object MapInfo : Module(
         val width = getStringWidth(secretText)
 
         if (compactSecretBackground) fill((-compactSecretMargin).toInt(), 0, (width + 2 + (compactSecretMargin * 2)).toInt(), 9, compactSecretColor.rgba)
-        drawString(secretText, 1, 1, Colors.WHITE.rgba)
-        width + 2 to 10
+        text(secretText, 0, 0, Colors.WHITE)
+        width to 9
     }
 
     private val compactAddRemaining by BooleanSetting("Compact Include remaining", false, desc = "Adds remaining to the secrets display.").withDependency { compactSecrets.enabled }
@@ -86,8 +86,8 @@ object MapInfo : Module(
         val scoreText = "§7Score: ${colorizeScore(DungeonUtils.score)}" + if (missing > 0) " §7(§6+${missing}?§7)" else ""
         val width = getStringWidth(scoreText)
         if (compactScoreBackground) fill((-compactScoreMargin).toInt(), 0, (width + 2 + (compactScoreMargin * 2)).toInt(), 9, compactScoreColor.rgba)
-        drawString(scoreText, 1, 1, Colors.WHITE.rgba)
-        width + 2 to 10
+        text(scoreText, 0, 0, Colors.WHITE)
+        width to 9
     }
 
     private val compactScoreBackground by BooleanSetting("Score Background", false, desc = "Render a background behind the score info.").withDependency { compactScore.enabled }
