@@ -7,10 +7,11 @@ import com.odtheking.odin.utils.capitalizeWords
 import com.odtheking.odin.utils.itemId
 import com.odtheking.odin.utils.lore
 import com.odtheking.odin.utils.magicalPower
-import net.minecraft.item.ItemStack
+import net.minecraft.nbt.NbtAccounter
 import net.minecraft.nbt.NbtIo
 import net.minecraft.nbt.NbtOps
-import net.minecraft.nbt.NbtSizeTracker
+import net.minecraft.world.item.ItemStack
+import kotlin.collections.mapNotNull
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.jvm.optionals.getOrNull
@@ -109,7 +110,7 @@ object HypixelData {
          * Taken and modified from [Skytils](https://github.com/Skytils/SkytilsMod) under [AGPL-3.0](https://github.com/Skytils/SkytilsMod/blob/1.x/LICENSE.md).
          */
         @Transient val magicalPower = inventory.bagContents["talisman_bag"]?.itemStacks?.mapNotNull {
-            if (it == null || it.lore.any { mpRegex.matches(it.string) }) return@mapNotNull null
+            if (it == null || it.lore.any { item -> mpRegex.matches(item.string) }) return@mapNotNull null
             val mp = it.magicalPower + (if (it.itemId == "ABICASE") floor(crimsonIsle.abiphone.activeContacts.size/2.0).toInt() else 0)
             val itemId = it.itemId.takeUnless { it.startsWith("PARTY_HAT") || it.startsWith("BALLOON_HAT") } ?: "PARTY_HAT"
             itemId to mp
@@ -119,9 +120,7 @@ object HypixelData {
             acc + pair.second
         }?.let { it + if (rift.access.consumedPrism) 11 else 0 } ?: 0
 
-        @Transient val tunings = accessoryBagStorage.tuning.currentTunings.map { "${it.key.replace("_", " ").capitalizeWords().colorStat}§7: ${it.value.colorize(
-            ceil(magicalPower / 10.0)
-        )}" }
+        @Transient val tunings = accessoryBagStorage.tuning.currentTunings.map { "${it.key.replace("_", " ").capitalizeWords()}§7: ${it.value}" }
 
         @Transient val inventoryApi = inventory.eChestContents.itemStacks.isNotEmpty()
 
@@ -719,12 +718,12 @@ object HypixelData {
         @OptIn(ExperimentalEncodingApi::class)
         val itemStacks: List<ItemStack?> get() = with(data) {
             if (isEmpty()) return emptyList()
-            val nbtCompound = NbtIo.readCompressed(Base64.decode(this).inputStream(), NbtSizeTracker.ofUnlimitedBytes())
+            val nbtCompound = NbtIo.readCompressed(Base64.decode(this).inputStream(), NbtAccounter.unlimitedHeap())
             val itemNBTList = nbtCompound.getList("i").getOrNull() ?: return emptyList()
-            val lookup = mc.world?.registryManager ?: return emptyList()
+            val lookup = mc.level?.registryAccess() ?: return emptyList()
             (0..<itemNBTList.size).map { i ->
-                val compound = itemNBTList.getCompound(i).getOrNull()?.takeIf { it.size > 0 } ?: return@map null
-                val parsed = ItemStack.OPTIONAL_CODEC.parse(lookup.getOps(NbtOps.INSTANCE), compound)
+                val compound = itemNBTList.getCompound(i).getOrNull()?.takeIf { it.size() > 0 } ?: return@map null
+                val parsed = ItemStack.OPTIONAL_CODEC.parse(NbtOps.INSTANCE, compound)
                 parsed.result().getOrNull()
             }
         }

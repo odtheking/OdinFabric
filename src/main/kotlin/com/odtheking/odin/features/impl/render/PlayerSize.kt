@@ -36,13 +36,8 @@ object PlayerSize : Module(
             return@ActionSetting
         }
         OdinMod.scope.launch {
-            modMessage(
-                sendDataToServer(
-                    body = "${mc.player?.name?.tryCollapseToString()}, [${devWingsColor.red},${devWingsColor.green},${devWingsColor.blue}], [$devSizeX,$devSizeY,$devSizeZ], $devWings, , $passcode",
-                    "https://tj4yzotqjuanubvfcrfo7h5qlq0opcyk.lambda-url.eu-north-1.on.aws/"
-                )
             val body = buildDevBody(
-                mc.session.username ?: return@launch,
+                mc.user.name ?: return@launch,
                 devWingsColor, devSizeX, devSizeY,
                 devSizeZ, devWings, " ", passcode
             )
