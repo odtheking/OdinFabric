@@ -2,7 +2,6 @@ package com.odtheking.odin.utils.render
 
 import net.minecraft.client.renderer.RenderType
 
-
 object CustomRenderLayer {
 
     val LINE_LIST: RenderType = RenderType.create(

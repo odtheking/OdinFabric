@@ -128,7 +128,7 @@ enum class Floor(val secretPercentage: Float = 1f) {
      *
      * @return The floor number. E has a floor number of 0, F1 to F7 have floor numbers from 1 to 7, and M1 to M7 have floor numbers from 1 to 7.
      */
-    val floorNumber: Int
+    inline val floorNumber: Int
         get() {
             return when (this) {
                 E -> 0
@@ -148,7 +148,7 @@ enum class Floor(val secretPercentage: Float = 1f) {
      *
      * @return `true` if the floor is a master mode floor (M1 to M7), otherwise `false`.
      */
-    val isMM: Boolean
+    inline val isMM: Boolean
         get() {
             return when (this) {
                 E, F1, F2, F3, F4, F5, F6, F7, None -> false

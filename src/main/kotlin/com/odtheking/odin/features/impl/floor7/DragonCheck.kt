@@ -23,7 +23,7 @@ object DragonCheck {
         } ?: return
 
         val entity = mc.level?.getEntity(packet.id) as? EnderDragon ?: return
-        if (entity.health <= 0 && dragon.state != WitherDragonState.DEAD) dragon.setDead()
+        if (entity.isDeadOrDying && dragon.state != WitherDragonState.DEAD) dragon.setDead()
     }
 
     fun dragonSpawn(packet: ClientboundAddEntityPacket) {

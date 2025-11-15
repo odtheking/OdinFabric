@@ -29,7 +29,6 @@ object TerminalSolver : Module(
     name = "Terminal Solver",
     description = "Renders solution for terminals in floor 7."
 ) {
-    private val debug by BooleanSetting("Debug", false, desc = ".")
     val renderType by SelectorSetting("Mode", "Normal", arrayListOf("Normal", "Custom GUI"), desc = "How the terminal solver should render.")
     private val cancelToolTip by BooleanSetting("Stop Tooltips", true, desc = "Stops rendering tooltips in terminals.").withDependency { renderType != 1 }
     val hideClicked by BooleanSetting("Hide Clicked", false, desc = "Visually hides your first click before a gui updates instantly to improve perceived response time. Does not affect actual click time.")
@@ -147,22 +146,23 @@ object TerminalSolver : Module(
                 cancel()
                 return@on
             }
+        }
 
-            val slotIndex = (screen as AbstractContainerScreenAccessor).hoveredSlot?.index ?: return@on
-
-            if (blockIncorrectClicks && currentTerm?.canClick(slotIndex, button) == false) {
+        on<GuiEvent.SlotClick> (EventPriority.HIGH) {
+            if (!enabled || currentTerm == null) return@on
+            if (blockIncorrectClicks && currentTerm?.canClick(slotId, button) == false) {
                 cancel()
                 return@on
             }
 
             if (middleClickGUI) {
-                currentTerm?.click(slotIndex, if (button == 0) GLFW.GLFW_MOUSE_BUTTON_3 else button, hideClicked && currentTerm?.isClicked == false)
+                currentTerm?.click(slotId, if (button == 0) GLFW.GLFW_MOUSE_BUTTON_3 else button, hideClicked && currentTerm?.isClicked == false)
                 cancel()
                 return@on
             }
 
             if (hideClicked && currentTerm?.isClicked == false) {
-                currentTerm?.simulateClick(slotIndex, button)
+                currentTerm?.simulateClick(slotId, button)
                 currentTerm?.isClicked = true
             }
         }
@@ -189,13 +189,13 @@ object TerminalSolver : Module(
 
         on<GuiEvent.DrawSlot> {
             val term = currentTerm ?: return@on
-            if (!enabled || renderType == 1 || currentTerm?.type == null || (term.type == TerminalTypes.MELODY && cancelMelodySolver)) return@on
+            if (!enabled || (term.type == TerminalTypes.MELODY && cancelMelodySolver)) return@on
 
             val slotIndex = slot.index
             val inventorySize = (screen as? AbstractContainerScreen<*>)?.menu?.slots?.size ?: return@on
 
-            if (!debug) cancel()
-            if (slotIndex !in term.solution || slotIndex > inventorySize - 37) return@on
+            if (slotIndex <= inventorySize - 37) cancel()
+            if (slotIndex !in term.solution) return@on
 
             when (term.type) {
                 TerminalTypes.PANES -> guiGraphics.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, panesColor.rgba)
@@ -204,7 +204,7 @@ object TerminalSolver : Module(
                     guiGraphics.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, startsWithColor.rgba)
 
                 TerminalTypes.NUMBERS -> {
-                    val index = term.solution.indexOf(slot.index)
+                    val index = term.solution.indexOf(slotIndex)
                     if (index < 3) {
                         val color = when (index) {
                             0 -> orderColor
