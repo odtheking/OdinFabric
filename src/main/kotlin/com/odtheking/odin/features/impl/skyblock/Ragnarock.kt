@@ -21,13 +21,13 @@ object Ragnarock : Module(
 
     init {
         on<ChatPacketEvent> {
-            if (castAlert && value.matches(cancelRegex)) alert("§aCasted Rag")
+            if (castAlert && value.matches(cancelRegex)) alert("§cRagnarock Cancelled!")
         }
 
         onReceive<ClientboundSoundPacket> {
             if (cancelAlert && pitch == 1.4920635f && mc.player?.mainHandItem?.itemId == "RAGNAROCK_AXE" &&
                 SoundEvents.WOLF_SOUNDS.entries.any { it.value.deathSound.value().location == sound.value().location }
-            ) alert("§cRagnarock Cancelled!")
+            ) alert("§aCasted Rag")
         }
     }
 }

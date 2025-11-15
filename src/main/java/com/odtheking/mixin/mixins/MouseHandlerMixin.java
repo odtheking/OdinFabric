@@ -24,7 +24,7 @@ public class MouseHandlerMixin {
     @Unique
     private double beforeY;
 
-    @Inject(method = "grabMouse", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MouseHandler;minecraft:Lnet/minecraft/client/Minecraft;", ordinal = 0))
+    @Inject(method = "grabMouse", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MouseHandler;xpos:D", ordinal = 0))
     private void odin$lockXPos(CallbackInfo ci) {
         this.beforeX = this.xpos;
         this.beforeY = this.ypos;

@@ -11,13 +11,16 @@ import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
-import com.odtheking.odin.utils.*
+import com.odtheking.odin.utils.Colors
+import com.odtheking.odin.utils.PersonalBest
 import com.odtheking.odin.utils.handlers.TickTask
+import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
+import com.odtheking.odin.utils.toFixed
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket
@@ -54,7 +57,6 @@ object WitherDragons : Module(
     val sendSpawning by BooleanSetting("Send Dragon Spawning", true, desc = "Sends a message when a dragon is spawning.").withDependency { dragonAlerts }
     val sendSpawned by BooleanSetting("Send Dragon Spawned", true, desc = "Sends a message when a dragon has spawned.").withDependency { dragonAlerts }
     val sendSpray by BooleanSetting("Send Ice Sprayed", true, desc = "Sends a message when a dragon has been ice sprayed.").withDependency { dragonAlerts }
-    val sendArrowHit by BooleanSetting("Send Arrows Hit", true, desc = "Sends a message when a dragon dies with how many arrows were hit.").withDependency { dragonAlerts }
 
     private val dragonHealth by BooleanSetting("Dragon Health", true, desc = "Displays the health of M7 dragons.")
 
@@ -112,7 +114,7 @@ object WitherDragons : Module(
                     if (dragon.health > 0) {
                         context.drawText(
                             Component.literal(colorHealth(dragon.health)).visualOrderText,
-                            dragon.position().addVec(y = 1.5), 1f, false
+                            dragon.position(), 5f, false
                         )
                     }
                 }
@@ -122,7 +124,7 @@ object WitherDragons : Module(
                 if (dragonTimer && dragon.state == WitherDragonState.SPAWNING && dragon.timeToSpawn > 0) {
                     context.drawText(
                         Component.literal("§${dragon.colorCode}${dragon.name.first()}: ${getDragonTimer(dragon.timeToSpawn)}").visualOrderText,
-                        dragon.spawnPos.center, 1f, false
+                        dragon.spawnPos.center, 5f, false
                     )
                 }
 

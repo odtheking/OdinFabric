@@ -90,7 +90,7 @@ object BloodCamp : Module(
     private var currentWatcherEntity: Zombie? = null
 
     init {
-        onReceive<ClientboundMoveEntityPacket> {
+        onReceive<ClientboundMoveEntityPacket.PosRot> {
             val level = mc.level ?: return@onReceive
             if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
 
