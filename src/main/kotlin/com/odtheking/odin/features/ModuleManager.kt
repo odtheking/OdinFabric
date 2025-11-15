@@ -36,7 +36,7 @@ object ModuleManager {
         // dungeon
         PuzzleSolvers, BlessingDisplay, LeapMenu, SecretClicked, MapInfo, Mimic, WarpCooldown, KeyHighlight, BloodCamp,
         PositionalMessages, TerracottaTimer, DungeonRequeue, BreakerDisplay, LividSolver, InvincibilityTimer, SpiritBear,
-        DungeonWaypoints,
+        DungeonWaypoints, ExtraStats,
 
         // floor 7
         TerminalSimulator, TerminalSolver, TerminalTimes, TerminalSounds, TickTimers, ArrowAlign, InactiveWaypoints,
