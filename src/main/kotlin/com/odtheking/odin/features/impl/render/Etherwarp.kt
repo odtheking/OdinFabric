@@ -12,7 +12,6 @@ import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.skyblock.Island
 import com.odtheking.odin.utils.skyblock.LocationUtils
-import net.minecraft.client.gui.screens.Screen
 import net.minecraft.core.BlockPos
 import net.minecraft.core.SectionPos
 import net.minecraft.core.registries.BuiltInRegistries
@@ -60,7 +59,7 @@ object Etherwarp : Module(
         }
 
         on<RenderEvent.Last> {
-            if (!Screen.hasShiftDown() || mc.screen != null || !render) return@on
+            if (mc.options?.keyShift?.isDown == false || mc.screen != null || !render) return@on
 
             etherPos = getEtherPos(
                 if (useServerPosition) mc.player?.oldPosition() else mc.player?.position(),
@@ -77,7 +76,7 @@ object Etherwarp : Module(
         }
 
         onSend<ServerboundUseItemPacket> {
-            if (!LocationUtils.currentArea.isArea(Island.SinglePlayer) || !Screen.hasShiftDown() || mc.player?.mainHandItem?.isEtherwarpItem() == null) return@onSend
+            if (!LocationUtils.currentArea.isArea(Island.SinglePlayer) || mc.options?.keyShift?.isDown == false || mc.player?.mainHandItem?.isEtherwarpItem() == null) return@onSend
 
             etherPos?.pos?.let {
                 if (etherPos?.succeeded == false) return@onSend
