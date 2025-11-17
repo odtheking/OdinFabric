@@ -110,13 +110,13 @@ object HypixelData {
             acc + pair.second
         }?.let { it + if (rift.access.consumedPrism) 11 else 0 } ?: 0
 
-        @Transient val tunings = accessoryBagStorage.tuning.currentTunings.map { "${it.key.replace("_", " ").capitalizeWords()}§7: ${it.value}" }
+        val tunings get() = accessoryBagStorage.tuning.currentTunings.map { "${it.key.replace("_", " ").capitalizeWords()}§7: ${it.value}" }
 
         @Transient val inventoryApi = inventory.eChestContents.itemStacks.isNotEmpty()
 
         @Transient val allItems = (inventory.invContents.itemStacks + inventory.eChestContents.itemStacks + inventory.backpackContents.flatMap { it.value.itemStacks })
 
-        @Transient val assumedMagicalPower = magicalPower.takeUnless { it == 0 } ?: (accessoryBagStorage.tuning.currentTunings.values.sum() * 10)
+        val assumedMagicalPower get() = magicalPower.takeUnless { it == 0 } ?: (accessoryBagStorage.tuning.currentTunings.values.sum() * 10)
     }
 
     data class Slayers(

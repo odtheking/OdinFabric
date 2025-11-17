@@ -51,7 +51,7 @@ private fun displayCataStats(name: String, member: HypixelData.MemberData) {
             .append(buildCataSecretsWatcherLine(cataLevel, cata.experience, secrets, secretAvg, totalRuns,
                 member.playerStats.bloodMobKills, cata.watcherKills.values.sum().toInt()))
             .append(buildClassLevelsLine(classes, classLevels.average()))
-            .append(buildFloorTimesLine(cata, mm, member.magicalPower))
+            .append(buildFloorTimesLine(cata, mm, member.assumedMagicalPower, member.tunings))
             .apply {
                 getArmorPieces(member).takeIf { it.isNotEmpty() }?.let { append(buildArmorLine(it)) }
                 checkMissingItems(member).takeIf { it.isNotEmpty() }?.let { append(buildMissingItemsLine(it)) }
@@ -117,7 +117,7 @@ private fun buildFloorHover(dungeonType: HypixelData.DungeonTypeData, title: Str
         }
     }
 
-private fun buildFloorTimesLine(cata: HypixelData.DungeonTypeData, mm: HypixelData.DungeonTypeData, magicalPower: Int) =
+private fun buildFloorTimesLine(cata: HypixelData.DungeonTypeData, mm: HypixelData.DungeonTypeData, magicalPower: Int, tunings: List<String>) =
     Component.literal("§7Floors: ")
         .append(Component.literal("§6Normal")
             .withStyle { it.withHoverEvent(HoverEvent.ShowText(buildFloorHover(cata, "§6§lNormal Floors", "§eF"))) })
@@ -125,6 +125,13 @@ private fun buildFloorTimesLine(cata: HypixelData.DungeonTypeData, mm: HypixelDa
         .append(Component.literal("§cMaster")
             .withStyle { it.withHoverEvent(HoverEvent.ShowText(buildFloorHover(mm, "§c§lMaster Floors", "§cM"))) })
         .append(Component.literal(" §8| §7MP: §d${formatNumber(magicalPower.toString())}"))
+            .withStyle { it.withHoverEvent(HoverEvent.ShowText(
+                Component.literal("§bTunings").apply {
+                    tunings.forEach {
+                        append(Component.literal("\n§7- §e$it"))
+                    }
+                }
+            )) }
         .append(Component.literal("\n"))
 
 private data class ArmorPiece(val slot: String, val itemStack: HypixelData.ItemData?)
@@ -133,17 +140,17 @@ private data class MissingItem(val name: String, val shortName: String)
 private fun getArmorPieces(member: HypixelData.MemberData) = member.inventory.invArmor.itemStacks
     .takeIf { it.size >= 4 }
     ?.let { listOfNotNull(
-        it[3]?.let { stack -> ArmorPiece("Helmet", stack) },
-        it[2]?.let { stack -> ArmorPiece("Chestplate", stack) },
-        it[1]?.let { stack -> ArmorPiece("Leggings", stack) },
-        it[0]?.let { stack -> ArmorPiece("Boots", stack) }
+        it[3]?.let { stack -> ArmorPiece("⛑", stack) },
+        it[2]?.let { stack -> ArmorPiece("\uD83D\uDEE1", stack) },
+        it[1]?.let { stack -> ArmorPiece("\uD83D\uDC56", stack) },
+        it[0]?.let { stack -> ArmorPiece("\uD83D\uDC62", stack) }
     )} ?: emptyList()
 
 private fun buildArmorLine(armorPieces: List<ArmorPiece>) = Component.literal("§7Armor: ").apply {
-    armorPieces.forEachIndexed { index, (_, itemStack) ->
+    armorPieces.forEachIndexed { index, (slot, itemStack) ->
         val displayName = itemStack?.name ?: "§8Empty"
 
-        append(Component.literal(displayName).withStyle { style ->
+        append(Component.literal(slot).withStyle { style ->
             itemStack?.let {
                 val hover = Component.empty().append(Component.literal("$displayName\n"))
                 it.lore.take(20).forEach { loreLine -> hover.append(loreLine).append(Component.literal("\n")) }
