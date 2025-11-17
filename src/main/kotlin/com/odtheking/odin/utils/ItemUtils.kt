@@ -2,6 +2,7 @@ package com.odtheking.odin.utils
 
 import com.mojang.authlib.properties.Property
 import com.mojang.authlib.properties.PropertyMap
+import com.odtheking.odin.utils.network.hypixelapi.HypixelData
 import net.minecraft.core.component.DataComponents
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component
@@ -39,9 +40,9 @@ inline val ItemStack.loreString: List<String>
     get() =
         lore.map { it.string }
 
-inline val ItemStack.magicalPower: Int
+inline val HypixelData.ItemData.magicalPower: Int
     get() =
-        getSkyblockRarity()?.mp?.let { if (itemId == "HEGEMONY_ARTIFACT") it * 2 else it } ?: 0
+        getSkyblockRarity(lore)?.mp?.let { if (id == "HEGEMONY_ARTIFACT") it * 2 else it } ?: 0
 
 val ItemStack.texture: String?
     get() =
@@ -66,8 +67,7 @@ enum class ItemRarity(
 
 private val rarityRegex = Regex("(${ItemRarity.entries.joinToString("|") { it.loreName }}) ?([A-Z ]+)?")
 
-fun ItemStack.getSkyblockRarity(): ItemRarity? {
-    val lore = loreString
+fun getSkyblockRarity(lore: List<String>): ItemRarity? {
     for (i in lore.indices.reversed()) {
         val rarity = rarityRegex.find(lore[i])?.groups?.get(1)?.value ?: continue
         return ItemRarity.entries.find { it.loreName == rarity }

@@ -2,20 +2,14 @@ package com.odtheking.odin.utils.network.hypixelapi
 
 import com.google.gson.JsonElement
 import com.google.gson.annotations.SerializedName
-import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.utils.capitalizeWords
-import com.odtheking.odin.utils.itemId
-import com.odtheking.odin.utils.lore
 import com.odtheking.odin.utils.magicalPower
+import com.odtheking.odin.utils.startsWithOneOf
 import net.minecraft.nbt.NbtAccounter
 import net.minecraft.nbt.NbtIo
-import net.minecraft.nbt.NbtOps
-import net.minecraft.world.item.ItemStack
-import kotlin.collections.mapNotNull
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.jvm.optionals.getOrNull
-import kotlin.math.ceil
 import kotlin.math.floor
 
 //todo all the missing data. right now its about enough for what i currently need
@@ -27,7 +21,7 @@ object HypixelData {
         val name: String,
     ) {
         fun profileOrSelected(profileName: String? = null): Profiles? =
-            profileData.profiles.find { it.cuteName.lowercase() == profileName?.lowercase() } ?: profileData.profiles.find { it.selected }
+            profileData.profiles.find { it.cuteName.equals(profileName, true) } ?: profileData.profiles.find { it.selected }
 
         inline val memberData get() = profileData.profiles.find { it.selected }?.members?.get(uuid)
 
@@ -48,8 +42,7 @@ object HypixelData {
         @SerializedName("profiles")
         private val profileList: List<Profiles>? = emptyList(), // for some reason this gets sent as null instead of empty sometimes. kinda weird.
     ) {
-        @Transient
-        val profiles = profileList.orEmpty()
+        val profiles get() = profileList.orEmpty()
 
         @Transient
         val failed: String? = when {
@@ -73,7 +66,7 @@ object HypixelData {
         val selected: Boolean,
     )
 
-    val mpRegex = Regex("§7§4☠ §cRequires §5.+§c.");
+    val mpRegex = Regex("§7§4☠ §cRequires §5.+§c.")
 
     data class MemberData(
         val rift: RiftData = RiftData(),
@@ -106,13 +99,10 @@ object HypixelData {
         val inventory: Inventory = Inventory(),
         val collection: Map<String, Long> = mapOf()
     ) {
-        /**
-         * Taken and modified from [Skytils](https://github.com/Skytils/SkytilsMod) under [AGPL-3.0](https://github.com/Skytils/SkytilsMod/blob/1.x/LICENSE.md).
-         */
-        @Transient val magicalPower = inventory.bagContents["talisman_bag"]?.itemStacks?.mapNotNull {
-            if (it == null || it.lore.any { item -> mpRegex.matches(item.string) }) return@mapNotNull null
-            val mp = it.magicalPower + (if (it.itemId == "ABICASE") floor(crimsonIsle.abiphone.activeContacts.size/2.0).toInt() else 0)
-            val itemId = it.itemId.takeUnless { it.startsWith("PARTY_HAT") || it.startsWith("BALLOON_HAT") } ?: "PARTY_HAT"
+        val magicalPower get() = inventory.bagContents["talisman_bag"]?.itemStacks?.mapNotNull {
+            if (it == null || it.lore.any { item -> mpRegex.matches(item) }) return@mapNotNull null
+            val mp = it.magicalPower + (if (it.id == "ABICASE") floor(crimsonIsle.abiphone.activeContacts.size / 2f).toInt() else 0)
+            val itemId = it.id.takeUnless { it.startsWithOneOf("PARTY_HAT", "BALLOON_HAT") } ?: "PARTY_HAT"
             itemId to mp
         }?.groupBy { it.first }?.mapValues { entry ->
             entry.value.maxBy { it.second }
@@ -145,8 +135,7 @@ object HypixelData {
         val kills: Map<String, Float> = emptyMap(),
         val deaths: Map<String, Float> = emptyMap(),
     ) {
-        @Transient
-        val bloodMobKills =
+        val bloodMobKills get() =
             ((kills["watcher_summon_undead"] ?: 0f) + (kills["master_watcher_summon_undead"] ?: 0f)).toInt()
     }
 
@@ -306,9 +295,7 @@ object HypixelData {
         val heldItem: String? = null,
         val candyUsed: Int = 0,
         val skin: String? = null,
-    ) {
-
-    }
+    )
 
     data class ProfileData(
         @SerializedName("first_join")
@@ -710,24 +697,32 @@ object HypixelData {
         val initiator: String,
     )
 
-
     data class InventoryContents(
         val type: Int? = null,
         val data: String = ""
     ) {
         @OptIn(ExperimentalEncodingApi::class)
-        val itemStacks: List<ItemStack?> get() = with(data) {
+        val itemStacks: List<ItemData?> get() = with(data) {
             if (isEmpty()) return emptyList()
             val nbtCompound = NbtIo.readCompressed(Base64.decode(this).inputStream(), NbtAccounter.unlimitedHeap())
             val itemNBTList = nbtCompound.getList("i").getOrNull() ?: return emptyList()
-            val lookup = mc.level?.registryAccess() ?: return emptyList()
-            (0..<itemNBTList.size).map { i ->
+            itemNBTList.indices.map { i ->
                 val compound = itemNBTList.getCompound(i).getOrNull()?.takeIf { it.size() > 0 } ?: return@map null
-                val parsed = ItemStack.OPTIONAL_CODEC.parse(NbtOps.INSTANCE, compound)
-                parsed.result().getOrNull()
+                val tag = compound.get("tag")?.asCompound()?.get() ?: return@map null
+                val id = tag.get("ExtraAttributes")?.asCompound()?.get()?.get("id")?.asString()?.get() ?: ""
+                val display = tag.get("display")?.asCompound()?.get() ?: return@map null
+                val name = display.get("Name")?.asString()?.get() ?: ""
+                val lore = display.get("Lore")?.asList()?.get()?.mapNotNull { it.asString().getOrNull() } ?: emptyList()
+                ItemData(name, id, lore)
             }
         }
     }
+
+    data class ItemData(
+        val name: String,
+        val id: String,
+        val lore: List<String>,
+    )
 
     data class CommunityUpgrades(
         @SerializedName("upgrade_states")

@@ -16,9 +16,9 @@ object RequestUtils {
     fun getProfile(name: String): Deferred<Result<HypixelData.PlayerInfo>> = scope.async {
         getFromCache(name)?.let { return@async Result.success(it) }
         val uuidData = getUuid(name).getOrElse { return@async Result.failure(Exception(it.cause)) }
-        return@async fetchJson<HypixelData.ProfilesData>(getServer(EndPoint.GET, uuidData.uuid)).map { it ->
-            it.failed?.let { return@async Result.failure(Exception("Failed to get hypixel data: ${it}")) }
-            HypixelData.PlayerInfo(it, uuidData.uuid, uuidData.name)
+        return@async fetchJson<HypixelData.ProfilesData>(getServer(EndPoint.GET, uuidData.id)).map { it ->
+            it.failed?.let { return@async Result.failure(Exception("Failed to get hypixel data: $it")) }
+            HypixelData.PlayerInfo(it, uuidData.id, uuidData.name)
         }
     }
 
@@ -47,5 +47,5 @@ object RequestUtils {
     }
 
     enum class EndPoint { SECRETS, GET }
-    data class UuidData(val name: String, val uuid: String)
+    data class UuidData(val name: String, val id: String)
 }

@@ -3,25 +3,21 @@ package com.odtheking.odin.utils.network
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import com.odtheking.odin.OdinMod.logger
 import com.odtheking.odin.OdinMod.okClient
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.Dispatcher
+import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
 import org.apache.http.impl.EnglishReasonPhraseCatalog
+import java.io.IOException
 import java.io.InputStream
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.resume
 
 object WebUtils {
-    private const val USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+    private const val USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     private val JSON = "application/json; charset=utf-8".toMediaType()
     val gson = GsonBuilder().setPrettyPrinting().create()
 
@@ -44,13 +40,13 @@ object WebUtils {
         logger.info("Making request to ${request.url}")
 
         val callback = object : Callback {
-            override fun onFailure(call: Call, e: java.io.IOException) {
-                cont.resume(Result.failure(e), null)
+            override fun onFailure(call: Call, e: IOException) {
+                cont.resume(Result.failure(e))
             }
 
             override fun onResponse(call: Call, response: Response) {
-                if (response.isSuccessful) response.body.let { cont.resume(Result.success(it.byteStream()), null) }
-                else cont.resume(Result.failure(InputStreamException(response.code, request.url.toString())), null)
+                if (response.isSuccessful) response.body.let { cont.resume(Result.success(it.byteStream())) }
+                else cont.resume(Result.failure(InputStreamException(response.code, request.url.toString())))
             }
         }
 

@@ -11,11 +11,7 @@ import com.odtheking.odin.utils.handlers.TickTasks
 import com.odtheking.odin.utils.network.WebUtils.createClient
 import com.odtheking.odin.utils.network.WebUtils.postData
 import com.odtheking.odin.utils.render.ItemStateRenderer
-import com.odtheking.odin.utils.skyblock.KuudraUtils
-import com.odtheking.odin.utils.skyblock.LocationUtils
-import com.odtheking.odin.utils.skyblock.PartyUtils
-import com.odtheking.odin.utils.skyblock.SkyblockPlayer
-import com.odtheking.odin.utils.skyblock.SplitsManager
+import com.odtheking.odin.utils.skyblock.*
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonListener
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils
@@ -53,7 +49,7 @@ object OdinMod : ClientModInitializer {
         ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
             arrayOf(
                 mainCommand, petCommand, devCommand, waypointCommand,
-                highlightCommand, termSimCommand, posMsgCommand, dungeonWaypointsCommand
+                highlightCommand, termSimCommand, posMsgCommand, dungeonWaypointsCommand, cataCommand
             ).forEach { commodore -> commodore.register(dispatcher) }
         }
 
