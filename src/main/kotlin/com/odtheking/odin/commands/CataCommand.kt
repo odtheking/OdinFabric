@@ -25,7 +25,7 @@ val cataCommand = Commodore("cata") {
 private fun fetchAndDisplayCataStats(name: String) {
     modMessage("§aFetching dungeon stats for §6$name§a...")
     scope.launch {
-        RequestUtils.getProfile(name).await().fold(
+        RequestUtils.getProfile(name).fold(
             onSuccess = { playerInfo ->
                 playerInfo.memberData?.let { displayCataStats(playerInfo.name, it) }
                     ?: modMessage("§cNo profile found for §6$name§c!")

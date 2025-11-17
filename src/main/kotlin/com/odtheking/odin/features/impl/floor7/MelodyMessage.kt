@@ -93,7 +93,7 @@ object MelodyMessage : Module(
     }
 
     private val coreRegex = Regex("^The Core entrance is opening!$")
-    private val p3StartRegex = Regex("^\\[BOSS] Goldor: Who dares trespass into myh domain\\?$")
+    private val p3StartRegex = Regex("^\\[BOSS] Goldor: Who dares trespass into my domain\\?$")
 
     private fun onChatMessage(packet: ClientboundSystemChatPacket) {
         val text = packet.content?.string ?: return
@@ -117,7 +117,7 @@ object MelodyMessage : Module(
             val position = packet.slot / 9
             if (lastSent.clay == position) return
             if (broadcast) melodyWebSocket.send(update(1, position))
-            if (melodyProgress) clayProgress[position]?.let {  }
+            if (melodyProgress) clayProgress[position]?.let { sendCommand("pc $it") }
             lastSent.clay = position
             return
         }

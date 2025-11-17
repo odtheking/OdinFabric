@@ -11,7 +11,8 @@ import okio.ByteString
 
 fun webSocket(func: WebSocketConnection.() -> Unit) = WebSocketConnection().apply(func)
 
-class WebSocketConnection() {
+class WebSocketConnection {
+    @Volatile
     private var _webSocket: WebSocket? = null
     private var onMessageFunc: (String) -> Unit = { }
 
@@ -22,6 +23,10 @@ class WebSocketConnection() {
     val connected get() = _webSocket != null
 
     fun send(message: String) {
+        if (!connected) {
+            logger.warn("Cannot send message: WebSocket not connected")
+            return
+        }
         _webSocket?.send(message)
     }
 

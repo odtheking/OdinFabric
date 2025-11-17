@@ -598,7 +598,7 @@ object HypixelData {
         @SerializedName("disabled_potion_effects")
         val disabledPotionEffects: List<String> = emptyList(),
         @SerializedName("visited_modes")
-        val vistedModes: List<String> = emptyList(),
+        val visitedModes: List<String> = emptyList(),
         @SerializedName("unlocked_coll_tiers")
         val unLockedCollTiers: List<String> = emptyList(),
         @SerializedName("crafted_generators")

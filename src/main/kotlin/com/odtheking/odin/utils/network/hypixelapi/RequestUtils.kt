@@ -1,11 +1,8 @@
 package com.odtheking.odin.utils.network.hypixelapi
 
 import com.odtheking.odin.OdinMod.logger
-import com.odtheking.odin.OdinMod.scope
 import com.odtheking.odin.features.impl.render.ClickGUIModule.hypixelApiUrl
 import com.odtheking.odin.utils.network.WebUtils.fetchJson
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
 
 object RequestUtils {
     private val uuidCache: HashMap<String, UuidData> = HashMap()
@@ -13,11 +10,11 @@ object RequestUtils {
 
     private fun getServer(endpoint: EndPoint, uuid: String): String = hypixelApiUrl + endpoint.name.lowercase() + "/" + uuid
 
-    fun getProfile(name: String): Deferred<Result<HypixelData.PlayerInfo>> = scope.async {
-        getFromCache(name)?.let { return@async Result.success(it) }
-        val uuidData = getUuid(name).getOrElse { return@async Result.failure(Exception(it.cause)) }
-        return@async fetchJson<HypixelData.ProfilesData>(getServer(EndPoint.GET, uuidData.id)).map { it ->
-            it.failed?.let { return@async Result.failure(Exception("Failed to get hypixel data: $it")) }
+    suspend fun getProfile(name: String): Result<HypixelData.PlayerInfo> {
+        getFromCache(name)?.let { return Result.success(it) }
+        val uuidData = getUuid(name).getOrElse { return Result.failure(Exception(it.cause)) }
+        return fetchJson<HypixelData.ProfilesData>(getServer(EndPoint.GET, uuidData.id)).map { it ->
+            it.failed?.let { return Result.failure(Exception("Failed to get hypixel data: $it")) }
             HypixelData.PlayerInfo(it, uuidData.id, uuidData.name)
         }
     }

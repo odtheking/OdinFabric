@@ -1,13 +1,15 @@
 package com.odtheking.odin.features.impl.render
 
-import com.google.gson.JsonParser
-import com.mojang.blaze3d.vertex.PoseStack
+import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
+import com.mojang.blaze3d.vertex.PoseStack
 import com.odtheking.odin.OdinMod
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.*
 import com.odtheking.odin.features.Module
-import com.odtheking.odin.utils.*
+import com.odtheking.odin.utils.Color
+import com.odtheking.odin.utils.Colors
+import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.network.WebUtils.fetchJson
 import com.odtheking.odin.utils.network.WebUtils.postData
 import kotlinx.coroutines.launch
@@ -55,8 +57,8 @@ object PlayerSize : Module(
         @SerializedName("CustomName")   val customName: String?,
         @SerializedName("DevName")      val name: String,
         @SerializedName("IsDev")        val isDev: Boolean?,
-        @SerializedName("WingsColor")   val wingsColor: Array<Int>,
-        @SerializedName("Size")         val scale: Array<Float>,
+        @SerializedName("WingsColor")   val wingsColor: List<Int>,
+        @SerializedName("Size")         val scale: List<Float>,
         @SerializedName("Wings")        val wings: Boolean
     )
 
@@ -73,11 +75,10 @@ object PlayerSize : Module(
         matrix.scale(random.scale[0], random.scale[1], random.scale[2])
     }
 
-    private val pattern = Regex("Decimal\\('(-?\\d+(?:\\.\\d+)?)'\\)")
-
     suspend fun updateCustomProperties() {
         val response = fetchJson<Array<RandomPlayer>>("https://api.odtheking.com/devs/").getOrNull() ?: return
         randoms.putAll(response.associateBy { it.name })
+        modMessage(randoms)
     }
 
     init {
@@ -87,13 +88,13 @@ object PlayerSize : Module(
     }
 
     fun buildDevBody(devName: String, wingsColor: Color, sizeX: Float, sizeY: Float, sizeZ: Float, wings: Boolean, customName: String, password: String): String {
-        return """ {
-            "devName": "$devName",
-            "wingsColor": [${wingsColor.red}, ${wingsColor.green}, ${wingsColor.blue}],
-            "size": [$sizeX, $sizeY, $sizeZ],
-            "wings": $wings,
-            "customName": "$customName",
-            "password": "$password"
-        } """.trimIndent()
+        return Gson().toJson(mapOf(
+            "devName" to devName,
+            "wingsColor" to listOf(wingsColor.red, wingsColor.green, wingsColor.blue),
+            "size" to listOf(sizeX, sizeY, sizeZ),
+            "wings" to wings,
+            "customName" to customName,
+            "password" to password
+        ))
     }
 }
