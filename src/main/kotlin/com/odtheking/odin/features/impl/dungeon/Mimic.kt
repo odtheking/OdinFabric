@@ -23,7 +23,7 @@ object Mimic : Module(
     val mimicMessage by StringSetting("Mimic Message", "Mimic Killed!", 128, desc = "Message sent when mimic is detected as killed.").withDependency { mimicMessageToggle }
     private val reset by ActionSetting("Mimic Killed", desc = "Sends Mimic killed message in party chat.") { mimicKilled() }
 
-    private val princeMessageToggle by BooleanSetting("Toggle Prince Message", false, desc = "Toggles the prince killed message.")
+    private val princeMessageToggle by BooleanSetting("Send Prince Message", true, desc = "Toggles the prince killed message.")
     val princeMessage by StringSetting("Prince Message", "Prince Killed!", 128, desc = "Message sent when prince is detected as killed.").withDependency { princeMessageToggle }
     private val princeReset by ActionSetting("Prince Killed", desc = "Sends Prince killed message in party chat.") { princeKilled() }
 
@@ -45,7 +45,7 @@ object Mimic : Module(
         }
 
         on<ChatPacketEvent> {
-            if (value.matches(princeRegex) && !DungeonUtils.princeKilled && DungeonUtils.inDungeons) princeKilled()
+            if (value.matches(princeRegex)) princeKilled()
         }
     }
 
@@ -56,7 +56,7 @@ object Mimic : Module(
     }
 
     private fun princeKilled() {
-        if (DungeonUtils.princeKilled || DungeonUtils.inBoss) return
+        if (DungeonUtils.princeKilled || DungeonUtils.inBoss || !DungeonUtils.inDungeons) return
         if (princeMessageToggle) sendCommand("pc $princeMessage")
         DungeonListener.dungeonStats.princeKilled = true
     }

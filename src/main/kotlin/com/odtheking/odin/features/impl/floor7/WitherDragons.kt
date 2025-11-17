@@ -92,13 +92,11 @@ object WitherDragons : Module(
         }
 
         on<ChatPacketEvent> {
-            if (DungeonUtils.getF7Phase() != M7Phases.P5) return@on
-            if (witherKingRegex.matches(value)) {
-                WitherDragonsEnum.entries.find { DragonCheck.lastDragonDeath == it && DragonCheck.lastDragonDeath != WitherDragonsEnum.None }?.let {
-                    if (sendNotification) modMessage("§${it.colorCode}${it.name} dragon counts.")
-                    DragonCheck.lastDragonDeath = WitherDragonsEnum.None
-                } ?: WitherDragonsEnum.entries.find { it.state == WitherDragonState.ALIVE }?.setDead(true)
-            }
+            if (DungeonUtils.getF7Phase() != M7Phases.P5 || !witherKingRegex.matches(value)) return@on
+            if (DragonCheck.lastDragonDeath == WitherDragonsEnum.None) return@on
+            if (sendNotification) modMessage("§${DragonCheck.lastDragonDeath.colorCode}${DragonCheck.lastDragonDeath.name} dragon counts.")
+            DragonCheck.lastDragonDeath = WitherDragonsEnum.entries.find { it.state == WitherDragonState.ALIVE } ?: WitherDragonsEnum.None
+
         }
 
         TickTask(0, true) {
