@@ -6,6 +6,9 @@ import com.odtheking.odin.OdinMod
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.features.ModuleManager.generateFeatureList
+import com.odtheking.odin.features.impl.floor7.WitherDragonState
+import com.odtheking.odin.features.impl.floor7.WitherDragons
+import com.odtheking.odin.features.impl.floor7.WitherDragonsEnum
 import com.odtheking.odin.features.impl.nether.NoPre
 import com.odtheking.odin.features.impl.render.PlayerSize
 import com.odtheking.odin.utils.customData
@@ -14,7 +17,6 @@ import com.odtheking.odin.utils.sendCommand
 import com.odtheking.odin.utils.setClipboardContent
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.skyblock.LocationUtils
-import com.odtheking.odin.utils.skyblock.SkyblockPlayer
 import com.odtheking.odin.utils.skyblock.Supply
 import com.odtheking.odin.utils.skyblock.dungeon.Blessing
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
@@ -35,11 +37,6 @@ val devCommand = Commodore("oddev") {
 
     literal("giveaotv").runs { tuners: Int? ->
         sendCommand("give @p minecraft:diamond_shovel[minecraft:custom_name={\"text\":\"Aspect Of The Void\",\"color\":\"dark_purple\"},minecraft:custom_data={ethermerge:1,\"tuned_transmission\":${tuners ?: 0}}]")
-    }
-
-    literal("debug").runs {
-        modMessage("Hypixel: ${LocationUtils.isOnHypixel}, Skyblock: ${LocationUtils.isInSkyblock}, Area: ${LocationUtils.currentArea.displayName}")
-        modMessage("SkyblockPlayer: ${SkyblockPlayer.currentHealth}/${SkyblockPlayer.maxHealth}❤, ${SkyblockPlayer.currentMana}/${SkyblockPlayer.maxMana}✎, ${SkyblockPlayer.overflowMana}ʬ, ${SkyblockPlayer.currentDefense}❈ Defense, EHP: ${SkyblockPlayer.effectiveHP}")
     }
 
     literal("simulate").runs { greedyString: GreedyString ->
@@ -106,6 +103,56 @@ val devCommand = Commodore("oddev") {
             }
         }
         """.trimIndent(), "")
+    }
+
+    literal("dragons").runs {
+        WitherDragonsEnum.entries.filter { it != WitherDragonsEnum.None }.forEach { dragon ->
+            val stateInfo = buildString {
+                when (dragon.state) {
+                    WitherDragonState.ALIVE -> {
+                        append("§a✓ ALIVE")
+                        dragon.entity?.let { entity ->
+                            val hp = entity.health.toInt()
+                            val maxHp = entity.maxHealth.toInt()
+                            val hpPercent = (hp * 100 / maxHp)
+                            val hpColor = when {
+                                hpPercent > 66 -> "§a"
+                                hpPercent > 33 -> "§e"
+                                else -> "§c"
+                            }
+                            append(" §8│ ${hpColor}${hp}§7/${hpColor}${maxHp}§8 (${hpColor}${hpPercent}%§8)")
+                        }
+                    }
+                    WitherDragonState.SPAWNING -> append("§e⚡ SPAWNING")
+                    WitherDragonState.DEAD -> append("§7✗ DEAD")
+                }
+                append(" §8│ §eIn §f${String.format("%.1f", dragon.timeToSpawn / 20f)}§es")
+            }
+
+
+
+            val spawnInfo = buildString {
+                if (dragon.timesSpawned > 0) append(" §8│ §7Spawned: §fx${dragon.timesSpawned}")
+            }
+
+            val entityInfo = buildString {
+                dragon.entityId?.let { id ->
+                    append(" §8│ §7ID: §f$id")
+                }
+            }
+
+            val flags = buildString {
+                val flagList = mutableListOf<String>()
+                if (WitherDragons.priorityDragon == dragon) flagList.add("§6§l➤ PRIORITY")
+                if (dragon.isSprayed) flagList.add("§d✓ Sprayed")
+                if (flagList.isNotEmpty()) {
+                    append(" §8│ ")
+                    append(flagList.joinToString(" §8│ "))
+                }
+            }
+
+            modMessage("§${dragon.colorCode}§l${dragon.name.padEnd(7)}§r $stateInfo$spawnInfo$entityInfo$flags")
+        }
     }
 
     literal("roomdata").runs {

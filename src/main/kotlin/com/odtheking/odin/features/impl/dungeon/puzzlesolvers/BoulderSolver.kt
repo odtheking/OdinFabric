@@ -35,18 +35,17 @@ object BoulderSolver {
         }
     }
 
-    fun onRoomEnter(event: RoomEnterEvent) {
-        val room = event.room ?: return reset()
-        if (room.data.name != "Boulder") return reset()
+    fun onRoomEnter(event: RoomEnterEvent) = with(event.room) {
+        if (this?.data?.name != "Boulder") return reset()
         var str = ""
         for (z in 24 downTo 9 step 3) {
             for (x in 24 downTo 6 step 3) {
-                str += if (mc.level?.getBlockState(room.getRealCoords(BlockPos(x, 66, z)))?.block == Blocks.AIR) "0" else "1"
+                str += if (mc.level?.getBlockState(getRealCoords(BlockPos(x, 66, z)))?.block == Blocks.AIR) "0" else "1"
             }
         }
         currentPositions = solutions[str]?.map { sol ->
-            val render = room.getRealCoords(BlockPos(sol[0], 65, sol[1]))
-            val click = room.getRealCoords(BlockPos(sol[2], 65, sol[3]))
+            val render = getRealCoords(BlockPos(sol[0], 65, sol[1]))
+            val click = getRealCoords(BlockPos(sol[2], 65, sol[3]))
             BoxPosition(render, click)
         }?.toMutableList() ?: return
     }
@@ -54,9 +53,9 @@ object BoulderSolver {
     fun onRenderWorld(context: WorldRenderContext, showAllBoulderClicks: Boolean, boulderStyle: Int, boulderColor: Color) {
         if (DungeonUtils.currentRoomName != "Boulder" || currentPositions.isEmpty()) return
         if (showAllBoulderClicks) currentPositions.forEach {
-            context.drawStyledBox(AABB(it.render), boulderColor, boulderStyle)
+            context.drawStyledBox(AABB(it.render), boulderColor, boulderStyle, false)
         } else currentPositions.firstOrNull()?.let {
-            context.drawStyledBox(AABB(it.render), boulderColor, boulderStyle)
+            context.drawStyledBox(AABB(it.render), boulderColor, boulderStyle, false)
         }
     }
 

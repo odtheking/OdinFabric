@@ -1,7 +1,6 @@
 package com.odtheking.odin.features.impl.floor7
 
 import com.odtheking.odin.OdinMod.mc
-import com.odtheking.odin.features.impl.floor7.DragonCheck.dragonEntityList
 import com.odtheking.odin.features.impl.floor7.DragonCheck.lastDragonDeath
 import com.odtheking.odin.features.impl.floor7.DragonPriority.displaySpawningDragon
 import com.odtheking.odin.features.impl.floor7.DragonPriority.findPriority
@@ -64,7 +63,6 @@ enum class WitherDragonsEnum(
 
     fun setDead(deathless: Boolean = false) {
         state = WitherDragonState.DEAD
-        dragonEntityList.remove(entity)
         entityId = null
         entity = null
         if (!deathless) lastDragonDeath = this
@@ -76,7 +74,7 @@ enum class WitherDragonsEnum(
     }
 
     fun updateEntity(entityId: Int) {
-        entity = (mc.level?.getEntity(entityId) as? EnderDragon)?.also { dragonEntityList.add(it) }
+        entity = (mc.level?.getEntity(entityId) as? EnderDragon)
     }
 
     companion object {
@@ -98,7 +96,6 @@ enum class WitherDragonsEnum(
                 it.isSprayed = false
                 it.spawnedTime = 0
             }
-            dragonEntityList.clear()
             priorityDragon = None
             lastDragonDeath = None
         }

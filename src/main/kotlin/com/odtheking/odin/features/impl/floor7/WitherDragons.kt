@@ -26,6 +26,7 @@ import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 
 object WitherDragons : Module(
     name = "Wither Dragons",
@@ -69,6 +70,7 @@ object WitherDragons : Module(
     val paulBuff by BooleanSetting("Paul Buff", false, desc = "Multiplies the power in your run by 1.25.").withDependency { dragonPriorityToggle && dragonPriorityDropDown }
 
     val witherKingRegex = Regex("^\\[BOSS] Wither King: (Oh, this one hurts!|I have more of those\\.|My soul is disposable\\.)$")
+    private var dragonEntities = emptyList<EnderDragon>()
     var priorityDragon = WitherDragonsEnum.None
     var currentTick = 0L
 
@@ -96,11 +98,11 @@ object WitherDragons : Module(
             if (DragonCheck.lastDragonDeath == WitherDragonsEnum.None) return@on
             if (sendNotification) modMessage("§${DragonCheck.lastDragonDeath.colorCode}${DragonCheck.lastDragonDeath.name} dragon counts.")
             DragonCheck.lastDragonDeath = WitherDragonsEnum.entries.find { it.state == WitherDragonState.ALIVE } ?: WitherDragonsEnum.None
-
         }
 
         TickTask(0, true) {
             WitherDragonsEnum.entries.forEach { if (it.state == WitherDragonState.SPAWNING && it.timeToSpawn > 0) it.timeToSpawn-- }
+            dragonEntities = mc.level?.entitiesForRendering()?.filterIsInstance<EnderDragon>().orEmpty()
             currentTick++
         }
 
@@ -108,8 +110,8 @@ object WitherDragons : Module(
             if (DungeonUtils.getF7Phase() != M7Phases.P5) return@on
 
             if (dragonHealth) {
-                DragonCheck.dragonEntityList.forEach { dragon ->
-                    if (dragon.health > 0) {
+                dragonEntities.forEach { dragon ->
+                    if (dragon.isAlive) {
                         context.drawText(
                             Component.literal(colorHealth(dragon.health)).visualOrderText,
                             dragon.position(), 5f, false

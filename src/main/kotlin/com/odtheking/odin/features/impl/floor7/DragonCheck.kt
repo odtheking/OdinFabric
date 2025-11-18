@@ -10,12 +10,10 @@ import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.entity.decoration.ArmorStand
 import net.minecraft.world.item.Items
 import net.minecraft.world.phys.Vec3
-import java.util.concurrent.CopyOnWriteArrayList
 
 object DragonCheck {
 
     var lastDragonDeath: WitherDragonsEnum = WitherDragonsEnum.None
-    val dragonEntityList = CopyOnWriteArrayList<EnderDragon>()
 
     fun dragonUpdate(packet: ClientboundSetEntityDataPacket) {
         val dragon = WitherDragonsEnum.entries.find { it.entityId == packet.id }?.apply {

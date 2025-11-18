@@ -75,11 +75,7 @@ object ScanUtils {
 
             scanRoom(roomCenter)?.let { room -> if (room.rotation != Rotations.NONE) RoomEnterEvent(room).postAndCatch() } ?: run {
                 if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
-                RoomEnterEvent(Room(
-                    data = RoomData("Unknown", RoomType.NORMAL, listOf(getCore(roomCenter)), 0, 0, 0),
-                    roomComponents = mutableSetOf(RoomComponent(roomCenter.x, roomCenter.z))
-                )).postAndCatch()
-                println("Unable to determine room at $roomCenter core: ${getCore(roomCenter)}")
+                devMessage("Unable to determine room at $roomCenter core: ${getCore(roomCenter)}")
             }
         }
 
