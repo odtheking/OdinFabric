@@ -30,6 +30,11 @@ dependencies {
         include("com.github.stivais:Commodore:$it")
     }
 
+    property("okhttp_version").let {
+        implementation("com.squareup.okhttp3:okhttp:$it")
+        include("com.squareup.okhttp3:okhttp:$it")
+    }
+
     modCompileOnly("com.terraformersmc:modmenu:${property("modmenu_version")}")
 
     property("minecraft_lwjgl_version").let {

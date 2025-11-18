@@ -2,6 +2,7 @@ package com.odtheking.odin.utils
 
 import com.mojang.authlib.properties.Property
 import com.mojang.authlib.properties.PropertyMap
+import com.odtheking.odin.utils.network.hypixelapi.HypixelData
 import net.minecraft.core.component.DataComponents
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component
@@ -39,6 +40,10 @@ inline val ItemStack.loreString: List<String>
     get() =
         lore.map { it.string }
 
+inline val HypixelData.ItemData.magicalPower: Int
+    get() =
+        getSkyblockRarity(lore)?.mp?.let { if (id == "HEGEMONY_ARTIFACT") it * 2 else it } ?: 0
+
 val ItemStack.texture: String?
     get() =
         get(DataComponents.PROFILE)?.gameProfile()?.properties?.get("textures")?.firstOrNull()?.value
@@ -46,23 +51,23 @@ val ItemStack.texture: String?
 enum class ItemRarity(
     val loreName: String,
     val colorCode: String,
-    val color: Color
+    val color: Color,
+    val mp: Int,
 ) {
-    COMMON("COMMON", "§f", Colors.WHITE),
-    UNCOMMON("UNCOMMON", "§2", Colors.MINECRAFT_GREEN),
-    RARE("RARE", "§9", Colors.MINECRAFT_BLUE),
-    EPIC("EPIC", "§5", Colors.MINECRAFT_DARK_PURPLE),
-    LEGENDARY("LEGENDARY", "§6", Colors.MINECRAFT_GOLD),
-    MYTHIC("MYTHIC", "§d", Colors.MINECRAFT_LIGHT_PURPLE),
-    DIVINE("DIVINE", "§b", Colors.MINECRAFT_AQUA),
-    SPECIAL("SPECIAL", "§c", Colors.MINECRAFT_RED),
-    VERY_SPECIAL("VERY SPECIAL", "§c", Colors.MINECRAFT_RED);
+    COMMON("COMMON", "§f", Colors.WHITE, 3),
+    UNCOMMON("UNCOMMON", "§2", Colors.MINECRAFT_GREEN, 5),
+    RARE("RARE", "§9", Colors.MINECRAFT_BLUE, 8),
+    EPIC("EPIC", "§5", Colors.MINECRAFT_DARK_PURPLE, 12),
+    LEGENDARY("LEGENDARY", "§6", Colors.MINECRAFT_GOLD, 16),
+    MYTHIC("MYTHIC", "§d", Colors.MINECRAFT_LIGHT_PURPLE, 22),
+    DIVINE("DIVINE", "§b", Colors.MINECRAFT_AQUA, 0),
+    SPECIAL("SPECIAL", "§c", Colors.MINECRAFT_RED, 3),
+    VERY_SPECIAL("VERY SPECIAL", "§c", Colors.MINECRAFT_RED, 5);
 }
 
 private val rarityRegex = Regex("(${ItemRarity.entries.joinToString("|") { it.loreName }}) ?([A-Z ]+)?")
 
-fun ItemStack.getSkyblockRarity(): ItemRarity? {
-    val lore = loreString
+fun getSkyblockRarity(lore: List<String>): ItemRarity? {
     for (i in lore.indices.reversed()) {
         val rarity = rarityRegex.find(lore[i])?.groups?.get(1)?.value ?: continue
         return ItemRarity.entries.find { it.loreName == rarity }

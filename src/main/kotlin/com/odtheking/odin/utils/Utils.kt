@@ -34,6 +34,10 @@ inline val String?.noControlCodes: String
 fun String.containsOneOf(vararg options: String, ignoreCase: Boolean = false): Boolean =
     containsOneOf(options.toList(), ignoreCase)
 
+fun String.capitalizeWords(): String = split(" ").joinToString(" ") { word ->
+    word.replaceFirstChar(Char::titlecase)
+}
+
 /**
  * Checks if the current string contains at least one of the specified strings.
  *

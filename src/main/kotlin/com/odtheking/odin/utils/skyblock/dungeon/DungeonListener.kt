@@ -10,7 +10,7 @@ import com.odtheking.odin.features.impl.dungeon.LeapMenu
 import com.odtheking.odin.features.impl.dungeon.LeapMenu.odinSorting
 import com.odtheking.odin.features.impl.dungeon.Mimic
 import com.odtheking.odin.utils.equalsOneOf
-import com.odtheking.odin.utils.hasBonusPaulScore
+import com.odtheking.odin.utils.network.WebUtils.hasBonusPaulScore
 import com.odtheking.odin.utils.noControlCodes
 import com.odtheking.odin.utils.romanToInt
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getDungeonTeammates

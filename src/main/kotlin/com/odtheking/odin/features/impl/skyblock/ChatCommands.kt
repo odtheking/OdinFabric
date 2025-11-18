@@ -12,6 +12,9 @@ import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.handlers.LimitedTickTask
 import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.odtheking.odin.utils.skyblock.PartyUtils
+import net.minecraft.network.chat.ClickEvent
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.HoverEvent
 import net.minecraft.sounds.SoundEvents
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -182,7 +185,10 @@ object ChatCommands : Module(
 
             "invite", "inv" -> if (invite && channel == ChatChannel.PRIVATE) {
                 if (autoConfirm) return sendCommand("p invite $name")
-                modMessage("§aClick on this message to invite $name to your party!", chatStyle = createClickStyle("/party invite $name"))
+                modMessage(Component.literal("§aClick on this message to invite $name to your party!").withStyle {
+                    it.withClickEvent(ClickEvent.RunCommand("/party invite $name"))
+                    .withHoverEvent(HoverEvent.ShowText(Component.literal("§6Click to invite $name to your party.")))
+                })
                 playSoundAtPlayer(SoundEvents.NOTE_BLOCK_PLING.value())
             }
         }
