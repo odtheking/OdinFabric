@@ -6,6 +6,9 @@ import com.odtheking.odin.OdinMod
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.features.ModuleManager.generateFeatureList
+import com.odtheking.odin.features.impl.floor7.WitherDragonState
+import com.odtheking.odin.features.impl.floor7.WitherDragons
+import com.odtheking.odin.features.impl.floor7.WitherDragonsEnum
 import com.odtheking.odin.features.impl.floor7.MelodyMessage.melodyWebSocket
 import com.odtheking.odin.features.impl.nether.NoPre
 import com.odtheking.odin.features.impl.render.ClickGUIModule.webSocketUrl
@@ -116,6 +119,42 @@ val devCommand = Commodore("oddev") {
                 }
             """.trimIndent(), ""
             )
+        }
+    }
+
+    literal("dragons").runs {
+        WitherDragonsEnum.entries.forEach { dragon ->
+            val stateInfo = buildString {
+                when (dragon.state) {
+                    WitherDragonState.ALIVE -> {
+                        append("§a✓ ALIVE")
+
+                        append(" §8│ Health: (${dragon.health}§8)")
+
+                    }
+                    WitherDragonState.SPAWNING -> append("§e⚡ SPAWNING")
+                    WitherDragonState.DEAD -> append("§7✗ DEAD")
+                }
+                append(" §8│ §eIn §f${String.format("%.1f", dragon.timeToSpawn / 20f)}§es")
+            }
+
+
+
+            val spawnInfo = buildString {
+                if (dragon.timesSpawned > 0) append(" §8│ §7Spawned: §fx${dragon.timesSpawned}")
+            }
+
+            val flags = buildString {
+                val flagList = mutableListOf<String>()
+                if (WitherDragons.priorityDragon == dragon) flagList.add("§6§l➤ PRIORITY")
+                if (dragon.isSprayed) flagList.add("§d✓ Sprayed")
+                if (flagList.isNotEmpty()) {
+                    append(" §8│ ")
+                    append(flagList.joinToString(" §8│ "))
+                }
+            }
+
+            modMessage("§${dragon.colorCode}§l${dragon.name.padEnd(7)}§r $stateInfo$spawnInfo$flags")
         }
     }
 

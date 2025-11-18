@@ -22,7 +22,6 @@ object DragonPriority {
         else sortPriority(spawningDragons)
 
     fun displaySpawningDragon(dragon: WitherDragonsEnum) {
-        if (dragon == WitherDragonsEnum.None) return
         if (WitherDragons.dragonTitle && WitherDragons.enabled) alert("§${dragon.colorCode}${dragon.name} is spawning!", true)
         if (dragonPriorityToggle && WitherDragons.enabled) modMessage("§${dragon.colorCode}${dragon.name} §7is your priority dragon!")
     }

@@ -1,6 +1,9 @@
 package com.odtheking.odin.features.impl.dungeon.puzzlesolvers
 
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonDeserializationContext
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonElement
 import com.odtheking.odin.OdinMod.logger
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.RoomEnterEvent
@@ -15,15 +18,19 @@ import net.minecraft.core.BlockPos
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.phys.Vec3
 import java.io.InputStreamReader
+import java.lang.reflect.Type
 import java.nio.charset.StandardCharsets
 
 object IceFillSolver {
-    private var currentPatterns: ArrayList<Vec3> = ArrayList()
 
-    private val gson = GsonBuilder().setPrettyPrinting().create()
-    private val isr = this::class.java.getResourceAsStream("/assets/odin/puzzles/IceFillFloors.json")
+    private val gson = GsonBuilder()
+        .setPrettyPrinting()
+        .registerTypeAdapter(BlockPos::class.java, BlockPosDeserializer())
+        .create()
+    private val isr = this::class.java.getResourceAsStream("/assets/odin/puzzles/iceFillFloors.json")
         ?.let { InputStreamReader(it, StandardCharsets.UTF_8) }
     private var iceFillFloors = IceFillData(emptyList(), emptyList(), emptyList())
+    private var currentPatterns: ArrayList<Vec3> = ArrayList()
 
     init {
         try {
@@ -36,24 +43,21 @@ object IceFillSolver {
     }
 
     fun onRenderWorld(context: WorldRenderContext, color: Color) {
-        if (currentPatterns.isEmpty() || DungeonUtils.currentRoomName != "Ice Fill") return
-
-        context.drawLine(currentPatterns, color, true)
+        if (!currentPatterns.isEmpty() && DungeonUtils.currentRoomName == "Ice Fill")
+            context.drawLine(currentPatterns, color, true)
     }
 
     fun onRoomEnter(event: RoomEnterEvent, optimizePatterns: Boolean) = with (event.room) {
         if (this?.data?.name != "Ice Fill" || currentPatterns.isNotEmpty()) return
+        val patterns = if (optimizePatterns) iceFillFloors.hard else iceFillFloors.easy
 
         (0..2).forEach { index ->
             val floorIdentifiers = iceFillFloors.identifier[index]
 
             for (patternIndex in floorIdentifiers.indices) {
                 if (isRealAir(floorIdentifiers[patternIndex][0]) && !isRealAir(floorIdentifiers[patternIndex][1])) {
-                    val patterns = if (optimizePatterns) iceFillFloors.hard else iceFillFloors.easy
 
-                    patterns[index][patternIndex].toMutableList().let { pattern ->
-                        currentPatterns.addAll(pattern.map { Vec3(getRealCoords(it)).add(0.5, 0.1, 0.5) })
-                    }
+                    currentPatterns.addAll(patterns[index][patternIndex].map { Vec3(getRealCoords(it)).add(0.5, 0.1, 0.5) })
 
                     return@forEach
                 }
@@ -74,4 +78,14 @@ object IceFillSolver {
         val easy: List<List<List<BlockPos>>>,
         val hard: List<List<List<BlockPos>>>
     )
+
+    private class BlockPosDeserializer : JsonDeserializer<BlockPos> {
+        override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): BlockPos {
+            val obj = json.asJsonObject
+            val x = obj.get("x").asInt
+            val y = obj.get("y").asInt
+            val z = obj.get("z").asInt
+            return BlockPos(x, y, z)
+        }
+    }
 }

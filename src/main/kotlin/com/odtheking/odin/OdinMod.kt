@@ -6,7 +6,6 @@ import com.odtheking.odin.events.EventDispatcher
 import com.odtheking.odin.events.core.EventBus
 import com.odtheking.odin.features.ModuleManager
 import com.odtheking.odin.utils.ServerUtils
-import com.odtheking.odin.utils.handlers.MobCaches
 import com.odtheking.odin.utils.handlers.TickTasks
 import com.odtheking.odin.utils.network.WebUtils.createClient
 import com.odtheking.odin.utils.network.WebUtils.postData
@@ -49,14 +48,14 @@ object OdinMod : ClientModInitializer {
         ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
             arrayOf(
                 mainCommand, petCommand, devCommand, waypointCommand,
-                soopyCommand, highlightCommand, termSimCommand,
-                posMsgCommand, dungeonWaypointsCommand, cataCommand
+                soopyCommand, termSimCommand, posMsgCommand,
+                dungeonWaypointsCommand, cataCommand
             ).forEach { commodore -> commodore.register(dispatcher) }
         }
 
         listOf(
             this, LocationUtils, TickTasks, KuudraUtils,
-            SkyblockPlayer, MobCaches, ServerUtils,
+            SkyblockPlayer, ServerUtils,
             EventDispatcher, ModuleManager, DungeonListener,
             ScanUtils, DungeonUtils, SplitsManager, PartyUtils
         ).forEach { EventBus.subscribe(it) }

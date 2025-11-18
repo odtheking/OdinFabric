@@ -44,7 +44,7 @@ object ModuleManager {
 
         // render
         ClickGUIModule, Camera, Etherwarp, PlayerSize, PerformanceHUD, RenderOptimizer,
-        PlayerDisplay, Waypoints, HidePlayers, CustomHighlight,
+        PlayerDisplay, Waypoints, HidePlayers, Highlight,
 
         //skyblock
         ChatCommands, NoCursorReset, Ragnarock, SpringBoots, WardrobeKeybinds, PetKeybinds, AutoSprint,

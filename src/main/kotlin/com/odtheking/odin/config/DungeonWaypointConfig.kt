@@ -1,9 +1,6 @@
 package com.odtheking.odin.config
 
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonDeserializationContext
-import com.google.gson.JsonDeserializer
-import com.google.gson.JsonElement
+import com.google.gson.*
 import com.google.gson.reflect.TypeToken
 import com.odtheking.odin.OdinMod
 import com.odtheking.odin.OdinMod.mc
@@ -25,7 +22,7 @@ import kotlin.io.encoding.Base64
 
 object DungeonWaypointConfig {
     private val gson = GsonBuilder()
-        .registerTypeAdapter(AABB::class.java, BoxDeserializer())
+        .registerTypeAdapter(AABB::class.java, AABBSerializer())
         .registerTypeAdapter(DungeonWaypoint::class.java, DungeonWaypointDeserializer())
         .setPrettyPrinting().create()
 
@@ -137,7 +134,7 @@ object DungeonWaypointConfig {
         }
     }
 
-    private class BoxDeserializer : JsonDeserializer<AABB> {
+    private class AABBSerializer : JsonSerializer<AABB>, JsonDeserializer<AABB> {
         override fun deserialize(json: JsonElement, type: Type, context: JsonDeserializationContext): AABB {
             val jsonObj = json.asJsonObject
 
@@ -148,6 +145,17 @@ object DungeonWaypointConfig {
                 val maxX = jsonObj["maxX"].asDouble
                 val maxY = jsonObj["maxY"].asDouble
                 val maxZ = jsonObj["maxZ"].asDouble
+
+                return AABB(minX, minY, minZ, maxX, maxY, maxZ)
+            }
+
+            if (jsonObj.has("field_1323")) {
+                val minX = jsonObj["field_1323"].asDouble
+                val minY = jsonObj["field_1322"].asDouble
+                val minZ = jsonObj["field_1321"].asDouble
+                val maxX = jsonObj["field_1320"].asDouble
+                val maxY = jsonObj["field_1325"].asDouble
+                val maxZ = jsonObj["field_1324"].asDouble
 
                 return AABB(minX, minY, minZ, maxX, maxY, maxZ)
             }
@@ -164,6 +172,18 @@ object DungeonWaypointConfig {
             }
 
             return AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        }
+
+        override fun serialize(src: AABB, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement {
+            val jsonObject = JsonObject()
+            jsonObject.addProperty("minX", src.minX)
+            jsonObject.addProperty("minY", src.minY)
+            jsonObject.addProperty("minZ", src.minZ)
+            jsonObject.addProperty("maxX", src.maxX)
+            jsonObject.addProperty("maxY", src.maxY)
+            jsonObject.addProperty("maxZ", src.maxZ)
+
+            return jsonObject
         }
     }
 }
