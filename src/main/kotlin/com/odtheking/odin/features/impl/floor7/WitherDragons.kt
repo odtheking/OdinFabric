@@ -11,16 +11,13 @@ import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
-import com.odtheking.odin.utils.Colors
-import com.odtheking.odin.utils.PersonalBest
+import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.handlers.TickTask
-import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
-import com.odtheking.odin.utils.toFixed
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket
@@ -39,8 +36,8 @@ object WitherDragons : Module(
     private val hud by HUD("Dragon Timer HUD", "Displays the dragon timer in the HUD.") { example ->
         if (example) textDim("§5P §a4.5s", 0, 0, Colors.WHITE)
         else {
-            priorityDragon.takeIf { it != WitherDragonsEnum.None }?.let { dragon ->
-                if (dragon.state != WitherDragonState.SPAWNING || dragon.timeToSpawn <= 0) return@HUD 0 to 0
+            priorityDragon?.let { dragon ->
+                if (dragon.timeToSpawn <= 0) return@HUD 0 to 0
                 textDim("§${dragon.colorCode}${dragon.name.first()}: ${getDragonTimer(dragon.timeToSpawn)}", 0, 0, Colors.WHITE)
             } ?: (0 to 0)
         }
@@ -70,8 +67,7 @@ object WitherDragons : Module(
     val paulBuff by BooleanSetting("Paul Buff", false, desc = "Multiplies the power in your run by 1.25.").withDependency { dragonPriorityToggle && dragonPriorityDropDown }
 
     val witherKingRegex = Regex("^\\[BOSS] Wither King: (Oh, this one hurts!|I have more of those\\.|My soul is disposable\\.)$")
-    private var dragonEntities = emptyList<EnderDragon>()
-    var priorityDragon = WitherDragonsEnum.None
+    var priorityDragon: WitherDragonsEnum? = null
     var currentTick = 0L
 
     val dragonPBs = PersonalBest(this, "DragonPBs")
@@ -95,33 +91,31 @@ object WitherDragons : Module(
 
         on<ChatPacketEvent> {
             if (DungeonUtils.getF7Phase() != M7Phases.P5 || !witherKingRegex.matches(value)) return@on
-            if (DragonCheck.lastDragonDeath == WitherDragonsEnum.None) return@on
-            if (sendNotification) modMessage("§${DragonCheck.lastDragonDeath.colorCode}${DragonCheck.lastDragonDeath.name} dragon counts.")
-            DragonCheck.lastDragonDeath = WitherDragonsEnum.entries.find { it.state == WitherDragonState.ALIVE } ?: WitherDragonsEnum.None
+            (DragonCheck.lastDragonDeath ?: WitherDragonsEnum.entries.find { it.state == WitherDragonState.ALIVE })
+                ?.apply {
+                    if (sendNotification) modMessage("§${colorCode}${name} dragon counts.")
+                    setDead()
+                }
         }
 
         TickTask(0, true) {
-            WitherDragonsEnum.entries.forEach { if (it.state == WitherDragonState.SPAWNING && it.timeToSpawn > 0) it.timeToSpawn-- }
-            dragonEntities = mc.level?.entitiesForRendering()?.filterIsInstance<EnderDragon>().orEmpty()
+            WitherDragonsEnum.entries.forEach { if (it.timeToSpawn > 0) it.timeToSpawn-- }
             currentTick++
         }
 
         on<RenderEvent.Last> {
             if (DungeonUtils.getF7Phase() != M7Phases.P5) return@on
 
-            if (dragonHealth) {
-                dragonEntities.forEach { dragon ->
-                    if (dragon.isAlive) {
-                        context.drawText(
-                            Component.literal(colorHealth(dragon.health)).visualOrderText,
-                            dragon.position(), 5f, false
-                        )
-                    }
-                }
-            }
-
             WitherDragonsEnum.entries.forEach { dragon ->
-                if (dragonTimer && dragon.state == WitherDragonState.SPAWNING && dragon.timeToSpawn > 0) {
+                val entity = mc.level?.getEntity(dragon.entityUUID ?: return@forEach) as? EnderDragon ?: return@forEach
+                if (dragonHealth && entity.isAlive) {
+                    context.drawText(
+                        Component.literal(colorHealth(dragon.health)).visualOrderText,
+                        entity.renderPos, 5f, false
+                    )
+                }
+
+                if (dragonTimer && dragon.timeToSpawn > 0) {
                     context.drawText(
                         Component.literal("§${dragon.colorCode}${dragon.name.first()}: ${getDragonTimer(dragon.timeToSpawn)}").visualOrderText,
                         dragon.spawnPos.center, 5f, false

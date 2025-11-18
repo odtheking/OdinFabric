@@ -106,22 +106,14 @@ val devCommand = Commodore("oddev") {
     }
 
     literal("dragons").runs {
-        WitherDragonsEnum.entries.filter { it != WitherDragonsEnum.None }.forEach { dragon ->
+        WitherDragonsEnum.entries.forEach { dragon ->
             val stateInfo = buildString {
                 when (dragon.state) {
                     WitherDragonState.ALIVE -> {
                         append("§a✓ ALIVE")
-                        dragon.entity?.let { entity ->
-                            val hp = entity.health.toInt()
-                            val maxHp = entity.maxHealth.toInt()
-                            val hpPercent = (hp * 100 / maxHp)
-                            val hpColor = when {
-                                hpPercent > 66 -> "§a"
-                                hpPercent > 33 -> "§e"
-                                else -> "§c"
-                            }
-                            append(" §8│ ${hpColor}${hp}§7/${hpColor}${maxHp}§8 (${hpColor}${hpPercent}%§8)")
-                        }
+
+                        append(" §8│ Health: (${dragon.health}§8)")
+
                     }
                     WitherDragonState.SPAWNING -> append("§e⚡ SPAWNING")
                     WitherDragonState.DEAD -> append("§7✗ DEAD")
@@ -135,12 +127,6 @@ val devCommand = Commodore("oddev") {
                 if (dragon.timesSpawned > 0) append(" §8│ §7Spawned: §fx${dragon.timesSpawned}")
             }
 
-            val entityInfo = buildString {
-                dragon.entityId?.let { id ->
-                    append(" §8│ §7ID: §f$id")
-                }
-            }
-
             val flags = buildString {
                 val flagList = mutableListOf<String>()
                 if (WitherDragons.priorityDragon == dragon) flagList.add("§6§l➤ PRIORITY")
@@ -151,7 +137,7 @@ val devCommand = Commodore("oddev") {
                 }
             }
 
-            modMessage("§${dragon.colorCode}§l${dragon.name.padEnd(7)}§r $stateInfo$spawnInfo$entityInfo$flags")
+            modMessage("§${dragon.colorCode}§l${dragon.name.padEnd(7)}§r $stateInfo$spawnInfo$flags")
         }
     }
 

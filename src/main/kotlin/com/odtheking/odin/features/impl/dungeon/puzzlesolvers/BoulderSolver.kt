@@ -5,7 +5,6 @@ import com.google.gson.reflect.TypeToken
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.utils.Color
-import com.odtheking.odin.utils.equalsOneOf
 import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
@@ -18,7 +17,7 @@ import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 
 object BoulderSolver {
-    private data class BoxPosition(val render: BlockPos, val click: BlockPos)
+    private data class BoxPosition(val render: AABB, val click: BlockPos)
     private var currentPositions = mutableListOf<BoxPosition>()
     private var solutions: Map<String, List<List<Int>>>
     private val gson = GsonBuilder().setPrettyPrinting().create()
@@ -46,22 +45,21 @@ object BoulderSolver {
         currentPositions = solutions[str]?.map { sol ->
             val render = getRealCoords(BlockPos(sol[0], 65, sol[1]))
             val click = getRealCoords(BlockPos(sol[2], 65, sol[3]))
-            BoxPosition(render, click)
+            BoxPosition(AABB(render), click)
         }?.toMutableList() ?: return
     }
 
     fun onRenderWorld(context: WorldRenderContext, showAllBoulderClicks: Boolean, boulderStyle: Int, boulderColor: Color) {
         if (DungeonUtils.currentRoomName != "Boulder" || currentPositions.isEmpty()) return
         if (showAllBoulderClicks) currentPositions.forEach {
-            context.drawStyledBox(AABB(it.render), boulderColor, boulderStyle, false)
+            context.drawStyledBox(it.render, boulderColor, boulderStyle, false)
         } else currentPositions.firstOrNull()?.let {
-            context.drawStyledBox(AABB(it.render), boulderColor, boulderStyle, false)
+            context.drawStyledBox(it.render, boulderColor, boulderStyle, false)
         }
     }
 
     fun playerInteract(event: ServerboundUseItemOnPacket) {
-        if (mc.level?.getBlockState(event.hitResult.blockPos).equalsOneOf(Blocks.OAK_SIGN, Blocks.STONE_BUTTON))
-            currentPositions.remove(currentPositions.firstOrNull { it.click == event.hitResult.blockPos })
+        currentPositions.remove(currentPositions.firstOrNull { it.click == event.hitResult.blockPos })
     }
 
     fun reset() {

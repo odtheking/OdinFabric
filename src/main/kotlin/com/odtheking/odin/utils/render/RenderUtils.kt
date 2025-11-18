@@ -56,7 +56,7 @@ fun WorldRenderContext.drawLine(points: Collection<Vec3>, color: Color, depth: B
     bufferSource.endBatch(layer)
 }
 
-fun WorldRenderContext.drawWireFrameBox(aabb: AABB, color: Color, thickness: Float = 5f, depth: Boolean = false) {
+fun WorldRenderContext.drawWireFrameBox(aabb: AABB, color: Color, thickness: Float = 6f, depth: Boolean = false) {
     val matrix = matrixStack() ?: return
     val bufferSource = consumers() as? MultiBufferSource.BufferSource ?: return
     val layer = if (depth) CustomRenderLayer.LINE_LIST else CustomRenderLayer.LINE_LIST_ESP

@@ -585,6 +585,7 @@
     "name": "Logs",
     "type": "NORMAL",
     "cores": [
+      1783642819
     ],
     "secrets": 4
   },
@@ -1127,7 +1128,8 @@
     "name": "Steps",
     "type": "NORMAL",
     "cores": [
-      755816704
+      755816704,
+      -340486787
     ],
     "crypts": 1,
     "secrets": 1
