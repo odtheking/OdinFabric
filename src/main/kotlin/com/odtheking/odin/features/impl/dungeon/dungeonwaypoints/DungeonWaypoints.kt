@@ -86,8 +86,16 @@ object DungeonWaypoints : Module(
             SecretWaypoints.onEtherwarp(this)
         }
 
-        on<SecretPickupEvent> {
-            if (!allowEdits) SecretWaypoints.onSecret(this)
+        on<SecretPickupEvent.Bat> {
+            SecretWaypoints.onSecret(this)
+        }
+
+        on<SecretPickupEvent.Item> {
+            SecretWaypoints.onSecret(this)
+        }
+
+        on<SecretPickupEvent.Interact> {
+            SecretWaypoints.onSecret(this)
         }
 
         on<RoomEnterEvent> {
@@ -121,7 +129,7 @@ object DungeonWaypoints : Module(
         }
 
         on<InputEvent> {
-            if (!allowEdits || key.value != GLFW.GLFW_MOUSE_BUTTON_RIGHT || mc.screen != null) return@on
+            if (key.value != GLFW.GLFW_MOUSE_BUTTON_RIGHT || mc.screen != null) return@on
             val room = DungeonUtils.currentRoom ?: return@on
             mc.player?.mainHandItem?.isEtherwarpItem()?.let { item ->
                 Etherwarp.getEtherPos(mc.player?.position(), 56.0 + item.getInt("tuned_transmission").orElse(0))
@@ -131,6 +139,7 @@ object DungeonWaypoints : Module(
                     lastEtherPos = it.pos
                 }
             }
+            if (!allowEdits) return@on
             val pos = reachPosition ?: return@on
             val blockPos = room.getRelativeCoords(pos)
 
@@ -185,10 +194,7 @@ object DungeonWaypoints : Module(
         waypoints = mutableSetOf<DungeonWaypoint>().apply {
             DungeonWaypointConfig.waypoints[data.name]?.let { waypoints ->
                 addAll(waypoints.map { waypoint ->
-                    DungeonWaypoint(
-                        getRealCoords(waypoint.blockPos), waypoint.color, waypoint.filled, waypoint.depth,
-                        waypoint.aabb, waypoint.title, waypoint.type
-                    )
+                    waypoint.copy(blockPos = getRealCoords(waypoint.blockPos))
                 })
             }
         }

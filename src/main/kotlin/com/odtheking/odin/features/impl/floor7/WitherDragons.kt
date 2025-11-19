@@ -91,10 +91,11 @@ object WitherDragons : Module(
 
         on<ChatPacketEvent> {
             if (DungeonUtils.getF7Phase() != M7Phases.P5 || !witherKingRegex.matches(value)) return@on
-            (DragonCheck.lastDragonDeath ?: WitherDragonsEnum.entries.find { it.state == WitherDragonState.ALIVE })
+            (DragonCheck.lastDragonDeath ?: WitherDragonsEnum.entries.find { it.state != WitherDragonState.DEAD })
                 ?.apply {
                     if (sendNotification) modMessage("§${colorCode}${name} dragon counts.")
                     if (state != WitherDragonState.DEAD) setDead()
+                    DragonCheck.lastDragonDeath = null
                 }
         }
 

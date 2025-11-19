@@ -29,7 +29,8 @@ object Highlight : Module(
     private val renderStyle by SelectorSetting("Render Style", "Outline", listOf("Filled", "Outline", "Filled Outline"), desc = "Style of the box.")
     private val hideNonNames by BooleanSetting("Hide non-starred names", true, desc = "Hides names of entities that are not starred.")
 
-    private val starredRegex = Regex("^(?:.* )?✯ .+ .*❤$")
+    // https://regex101.com/r/QQf502/1
+    private val starredRegex = Regex("^.*✯ .*\\d{1,3}(?:,\\d{3})*(?:\\.\\d+)?(?:[kM])?❤$")
     private const val DEFAULT_STAND_NAME = "Armor Stand"
     private val entities = mutableSetOf<Entity>()
 
@@ -37,17 +38,20 @@ object Highlight : Module(
         on<TickEvent.End> {
             if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
 
+            val entitiesToRemove = mutableListOf<Entity>()
             mc.level?.entitiesForRendering()?.forEach { e ->
                 val entity = e ?: return@forEach
                 val entityName = mc.level?.getEntity(entity.id)?.takeIf { entity.isAlive }?.name?.string?.noControlCodes ?: return@forEach
 
-                if (hideNonNames && entity is ArmorStand && (entityName == DEFAULT_STAND_NAME || !starredRegex.matches(entityName)) )
-                     entity.remove(Entity.RemovalReason.DISCARDED)
+                if (hideNonNames && entity is ArmorStand && entity.isInvisible && entityName != DEFAULT_STAND_NAME && !starredRegex.matches(entityName))
+                    entitiesToRemove.add(entity)
 
                 if (entity !is ArmorStand || entityName == DEFAULT_STAND_NAME || !starredRegex.matches(entityName)) return@forEach
+
                 mc.level?.getEntities(entity, entity.boundingBox.move(0.0, -1.0, 0.0)) { isValidEntity(it) }
                     ?.firstOrNull()?.let { entities.add(it) }
             }
+            entitiesToRemove.forEach { it.remove(Entity.RemovalReason.DISCARDED) }
             entities.removeIf { entity -> !entity.isAlive }
         }
 

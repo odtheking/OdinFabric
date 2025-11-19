@@ -63,6 +63,7 @@ enum class WitherDragonsEnum(
     fun setDead() {
         state = WitherDragonState.DEAD
         entityUUID = null
+        lastDragonDeath = this
 
         if (priorityDragon == this) priorityDragon = null
 
