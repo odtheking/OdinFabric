@@ -9,13 +9,13 @@ import java.util.concurrent.ConcurrentHashMap
 object EventBus {
 
     @JvmField
-    internal val listenerArrays = ConcurrentHashMap<Class<out Event>, Array<ListenerEntry<*>>>()
+    internal val listenerArrays = mutableMapOf<Class<out Event>, Array<ListenerEntry<*>>>()
+    @JvmField
+    internal val activeSubscribers = mutableSetOf<Any>()
+    @JvmField
+    internal val subscriberClasses = mutableMapOf<Any, Class<*>>()
     @JvmField
     internal val invokers = ConcurrentHashMap<Class<out Event>, Invoker>()
-    @JvmField
-    internal val activeSubscribers = ConcurrentHashMap.newKeySet<Any>()
-    @JvmField
-    internal val subscriberClasses = ConcurrentHashMap<Any, Class<*>>()
 
     fun subscribe(subscriber: Any) {
         if (activeSubscribers.add(subscriber)) {
@@ -51,10 +51,9 @@ object EventBus {
         val subscriberName = subscriber.simpleName ?: "Unknown"
         val entry = ListenerEntry(subscriber, EventListener(priority, ignoreCancelled, subscriberName, handler))
 
-        val newArray = listenerArrays.compute(eventClass) { _, current ->
-            val existing = current ?: emptyArray()
-            (existing + entry).sortedByDescending { it.listener.priority }.toTypedArray()
-        } ?: return
+        val existing = listenerArrays[eventClass] ?: emptyArray()
+        val newArray = (existing + entry).sortedByDescending { it.listener.priority }.toTypedArray()
+        listenerArrays[eventClass] = newArray
 
         rebuildInvoker(eventClass, newArray)
     }
@@ -93,7 +92,7 @@ object EventBus {
         val subscriberName: String,
         val handler: (T) -> Unit
     ) {
-        inline fun invoke(event: T) {
+        fun invoke(event: T) {
             if (!ignoreCancelled || event !is CancellableEvent || !event.isCancelled)
                 handler(event)
         }

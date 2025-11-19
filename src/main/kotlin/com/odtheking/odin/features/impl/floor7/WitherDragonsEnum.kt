@@ -10,7 +10,6 @@ import com.odtheking.odin.features.impl.floor7.WitherDragons.sendSpawning
 import com.odtheking.odin.features.impl.floor7.WitherDragons.sendTime
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Colors
-import com.odtheking.odin.utils.handlers.LimitedTickTask
 import com.odtheking.odin.utils.modMessage
 import net.minecraft.core.BlockPos
 import net.minecraft.core.particles.ParticleTypes
@@ -41,11 +40,12 @@ enum class WitherDragonsEnum(
     Purple(BlockPos(56, 14, 125), AABB(45.5, 13.0, 113.5, 68.5, 23.0, 136.5), '5', Colors.MINECRAFT_DARK_PURPLE, 53.0..59.0, 122.0..128.0, skipKillTime = 38);
 
     fun setAlive(entityId: UUID?) {
+        if (entityId != null) this.entityUUID = entityId
+
+        if (state == WitherDragonState.ALIVE) return
         state = WitherDragonState.ALIVE
 
-        timeToSpawn = 100
         timesSpawned++
-        this.entityUUID = entityId
         spawnedTime = currentTick
         isSprayed = false
 
@@ -126,9 +126,7 @@ fun handleSpawnPacket(particle: ClientboundLevelParticlesPacket) {
         if (sendSpawning && WitherDragons.enabled) modMessage("§${dragon.colorCode}$dragon §fdragon is spawning.")
 
         dragon.state = WitherDragonState.SPAWNING
-        LimitedTickTask(100, 1, true) {
-            if (dragon.state == WitherDragonState.SPAWNING) dragon.setAlive(null)
-        }
+        dragon.timeToSpawn = 100
         dragons.add(dragon)
         newSpawned to dragons
     }

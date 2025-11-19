@@ -136,28 +136,33 @@ object ExtraStats : Module(
         val defeatedText = if (extraStats.bossKilled == null) "§c§lFAILED §a- §e${DungeonUtils.dungeonTime}"
         else "§aDefeated §c${extraStats.bossKilled} §ain §e${DungeonUtils.dungeonTime}${if (extraStats.timePB) " §d§l(NEW RECORD!)" else ""}"
 
-        modMessage(getChatBreak(), "")
-        modMessage("", "")
-        modMessage(getCenteredText((if (DungeonUtils.floor?.isMM == true) "§cMaster Mode" else "§cThe Catacombs") + " §r- §e${DungeonUtils.floor?.name}"), "")
-        modMessage("", "")
-        modMessage(getCenteredText(defeatedText), "")
-        modMessage(getCenteredText("§aScore: §6${extraStats.score} §a(§b${extraStats.scoreLetter}§a)${if (extraStats.scorePB) " §d§l(NEW RECORD!)" else ""}${if (extraStats.bits != null && showBits) "    §b${extraStats.bits}" else ""}"), "")
+        val passedRoomsText = "Passed rooms: \n${DungeonUtils.passedRooms.joinToString("\n") { room -> "§a${room.data.name}" }}"
+
+        val message = Component.literal(getChatBreak()).withStyle {
+            it.withHoverEvent(HoverEvent.ShowText(Component.literal(passedRoomsText)))
+        }   .append("\n\n")
+            .append(getCenteredText((if (DungeonUtils.floor?.isMM == true) "§cMaster Mode" else "§cThe Catacombs") + " §r- §e${DungeonUtils.floor?.name}"))
+            .append("\n\n")
+            .append(getCenteredText(defeatedText))
+            .append("\n")
+            .append(getCenteredText("§aScore: §6${extraStats.score} §a(§b${extraStats.scoreLetter}§a)${if (extraStats.scorePB) " §d§l(NEW RECORD!)" else ""}${if (extraStats.bits != null && showBits) "    §b${extraStats.bits}" else ""}"))
+            .append("\n")
 
         val xpText = "${extraStats.xp.firstOrNull() ?: ""}${if (showClassEXP) "  ${extraStats.xp.getOrNull(1) ?: ""}" else ""}"
-        modMessage(
+        message.append(
             Component.literal(getCenteredText(xpText)).withStyle {
                 it.withClickEvent(ClickEvent.SuggestCommand(extraStats.xp.joinToString("\n")))
                     .withHoverEvent(HoverEvent.ShowText(Component.literal(extraStats.xp.joinToString("\n"))))
-            }, ""
-        )
+            }
+        ).append("\n")
 
         if (showCombatStats) {
-            modMessage(
+            message.append(
                 Component.literal(getCenteredText("§e${extraStats.damage}§r-§b${extraStats.enemyKill}§r-§a${extraStats.heal}")).withStyle {
                     it.withClickEvent(ClickEvent.SuggestCommand(extraStats.combatStats.joinToString("\n")))
                         .withHoverEvent(HoverEvent.ShowText(Component.literal(extraStats.combatStats.joinToString("\n"))))
-                }, ""
-            )
+                }
+            ).append("\n")
         }
 
         if (teamStats != 0) {
@@ -167,32 +172,33 @@ object ExtraStats : Module(
                 3 -> "§b${extraStats.secretsFound}§r-§c${extraStats.deaths} §r/ §b${DungeonUtils.secretCount}§r-§6${DungeonUtils.cryptCount}§r-§c${DungeonUtils.deathCount}" // Both
                 else -> ""
             }
-            modMessage(
+            message.append(
                 Component.literal(getCenteredText(statsText)).withStyle {
                     it.withClickEvent(ClickEvent.SuggestCommand(extraStats.skillStats.joinToString("\n")))
                         .withHoverEvent(HoverEvent.ShowText(Component.literal(extraStats.skillStats.joinToString("\n"))))
-                }, ""
-            )
+                }
+            ).append("\n")
         }
 
         if (showTeammates) {
-            modMessage(
+            message.append(
                 getCenteredText(
                     if (DungeonUtils.dungeonTeammatesNoSelf.isNotEmpty())
                         DungeonUtils.dungeonTeammatesNoSelf.joinToString(separator = "§r, ") { "§${it.clazz.colorCode}${it.name}" }
                     else "§3Solo"
-                ), ""
-            )
+                )
+            ).append("\n")
         }
-        modMessage("", "")
 
-        val passedRoomsText = "Passed rooms: \n${DungeonUtils.passedRooms.joinToString("\n") { room -> "§a${room.data.name}" }}"
-        modMessage(
-            Component.literal(getChatBreak()).withStyle {
-                it.withClickEvent(ClickEvent.SuggestCommand(passedRoomsText))
-                    .withHoverEvent(HoverEvent.ShowText(Component.literal(passedRoomsText)))
-            }, ""
-        )
+        message.append("\n")
+            .append(
+                Component.literal(getChatBreak()).withStyle {
+                    it.withClickEvent(ClickEvent.SuggestCommand(passedRoomsText))
+                        .withHoverEvent(HoverEvent.ShowText(Component.literal(passedRoomsText)))
+                }
+            )
+
+        modMessage(message, "")
     }
 
     private data class PostDungeonStats(

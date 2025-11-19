@@ -9,6 +9,7 @@ import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onSend
 import com.odtheking.odin.features.impl.floor7.TerminalSounds
 import com.odtheking.odin.utils.handlers.LimitedTickTask
+import com.odtheking.odin.utils.playSoundAtPlayer
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
@@ -127,7 +128,7 @@ open class TermSimGUI(
     }
 
     protected fun playTermSimSound() {
-        if (!TerminalSounds.enabled || !TerminalSounds.clickSounds) mc.player?.playSound(
+        if (!TerminalSounds.enabled || !TerminalSounds.clickSounds) playSoundAtPlayer(
             SoundEvents.EXPERIENCE_ORB_PICKUP,
             1f, 1f
         )

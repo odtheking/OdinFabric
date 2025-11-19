@@ -94,12 +94,15 @@ object WitherDragons : Module(
             (DragonCheck.lastDragonDeath ?: WitherDragonsEnum.entries.find { it.state == WitherDragonState.ALIVE })
                 ?.apply {
                     if (sendNotification) modMessage("§${colorCode}${name} dragon counts.")
-                    setDead()
+                    if (state != WitherDragonState.DEAD) setDead()
                 }
         }
 
         TickTask(0, true) {
-            WitherDragonsEnum.entries.forEach { if (it.timeToSpawn > 0) it.timeToSpawn-- }
+            WitherDragonsEnum.entries.forEach {
+                if (it.timeToSpawn > 0) it.timeToSpawn--
+                else if (it.state == WitherDragonState.SPAWNING) it.setAlive(null)
+            }
             currentTick++
         }
 
