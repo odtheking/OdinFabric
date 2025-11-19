@@ -102,7 +102,8 @@ open class TermSimGUI(
 //        event.isCanceled = true
 //     }
 
-    private fun delaySlotClick(slot: Slot, button: Int) {
+    private fun delaySlotClick(slot: Slot?, button: Int) {
+        if (slot == null) return
         if (mc.screen == StartGUI) return slotClick(slot, button)
         if (!doesAcceptClick || slot.container != inv || slot.item?.item == Items.BLACK_STAINED_GLASS_PANE) return
         doesAcceptClick = false
@@ -113,7 +114,7 @@ open class TermSimGUI(
         }
     }
 
-    override fun slotClicked(slot: Slot, slotId: Int, button: Int, actionType: ClickType) {
+    override fun slotClicked(slot: Slot?, slotId: Int, button: Int, actionType: ClickType) {
         delaySlotClick(slot, button)
     }
 
