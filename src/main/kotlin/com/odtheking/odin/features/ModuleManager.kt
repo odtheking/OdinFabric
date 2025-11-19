@@ -36,15 +36,15 @@ object ModuleManager {
         // dungeon
         PuzzleSolvers, BlessingDisplay, LeapMenu, SecretClicked, MapInfo, Mimic, WarpCooldown, KeyHighlight, BloodCamp,
         PositionalMessages, TerracottaTimer, DungeonRequeue, BreakerDisplay, LividSolver, InvincibilityTimer, SpiritBear,
-        DungeonWaypoints,
+        DungeonWaypoints, ExtraStats,
 
         // floor 7
         TerminalSimulator, TerminalSolver, TerminalTimes, TerminalSounds, TickTimers, ArrowAlign, InactiveWaypoints,
-        WitherDragons,
+        MelodyMessage, WitherDragons,
 
         // render
         ClickGUIModule, Camera, Etherwarp, PlayerSize, PerformanceHUD, RenderOptimizer,
-        PlayerDisplay, Waypoints, HidePlayers, CustomHighlight,
+        PlayerDisplay, Waypoints, HidePlayers, Highlight,
 
         //skyblock
         ChatCommands, NoCursorReset, Ragnarock, SpringBoots, WardrobeKeybinds, PetKeybinds, AutoSprint,

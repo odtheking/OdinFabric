@@ -1,6 +1,5 @@
 package com.odtheking.odin.features.impl.floor7
 
-import com.odtheking.mixin.accessors.AbstractContainerScreenAccessor
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.ActionSetting
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
@@ -39,12 +38,12 @@ object TerminalSounds : Module(
 
     init {
         on<TerminalEvent.Solved> {
-            if (shouldReplaceSounds && (!completeSounds && !clickSounds)) mc.player?.playSound(SoundEvents.NOTE_BLOCK_PLING.value(), 8f, 4f)
+            if (shouldReplaceSounds && (!completeSounds && !clickSounds)) playSoundAtPlayer(SoundEvents.NOTE_BLOCK_PLING.value(), 8f, 4f)
             else if (shouldReplaceSounds && completeSounds && !clickSounds) playCompleteSound()
         }
 
-        on<GuiEvent.MouseClick> {
-            if (shouldReplaceSounds) playSoundForSlot((screen as AbstractContainerScreenAccessor).hoveredSlot?.index ?: return@on, click.button())
+        on<GuiEvent.SlotClick> {
+            if (shouldReplaceSounds) playSoundForSlot(slotId, button)
         }
 
         on<GuiEvent.CustomTermGuiClick> {

@@ -49,7 +49,7 @@ val dungeonWaypointsCommand = Commodore("dwp", "dungeonwaypoints") {
 
     literal("depth").runs {
         DungeonWaypoints.depthCheck = !DungeonWaypoints.depthCheck
-        modMessage("Next waypoint will be added with through walls: ${DungeonWaypoints.depthCheck}")
+        modMessage("Next waypoint will be added with depth check: ${DungeonWaypoints.depthCheck}")
     }
 
     literal("color").runs { hex: String ->

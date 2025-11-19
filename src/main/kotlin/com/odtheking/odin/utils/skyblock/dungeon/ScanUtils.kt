@@ -13,7 +13,6 @@ import com.odtheking.odin.utils.devMessage
 import com.odtheking.odin.utils.equalsOneOf
 import com.odtheking.odin.utils.skyblock.Island
 import com.odtheking.odin.utils.skyblock.LocationUtils
-import com.odtheking.odin.utils.skyblock.dungeon.DungeonListener.inBoss
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.*
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
@@ -60,7 +59,7 @@ object ScanUtils {
         on<TickEvent.End> {
             if (mc.level == null || mc.player == null) return@on
 
-            if ((!DungeonUtils.inDungeons && !LocationUtils.currentArea.isArea(Island.SinglePlayer)) || inBoss) {
+            if ((!DungeonUtils.inDungeons && !LocationUtils.currentArea.isArea(Island.SinglePlayer)) || DungeonUtils.inBoss) {
                 currentRoom?.let { RoomEnterEvent(null).postAndCatch() }
                 return@on
             } // We want the current room to register as null if we are not in a dungeon
@@ -74,7 +73,10 @@ object ScanUtils {
                 return@on
             } // We want to use cached rooms instead of scanning it again if we have already passed through it and if we are already in it we don't want to trigger the event
 
-            scanRoom(roomCenter)?.let { room -> if (room.rotation != Rotations.NONE) RoomEnterEvent(room).postAndCatch() }
+            scanRoom(roomCenter)?.let { room -> if (room.rotation != Rotations.NONE) RoomEnterEvent(room).postAndCatch() } ?: run {
+                if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
+                devMessage("Unable to determine room at $roomCenter core: ${getCore(roomCenter)}")
+            }
         }
 
         on<RoomEnterEvent> {

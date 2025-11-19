@@ -34,6 +34,10 @@ inline val String?.noControlCodes: String
 fun String.containsOneOf(vararg options: String, ignoreCase: Boolean = false): Boolean =
     containsOneOf(options.toList(), ignoreCase)
 
+fun String.capitalizeWords(): String = split(" ").joinToString(" ") { word ->
+    word.replaceFirstChar(Char::titlecase)
+}
+
 /**
  * Checks if the current string contains at least one of the specified strings.
  *
@@ -121,10 +125,6 @@ inline val Entity.renderPos: Vec3
     get() =
         Vec3(renderX, renderY, renderZ)
 
-inline val Entity.lastPos: Vec3
-    get() =
-        Vec3(xo, yo, zo)
-
 inline val Entity.renderBoundingBox: AABB
     get() =
         boundingBox.move(renderX - x, renderY - y, renderZ - z)
@@ -161,4 +161,31 @@ fun BlockPos.getBlockBounds() =
 
 fun Player.clickSlot(containerId: Int, slotIndex: Int, button: Int = 0, clickType: ClickType = ClickType.PICKUP) {
     mc.gameMode?.handleInventoryMouseClick(containerId, slotIndex, button, clickType, this)
+}
+
+fun getCenteredText(text: String): String {
+    val strippedText = text.noControlCodes
+    if (strippedText.isEmpty()) return text
+    val textWidth = mc.font.width(strippedText)
+    val chatWidth = mc.gui.chat.width
+
+    if (textWidth >= chatWidth) return text
+
+    val spacesNeeded = ((chatWidth - textWidth) / 2 / 4).coerceAtLeast(0)
+    return " ".repeat(spacesNeeded) + text
+}
+
+fun getChatBreak(): String =
+    mc.gui?.chat?.width?.let {
+        "§9§m" + "-".repeat(it / mc.font.width("-"))
+    } ?: ""
+
+fun formatNumber(numStr: String): String {
+    val num = numStr.replace(",", "").toDoubleOrNull() ?: return numStr
+    return when {
+        num >= 1_000_000_000 -> "%.2fB".format(num / 1_000_000_000)
+        num >= 1_000_000 -> "%.2fM".format(num / 1_000_000)
+        num >= 1_000 -> "%.2fK".format(num / 1_000)
+        else -> "%.0f".format(num)
+    }
 }

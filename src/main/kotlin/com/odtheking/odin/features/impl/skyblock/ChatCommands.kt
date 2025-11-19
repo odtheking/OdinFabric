@@ -7,10 +7,14 @@ import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.MessageSentEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
+import com.odtheking.odin.features.impl.dungeon.DungeonRequeue
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.handlers.LimitedTickTask
 import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.odtheking.odin.utils.skyblock.PartyUtils
+import net.minecraft.network.chat.ClickEvent
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.HoverEvent
 import net.minecraft.sounds.SoundEvents
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -39,6 +43,7 @@ object ChatCommands : Module(
     private val ping by BooleanSetting("Ping", true, desc = "Sends your current Ping.").withDependency { showSettings }
     private val tps by BooleanSetting("Tps", true, desc = "Sends your server's current TPS.").withDependency { showSettings }
     private val fps by BooleanSetting("FPS", true, desc = "Sends your current FPS.").withDependency { showSettings }
+    private val dt by BooleanSetting("DT", true, desc = "Sets a reminder for the end of the run.").withDependency { showSettings }
     private val invite by BooleanSetting("Invite", true, desc = "Invites the player to your party.").withDependency { showSettings }
     private val autoConfirm by BooleanSetting("Auto Confirm", false, desc = "Removes the need to confirm a party invite with the !invite command.").withDependency { showSettings && invite }
     private val racism by BooleanSetting("Racism", false, desc = "Sends a random racism percentage.").withDependency { showSettings }
@@ -51,9 +56,21 @@ object ChatCommands : Module(
 
     // https://regex101.com/r/joY7dm/1
     private val messageRegex = Regex("^(?:Party > (\\[[^]]*?])? ?(\\w{1,16})(?: [ቾ⚒])?: ?(.+)\$|Guild > (\\[[^]]*?])? ?(\\w{1,16})(?: \\[([^]]*?)])?: ?(.+)\$|From (\\[[^]]*?])? ?(\\w{1,16}): ?(.+)\$)")
+    private val endRunRegex = Regex(" {29}> EXTRA STATS <|^\\[NPC] Elle: Good job everyone. A hard fought battle come to an end. Let's get out of here before we run into any more trouble!$")
+    private val dtReason = mutableListOf<Pair<String, String>>()
 
     init {
         on<ChatPacketEvent> {
+            if (value.matches(endRunRegex)) {
+                if (!dt || dtReason.isEmpty()) return@on
+                LimitedTickTask(30, 1) {
+                    dtReason.find { it.first == mc.player?.name?.string }?.let { sendCommand("pc Downtime needed: ${it.second}") }
+                    modMessage("DT Reasons: ${dtReason.groupBy({ it.second }, { it.first }).entries.joinToString(", ") { (reason, names) -> "${names.joinToString(", ")}: $reason" }}")
+                    alert("§cPlayers need DT")
+                    dtReason.clear()
+                }
+            }
+
             val result = messageRegex.find(value) ?: return@on
             val channel = when(result.value.split(" ")[0]) {
                 "From" -> if (!privateChatCommands) return@on else ChatChannel.PRIVATE
@@ -148,11 +165,30 @@ object ChatCommands : Module(
                 sendCommand("odin ${words[0].lowercase()}")
             }
 
+            "downtime", "dt" -> {
+                if (!dt || channel != ChatChannel.PARTY) return
+                val reason = words.drop(1).joinToString(" ").takeIf { it.isNotBlank() } ?: "No reason given"
+                if (dtReason.any { it.first == name }) return modMessage("§6${name} §calready has a reminder!")
+                modMessage("§aReminder set for the end of the run! §7(disabled auto requeue for this run)")
+                dtReason.add(name to reason)
+                DungeonRequeue.disableRequeue = true
+            }
+            "undowntime", "undt" -> {
+                if (!dt || channel != ChatChannel.PARTY) return
+                if (dtReason.none { it.first == name }) return modMessage("§6${name} §chas no reminder set!")
+                modMessage("§aReminder removed!")
+                dtReason.removeIf { it.first == name }
+                if (dtReason.isEmpty()) DungeonRequeue.disableRequeue = false
+            }
+
             // private commands
 
             "invite", "inv" -> if (invite && channel == ChatChannel.PRIVATE) {
                 if (autoConfirm) return sendCommand("p invite $name")
-                modMessage("§aClick on this message to invite $name to your party!", chatStyle = createClickStyle("/party invite $name"))
+                modMessage(Component.literal("§aClick on this message to invite $name to your party!").withStyle {
+                    it.withClickEvent(ClickEvent.RunCommand("/party invite $name"))
+                    .withHoverEvent(HoverEvent.ShowText(Component.literal("§6Click to invite $name to your party.")))
+                })
                 playSoundAtPlayer(SoundEvents.NOTE_BLOCK_PLING.value())
             }
         }

@@ -6,10 +6,10 @@ import com.odtheking.odin.events.EventDispatcher
 import com.odtheking.odin.events.core.EventBus
 import com.odtheking.odin.features.ModuleManager
 import com.odtheking.odin.utils.ServerUtils
-import com.odtheking.odin.utils.handlers.MobCaches
 import com.odtheking.odin.utils.handlers.TickTasks
+import com.odtheking.odin.utils.network.WebUtils.createClient
+import com.odtheking.odin.utils.network.WebUtils.postData
 import com.odtheking.odin.utils.render.ItemStateRenderer
-import com.odtheking.odin.utils.sendDataToServer
 import com.odtheking.odin.utils.skyblock.*
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonListener
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
@@ -17,6 +17,7 @@ import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils
 import com.odtheking.odin.utils.ui.rendering.NVGSpecialRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.rendering.v1.SpecialGuiElementRegistry
@@ -40,19 +41,21 @@ object OdinMod : ClientModInitializer {
     val version: Version by lazy { metadata.version }
     val logger: Logger = LogManager.getLogger("Odin")
 
+    val okClient = createClient()
     val scope = CoroutineScope(SupervisorJob() + EmptyCoroutineContext)
 
     override fun onInitializeClient() {
         ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
             arrayOf(
                 mainCommand, petCommand, devCommand, waypointCommand,
-                highlightCommand, termSimCommand, posMsgCommand, dungeonWaypointsCommand
+                soopyCommand, termSimCommand, posMsgCommand,
+                dungeonWaypointsCommand, cataCommand
             ).forEach { commodore -> commodore.register(dispatcher) }
         }
 
         listOf(
             this, LocationUtils, TickTasks, KuudraUtils,
-            SkyblockPlayer, MobCaches, ServerUtils,
+            SkyblockPlayer, ServerUtils,
             EventDispatcher, ModuleManager, DungeonListener,
             ScanUtils, DungeonUtils, SplitsManager, PartyUtils
         ).forEach { EventBus.subscribe(it) }
@@ -68,6 +71,8 @@ object OdinMod : ClientModInitializer {
         Config.load()
 
         val name = mc.user?.name ?: return
-        sendDataToServer(body = """{"username": "$name", "version": "Fabric $version"}""")
+        scope.launch {
+            postData("https://api.odtheking.com/tele/", """{"username": "$name", "version": "Fabric $version"}""")
+        }
     }
 }

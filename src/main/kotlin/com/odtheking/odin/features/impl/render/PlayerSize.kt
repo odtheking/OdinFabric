@@ -1,12 +1,17 @@
 package com.odtheking.odin.features.impl.render
 
-import com.google.gson.JsonParser
+import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import com.mojang.blaze3d.vertex.PoseStack
 import com.odtheking.odin.OdinMod
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.*
 import com.odtheking.odin.features.Module
-import com.odtheking.odin.utils.*
+import com.odtheking.odin.utils.Color
+import com.odtheking.odin.utils.Colors
+import com.odtheking.odin.utils.modMessage
+import com.odtheking.odin.utils.network.WebUtils.fetchJson
+import com.odtheking.odin.utils.network.WebUtils.postData
 import kotlinx.coroutines.launch
 import net.minecraft.client.renderer.entity.state.AvatarRenderState
 
@@ -23,6 +28,8 @@ object PlayerSize : Module(
     private var showHidden by DropdownSetting("Show Hidden", false).withDependency { isRandom }
     private val passcode by StringSetting("Passcode", "odin", desc = "Passcode for dev features.").withDependency { showHidden && isRandom }
 
+    const val DEV_SERVER = "https://api.odtheking.com/devs/"
+
     private val sendDevData by ActionSetting("Send Dev Data", desc = "Sends dev data to the server.") {
         showHidden = false
         fun valid(v: Float) = (v in 0.8f..1.6f) || (v in -1.0f..-0.8f)
@@ -31,12 +38,13 @@ object PlayerSize : Module(
             return@ActionSetting
         }
         OdinMod.scope.launch {
-            modMessage(
-                sendDataToServer(
-                    body = "${mc.player?.name?.tryCollapseToString()}, [${devWingsColor.red},${devWingsColor.green},${devWingsColor.blue}], [$devSizeX,$devSizeY,$devSizeZ], $devWings, , $passcode",
-                    "https://tj4yzotqjuanubvfcrfo7h5qlq0opcyk.lambda-url.eu-north-1.on.aws/"
-                )
+            val body = buildDevBody(
+                mc.user.name ?: return@launch,
+                devWingsColor, devSizeX, devSizeY,
+                devSizeZ, devWings, " ", passcode
             )
+
+            modMessage(postData(DEV_SERVER, body).getOrNull())
             updateCustomProperties()
         }
     }.withDependency { isRandom }
@@ -46,11 +54,12 @@ object PlayerSize : Module(
     val isRandom get() = randoms.containsKey(mc.user.name)
 
     data class RandomPlayer(
-        val scale: Triple<Float, Float, Float>,
-        val wings: Boolean = false,
-        val wingsColor: Color = Colors.WHITE,
-        val customName: String,
-        val isDev: Boolean
+        @SerializedName("CustomName")   val customName: String?,
+        @SerializedName("DevName")      val name: String,
+        @SerializedName("IsDev")        val isDev: Boolean?,
+        @SerializedName("WingsColor")   val wingsColor: List<Int>,
+        @SerializedName("Size")         val scale: List<Float>,
+        @SerializedName("Wings")        val wings: Boolean
     )
 
     @JvmStatic
@@ -60,46 +69,32 @@ object PlayerSize : Module(
             matrix.scale(devSizeX, devSizeY, devSizeZ)
         }
         if (!randoms.containsKey(entityRenderer.nameTag?.string)) return
-        if (!devSize && entityRenderer.nameTag == mc.player?.name) return
+        if (!devSize && entityRenderer.nameTag?.string == mc.player?.name?.string) return
         val random = randoms[entityRenderer.nameTag?.string] ?: return
-        if (random.scale.second < 0) matrix.translate(0f, random.scale.second * 2, 1f)
-        matrix.scale(random.scale.first, random.scale.second, random.scale.third)
+        if (random.scale[1] < 0) matrix.translate(0f, random.scale[1] * 2, 1f)
+        matrix.scale(random.scale[0], random.scale[1], random.scale[2])
     }
 
-    private val pattern = Regex("Decimal\\('(-?\\d+(?:\\.\\d+)?)'\\)")
-
-    fun updateCustomProperties() {
-        val data =
-            fetchData("https://tj4yzotqjuanubvfcrfo7h5qlq0opcyk.lambda-url.eu-north-1.on.aws/").replace(pattern) { match -> match.groupValues[1] }
-                .ifEmpty { null } ?: return
-        JsonParser.parseString(data)?.asJsonArray?.forEach {
-            val jsonElement = it.asJsonObject
-            val randomsName = jsonElement.get("DevName")?.asString ?: return@forEach
-            val size = jsonElement.get("Size")?.asJsonArray?.let { sizeArray ->
-                Triple(
-                    sizeArray[0].asFloat,
-                    sizeArray[1].asFloat,
-                    sizeArray[2].asFloat
-                )
-            } ?: return@forEach
-            val wings = jsonElement.get("Wings")?.asBoolean == true
-            val wingsColor = jsonElement.get("WingsColor")?.asJsonArray?.let { colorArray ->
-                Color(
-                    colorArray[0].asInt,
-                    colorArray[1].asInt,
-                    colorArray[2].asInt
-                )
-            } ?: Colors.WHITE
-            val customName = jsonElement.get("CustomName")?.asString?.replace("COLOR", "§") ?: ""
-            val isDev = jsonElement.get("IsDev")?.asBoolean ?: false
-            randoms[randomsName] =
-                RandomPlayer(size, wings, Color(wingsColor.red, wingsColor.green, wingsColor.blue), customName, isDev)
-        }
+    suspend fun updateCustomProperties() {
+        val response = fetchJson<Array<RandomPlayer>>("https://api.odtheking.com/devs/").getOrNull() ?: return
+        randoms.putAll(response.associateBy { it.name })
+        modMessage(randoms)
     }
 
     init {
         OdinMod.scope.launch {
             updateCustomProperties()
         }
+    }
+
+    fun buildDevBody(devName: String, wingsColor: Color, sizeX: Float, sizeY: Float, sizeZ: Float, wings: Boolean, customName: String, password: String): String {
+        return Gson().toJson(mapOf(
+            "devName" to devName,
+            "wingsColor" to listOf(wingsColor.red, wingsColor.green, wingsColor.blue),
+            "size" to listOf(sizeX, sizeY, sizeZ),
+            "wings" to wings,
+            "customName" to customName,
+            "password" to password
+        ))
     }
 }

@@ -10,28 +10,27 @@ import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.entity.decoration.ArmorStand
 import net.minecraft.world.item.Items
 import net.minecraft.world.phys.Vec3
-import java.util.concurrent.CopyOnWriteArrayList
 
 object DragonCheck {
 
-    var lastDragonDeath: WitherDragonsEnum = WitherDragonsEnum.None
-    val dragonEntityList = CopyOnWriteArrayList<EnderDragon>()
+    var lastDragonDeath: WitherDragonsEnum? = null
 
     fun dragonUpdate(packet: ClientboundSetEntityDataPacket) {
-        val dragon = WitherDragonsEnum.entries.find { it.entityId == packet.id }?.apply {
-            if (entity == null) updateEntity(packet.id)
-        } ?: return
-
         val entity = mc.level?.getEntity(packet.id) as? EnderDragon ?: return
-        if (entity.health <= 0 && dragon.state != WitherDragonState.DEAD) dragon.setDead()
+
+        WitherDragonsEnum.entries.firstOrNull {
+            mc.level?.getEntity(it.entityUUID ?: return@firstOrNull false)?.id == packet.id
+        }?.apply {
+            health = entity.health
+            if (entity.isDeadOrDying && state != WitherDragonState.DEAD) setDead()
+        }
     }
 
     fun dragonSpawn(packet: ClientboundAddEntityPacket) {
-        if (packet.type != EntityType.ENDER_DRAGON) return
-        WitherDragonsEnum.entries.find {
-            it.aabbDimensions.contains(Vec3(packet.x, packet.y, packet.z)) &&
-            it.state == WitherDragonState.SPAWNING
-        }?.setAlive(packet.id)
+        if (packet.type == EntityType.ENDER_DRAGON)
+            WitherDragonsEnum.entries.find {
+                it.aabbDimensions.contains(Vec3(packet.x, packet.y, packet.z))
+            }?.setAlive(packet.uuid)
     }
 
     fun dragonSprayed(packet: ClientboundSetEquipmentPacket) {
@@ -40,7 +39,7 @@ object DragonCheck {
         val sprayedEntity = mc.level?.getEntity(packet.entity) as? ArmorStand ?: return
 
         WitherDragonsEnum.entries.forEach { dragon ->
-            val entity = dragon.entity ?: return@forEach
+            val entity = mc.level?.getEntity(dragon.entityUUID ?: return@forEach) as? EnderDragon ?: return@forEach
             if (dragon.isSprayed || dragon.state != WitherDragonState.ALIVE || sprayedEntity.distanceTo(entity) > 8) return@forEach
 
             if (WitherDragons.sendSpray) {

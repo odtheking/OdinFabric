@@ -59,7 +59,7 @@ fun RenderEvent.drawLine(points: Collection<Vec3>, color: Color, depth: Boolean,
     bufferSource.endBatch(layer)
 }
 
-fun RenderEvent.drawWireFrameBox(aabb: AABB, color: Color, thickness: Float = 5f, depth: Boolean = false) {
+fun RenderEvent.drawWireFrameBox(aabb: AABB, color: Color, thickness: Float = 6f, depth: Boolean = false) {
     val matrix = context.matrices() ?: return
     val bufferSource = context.consumers() as? MultiBufferSource.BufferSource ?: return
     val layer = if (depth) CustomRenderLayer.LINE_LIST else CustomRenderLayer.LINE_LIST_ESP

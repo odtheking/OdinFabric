@@ -46,7 +46,7 @@ object DungeonWaypoints : Module(
     private val colorPallet by SelectorSetting("Color pallet", "None", arrayListOf("None", "Aqua", "Magenta", "Yellow", "Lime", "Red"), desc = "The color pallet of the next waypoint you place.").withDependency { settingsDropDown }
     var color by ColorSetting("Color", Colors.MINECRAFT_GREEN, true, desc = "The color of the next waypoint you place.").withDependency { colorPallet == 0 && settingsDropDown }
     var filled by BooleanSetting("Filled", false, desc = "If the next waypoint you place should be 'filled'.").withDependency { settingsDropDown }
-    var depthCheck by BooleanSetting("Depth check", false, desc = "Whether the next waypoint you place should be visible through walls.").withDependency { settingsDropDown }
+    var depthCheck by BooleanSetting("Depth check", false, desc = "Whether the next waypoint you place should have a depth check.").withDependency { settingsDropDown }
     var useBlockSize by BooleanSetting("Use block size", true, desc = "Use the size of the block you click for waypoint size.").withDependency { settingsDropDown }
     var size by NumberSetting("Size", 1.0, .1, 1.0, 0.01, desc = "The size of the next waypoint you place.").withDependency { !useBlockSize && settingsDropDown }
 
@@ -86,8 +86,16 @@ object DungeonWaypoints : Module(
             SecretWaypoints.onEtherwarp(this)
         }
 
-        on<SecretPickupEvent> {
-            if (!allowEdits) SecretWaypoints.onSecret(this)
+        on<SecretPickupEvent.Bat> {
+            SecretWaypoints.onSecret(this)
+        }
+
+        on<SecretPickupEvent.Item> {
+            SecretWaypoints.onSecret(this)
+        }
+
+        on<SecretPickupEvent.Interact> {
+            SecretWaypoints.onSecret(this)
         }
 
         on<RoomEnterEvent> {
@@ -121,7 +129,7 @@ object DungeonWaypoints : Module(
         }
 
         on<InputEvent> {
-            if (!allowEdits || key.value != GLFW.GLFW_MOUSE_BUTTON_RIGHT || mc.screen != null) return@on
+            if (key.value != GLFW.GLFW_MOUSE_BUTTON_RIGHT || mc.screen != null) return@on
             val room = DungeonUtils.currentRoom ?: return@on
             mc.player?.mainHandItem?.isEtherwarpItem()?.let { item ->
                 Etherwarp.getEtherPos(mc.player?.position(), 56.0 + item.getInt("tuned_transmission").orElse(0))
@@ -131,6 +139,7 @@ object DungeonWaypoints : Module(
                     lastEtherPos = it.pos
                 }
             }
+            if (!allowEdits) return@on
             val pos = reachPosition ?: return@on
             val blockPos = room.getRelativeCoords(pos)
 
@@ -185,10 +194,7 @@ object DungeonWaypoints : Module(
         waypoints = mutableSetOf<DungeonWaypoint>().apply {
             DungeonWaypointConfig.waypoints[data.name]?.let { waypoints ->
                 addAll(waypoints.map { waypoint ->
-                    DungeonWaypoint(
-                        getRealCoords(waypoint.blockPos), waypoint.color, waypoint.filled, waypoint.depth,
-                        waypoint.aabb, waypoint.title, waypoint.type
-                    )
+                    waypoint.copy(blockPos = getRealCoords(waypoint.blockPos))
                 })
             }
         }

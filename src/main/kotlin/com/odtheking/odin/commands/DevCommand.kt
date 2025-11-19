@@ -6,7 +6,12 @@ import com.odtheking.odin.OdinMod
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.features.ModuleManager.generateFeatureList
+import com.odtheking.odin.features.impl.floor7.WitherDragonState
+import com.odtheking.odin.features.impl.floor7.WitherDragons
+import com.odtheking.odin.features.impl.floor7.WitherDragonsEnum
+import com.odtheking.odin.features.impl.floor7.MelodyMessage.melodyWebSocket
 import com.odtheking.odin.features.impl.nether.NoPre
+import com.odtheking.odin.features.impl.render.ClickGUIModule.webSocketUrl
 import com.odtheking.odin.features.impl.render.PlayerSize
 import com.odtheking.odin.utils.customData
 import com.odtheking.odin.utils.modMessage
@@ -14,7 +19,6 @@ import com.odtheking.odin.utils.sendCommand
 import com.odtheking.odin.utils.setClipboardContent
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.skyblock.LocationUtils
-import com.odtheking.odin.utils.skyblock.SkyblockPlayer
 import com.odtheking.odin.utils.skyblock.Supply
 import com.odtheking.odin.utils.skyblock.dungeon.Blessing
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
@@ -29,17 +33,18 @@ import net.minecraft.world.phys.BlockHitResult
 
 val devCommand = Commodore("oddev") {
 
+    literal("ws") {
+        literal("connect").runs { lobby: String ->
+            melodyWebSocket.connect("${webSocketUrl}${lobby}")
+        }
+    }
+
     literal("getitem").runs {
         modMessage("Item in hand: ${mc.player?.mainHandItem?.customData}")
     }
 
     literal("giveaotv").runs { tuners: Int? ->
         sendCommand("give @p minecraft:diamond_shovel[minecraft:custom_name={\"text\":\"Aspect Of The Void\",\"color\":\"dark_purple\"},minecraft:custom_data={ethermerge:1,\"tuned_transmission\":${tuners ?: 0}}]")
-    }
-
-    literal("debug").runs {
-        modMessage("Hypixel: ${LocationUtils.isOnHypixel}, Skyblock: ${LocationUtils.isInSkyblock}, Area: ${LocationUtils.currentArea.displayName}")
-        modMessage("SkyblockPlayer: ${SkyblockPlayer.currentHealth}/${SkyblockPlayer.maxHealth}❤, ${SkyblockPlayer.currentMana}/${SkyblockPlayer.maxMana}✎, ${SkyblockPlayer.overflowMana}ʬ, ${SkyblockPlayer.currentDefense}❈ Defense, EHP: ${SkyblockPlayer.effectiveHP}")
     }
 
     literal("simulate").runs { greedyString: GreedyString ->
@@ -63,49 +68,94 @@ val devCommand = Commodore("oddev") {
         modMessage("Generated feature list and copied to clipboard.")
     }
 
-    literal("debug").runs { string: String ->
-        modMessage("""
-            |Version: ${OdinMod.version}
-            |Hypixel: ${LocationUtils.isOnHypixel}
-            ${
-            when (string) {
-                "kuudra" -> """
-                        |inKuudra: ${KuudraUtils.inKuudra}, tier: ${KuudraUtils.kuudraTier}, phase: ${KuudraUtils.phase}
-                        |kuudraTeammates: ${KuudraUtils.freshers.map { it.key }}
-                        |giantZombies: ${KuudraUtils.giantZombies.joinToString { it.position().toString() }}
-                        |supplies: ${Supply.entries.joinToString { "${it.name} -> ${it.isActive}" }}
-                        |kuudraEntity: ${KuudraUtils.kuudraEntity}
-                        |builders: ${KuudraUtils.playersBuildingAmount}
-                        |build: ${KuudraUtils.buildDonePercentage}
-                        |buildingPiles: ${KuudraUtils.buildingPiles.joinToString { it.position().toString() }}
-                        |missing: ${NoPre.missing}
-                    """.trimIndent()
-                "dungeon" -> """
-                        |inDungeons: ${DungeonUtils.inDungeons}
-                        |InBoss: ${DungeonUtils.inBoss}
-                        |Floor: ${DungeonUtils.floor?.name}
-                        |Score: ${DungeonUtils.score}
-                        |Secrets: (${DungeonUtils.secretCount} - ${DungeonUtils.neededSecretsAmount} - ${DungeonUtils.totalSecrets} - ${DungeonUtils.knownSecrets}) 
-                        |mimicKilled: ${DungeonUtils.mimicKilled}
-                        |Deaths: ${DungeonUtils.deathCount}, Crypts: ${DungeonUtils.cryptCount}
-                        |BonusScore: ${DungeonUtils.getBonusScore}, isPaul: ${DungeonUtils.isPaul}
-                        |OpenRooms: ${DungeonUtils.openRoomCount}, CompletedRooms: ${DungeonUtils.completedRoomCount} ${DungeonUtils.percentCleared}%, Blood Done: ${DungeonUtils.bloodDone}, Total: ${DungeonUtils.totalRooms}
-                        |Puzzles (${DungeonUtils.puzzleCount}): ${DungeonUtils.puzzles.joinToString { "${it.name} (${it.status.toString()})" }}
-                        |DungeonTime: ${DungeonUtils.dungeonTime}
-                        |currentDungeonPlayer: ${DungeonUtils.currentDungeonPlayer.name}, ${DungeonUtils.currentDungeonPlayer.clazz}, ${DungeonUtils.currentDungeonPlayer.isDead}
-                        |doorOpener: ${DungeonUtils.doorOpener}
-                        |currentRoom: ${DungeonUtils.currentRoom?.data?.name}, roomsPassed: ${DungeonUtils.passedRooms.map { it.data.name }}
-                        |Teammates: ${DungeonUtils.dungeonTeammates.joinToString { "§${it.clazz.colorCode}${it.name} (${it.clazz} [${it.clazzLvl}])§r" }}
-                        |TeammatesNoSelf: ${DungeonUtils.dungeonTeammatesNoSelf.map { it.name }}
-                        |LeapTeammates: ${DungeonUtils.leapTeammates.map { it.name }}
-                        |Blessings: ${Blessing.entries.joinToString { "${it.name}: ${it.current}" }}
-                    """.trimIndent()
-                else -> """
-                        |Current Area: ${LocationUtils.currentArea.displayName}
-                    """.trimIndent()
-            }
+    literal("debug").executable {
+
+        param("type").suggests { setOf("kuudra", "dungeon", "none") }
+
+        runs { type: String ->
+            modMessage(
+                """
+                |Version: ${OdinMod.version}
+                |Hypixel: ${LocationUtils.isOnHypixel}
+                ${
+                    when (type) {
+                        "kuudra" -> """
+                            |inKuudra: ${KuudraUtils.inKuudra}, tier: ${KuudraUtils.kuudraTier}, phase: ${KuudraUtils.phase}
+                            |kuudraTeammates: ${KuudraUtils.freshers.map { it.key }}
+                            |giantZombies: ${KuudraUtils.giantZombies.joinToString { it.position().toString() }}
+                            |supplies: ${Supply.entries.joinToString { "${it.name} -> ${it.isActive}" }}
+                            |kuudraEntity: ${KuudraUtils.kuudraEntity}
+                            |builders: ${KuudraUtils.playersBuildingAmount}
+                            |build: ${KuudraUtils.buildDonePercentage}
+                            |buildingPiles: ${KuudraUtils.buildingPiles.joinToString { it.position().toString() }}
+                            |missing: ${NoPre.missing}
+                        """.trimIndent()
+
+                        "dungeon" -> """
+                            |inDungeons: ${DungeonUtils.inDungeons}
+                            |InBoss: ${DungeonUtils.inBoss}
+                            |Floor: ${DungeonUtils.floor?.name}
+                            |Score: ${DungeonUtils.score}
+                            |Secrets: (${DungeonUtils.secretCount} - ${DungeonUtils.neededSecretsAmount} - ${DungeonUtils.totalSecrets} - ${DungeonUtils.knownSecrets}) 
+                            |mimicKilled: ${DungeonUtils.mimicKilled}
+                            |Deaths: ${DungeonUtils.deathCount}, Crypts: ${DungeonUtils.cryptCount}
+                            |BonusScore: ${DungeonUtils.getBonusScore}, isPaul: ${DungeonUtils.isPaul}
+                            |OpenRooms: ${DungeonUtils.openRoomCount}, CompletedRooms: ${DungeonUtils.completedRoomCount} ${DungeonUtils.percentCleared}%, Blood Done: ${DungeonUtils.bloodDone}, Total: ${DungeonUtils.totalRooms}
+                            |Puzzles (${DungeonUtils.puzzleCount}): ${DungeonUtils.puzzles.joinToString { "${it.name} (${it.status.toString()})" }}
+                            |DungeonTime: ${DungeonUtils.dungeonTime}
+                            |currentDungeonPlayer: ${DungeonUtils.currentDungeonPlayer.name}, ${DungeonUtils.currentDungeonPlayer.clazz}, ${DungeonUtils.currentDungeonPlayer.isDead}
+                            |doorOpener: ${DungeonUtils.doorOpener}
+                            |currentRoom: ${DungeonUtils.currentRoom?.data?.name}, roomsPassed: ${DungeonUtils.passedRooms.map { it.data.name }}
+                            |Teammates: ${DungeonUtils.dungeonTeammates.joinToString { "§${it.clazz.colorCode}${it.name} (${it.clazz} [${it.clazzLvl}])§r" }}
+                            |TeammatesNoSelf: ${DungeonUtils.dungeonTeammatesNoSelf.map { it.name }}
+                            |LeapTeammates: ${DungeonUtils.leapTeammates.map { it.name }}
+                            |Blessings: ${Blessing.entries.joinToString { "${it.name}: ${it.current}" }}
+                        """.trimIndent()
+
+                        else -> """
+                            |Current Area: ${LocationUtils.currentArea.displayName}
+                        """.trimIndent()
+                    }
+                }
+            """.trimIndent(), ""
+            )
         }
-        """.trimIndent(), "")
+    }
+
+    literal("dragons").runs {
+        WitherDragonsEnum.entries.forEach { dragon ->
+            val stateInfo = buildString {
+                when (dragon.state) {
+                    WitherDragonState.ALIVE -> {
+                        append("§a✓ ALIVE")
+
+                        append(" §8│ Health: (${dragon.health}§8)")
+
+                    }
+                    WitherDragonState.SPAWNING -> append("§e⚡ SPAWNING")
+                    WitherDragonState.DEAD -> append("§7✗ DEAD")
+                }
+                append(" §8│ §eIn §f${String.format("%.1f", dragon.timeToSpawn / 20f)}§es")
+            }
+
+
+
+            val spawnInfo = buildString {
+                if (dragon.timesSpawned > 0) append(" §8│ §7Spawned: §fx${dragon.timesSpawned}")
+            }
+
+            val flags = buildString {
+                val flagList = mutableListOf<String>()
+                if (WitherDragons.priorityDragon == dragon) flagList.add("§6§l➤ PRIORITY")
+                if (dragon.isSprayed) flagList.add("§d✓ Sprayed")
+                if (flagList.isNotEmpty()) {
+                    append(" §8│ ")
+                    append(flagList.joinToString(" §8│ "))
+                }
+            }
+
+            modMessage("§${dragon.colorCode}§l${dragon.name.padEnd(7)}§r $stateInfo$spawnInfo$flags")
+        }
     }
 
     literal("roomdata").runs {

@@ -39,7 +39,7 @@ object Etherwarp : Module(
     private val color by ColorSetting("Color", Colors.MINECRAFT_GOLD.withAlpha(.5f), allowAlpha = true, desc = "Color of the box.").withDependency { render }
     private val renderFail by BooleanSetting("Show when failed", true, desc = "Shows the box even when the guess failed.").withDependency { render }
     private val failColor by ColorSetting("Fail Color", Colors.MINECRAFT_RED.withAlpha(.5f), allowAlpha = true, desc = "Color of the box if guess failed.").withDependency { renderFail }
-    private val renderStyle by SelectorSetting("Render Style", "Outline", listOf("Outline", "Filled", "Filled Outline"), desc = "Style of the box.").withDependency { render }
+    private val renderStyle by SelectorSetting("Render Style", "Outline", listOf("Filled", "Outline", "Filled Outline"), desc = "Style of the box.").withDependency { render }
     private val useServerPosition by BooleanSetting("Use Server Position", false, desc = "Uses the server position for etherwarp instead of the client position.").withDependency { render }
     private val fullBlock by BooleanSetting("Full Block", false, desc = "Renders the the 1x1x1 block instead of it's actual size.").withDependency { render }
     private val depth by BooleanSetting("Depth", true, desc = "Renders the box through walls.").withDependency { render }
@@ -59,10 +59,10 @@ object Etherwarp : Module(
         }
 
         on<RenderEvent.Last> {
-            if (mc.player?.isCrouching == false || mc.screen != null || !render) return@on
+            if (mc.options?.keyShift?.isDown == false || mc.screen != null || !render) return@on
 
             etherPos = getEtherPos(
-                if (useServerPosition) mc.player?.lastPos else mc.player?.position(),
+                if (useServerPosition) mc.player?.oldPosition() else mc.player?.position(),
                 56.0 + (mc.player?.mainHandItem?.isEtherwarpItem()?.getInt("tuned_transmission")?.orElse(0) ?: return@on),
                 etherWarp = true
             )
@@ -76,11 +76,11 @@ object Etherwarp : Module(
         }
 
         onSend<ServerboundUseItemPacket> {
-            if (!LocationUtils.currentArea.isArea(Island.SinglePlayer) || mc.player?.isCrouching == false || mc.player?.mainHandItem?.isEtherwarpItem() == null) return@onSend
+            if (!LocationUtils.currentArea.isArea(Island.SinglePlayer) || mc.options?.keyShift?.isDown == false || mc.player?.mainHandItem?.isEtherwarpItem() == null) return@onSend
 
             etherPos?.pos?.let {
                 if (etherPos?.succeeded == false) return@onSend
-                mc.executeIfPossible {
+                mc.execute {
                     mc.player?.connection?.send(
                         ServerboundMovePlayerPacket.PosRot(
                             it.x + 0.5, it.y + 1.05, it.z + 0.5, mc.player?.yRot ?: 0f,
@@ -89,8 +89,8 @@ object Etherwarp : Module(
                     )
                     mc.player?.setPos(it.x + 0.5, it.y + 1.05, it.z + 0.5)
                     mc.player?.setDeltaMovement(0.0, 0.0, 0.0)
-                    if (sounds) mc.execute { playSoundAtPlayer(SoundEvent.createVariableRangeEvent(ResourceLocation.withDefaultNamespace(customSound))) }
-                    else mc.execute { playSoundAtPlayer(SoundEvents.ENDER_DRAGON_HURT, pitch = 0.53968257f) }
+                    if (sounds) playSoundAtPlayer(SoundEvent.createVariableRangeEvent(ResourceLocation.withDefaultNamespace(customSound)))
+                    else playSoundAtPlayer(SoundEvents.ENDER_DRAGON_HURT, pitch = 0.53968257f)
                 }
             }
         }

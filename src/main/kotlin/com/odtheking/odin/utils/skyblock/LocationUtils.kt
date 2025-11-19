@@ -18,6 +18,11 @@ object LocationUtils {
     var currentArea: Island = Island.Unknown
         private set
 
+    var lobbyId: String? = null
+        private set
+
+    private val lobbyRegex = Regex("\\d\\d/\\d\\d/\\d\\d (\\w{0,6}) *")
+
     init {
         on<ServerEvent.Connect> {
             if (mc.isSingleplayer) {
