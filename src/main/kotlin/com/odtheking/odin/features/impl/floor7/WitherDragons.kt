@@ -113,14 +113,14 @@ object WitherDragons : Module(
             WitherDragonsEnum.entries.forEach { dragon ->
                 val entity = mc.level?.getEntity(dragon.entityUUID ?: return@forEach) as? EnderDragon ?: return@forEach
                 if (dragonHealth && entity.isAlive) {
-                    context.drawText(
+                    drawText(
                         Component.literal(colorHealth(dragon.health)).visualOrderText,
                         entity.renderPos, 5f, false
                     )
                 }
 
                 if (dragonTimer && dragon.timeToSpawn > 0) {
-                    context.drawText(
+                    drawText(
                         Component.literal("§${dragon.colorCode}${dragon.name.first()}: ${getDragonTimer(dragon.timeToSpawn)}").visualOrderText,
                         dragon.spawnPos.center, 5f, false
                     )

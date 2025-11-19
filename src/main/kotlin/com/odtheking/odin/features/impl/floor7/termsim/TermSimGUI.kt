@@ -113,8 +113,8 @@ open class TermSimGUI(
         }
     }
 
-    override fun slotClicked(slot: Slot?, slotId: Int, button: Int, actionType: ClickType) {
-        slot?.let { delaySlotClick(it, button) }
+    override fun slotClicked(slot: Slot, slotId: Int, button: Int, actionType: ClickType) {
+        delaySlotClick(slot, button)
     }
 
     protected fun createNewGui(block: (Slot) -> ItemStack) {

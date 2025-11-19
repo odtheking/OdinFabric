@@ -65,7 +65,7 @@ object Highlight : Module(
                     ClipContext.Fluid.NONE, entity.eyeY
                 ) ?: false
 
-                context.drawStyledBox(entity.renderBoundingBox, color.multiplyAlpha(0.5f), renderStyle, !canSee)
+                drawStyledBox(entity.renderBoundingBox, color.multiplyAlpha(0.5f), renderStyle, !canSee)
             }
         }
 
