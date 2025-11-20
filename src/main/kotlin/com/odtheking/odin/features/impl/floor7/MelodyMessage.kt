@@ -37,16 +37,15 @@ object MelodyMessage : Module(
 
     private val broadcast by BooleanSetting("Broadcast Progress", true, desc = "Broadcasts melody progress to all other odin users in the party.")
     private val melodyGui by HUD("Progress GUI", "Shows a gui with the progress of broadcasting odin users in melody.", true) {
-        if (it) {
-            drawMelody(MelodyData(3, 1, 2), 0)
-        }
+        if (it) drawMelody(MelodyData(3, 1, 2), 0)
 
-        if (!broadcast || !melodyWebSocket.connected) return@HUD 0 to 0
-        melodies.entries.forEachIndexed { i, (name, data) ->
-            if (!showOwn && name == mc.user.name) return@forEachIndexed
-            drawMelody(data, i)
+        if (broadcast && melodyWebSocket.connected) {
+            melodies.entries.forEachIndexed { i, (name, data) ->
+                if (!showOwn && name == mc.user.name) return@forEachIndexed
+                drawMelody(data, i)
+            }
         }
-        45 to 25
+        40 to 15
     }.withDependency { broadcast }
 
     private val showOwn: Boolean by BooleanSetting("Show Own", true, desc = "Shows your own progress in the melody GUI.").withDependency { broadcast && melodyGui.enabled }
@@ -155,14 +154,13 @@ object MelodyMessage : Module(
     private val width by lazy { getStringWidth("§d■") }
 
     private fun GuiGraphics.drawMelody(data: MelodyData, index: Int) {
-        val y = width* 2 * index
+        val y = width * 2 * index
 
         repeat(5) {
             if (data.purple == it) textDim("§d■", width * it, y)
-            val color = if (data.pane == it) "§a" else "§f"
-            textDim("${color}■", width * it, y + width)
+            textDim("${if (data.pane == it) "§a" else "§f"}■", width * it, y + width)
         }
-        data.clay?.let { textDim(it.toString(), 40, y + width / 2) }
+        data.clay?.let { textDim(it.toString(), width * 5 + 2, y + width / 2) }
     }
 
     private data class UpdateMessage(val user: String, val type: Int, val slot: Int)
