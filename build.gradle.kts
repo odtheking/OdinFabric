@@ -35,6 +35,11 @@ dependencies {
         include("com.squareup.okhttp3:okhttp:$it")
     }
 
+    property("okio_version").let {
+        implementation("com.squareup.okio:okio:$it")
+        include("com.squareup.okio:okio:$it")
+    }
+
     modCompileOnly("com.terraformersmc:modmenu:${property("modmenu_version")}")
 
     property("minecraft_lwjgl_version").let {

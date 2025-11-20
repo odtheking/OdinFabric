@@ -55,12 +55,12 @@ object Etherwarp : Module(
     init {
         onReceive<ClientboundSoundPacket> {
             if (!sounds || sound.value() != SoundEvents.ENDER_DRAGON_HURT || volume != 1f || pitch != 0.53968257f) return@onReceive
-            mc.execute { playSoundAtPlayer(SoundEvent.createVariableRangeEvent(ResourceLocation.withDefaultNamespace(customSound))) }
+            playSoundAtPlayer(SoundEvent.createVariableRangeEvent(ResourceLocation.withDefaultNamespace(customSound)))
             it.cancel()
         }
 
         on<RenderEvent.Last> (EventPriority.LOW) {
-            if (mc.options?.keyShift?.isDown == false || mc.screen != null || !render) return@on
+            if (mc.player?.isShiftKeyDown == false || mc.screen != null || !render) return@on
 
             etherPos = getEtherPos(
                 if (useServerPosition) mc.player?.oldPosition() else mc.player?.position(),
@@ -77,7 +77,7 @@ object Etherwarp : Module(
         }
 
         onSend<ServerboundUseItemPacket> {
-            if (!LocationUtils.currentArea.isArea(Island.SinglePlayer) || mc.options?.keyShift?.isDown == false || mc.player?.mainHandItem?.isEtherwarpItem() == null) return@onSend
+            if (!LocationUtils.currentArea.isArea(Island.SinglePlayer) || mc.player?.isShiftKeyDown == false || mc.player?.mainHandItem?.isEtherwarpItem() == null) return@onSend
 
             etherPos?.pos?.let {
                 if (etherPos?.succeeded == false) return@onSend
@@ -98,7 +98,6 @@ object Etherwarp : Module(
     }
 
     data class EtherPos(val succeeded: Boolean, val pos: BlockPos?, val state: BlockState?) {
-
         companion object {
             val NONE = EtherPos(false, null, null)
         }

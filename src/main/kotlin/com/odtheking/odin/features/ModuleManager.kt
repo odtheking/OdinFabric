@@ -40,7 +40,7 @@ object ModuleManager {
 
         // floor 7
         TerminalSimulator, TerminalSolver, TerminalTimes, TerminalSounds, TickTimers, ArrowAlign, InactiveWaypoints,
-        MelodyMessage, WitherDragons,
+        MelodyMessage, WitherDragons, SimonSays,
 
         // render
         ClickGUIModule, Camera, Etherwarp, PlayerSize, PerformanceHUD, RenderOptimizer,

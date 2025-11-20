@@ -27,7 +27,6 @@ object ArrowAlign : Module(
     private val blockWrong by BooleanSetting("Block Wrong Clicks", false, desc = "Blocks wrong clicks, shift will override this.")
     private val invertSneak by BooleanSetting("Invert Sneak", false, desc = "Only block wrong clicks whilst sneaking, instead of whilst standing").withDependency { blockWrong }
 
-
     private val recentClickTimestamps = mutableMapOf<Int, Long>()
     private val clicksRemaining = mutableMapOf<Int, Int>()
     private var currentFrameRotations: List<Int>? = null
