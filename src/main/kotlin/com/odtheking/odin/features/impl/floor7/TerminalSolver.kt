@@ -150,7 +150,11 @@ object TerminalSolver : Module(
 
         on<GuiEvent.SlotClick> (EventPriority.HIGH) {
             if (!enabled || currentTerm == null) return@on
-            if (blockIncorrectClicks && currentTerm?.canClick(slotId, button) == false) {
+
+            if (
+                (renderType == 1 && !(currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver)) ||
+                (blockIncorrectClicks && currentTerm?.canClick(slotId, button) == false)
+            ) {
                 cancel()
                 return@on
             }

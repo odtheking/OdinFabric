@@ -90,13 +90,13 @@ object LeapMenu : Module(
 
         on<GuiEvent.DrawBackground> {
             val chest = (screen as? AbstractContainerScreen<*>) ?: return@on
-            if (!chest.title.string.equalsOneOf("Spirit Leap", "Teleport to Player") || leapTeammates.isEmpty() || leapTeammates.all { it == EMPTY }) return@on
+            if (chest.title?.string?.equalsOneOf("Spirit Leap", "Teleport to Player") == false || leapTeammates.isEmpty() || leapTeammates.all { it == EMPTY }) return@on
             cancel()
         }
 
         on<GuiEvent.MouseClick> {
             val chest = (screen as? AbstractContainerScreen<*>) ?: return@on
-            if (!chest.title.string.equalsOneOf("Spirit Leap", "Teleport to Player") || leapTeammates.isEmpty() || leapTeammates.all { it == EMPTY }) return@on
+            if (chest.title?.string?.equalsOneOf("Spirit Leap", "Teleport to Player") == false || leapTeammates.isEmpty() || leapTeammates.all { it == EMPTY }) return@on
 
             val quadrant = getQuadrant()
             if ((type.equalsOneOf(1,2,3)) && leapTeammates.size < quadrant) return@on

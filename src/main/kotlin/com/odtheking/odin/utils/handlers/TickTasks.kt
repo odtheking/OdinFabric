@@ -67,6 +67,7 @@ object TickTasks {
         }
 
         onReceive<ClientboundPingPacket> {
+            if (id == 0) return@onReceive
             for (task in serverTickTasks) task.run()
         }
     }

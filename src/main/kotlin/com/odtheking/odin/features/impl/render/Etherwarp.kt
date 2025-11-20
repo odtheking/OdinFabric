@@ -3,6 +3,7 @@ package com.odtheking.odin.features.impl.render
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.*
 import com.odtheking.odin.events.RenderEvent
+import com.odtheking.odin.events.core.EventPriority
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.events.core.onSend
@@ -42,7 +43,7 @@ object Etherwarp : Module(
     private val renderStyle by SelectorSetting("Render Style", "Outline", listOf("Filled", "Outline", "Filled Outline"), desc = "Style of the box.").withDependency { render }
     private val useServerPosition by BooleanSetting("Use Server Position", false, desc = "Uses the server position for etherwarp instead of the client position.").withDependency { render }
     private val fullBlock by BooleanSetting("Full Block", false, desc = "Renders the the 1x1x1 block instead of it's actual size.").withDependency { render }
-    private val depth by BooleanSetting("Depth", true, desc = "Renders the box through walls.").withDependency { render }
+    private val depth by BooleanSetting("Depth", false, desc = "Renders the box through walls.").withDependency { render }
 
     private val dropdown by DropdownSetting("Sounds", false)
     private val sounds by BooleanSetting("Custom Sounds", false, desc = "Plays the selected custom sound when you etherwarp.").withDependency { dropdown }
@@ -58,7 +59,7 @@ object Etherwarp : Module(
             it.cancel()
         }
 
-        on<RenderEvent.Last> {
+        on<RenderEvent.Last> (EventPriority.LOW) {
             if (mc.options?.keyShift?.isDown == false || mc.screen != null || !render) return@on
 
             etherPos = getEtherPos(

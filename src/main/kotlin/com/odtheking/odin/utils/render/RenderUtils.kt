@@ -115,8 +115,8 @@ fun WorldRenderContext.drawStyledBox(
         0 -> drawFilledBox(aabb, color, depth = depth)
         1 -> drawWireFrameBox(aabb, color, depth = depth)
         2 -> {
-            drawWireFrameBox(aabb, color, thickness = 2f, depth = depth)
             drawFilledBox(aabb, color.multiplyAlpha(0.5f), depth = depth)
+            drawWireFrameBox(aabb, color, depth = depth)
         }
     }
 }
