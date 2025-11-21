@@ -75,8 +75,9 @@ object LeapMenu : Module(
 
                     val expandValue = hoverHandler[index].anim.get(0f, 15f, !hoverHandler[index].isHovered)
                     NVGRenderer.rect(x - expandValue ,y - expandValue, boxWidth + expandValue * 2, boxHeight + expandValue * 2, (if (colorStyle) player.clazz.color else backgroundColor).rgba, 12f)
-                    imageCacheMap.getOrPut(player.locationSkin.path) {
-                        NVGRenderer.createNVGImage((mc.textureManager?.getTexture(player.locationSkin)?.texture as? GlTexture)?.glId() ?: 0, 64, 64)
+                    val locationSkin = player.locationSkin ?: mc.player?.skin?.texture ?: return@forEachIndexed
+                    imageCacheMap.getOrPut(locationSkin.path) {
+                        NVGRenderer.createNVGImage((mc.textureManager?.getTexture(locationSkin)?.texture as? GlTexture)?.glId() ?: 0, 64, 64)
                     }.let { glTextureId ->
                         NVGRenderer.image(glTextureId, 64, 64, 8, 8, 8, 8, x + 30f, y + 30f, 240f, 240f, 9f)
                     }

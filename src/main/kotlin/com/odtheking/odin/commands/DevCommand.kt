@@ -6,10 +6,10 @@ import com.odtheking.odin.OdinMod
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.features.ModuleManager.generateFeatureList
+import com.odtheking.odin.features.impl.floor7.MelodyMessage.melodyWebSocket
 import com.odtheking.odin.features.impl.floor7.WitherDragonState
 import com.odtheking.odin.features.impl.floor7.WitherDragons
 import com.odtheking.odin.features.impl.floor7.WitherDragonsEnum
-import com.odtheking.odin.features.impl.floor7.MelodyMessage.melodyWebSocket
 import com.odtheking.odin.features.impl.nether.NoPre
 import com.odtheking.odin.features.impl.render.ClickGUIModule.webSocketUrl
 import com.odtheking.odin.features.impl.render.PlayerSize
@@ -27,6 +27,7 @@ import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils
 import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils.getRoomCenter
 import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils.getRoomData
 import kotlinx.coroutines.launch
+import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
 import net.minecraft.world.phys.BlockHitResult
@@ -181,6 +182,17 @@ val devCommand = Commodore("oddev") {
             if (it !is BlockHitResult) return@runs
             DungeonUtils.currentRoom?.getRelativeCoords(it.blockPos)?.let { vec2 ->
                 modMessage("Relative coords: ${vec2.x}, ${vec2.z}")
+            }
+        }
+    }
+
+    literal("setblock").executable {
+        param("type").suggests { BuiltInRegistries.BLOCK.entrySet().map { it.value.descriptionId.replace("block.minecraft.", "") } }
+
+        runs { type: String ->
+            mc.hitResult?.let {
+                if (it !is BlockHitResult) return@runs
+                sendCommand("setblock ${it.blockPos.x} ${it.blockPos.y} ${it.blockPos.z} minecraft:$type")
             }
         }
     }

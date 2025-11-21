@@ -138,7 +138,7 @@ fun WorldRenderContext.drawBeaconBeam(position: BlockPos, color: Color) {
     matrix.popPose()
 }
 
-fun WorldRenderContext.drawText(text: FormattedCharSequence?, pos: Vec3, scale: Float, depth: Boolean) {
+fun WorldRenderContext.drawText(text: FormattedCharSequence, pos: Vec3, scale: Float, depth: Boolean) {
     val stack = matrixStack() ?: return
 
     stack.pushPose()

@@ -3,7 +3,6 @@ package com.odtheking.odin.utils.skyblock.dungeon
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Colors
 import net.minecraft.resources.ResourceLocation
-import net.minecraft.world.entity.player.Player
 
 /**
  * Data class representing a player in a dungeon, including their name, class, skin location, and associated player entity.
@@ -11,15 +10,13 @@ import net.minecraft.world.entity.player.Player
  * @property name The name of the player.
  * @property clazz The player's class, defined by the [DungeonClass] enum.
  * @property locationSkin The resource location of the player's skin.
- * @property entity The optional associated player entity. Defaults to `null`.
  * @property isDead The player's death status. Defaults to `false`.
  */
 data class DungeonPlayer(
     val name: String,
     val clazz: DungeonClass,
     val clazzLvl: Int,
-    val locationSkin: ResourceLocation = ResourceLocation.withDefaultNamespace("textures/entity/steve.png"),
-    var entity: Player? = null,
+    val locationSkin: ResourceLocation?,
     var isDead: Boolean = false,
     var deaths: Int = 0
 )

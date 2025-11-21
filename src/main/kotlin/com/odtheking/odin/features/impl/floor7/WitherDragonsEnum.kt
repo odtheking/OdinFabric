@@ -60,14 +60,14 @@ enum class WitherDragonsEnum(
         }
     }
 
-    fun setDead() {
+    fun setDead(realTime: Boolean) {
         state = WitherDragonState.DEAD
         entityUUID = null
         lastDragonDeath = this
 
         if (priorityDragon == this) priorityDragon = null
 
-        if (sendTime && WitherDragons.enabled)
+        if (sendTime && WitherDragons.enabled && realTime)
             WitherDragons.dragonPBs.time(name, (currentTick - spawnedTime) / 20f, "s§7!", "§${colorCode}${name} §7was alive for §6")
     }
 

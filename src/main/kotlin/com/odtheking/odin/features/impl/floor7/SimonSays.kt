@@ -32,8 +32,8 @@ object SimonSays : Module(
     private val secondColor by ColorSetting("Second Color", Colors.MINECRAFT_GOLD.withAlpha(0.5f), allowAlpha = true, desc = "The color of the second button.")
     private val thirdColor by ColorSetting("Third Color", Colors.MINECRAFT_RED.withAlpha(0.5f), allowAlpha = true, desc = "The color of the buttons after the second.")
     private val style by SelectorSetting("Style", "Filled Outline", arrayListOf("Filled", "Outline", "Filled Outline"), desc = "The style of the box rendering.")
-    private val depthCheck by BooleanSetting("Depth Check", false, desc = "Boxes show through walls.")
     private val blockWrong by BooleanSetting("Block Wrong Clicks", false, desc = "Blocks wrong clicks, shift will override this.")
+    private val optimizeSolution by BooleanSetting("Optimized Solution", true, desc = "Use optimized solution, might fix ss-skip")
 
     private val startButton = BlockPos(110, 121, 91)
     private val clickInOrder = ArrayList<BlockPos>()
@@ -53,19 +53,26 @@ object SimonSays : Module(
         on<BlockUpdateEvent> {
             if (DungeonUtils.getF7Phase() != M7Phases.P3) return@on
 
-            if (pos == startButton && updated.block == Blocks.STONE_BUTTON && updated.getValue(BlockStateProperties.POWERED)) return@on
+            if (pos == startButton && updated.block == Blocks.STONE_BUTTON && updated.getValue(BlockStateProperties.POWERED)) {
+                if (!optimizeSolution) resetSolution()
+                return@on
+            }
 
             if (pos.y !in 120..123 || pos.z !in 92..95) return@on
 
             when (pos.x) {
                 111 ->
-                    if (updated.block == Blocks.SEA_LANTERN && old.block == Blocks.OBSIDIAN && (clickInOrder.isEmpty() || pos !in clickInOrder))
-                        clickInOrder.add(pos)
+                    if (optimizeSolution) {
+                        if (updated.block == Blocks.SEA_LANTERN && old.block == Blocks.OBSIDIAN && (clickInOrder.isEmpty() || pos !in clickInOrder))
+                            clickInOrder.add(pos)
+                    } else if (updated.block == Blocks.OBSIDIAN && old.block == Blocks.SEA_LANTERN && pos !in clickInOrder) clickInOrder.add(pos)
 
                 110 ->
-                    if (updated.block != Blocks.AIR && old.block == Blocks.STONE_BUTTON && updated.getValue(BlockStateProperties.POWERED)) {
+                    if (updated.block == Blocks.AIR) {
+                        if (!optimizeSolution) resetSolution()
+                    } else if (old.block == Blocks.STONE_BUTTON && updated.getValue(BlockStateProperties.POWERED)) {
                         clickNeeded = clickInOrder.indexOf(pos.east()) + 1
-                        if (clickNeeded >= clickInOrder.size) resetSolution()
+                        if (clickNeeded >= clickInOrder.size) if (optimizeSolution) resetSolution() else clickNeeded = 0
                     }
             }
         }
@@ -84,13 +91,12 @@ object SimonSays : Module(
             if (DungeonUtils.getF7Phase() != M7Phases.P3) return@onSend
 
             if (hitResult.blockPos == startButton) {
-                resetSolution()
+                if (optimizeSolution) resetSolution()
                 return@onSend
             }
 
             if (
-                blockWrong &&
-                mc.player?.isShiftKeyDown == false &&
+                blockWrong && mc.player?.isShiftKeyDown == false &&
                 hitResult.blockPos.x == 110 && hitResult.blockPos.y in 120..123 && hitResult.blockPos.z in 92..95 &&
                 hitResult.blockPos.east() != clickInOrder.getOrNull(clickNeeded)
             ) it.cancel()
@@ -107,7 +113,7 @@ object SimonSays : Module(
                         else -> thirdColor
                     }
 
-                    context.drawStyledBox(AABB(x + 0.05, y + 0.37, z + 0.3, x - 0.15, y + 0.63, z + 0.7), color, style, depthCheck)
+                    context.drawStyledBox(AABB(x + 0.05, y + 0.37, z + 0.3, x - 0.15, y + 0.63, z + 0.7), color, style, true)
                 }
             }
         }

@@ -94,7 +94,7 @@ object WitherDragons : Module(
             (DragonCheck.lastDragonDeath ?: WitherDragonsEnum.entries.find { it.state != WitherDragonState.DEAD })
                 ?.apply {
                     if (sendNotification) modMessage("§${colorCode}${name} dragon counts.")
-                    if (state != WitherDragonState.DEAD) setDead()
+                    if (state != WitherDragonState.DEAD) setDead(false)
                     DragonCheck.lastDragonDeath = null
                 }
         }

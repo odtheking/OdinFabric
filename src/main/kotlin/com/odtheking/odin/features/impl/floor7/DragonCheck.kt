@@ -17,12 +17,11 @@ object DragonCheck {
 
     fun dragonUpdate(packet: ClientboundSetEntityDataPacket) {
         val entity = mc.level?.getEntity(packet.id) as? EnderDragon ?: return
+        val dragonHealth = (packet.packedItems.find { it.id == 9 }?.value as? Float) ?: return
 
-        WitherDragonsEnum.entries.firstOrNull {
-            mc.level?.getEntity(it.entityUUID ?: return@firstOrNull false)?.id == packet.id
-        }?.apply {
-            health = entity.health
-            if (entity.isDeadOrDying && state != WitherDragonState.DEAD) setDead()
+        WitherDragonsEnum.entries.firstOrNull { it.entityUUID == entity.uuid }?.let {
+            it.health = dragonHealth
+            if (dragonHealth <= 0 && it.state != WitherDragonState.DEAD) it.setDead(true)
         }
     }
 

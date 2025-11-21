@@ -221,6 +221,14 @@ object BloodCamp : Module(
 
                 val time = getTime(firstSpawn,  currentTickTime - started)
 
+                if (mobOffset < time) {
+                    context.drawWireFrameBox(pingAABB, mboxColor, depth = true)
+                    context.drawWireFrameBox(endAABB, pboxColor, depth = true)
+                } else context.drawWireFrameBox(endAABB, fboxColor, depth = true)
+
+                if (drawLine)
+                    context.drawLine(listOf(currVector.addVec(y = 2.0), endPoint.addVec(y = 2.0)), Colors.MINECRAFT_RED, depth = true)
+
                 val timeDisplay = ((time.toFloat() - offset) / 1000).also { renderData.time = it }
                 val colorTime = when {
                     timeDisplay > 1.5 -> 'a'
@@ -229,14 +237,6 @@ object BloodCamp : Module(
                     else -> 'b'
                 }
                 if (drawTime) context.drawText(Component.literal("§$colorTime${timeDisplay.toFixed()}s").visualOrderText, endPoint.addVec(y = 2.0), 2f, true)
-
-                if (mobOffset < time) {
-                    context.drawWireFrameBox(pingAABB, mboxColor, depth = true)
-                    context.drawWireFrameBox(endAABB, pboxColor, depth = true)
-                } else context.drawWireFrameBox(endAABB, fboxColor, depth = true)
-
-                if (drawLine)
-                    context.drawLine(listOf(currVector.addVec(y = 2.0), endPoint.addVec(y = 2.0)), Colors.MINECRAFT_RED, depth = true)
             }
         }
     }
