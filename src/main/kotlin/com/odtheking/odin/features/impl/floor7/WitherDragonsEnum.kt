@@ -82,7 +82,7 @@ enum class WitherDragonsEnum(
             }
 
             WitherDragonsEnum.entries.forEach {
-                it.timeToSpawn = 100
+                it.timeToSpawn = 0
                 it.timesSpawned = 0
                 it.state = WitherDragonState.DEAD
                 it.entityUUID = null
