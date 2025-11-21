@@ -1,5 +1,7 @@
 package com.odtheking.odin.utils
 
+import com.google.common.collect.ImmutableMultimap
+import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
 import com.mojang.authlib.properties.PropertyMap
 import com.odtheking.odin.utils.network.hypixelapi.HypixelData
@@ -12,9 +14,10 @@ import net.minecraft.world.item.component.CustomData
 import net.minecraft.world.item.component.ItemLore
 import net.minecraft.world.item.component.ResolvableProfile
 import java.util.*
+import kotlin.text.set
 
 const val ID = "id"
-const val UUID = "uuid"
+const val UUID_STRING = "uuid"
 
 inline val ItemStack.customData: CompoundTag
     get() =
@@ -30,7 +33,7 @@ inline val CompoundTag.itemId: String
 
 inline val ItemStack.itemUUID: String
     get() =
-        customData.getString(UUID).orElse("")
+        customData.getString(UUID_STRING).orElse("")
 
 inline val ItemStack.lore: List<Component>
     get() =
@@ -46,7 +49,7 @@ inline val HypixelData.ItemData.magicalPower: Int
 
 val ItemStack.texture: String?
     get() =
-        get(DataComponents.PROFILE)?.gameProfile()?.properties?.get("textures")?.firstOrNull()?.value
+        get(DataComponents.PROFILE)?.partialProfile()?.properties?.get("textures")?.firstOrNull()?.value
 
 enum class ItemRarity(
     val loreName: String,
@@ -77,22 +80,15 @@ fun getSkyblockRarity(lore: List<String>): ItemRarity? {
 
 fun createSkullStack(textureHash: String): ItemStack {
     val stack = ItemStack(Items.PLAYER_HEAD)
-    val properties = PropertyMap()
-    properties.put(
+
+    val property = Property(
         "textures",
-        Property(
-            "textures",
-            Base64.getEncoder().encodeToString(
-                "{\"textures\":{\"SKIN\":{\"url\":\"http://textures.minecraft.net/texture/$textureHash\"}}}".toByteArray()
-            )
-        )
+        Base64.getEncoder().encodeToString("{\"textures\":{\"SKIN\":{\"url\":\"http://textures.minecraft.net/texture/$textureHash\"}}}".toByteArray())
     )
-    val profile = ResolvableProfile(
-        Optional.empty(),
-        Optional.empty(),
-        properties
-    )
-    stack.set(DataComponents.PROFILE, profile)
+    val multimap = ImmutableMultimap.builder<String, Property>().put("textures", property).build()
+    val gameProfile = GameProfile(UUID.randomUUID(), "_", PropertyMap(multimap))
+
+    stack.set(DataComponents.PROFILE, ResolvableProfile.createResolved(gameProfile))
     return stack
 }
 

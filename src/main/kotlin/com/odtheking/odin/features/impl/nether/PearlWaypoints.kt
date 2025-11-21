@@ -34,7 +34,7 @@ object PearlWaypoints : Module(
             var closest = true
             getOrderedLineups(mc.player?.blockPosition() ?: return@on).forEach { (lineup, color) ->
                 lineup.startPos.forEach {
-                    if (presetWaypoints) context.drawWireFrameBox(
+                    if (presetWaypoints) drawWireFrameBox(
                         AABB(it),
                         color.withAlpha(if (!closest && hideFarWaypoints) 0.25f else 1f),
                         if (!closest && hideFarWaypoints) 4f else 6f
@@ -44,13 +44,13 @@ object PearlWaypoints : Module(
                 lineup.lineups.forEach lineupLoop@{ blockPos ->
                     if ((NoPre.missing.equalsOneOf(Supply.None, Supply.Square) ||
                                 (lineup.supply != Supply.Square || enumToLineup[NoPre.missing] == blockPos)) && (!hideFarWaypoints || closest)) {
-                        if (presetWaypoints) context.drawFilledBox(AABB(blockPos), color)
+                        if (presetWaypoints) drawFilledBox(AABB(blockPos), color)
                         if (dynamicWaypoints) {
                             val destinationSupply = if (lineup.supply == Supply.Square) NoPre.missing else lineup.supply
                             calculatePearl(destinationSupply.dropOffSpot)?.let {
-                                context.drawWireFrameBox(AABB.ofSize(it, 0.12, 0.12, 0.12), dynamicWaypointsColor, 2f)
+                                drawWireFrameBox(AABB.ofSize(it, 0.12, 0.12, 0.12), dynamicWaypointsColor, 2f)
                             }
-                            context.drawWireFrameBox(AABB(BlockPos(lineup.supply.dropOffSpot.above())), dynamicWaypointsColor)
+                            drawWireFrameBox(AABB(BlockPos(lineup.supply.dropOffSpot.above())), dynamicWaypointsColor)
                         }
                     }
                 }

@@ -13,7 +13,7 @@ import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.network.WebUtils.fetchJson
 import com.odtheking.odin.utils.network.WebUtils.postData
 import kotlinx.coroutines.launch
-import net.minecraft.client.renderer.entity.state.PlayerRenderState
+import net.minecraft.client.renderer.entity.state.AvatarRenderState
 
 object PlayerSize : Module(
     name = "Player Size",
@@ -63,14 +63,14 @@ object PlayerSize : Module(
     )
 
     @JvmStatic
-    fun preRenderCallbackScaleHook(entityRenderer: PlayerRenderState, matrix: PoseStack) {
-        if (enabled && entityRenderer.name == mc.player?.name?.string && !randoms.containsKey(entityRenderer.name)) {
+    fun preRenderCallbackScaleHook(entityRenderer: AvatarRenderState, matrix: PoseStack) {
+        if (enabled && entityRenderer.nameTag == mc.player?.name && !randoms.containsKey(entityRenderer.nameTag?.string)) {
             if (devSizeY < 0) matrix.translate(0f, devSizeY * 2, 0f)
             matrix.scale(devSizeX, devSizeY, devSizeZ)
         }
-        if (!randoms.containsKey(entityRenderer.name)) return
-        if (!devSize && entityRenderer.name == mc.player?.name?.string) return
-        val random = randoms[entityRenderer.name] ?: return
+        if (!randoms.containsKey(entityRenderer.nameTag?.string)) return
+        if (!devSize && entityRenderer.nameTag?.string == mc.player?.name?.string) return
+        val random = randoms[entityRenderer.nameTag?.string] ?: return
         if (random.scale[1] < 0) matrix.translate(0f, random.scale[1] * 2, 1f)
         matrix.scale(random.scale[0], random.scale[1], random.scale[2])
     }

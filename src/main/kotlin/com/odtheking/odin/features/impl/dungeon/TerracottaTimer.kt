@@ -36,7 +36,7 @@ object TerracottaTimer : Module(
         on<RenderEvent.Last> {
             if (!DungeonUtils.inBoss || !DungeonUtils.isFloor(6) || terracottaSpawning.isEmpty()) return@on
             terracottaSpawning.forEach {
-                context.drawText(Component.literal("§${getColor(it.time)}${it.time.toFixed()}s").visualOrderText, it.pos.center, depth = false, scale = 1f)
+                drawText(Component.literal("§${getColor(it.time)}${it.time.toFixed()}s").visualOrderText, it.pos.center, depth = false, scale = 1f)
             }
         }
     }
