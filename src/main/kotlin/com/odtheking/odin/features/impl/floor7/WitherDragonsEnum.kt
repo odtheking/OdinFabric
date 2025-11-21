@@ -1,15 +1,16 @@
 package com.odtheking.odin.features.impl.floor7
 
 import com.odtheking.odin.features.impl.floor7.DragonCheck.lastDragonDeath
-import com.odtheking.odin.features.impl.floor7.DragonPriority.displaySpawningDragon
 import com.odtheking.odin.features.impl.floor7.DragonPriority.findPriority
 import com.odtheking.odin.features.impl.floor7.WitherDragons.currentTick
+import com.odtheking.odin.features.impl.floor7.WitherDragons.dragonPriorityToggle
 import com.odtheking.odin.features.impl.floor7.WitherDragons.priorityDragon
 import com.odtheking.odin.features.impl.floor7.WitherDragons.sendSpawned
 import com.odtheking.odin.features.impl.floor7.WitherDragons.sendSpawning
 import com.odtheking.odin.features.impl.floor7.WitherDragons.sendTime
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Colors
+import com.odtheking.odin.utils.alert
 import com.odtheking.odin.utils.modMessage
 import net.minecraft.core.BlockPos
 import net.minecraft.core.particles.ParticleTypes
@@ -133,6 +134,9 @@ fun handleSpawnPacket(particle: ClientboundLevelParticlesPacket) {
     }
 
     if (dragons.isNotEmpty() && (dragons.size == 2 || spawned >= 2) && priorityDragon == null)
-        priorityDragon = findPriority(dragons).also { displaySpawningDragon(it) }
+        priorityDragon = findPriority(dragons).also { dragon ->
+            if (WitherDragons.dragonTitle && WitherDragons.enabled) alert("§${dragon.colorCode}${dragon.name} is spawning!", true)
+            if (dragonPriorityToggle && WitherDragons.enabled) modMessage("${dragons.joinToString(", ") { "§${it.colorCode}${it.name}" }}§r -> §${dragon.colorCode}${dragon.name} §7is your priority dragon!")
+        }
 }
 
