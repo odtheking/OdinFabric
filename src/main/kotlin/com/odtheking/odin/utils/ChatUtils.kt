@@ -29,3 +29,20 @@ fun devMessage(message: Any?) {
     if (!ClickGUIModule.devMessage) return
     modMessage(message, "§3Odin§bDev §8»§r ")
 }
+
+fun getCenteredText(text: String): String {
+    val strippedText = text.noControlCodes
+    if (strippedText.isEmpty()) return text
+    val textWidth = mc.font.width(strippedText)
+    val chatWidth = mc.gui.chat.width
+
+    if (textWidth >= chatWidth) return text
+
+    val spacesNeeded = ((chatWidth - textWidth) / 2 / 4).coerceAtLeast(0)
+    return " ".repeat(spacesNeeded) + text
+}
+
+fun getChatBreak(): String =
+    mc.gui?.chat?.width?.let {
+        "§9§m" + "-".repeat(it / mc.font.width("-"))
+    } ?: ""

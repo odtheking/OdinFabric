@@ -140,10 +140,10 @@ object LeapMenu : Module(
     }
 
     /*private val leapTeammates: MutableList<DungeonPlayer> = mutableListOf(
-        DungeonPlayer("Stiviaisd", DungeonClass.Healer, 50),
-        DungeonPlayer("Odtheking", DungeonClass.Archer, 50),
-        DungeonPlayer("Bonzi", DungeonClass.Mage, 47),
-        DungeonPlayer("Cezar", DungeonClass.Tank, 38)
+        DungeonPlayer("Stiviaisd", DungeonClass.Healer, 50, null),
+        DungeonPlayer("Odtheking", DungeonClass.Archer, 50, null),
+        DungeonPlayer("Bonzi", DungeonClass.Mage, 47, null),
+        DungeonPlayer("Cezar", DungeonClass.Tank, 38, null)
     )*/
 
     /**

@@ -84,9 +84,7 @@ object PearlWaypoints : Module(
 
     // Made by Aidanmao
     private fun calculatePearl(targetPos: BlockPos): Vec3? {
-        val posX = mc.player?.renderX ?: return null
-        val posY = mc.player?.renderY ?: return null
-        val posZ = mc.player?.renderZ ?: return null
+        val (posX, posY, posZ) = mc.player?.renderPos ?: return null
 
         val offX = targetPos.x - posX
         val offZ = targetPos.z - posZ

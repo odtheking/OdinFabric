@@ -111,12 +111,15 @@ object WitherDragons : Module(
             if (DungeonUtils.getF7Phase() != M7Phases.P5) return@on
 
             WitherDragonsEnum.entries.forEach { dragon ->
-                val entity = mc.level?.getEntity(dragon.entityUUID ?: return@forEach) as? EnderDragon ?: return@forEach
-                if (dragonHealth && entity.isAlive) {
-                    context.drawText(
-                        Component.literal(colorHealth(dragon.health)).visualOrderText,
-                        entity.renderPos, 5f, false
-                    )
+                if (dragonHealth) {
+                    dragon.entityUUID?.let { mc.level?.getEntity(it) as? EnderDragon }?.let {
+                        if (it.isAlive) {
+                            context.drawText(
+                                Component.literal(colorHealth(dragon.health)).visualOrderText,
+                                it.renderPos, 5f, false
+                            )
+                        }
+                    }
                 }
 
                 if (dragonTimer && dragon.timeToSpawn > 0) {
