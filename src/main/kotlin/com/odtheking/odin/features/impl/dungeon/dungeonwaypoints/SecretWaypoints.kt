@@ -17,27 +17,21 @@ import net.minecraft.world.phys.Vec3
 
 object SecretWaypoints {
 
-    private var routeTimer: Long? = null
-    private var checkpoints = 0
-
     fun onSecret(event: SecretPickupEvent) {
         when (event) {
-            is SecretPickupEvent.Interact -> clickSecret(event.blockPos, 0.0)
-            is SecretPickupEvent.Bat -> clickSecret(BlockPos.containing(event.packet.x, event.packet.y, event.packet.z), 5.0)
-            is SecretPickupEvent.Item -> clickSecret(event.entity.blockPosition(), 3.0)
+            is SecretPickupEvent.Interact -> clickSecret(event.blockPos, 0)
+            is SecretPickupEvent.Bat -> clickSecret(BlockPos.containing(event.packet.x, event.packet.y, event.packet.z), 5)
+            is SecretPickupEvent.Item -> clickSecret(event.entity.blockPosition(), 3)
         }
     }
 
     fun onEtherwarp(packet: ClientboundPlayerPositionPacket) {
-        if (!DungeonUtils.inDungeons) return
-        val etherPos = lastEtherPos ?: return
-        if (System.currentTimeMillis() - lastEtherTime > 1000) return
-        if (packet.change.position.distanceTo(Vec3(etherPos)) > 3) return
+        if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return
         val room = DungeonUtils.currentRoom ?: return
+        val etherPos = lastEtherPos ?: return
+        if (System.currentTimeMillis() - lastEtherTime > 1000 || packet.change.position.distanceTo(Vec3(etherPos)) > 3) return
         val waypoints = getWaypoints(room)
-        waypoints.find { wp ->
-            wp.blockPos == room.getRelativeCoords(etherPos) && wp.type == WaypointType.ETHERWARP
-        }?.let {
+        waypoints.find { wp -> wp.blockPos == room.getRelativeCoords(etherPos) && wp.type == WaypointType.ETHERWARP }?.let {
             it.isClicked = true
             lastEtherPos = null
             room.setWaypoints()
@@ -45,16 +39,17 @@ object SecretWaypoints {
         }
     }
 
-    private fun clickSecret(pos: BlockPos, distance: Double) {
+    private fun clickSecret(pos: BlockPos, distance: Int) {
+        if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return
         val room = DungeonUtils.currentRoom ?: return
         val blockPos = room.getRelativeCoords(pos)
 
         val waypoints = getWaypoints(room)
-        if (distance == 0.0) getWaypoints(room).find { wp -> wp.blockPos == blockPos && wp.secret && !wp.isClicked }
+        if (distance == 0) waypoints.find { wp -> wp.blockPos == blockPos && wp.isSecret && !wp.isClicked }
         else {
             waypoints.fold(null) { near: DungeonWaypoint?, wp ->
                 val waypointDistance = wp.blockPos.distSqr(blockPos)
-                if (waypointDistance <= distance && wp.secret && !wp.isClicked && (near == null || waypointDistance < near.blockPos.distSqr(blockPos))) wp
+                if (waypointDistance <= distance && wp.isSecret && !wp.isClicked && (near == null || waypointDistance < near.blockPos.distSqr(blockPos))) wp
                 else near
             }
         }?.let {
@@ -65,9 +60,6 @@ object SecretWaypoints {
     }
 
     fun resetSecrets() {
-        checkpoints = 0
-        routeTimer = null
-
         DungeonWaypointConfig.waypoints.values.forEach { roomWaypoints ->
             roomWaypoints.forEach { it.isClicked = false }
         }

@@ -111,11 +111,9 @@ object DungeonWaypoints : Module(
             if (renderTitle) {
                 for (waypoint in room.waypoints) {
                     if (waypoint.isClicked || waypoint.title == null) continue
-
-                    val pos = waypoint.blockPos.center.add(0.0, 0.1 * titleScale, 0.0)
                     context.drawText(
                         Component.literal(waypoint.title).visualOrderText,
-                        pos, titleScale, waypoint.depth
+                        waypoint.blockPos.center.add(0.0, 0.1 * titleScale, 0.0), titleScale, waypoint.depth
                     )
                 }
             }
@@ -222,8 +220,7 @@ object DungeonWaypoints : Module(
         var type: WaypointType? = null,
         @Transient var isClicked: Boolean = false,
     ) {
-        inline val secret: Boolean
-            get() = type == WaypointType.SECRET
+        inline val isSecret: Boolean get() = type == WaypointType.SECRET
     }
 
     override fun onKeybind() {

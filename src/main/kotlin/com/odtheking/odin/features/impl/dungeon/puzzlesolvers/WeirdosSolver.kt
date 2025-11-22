@@ -9,7 +9,6 @@ import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRelativeCoords
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.core.BlockPos
-import net.minecraft.core.Vec3i
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.entity.decoration.ArmorStand
 import net.minecraft.world.phys.AABB
@@ -24,7 +23,7 @@ object WeirdosSolver {
         val correctNPC = mc.level?.entitiesForRendering()?.find { it is ArmorStand && it.name.string == npc } ?: return
         val room = DungeonUtils.currentRoom ?: return
         val relativePos = room.getRelativeCoords(BlockPos(correctNPC.x.toInt() - 1, 69, correctNPC.z.toInt() - 1))
-        val pos = room.getRealCoords(relativePos.subtract(Vec3i(-1, 0, 0)))
+        val pos = room.getRealCoords(relativePos.offset(1, 0, 0))
 
         if (solutions.any { it.matches(msg) }) {
             correctPos = pos

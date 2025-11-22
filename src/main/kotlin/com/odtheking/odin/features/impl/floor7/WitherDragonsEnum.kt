@@ -31,7 +31,6 @@ enum class WitherDragonsEnum(
     var entityUUID: UUID? = null,
     var isSprayed: Boolean = false,
     var spawnedTime: Long = 0,
-    var health: Float = 0f,
     val skipKillTime: Int = 0
 ) {
     Red(BlockPos(27, 14, 59), AABB(14.5, 13.0, 45.5, 39.5, 28.0, 70.5), 'c', Colors.MINECRAFT_RED, 24.0..30.0, 56.0..62.0, skipKillTime = 50),

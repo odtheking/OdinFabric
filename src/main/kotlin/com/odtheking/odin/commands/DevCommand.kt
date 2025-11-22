@@ -13,10 +13,10 @@ import com.odtheking.odin.features.impl.floor7.WitherDragonsEnum
 import com.odtheking.odin.features.impl.nether.NoPre
 import com.odtheking.odin.features.impl.render.ClickGUIModule.webSocketUrl
 import com.odtheking.odin.features.impl.render.PlayerSize
-import com.odtheking.odin.utils.customData
-import com.odtheking.odin.utils.modMessage
-import com.odtheking.odin.utils.sendCommand
-import com.odtheking.odin.utils.setClipboardContent
+import com.odtheking.odin.features.impl.render.PlayerSize.DEV_SERVER
+import com.odtheking.odin.features.impl.render.PlayerSize.buildDevBody
+import com.odtheking.odin.utils.*
+import com.odtheking.odin.utils.network.WebUtils.postData
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.odtheking.odin.utils.skyblock.Supply
@@ -62,6 +62,16 @@ val devCommand = Commodore("oddev") {
 
     literal("deletedevs").runs {
         PlayerSize.randoms.clear()
+    }
+
+    literal("adddev").runs { name: String, password: String, xSize: Float?, ySize: Float?, zSize: Float? ->
+        val x = xSize ?: 0.6f
+        val y = ySize ?: 0.6f
+        val z = zSize ?: 0.6f
+        modMessage("Sending data... name: $name, x: $x, y: $y, z: $z")
+        OdinMod.scope.launch {
+            modMessage(postData(DEV_SERVER, buildDevBody(name, Colors.WHITE, x, y, z, false, " ", password)).getOrNull())
+        }
     }
 
     literal("generatefeaturelist").runs {
@@ -127,22 +137,15 @@ val devCommand = Commodore("oddev") {
         WitherDragonsEnum.entries.forEach { dragon ->
             val stateInfo = buildString {
                 when (dragon.state) {
-                    WitherDragonState.ALIVE -> {
-                        append("§a✓ ALIVE")
-
-                        append(" §8│ Health: (${dragon.health}§8)")
-
-                    }
+                    WitherDragonState.ALIVE -> append("§a✓ ALIVE")
                     WitherDragonState.SPAWNING -> append("§e⚡ SPAWNING")
                     WitherDragonState.DEAD -> append("§7✗ DEAD")
                 }
-                append(" §8│ §eIn §f${String.format("%.1f", dragon.timeToSpawn / 20f)}§es")
+                append(" §8│ §eIn §f${(dragon.timeToSpawn / 20f).toFixed()}§es")
             }
 
-
-
             val spawnInfo = buildString {
-                if (dragon.timesSpawned > 0) append(" §8│ §7Spawned: §fx${dragon.timesSpawned}")
+                append(" §8│ §7Spawned: §fx${dragon.timesSpawned}")
             }
 
             val flags = buildString {

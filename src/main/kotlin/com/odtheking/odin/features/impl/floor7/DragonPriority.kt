@@ -16,6 +16,8 @@ import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 object DragonPriority {
 
     private val defaultOrder = listOf(WitherDragonsEnum.Red, WitherDragonsEnum.Orange, WitherDragonsEnum.Blue, WitherDragonsEnum.Purple, WitherDragonsEnum.Green)
+    private val dragonList = listOf(WitherDragonsEnum.Orange, WitherDragonsEnum.Green, WitherDragonsEnum.Red, WitherDragonsEnum.Blue, WitherDragonsEnum.Purple)
+
 
     fun findPriority(spawningDragons: MutableList<WitherDragonsEnum>): WitherDragonsEnum =
         if (!dragonPriorityToggle) spawningDragons.minBy { defaultOrder.indexOf(it) }
@@ -24,8 +26,6 @@ object DragonPriority {
     private fun sortPriority(spawningDragons: MutableList<WitherDragonsEnum>): WitherDragonsEnum {
         val totalPower = Blessing.POWER.current * (if (paulBuff) 1.25 else 1.0) + (if (Blessing.TIME.current > 0) 2.5 else 0.0)
         val playerClass = DungeonUtils.currentDungeonPlayer.clazz.apply { if (this == DungeonClass.Unknown) modMessage("§cFailed to get dungeon class.") }
-
-        val dragonList = listOf(WitherDragonsEnum.Orange, WitherDragonsEnum.Green, WitherDragonsEnum.Red, WitherDragonsEnum.Blue, WitherDragonsEnum.Purple)
 
         val priorityList =
             if (totalPower >= normalPower || (spawningDragons.any { it == WitherDragonsEnum.Purple } && totalPower >= easyPower))

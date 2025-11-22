@@ -11,19 +11,21 @@ import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
-import com.odtheking.odin.utils.*
+import com.odtheking.odin.utils.Colors
+import com.odtheking.odin.utils.PersonalBest
 import com.odtheking.odin.utils.handlers.TickTask
+import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
+import com.odtheking.odin.utils.toFixed
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket
-import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 
 object WitherDragons : Module(
     name = "Wither Dragons",
@@ -112,11 +114,11 @@ object WitherDragons : Module(
 
             WitherDragonsEnum.entries.forEach { dragon ->
                 if (dragonHealth) {
-                    dragon.entityUUID?.let { mc.level?.getEntity(it) as? EnderDragon }?.let {
-                        if (it.isAlive) {
+                    DragonCheck.dragonHealthMap.forEach { (_, data) ->
+                        if (data.second > 0) {
                             context.drawText(
-                                Component.literal(colorHealth(dragon.health)).visualOrderText,
-                                it.renderPos, 5f, false
+                                Component.literal(colorHealth(data.second)).visualOrderText,
+                                data.first, 5f, false
                             )
                         }
                     }
@@ -135,6 +137,7 @@ object WitherDragons : Module(
         }
 
         on<WorldLoadEvent> {
+            DragonCheck.dragonHealthMap.clear()
             WitherDragonsEnum.reset()
         }
     }

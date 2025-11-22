@@ -56,9 +56,7 @@ object IceFillSolver {
 
             for (patternIndex in floorIdentifiers.indices) {
                 if (isRealAir(floorIdentifiers[patternIndex][0]) && !isRealAir(floorIdentifiers[patternIndex][1])) {
-
                     currentPatterns.addAll(patterns[index][patternIndex].map { Vec3(getRealCoords(it)).add(0.5, 0.1, 0.5) })
-
                     return@forEach
                 }
             }

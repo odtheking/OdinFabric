@@ -37,9 +37,9 @@ object Etherwarp : Module(
     description = "Provides configurable visual feedback for etherwarp."
 ) {
     private val render by BooleanSetting("Show Guess", true, desc = "Shows where etherwarp will take you.")
-    private val color by ColorSetting("Color", Colors.MINECRAFT_GOLD.withAlpha(.5f), allowAlpha = true, desc = "Color of the box.").withDependency { render }
+    private val color by ColorSetting("Color", Colors.MINECRAFT_GOLD.withAlpha(.5f), true, desc = "Color of the box.").withDependency { render }
     private val renderFail by BooleanSetting("Show when failed", true, desc = "Shows the box even when the guess failed.").withDependency { render }
-    private val failColor by ColorSetting("Fail Color", Colors.MINECRAFT_RED.withAlpha(.5f), allowAlpha = true, desc = "Color of the box if guess failed.").withDependency { renderFail }
+    private val failColor by ColorSetting("Fail Color", Colors.MINECRAFT_RED.withAlpha(.5f), true, desc = "Color of the box if guess failed.").withDependency { renderFail }
     private val renderStyle by SelectorSetting("Render Style", "Outline", listOf("Filled", "Outline", "Filled Outline"), desc = "Style of the box.").withDependency { render }
     private val useServerPosition by BooleanSetting("Use Server Position", false, desc = "Uses the server position for etherwarp instead of the client position.").withDependency { render }
     private val fullBlock by BooleanSetting("Full Block", false, desc = "Renders the the 1x1x1 block instead of it's actual size.").withDependency { render }
