@@ -31,13 +31,13 @@ dependencies {
     }
 
     property("okhttp_version").let {
-        implementation("com.squareup.okhttp3:okhttp:$it")
-        include("com.squareup.okhttp3:okhttp:$it")
+        implementation("com.squareup.okhttp3:okhttp-jvm:$it")
+        include("com.squareup.okhttp3:okhttp-jvm:$it")
     }
 
     property("okio_version").let {
-        implementation("com.squareup.okio:okio:$it")
-        include("com.squareup.okio:okio:$it")
+        implementation("com.squareup.okio:okio-jvm:$it")
+        include("com.squareup.okio:okio-jvm:$it")
     }
 
     modCompileOnly("com.terraformersmc:modmenu:${property("modmenu_version")}")
