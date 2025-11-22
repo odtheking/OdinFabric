@@ -23,11 +23,14 @@ import net.minecraft.world.level.ClipContext
 
 object Highlight : Module(
     name = "Highlight",
-    description = "Allows you to highlight selected mobs."
+    description = "Allows you to highlight selected entities."
 ) {
+    private val highlightStar by BooleanSetting("Highlight Starred Mobs", true, desc = "Highlights starred dungeon mobs.")
     private val color by ColorSetting("Highlight color", Colors.WHITE.withAlpha(0.75f), true, desc = "The color of the highlight.")
     private val renderStyle by SelectorSetting("Render Style", "Outline", listOf("Filled", "Outline", "Filled Outline"), desc = "Style of the box.")
     private val hideNonNames by BooleanSetting("Hide non-starred names", true, desc = "Hides names of entities that are not starred.")
+
+    private val teammateClassGlow by BooleanSetting("Teammate Class Glow", true, desc = "Highlights dungeon teammates based on their class color.")
 
     private val dungeonMobSpawns = hashSetOf("Lurker", "Dreadlord", "Souleater", "Zombie", "Skeleton", "Skeletor", "Sniper", "Super Archer", "Spider", "Fels", "Withermancer")
     // https://regex101.com/r/QQf502/1
@@ -36,7 +39,7 @@ object Highlight : Module(
 
     init {
         on<TickEvent.End> {
-            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
+            if (!highlightStar || !DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
 
             val entitiesToRemove = mutableListOf<Entity>()
             mc.level?.entitiesForRendering()?.forEach { e ->
@@ -56,7 +59,7 @@ object Highlight : Module(
         }
 
         on<RenderEvent.Last> {
-            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
+            if (!highlightStar || !DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
 
             entities.forEach { entity ->
                 if (!entity.isAlive) return@forEach
@@ -81,4 +84,10 @@ object Highlight : Module(
             is Player -> entity.uuid.version() == 2 && entity != mc.player
             else -> !entity.isInvisible
         }
+
+    @JvmStatic
+    fun getTeammateColor(entity: Entity): Int? {
+        if (!enabled || !teammateClassGlow || !DungeonUtils.inDungeons || entity !is Player) return null
+        return DungeonUtils.dungeonTeammatesNoSelf.find { it.name == entity.name?.string }?.clazz?.color?.rgba
+    }
 }

@@ -31,7 +31,11 @@ object RenderOptimizer : Module(
 
         onReceive<ClientboundSetEntityDataPacket> {
             if (hideDyingMobs)
-                mc.level?.getEntity(id)?.let { if (!it.isAlive) it.remove(Entity.RemovalReason.DISCARDED) }
+                mc.execute {
+                    (packedItems.find { it.id == 9 }?.value as? Float)?.let {
+                        if (it <= 0f) mc.level?.getEntity(id)?.remove(Entity.RemovalReason.DISCARDED)
+                    }
+                }
         }
 
         onReceive<ClientboundLevelParticlesPacket> {
