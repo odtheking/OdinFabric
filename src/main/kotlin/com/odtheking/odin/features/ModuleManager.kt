@@ -40,11 +40,11 @@ object ModuleManager {
 
         // floor 7
         TerminalSimulator, TerminalSolver, TerminalTimes, TerminalSounds, TickTimers, ArrowAlign, InactiveWaypoints,
-        MelodyMessage, WitherDragons, SimonSays,
+        MelodyMessage, WitherDragons, SimonSays, KingRelics,
 
         // render
         ClickGUIModule, Camera, Etherwarp, PlayerSize, PerformanceHUD, RenderOptimizer,
-        PlayerDisplay, Waypoints, HidePlayers, Highlight,
+        PlayerDisplay, Waypoints, HidePlayers, Highlight, GyroWand,
 
         //skyblock
         ChatCommands, NoCursorReset, Ragnarock, SpringBoots, WardrobeKeybinds, PetKeybinds, AutoSprint,
