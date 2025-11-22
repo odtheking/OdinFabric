@@ -100,7 +100,7 @@ object TickTimers : Module(
             if (necronTime >= 0 && necronHud.enabled) necronTime--
             if (outboundsTime == 0 && outboundsHud.enabled) outboundsTime = 40
             if (outboundsTime >= 0 && outboundsHud.enabled) outboundsTime--
-            if (secretsTime == 0 && secretsHud.enabled) secretsTime = 20
+            if (secretsTime == 0 && secretsHud.enabled && !DungeonUtils.inBoss) secretsTime = 20
             if (secretsTime >= 0 && secretsHud.enabled) secretsTime--
         }
 
