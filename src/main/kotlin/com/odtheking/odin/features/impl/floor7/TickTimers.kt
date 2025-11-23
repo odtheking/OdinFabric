@@ -92,16 +92,17 @@ object TickTimers : Module(
 
         TickTask(0, true) {
             if (!DungeonUtils.inDungeons) return@TickTask
+            if (outboundsTime == 0 && outboundsHud.enabled) outboundsTime = 40
+            if (outboundsTime >= 0 && outboundsHud.enabled) outboundsTime--
+            if (secretsTime == 0 && secretsHud.enabled && !DungeonUtils.inBoss) secretsTime = 20
+            if (secretsTime >= 0 && secretsHud.enabled) secretsTime--
+            if (!DungeonUtils.inBoss) return@TickTask
             if (goldorTickTime == 0 && goldorStartTime <= 0 && goldorHud.enabled) goldorTickTime = 60
             if (goldorStartTime >= 0 && goldorHud.enabled) goldorStartTime--
             if (goldorTickTime >= 0 && goldorHud.enabled) goldorTickTime--
             if (padTickTime == 0 && stormHud.enabled) padTickTime = 20
             if (padTickTime >= 0 && stormHud.enabled) padTickTime--
             if (necronTime >= 0 && necronHud.enabled) necronTime--
-            if (outboundsTime == 0 && outboundsHud.enabled) outboundsTime = 40
-            if (outboundsTime >= 0 && outboundsHud.enabled) outboundsTime--
-            if (secretsTime == 0 && secretsHud.enabled && !DungeonUtils.inBoss) secretsTime = 20
-            if (secretsTime >= 0 && secretsHud.enabled) secretsTime--
         }
 
         onReceive<ClientboundSetTimePacket> {
@@ -109,7 +110,7 @@ object TickTimers : Module(
             val dungeonNotStarted = DungeonUtils.openRoomCount == 0
             val gameTime = mc.level?.gameTime ?: -1
             if (dungeonNotStarted) {
-                if (outboundsHud.enabled) outboundsTime = 40 -(gameTime % 40).toInt()
+                if (outboundsHud.enabled) outboundsTime = 40 - (gameTime % 40).toInt()
             } else {
                 if (secretsHud.enabled) secretsTime = 20 - (gameTime % 20).toInt()
                 outboundsTime = -1
