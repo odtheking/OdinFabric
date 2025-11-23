@@ -119,7 +119,7 @@ object WitherDragons : Module(
                 if (dragonHealth) {
                     DragonCheck.dragonHealthMap.forEach { (_, data) ->
                         if (data.second > 0) {
-                            context.drawText(
+                            drawText(
                                 Component.literal(colorHealth(data.second)).visualOrderText,
                                 data.first, 5f, false
                             )

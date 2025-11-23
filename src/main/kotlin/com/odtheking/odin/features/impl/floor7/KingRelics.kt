@@ -87,7 +87,7 @@ object KingRelics : Module(
 
             Relic.entries.forEach {
                 if (currentRelic?.id == it.id) {
-                    context.drawCustomBeacon(Component.empty().visualOrderText, it.cauldronPosition, it.color, distance = false)
+                    drawCustomBeacon(Component.empty().visualOrderText, it.cauldronPosition, it.color, distance = false)
                 }
             }
         }
