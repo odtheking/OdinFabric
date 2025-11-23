@@ -109,9 +109,9 @@ object TickTimers : Module(
             val dungeonNotStarted = DungeonUtils.openRoomCount == 0
             val gameTime = mc.level?.gameTime ?: -1
             if (dungeonNotStarted) {
-                if (outboundsHud.enabled)  outboundsTime = 40 -(gameTime % 40).toInt()
+                if (outboundsHud.enabled) outboundsTime = 40 -(gameTime % 40).toInt()
             } else {
-                if (secretsHud.enabled)  secretsTime = 20 - (gameTime % 20).toInt()
+                if (secretsHud.enabled) secretsTime = 20 - (gameTime % 20).toInt()
                 outboundsTime = -1
             }
         }
