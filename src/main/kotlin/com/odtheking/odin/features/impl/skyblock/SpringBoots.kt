@@ -40,7 +40,7 @@ object SpringBoots : Module(
             val id = sound.value().location
 
             when {
-                SoundEvents.NOTE_BLOCK_PLING.`is`(id) && mc.player?.isCrouching == true && EquipmentSlot.FEET isItem "SPRING_BOOTS" ->
+                SoundEvents.NOTE_BLOCK_PLING.`is`(id) && mc.player?.isCrouching == true && EquipmentSlot.FEET.isItem("SPRING_BOOTS") ->
                     when (pitch) {
                         0.6984127f -> lowCount = (lowCount + 1).coerceAtMost(2)
                         in pitchSet -> highCount++
@@ -56,7 +56,7 @@ object SpringBoots : Module(
         }
 
         on<TickEvent.End> {
-            if (!LocationUtils.isInSkyblock || mc.player?.isCrouching == true || !(EquipmentSlot.FEET isItem "SPRING_BOOTS")) return@on
+            if (!LocationUtils.isInSkyblock || mc.player?.isCrouching == true || !EquipmentSlot.FEET.isItem("SPRING_BOOTS")) return@on
             highCount = 0
             lowCount = 0
             blockAmount = 0f

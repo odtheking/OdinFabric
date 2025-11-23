@@ -70,7 +70,7 @@ object EventDispatcher {
 
         onReceive<ClientboundSoundPacket> {
             if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
-            if (sound.equalsOneOf(SoundEvents.BAT_HURT, SoundEvents.BAT_DEATH) && volume == 0.1f)
+            if (sound.value().equalsOneOf(SoundEvents.BAT_HURT, SoundEvents.BAT_DEATH) && volume == 0.1f)
                 SecretPickupEvent.Bat(this).postAndCatch()
         }
 

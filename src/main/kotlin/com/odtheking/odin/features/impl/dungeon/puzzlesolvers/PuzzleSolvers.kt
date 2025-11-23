@@ -88,7 +88,6 @@ object PuzzleSolvers : Module(
     private val boulderColor by ColorSetting("Boulder Color", Colors.MINECRAFT_GREEN.withAlpha(.5f), true, desc = "The color of the box.").withDependency { boulderDropDown && boulderSolver }
 
     private val puzzleTimers by BooleanSetting("Puzzle Timers", true, desc = "Shows the time it took to solve each puzzle.")
-    private val sendPuzzleTime by BooleanSetting("Send Puzzle Time", false, desc = "Sends the time it took to solve each puzzle in party chat.").withDependency { puzzleTimers }
     private val puzzleTimersMap = hashMapOf<String, PuzzleTimer>()
     private data class PuzzleTimer(val timeEntered: Long = System.currentTimeMillis(), var sentMessage: Boolean = false)
     private val weirdosRegex = Regex("\\[NPC] (.+): (.+).?")

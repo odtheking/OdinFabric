@@ -4,10 +4,12 @@ import com.google.common.collect.ImmutableMultimap
 import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
 import com.mojang.authlib.properties.PropertyMap
+import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.utils.network.hypixelapi.HypixelData
 import net.minecraft.core.component.DataComponents
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component
+import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.component.CustomData
@@ -93,9 +95,10 @@ fun createSkullStack(textureHash: String): ItemStack {
 }
 
 fun ItemStack.isEtherwarpItem(): CompoundTag? =
-    customData.takeIf {
-        it.getInt("ethermerge").orElse(0) == 1 || it.itemId == "ETHERWARP_CONDUIT"
-    }
+    customData.takeIf { it.getInt("ethermerge").orElse(0) == 1 || it.itemId == "ETHERWARP_CONDUIT" }
 
 fun ItemStack.hasGlint(): Boolean =
     componentsPatch.get(DataComponents.ENCHANTMENT_GLINT_OVERRIDE)?.isPresent == true
+
+fun EquipmentSlot.isItem(itemId: String): Boolean =
+    mc.player?.getItemBySlot(this)?.itemId == itemId

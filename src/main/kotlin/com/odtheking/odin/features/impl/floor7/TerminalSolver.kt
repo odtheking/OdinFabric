@@ -92,7 +92,7 @@ object TerminalSolver : Module(
                     StartsWithHandler(startsWithRegex.find(windowName)?.groupValues?.get(1) ?: return@onReceive modMessage("Failed to find letter, please report this!"))
 
                 TerminalTypes.SELECT ->
-                    SelectAllHandler(DyeColor.entries.find { it.name.replace("_", " ").equals(selectAllRegex.find(windowName)?.groupValues?.get(1), true) } ?: return@onReceive modMessage("Failed to find color, please report this!"))
+                    SelectAllHandler(DyeColor.entries.find { it.name.replace("_", " ").equals(selectAllRegex.find(windowName)?.groupValues?.get(1)?.replace("SILVER", "light_gray"), true) } ?: return@onReceive modMessage("Failed to find color, please report this!"))
 
                 TerminalTypes.MELODY -> MelodyHandler()
             }
@@ -150,7 +150,11 @@ object TerminalSolver : Module(
 
         on<GuiEvent.SlotClick> (EventPriority.HIGH) {
             if (!enabled || currentTerm == null) return@on
-            if (blockIncorrectClicks && currentTerm?.canClick(slotId, button) == false) {
+
+            if (
+                (renderType == 1 && !(currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver)) ||
+                (blockIncorrectClicks && currentTerm?.canClick(slotId, button) == false)
+            ) {
                 cancel()
                 return@on
             }

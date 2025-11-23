@@ -8,6 +8,9 @@ import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onSend
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.addVec
+import com.odtheking.odin.utils.component1
+import com.odtheking.odin.utils.component2
+import com.odtheking.odin.utils.component3
 import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
@@ -26,7 +29,6 @@ object ArrowAlign : Module(
 ) {
     private val blockWrong by BooleanSetting("Block Wrong Clicks", false, desc = "Blocks wrong clicks, shift will override this.")
     private val invertSneak by BooleanSetting("Invert Sneak", false, desc = "Only block wrong clicks whilst sneaking, instead of whilst standing").withDependency { blockWrong }
-
 
     private val recentClickTimestamps = mutableMapOf<Int, Long>()
     private val clicksRemaining = mutableMapOf<Int, Int>()
@@ -67,10 +69,7 @@ object ArrowAlign : Module(
                 override fun onInteraction(hand: InteractionHand) {
                     val entity = mc.level?.getEntity((this@onSend as ServerboundInteractPacketAccessor).entityId) as? ItemFrame ?: return
                     if (entity.item?.item != Items.ARROW) return
-                    val pos = entity.blockPosition()
-                    val x = pos.x
-                    val y = pos.y
-                    val z = pos.z
+                    val (x, y, z) = entity.blockPosition()
 
                     val frameIndex = ((y - frameGridCorner.y) + (z - frameGridCorner.z) * 5)
                     if (x != frameGridCorner.x || currentFrameRotations?.get(frameIndex) == -1 || frameIndex !in 0..24) return

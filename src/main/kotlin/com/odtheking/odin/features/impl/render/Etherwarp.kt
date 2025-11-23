@@ -3,6 +3,7 @@ package com.odtheking.odin.features.impl.render
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.*
 import com.odtheking.odin.events.RenderEvent
+import com.odtheking.odin.events.core.EventPriority
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.events.core.onSend
@@ -36,13 +37,13 @@ object Etherwarp : Module(
     description = "Provides configurable visual feedback for etherwarp."
 ) {
     private val render by BooleanSetting("Show Guess", true, desc = "Shows where etherwarp will take you.")
-    private val color by ColorSetting("Color", Colors.MINECRAFT_GOLD.withAlpha(.5f), allowAlpha = true, desc = "Color of the box.").withDependency { render }
+    private val color by ColorSetting("Color", Colors.MINECRAFT_GOLD.withAlpha(.5f), true, desc = "Color of the box.").withDependency { render }
     private val renderFail by BooleanSetting("Show when failed", true, desc = "Shows the box even when the guess failed.").withDependency { render }
-    private val failColor by ColorSetting("Fail Color", Colors.MINECRAFT_RED.withAlpha(.5f), allowAlpha = true, desc = "Color of the box if guess failed.").withDependency { renderFail }
+    private val failColor by ColorSetting("Fail Color", Colors.MINECRAFT_RED.withAlpha(.5f), true, desc = "Color of the box if guess failed.").withDependency { renderFail }
     private val renderStyle by SelectorSetting("Render Style", "Outline", listOf("Filled", "Outline", "Filled Outline"), desc = "Style of the box.").withDependency { render }
     private val useServerPosition by BooleanSetting("Use Server Position", false, desc = "Uses the server position for etherwarp instead of the client position.").withDependency { render }
     private val fullBlock by BooleanSetting("Full Block", false, desc = "Renders the the 1x1x1 block instead of it's actual size.").withDependency { render }
-    private val depth by BooleanSetting("Depth", true, desc = "Renders the box through walls.").withDependency { render }
+    private val depth by BooleanSetting("Depth", false, desc = "Renders the box through walls.").withDependency { render }
 
     private val dropdown by DropdownSetting("Sounds", false)
     private val sounds by BooleanSetting("Custom Sounds", false, desc = "Plays the selected custom sound when you etherwarp.").withDependency { dropdown }
@@ -54,12 +55,12 @@ object Etherwarp : Module(
     init {
         onReceive<ClientboundSoundPacket> {
             if (!sounds || sound.value() != SoundEvents.ENDER_DRAGON_HURT || volume != 1f || pitch != 0.53968257f) return@onReceive
-            mc.execute { playSoundAtPlayer(SoundEvent.createVariableRangeEvent(ResourceLocation.withDefaultNamespace(customSound))) }
+            playSoundAtPlayer(SoundEvent.createVariableRangeEvent(ResourceLocation.withDefaultNamespace(customSound)))
             it.cancel()
         }
 
-        on<RenderEvent.Last> {
-            if (mc.options?.keyShift?.isDown == false || mc.screen != null || !render) return@on
+        on<RenderEvent.Last> (EventPriority.LOW) {
+            if (mc.player?.isShiftKeyDown == false || mc.screen != null || !render) return@on
 
             etherPos = getEtherPos(
                 if (useServerPosition) mc.player?.oldPosition() else mc.player?.position(),
@@ -76,7 +77,7 @@ object Etherwarp : Module(
         }
 
         onSend<ServerboundUseItemPacket> {
-            if (!LocationUtils.currentArea.isArea(Island.SinglePlayer) || mc.options?.keyShift?.isDown == false || mc.player?.mainHandItem?.isEtherwarpItem() == null) return@onSend
+            if (!LocationUtils.currentArea.isArea(Island.SinglePlayer) || mc.player?.isShiftKeyDown == false || mc.player?.mainHandItem?.isEtherwarpItem() == null) return@onSend
 
             etherPos?.pos?.let {
                 if (etherPos?.succeeded == false) return@onSend
@@ -97,6 +98,7 @@ object Etherwarp : Module(
     }
 
     data class EtherPos(val succeeded: Boolean, val pos: BlockPos?, val state: BlockState?) {
+        val vec3: Vec3 by lazy { Vec3(pos) }
 
         companion object {
             val NONE = EtherPos(false, null, null)

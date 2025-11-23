@@ -126,12 +126,6 @@ object DungeonListener {
         }
     }
 
-//    @SubscribeEvent
-//    fun onEntityJoin(event: EntityJoinWorldEvent) {
-//        val teammate = dungeonTeammatesNoSelf.find { it.name == event.entity.name } ?: return
-//        teammate.entity = event.entity as? EntityPlayer ?: return
-//    }
-
     private fun getDungeonPuzzles(tabList: List<String>) {
         for (entry in tabList) {
             val (name, status) = puzzleRegex.find(entry)?.destructured ?: continue
@@ -164,7 +158,7 @@ object DungeonListener {
 
     private fun updateDungeonTeammates(tabList: List<String>) {
         dungeonTeammates = getDungeonTeammates(dungeonTeammates, tabList)
-        dungeonTeammatesNoSelf = dungeonTeammates.filter { it.entity != mc.player }
+        dungeonTeammatesNoSelf = dungeonTeammates.filter { it.name != mc.player?.name?.string }
 
         leapTeammates =
             when (LeapMenu.type) {

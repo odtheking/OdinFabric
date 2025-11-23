@@ -37,6 +37,15 @@
     "secrets": 3
   },
   {
+    "name": "Arrow Trap",
+    "type": "NORMAL",
+    "cores": [
+      313879976
+    ],
+    "crypts": 1,
+    "secrets": 1
+  },
+  {
     "name": "Atlas",
     "type": "NORMAL",
     "cores": [
@@ -104,7 +113,8 @@
     "name": "Blood",
     "type": "BLOOD",
     "cores": [
-      1898104308
+      1898104308,
+      698844034
     ]
   },
   {

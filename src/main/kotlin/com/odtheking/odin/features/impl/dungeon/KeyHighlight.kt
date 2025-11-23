@@ -40,6 +40,7 @@ object KeyHighlight : Module(
         }
 
         on<RenderEvent.Last> {
+            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
             if (currentKey == null || currentKey?.entity == null) return@on
             currentKey?.let { keyType ->
                 if (keyType.entity?.isAlive == false) {

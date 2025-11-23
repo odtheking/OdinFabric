@@ -11,22 +11,23 @@
     "accessors.AbstractContainerScreenAccessor",
     "accessors.KeyMappingAccessor",
     "accessors.PictureInPictureRendererAccessor",
+    "mixins.AbstractContainerScreenMixin",
     "mixins.BossBarHealthOverlayMixin",
+    "mixins.ChatListenerMixin",
     "mixins.ChatScreenMixin",
     "mixins.ClientPacketListenerMixin",
     "mixins.EntityRendererMixin",
     "mixins.ExperienceBarRendererMixin",
-    "mixins.AbstractContainerScreenMixin",
     "mixins.GuiMixin",
-    "mixins.ScreenEffectRendererMixin",
     "mixins.KeyBindingMixin",
-    "mixins.ChatListenerMixin",
     "mixins.MouseHandlerMixin",
-    "mixins.PlayerRendererMixin"
+    "mixins.PlayerRendererMixin",
+    "mixins.ScreenEffectRendererMixin"
   ],
   "mixins": [
     "accessors.ServerboundInteractPacketAccessor",
     "mixins.ConnectionMixin",
+    "mixins.EntityMixin",
     "mixins.LevelChunkMixin",
     "mixins.YggdrasilSignatureIgnoreMixin"
   ]

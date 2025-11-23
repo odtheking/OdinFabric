@@ -9,7 +9,6 @@ import net.minecraft.network.chat.ClickEvent
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.HoverEvent
 import net.minecraft.world.entity.Entity
-import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.ClickType
 import net.minecraft.world.phys.AABB
@@ -34,10 +33,6 @@ inline val String?.noControlCodes: String
 fun String.containsOneOf(vararg options: String, ignoreCase: Boolean = false): Boolean =
     containsOneOf(options.toList(), ignoreCase)
 
-fun String.capitalizeWords(): String = split(" ").joinToString(" ") { word ->
-    word.replaceFirstChar(Char::titlecase)
-}
-
 /**
  * Checks if the current string contains at least one of the specified strings.
  *
@@ -47,9 +42,6 @@ fun String.capitalizeWords(): String = split(" ").joinToString(" ") { word ->
  */
 fun String.containsOneOf(options: Collection<String>, ignoreCase: Boolean = false): Boolean =
     options.any { this.contains(it, ignoreCase) }
-
-fun Number.toFixed(decimals: Int = 2): String =
-    "%.${decimals}f".format(Locale.US, this)
 
 fun String.startsWithOneOf(vararg options: String, ignoreCase: Boolean = false): Boolean =
     options.any { this.startsWith(it, ignoreCase) }
@@ -95,6 +87,13 @@ fun setClipboardContent(string: String) {
 fun String.capitalizeFirst(): String =
     if (isNotEmpty() && this[0] in 'a'..'z') this[0].uppercaseChar() + substring(1) else this
 
+fun String.capitalizeWords(): String = split(" ").joinToString(" ") { word ->
+    word.replaceFirstChar(Char::titlecase)
+}
+
+fun Number.toFixed(decimals: Int = 2): String =
+    "%.${decimals}f".format(Locale.US, this)
+
 fun formatTime(time: Long, decimalPlaces: Int = 2): String {
     if (time == 0L) return "0s"
     var remaining = time
@@ -122,15 +121,10 @@ inline val Entity.renderZ: Double
         zo + (z - zo) * mc.deltaTracker.getGameTimeDeltaPartialTick(true)
 
 inline val Entity.renderPos: Vec3
-    get() =
-        Vec3(renderX, renderY, renderZ)
+    get() = Vec3(renderX, renderY, renderZ)
 
 inline val Entity.renderBoundingBox: AABB
-    get() =
-        boundingBox.move(renderX - x, renderY - y, renderZ - z)
-
-infix fun EquipmentSlot.isItem(itemId: String): Boolean =
-    mc.player?.getItemBySlot(this)?.itemId == itemId
+    get() = boundingBox.move(renderX - x, renderY - y, renderZ - z)
 
 fun fillItemFromSack(amount: Int, itemId: String, sackName: String, sendMessage: Boolean) {
     val needed = mc.player?.inventory?.find { it?.itemId == itemId }?.count ?: 0
@@ -158,27 +152,9 @@ fun BlockPos.getBlockBounds() =
             ?.takeIf { !it.isEmpty }?.bounds()
     }
 
-
 fun Player.clickSlot(containerId: Int, slotIndex: Int, button: Int = 0, clickType: ClickType = ClickType.PICKUP) {
     mc.gameMode?.handleInventoryMouseClick(containerId, slotIndex, button, clickType, this)
 }
-
-fun getCenteredText(text: String): String {
-    val strippedText = text.noControlCodes
-    if (strippedText.isEmpty()) return text
-    val textWidth = mc.font.width(strippedText)
-    val chatWidth = mc.gui.chat.width
-
-    if (textWidth >= chatWidth) return text
-
-    val spacesNeeded = ((chatWidth - textWidth) / 2 / 4).coerceAtLeast(0)
-    return " ".repeat(spacesNeeded) + text
-}
-
-fun getChatBreak(): String =
-    mc.gui?.chat?.width?.let {
-        "§9§m" + "-".repeat(it / mc.font.width("-"))
-    } ?: ""
 
 fun formatNumber(numStr: String): String {
     val num = numStr.replace(",", "").toDoubleOrNull() ?: return numStr

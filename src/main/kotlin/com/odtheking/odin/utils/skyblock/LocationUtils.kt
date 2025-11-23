@@ -9,6 +9,7 @@ import com.odtheking.odin.utils.equalsOneOf
 import com.odtheking.odin.utils.startsWithOneOf
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket
 import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket
+import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket
 
 object LocationUtils {
     var isOnHypixel: Boolean = false
@@ -40,6 +41,14 @@ object LocationUtils {
 
         onReceive<ClientboundSetObjectivePacket> {
             if (!isInSkyblock) isInSkyblock = isOnHypixel && objectiveName == "SBScoreboard"
+        }
+
+        onReceive<ClientboundSetPlayerTeamPacket> {
+            if (!currentArea.isArea(Island.Unknown)) return@onReceive
+            val team = parameters?.orElse(null) ?: return@onReceive
+            val text = team.playerPrefix?.string?.plus(team.playerSuffix?.string) ?: return@onReceive
+
+            lobbyRegex.find(text)?.groupValues?.get(1)?.let { lobbyId = it }
         }
 
         on<WorldLoadEvent> {

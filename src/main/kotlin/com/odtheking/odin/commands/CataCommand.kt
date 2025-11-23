@@ -124,14 +124,15 @@ private fun buildFloorTimesLine(cata: HypixelData.DungeonTypeData, mm: HypixelDa
         .append(Component.literal(" §8| "))
         .append(Component.literal("§cMaster")
             .withStyle { it.withHoverEvent(HoverEvent.ShowText(buildFloorHover(mm, "§c§lMaster Floors", "§cM"))) })
-        .append(Component.literal(" §8| §7MP: §d${formatNumber(magicalPower.toString())}"))
+        .append(Component.literal(" §8| "))
+        .append(Component.literal("§7MP: §d${formatNumber(magicalPower.toString())}")
             .withStyle { it.withHoverEvent(HoverEvent.ShowText(
                 Component.literal("§bTunings").apply {
                     tunings.forEach {
                         append(Component.literal("\n§7- §e$it"))
                     }
                 }
-            )) }
+            )) })
         .append(Component.literal("\n"))
 
 private data class ArmorPiece(val slot: String, val itemStack: HypixelData.ItemData?)

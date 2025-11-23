@@ -118,8 +118,8 @@ fun RenderEvent.drawStyledBox(
         0 -> drawFilledBox(aabb, color, depth = depth)
         1 -> drawWireFrameBox(aabb, color, depth = depth)
         2 -> {
-            drawWireFrameBox(aabb, color, thickness = 2f, depth = depth)
             drawFilledBox(aabb, color.multiplyAlpha(0.5f), depth = depth)
+            drawWireFrameBox(aabb, color, depth = depth)
         }
     }
 }
@@ -150,7 +150,7 @@ fun RenderEvent.drawBeaconBeam(position: BlockPos, color: Color) {
     matrix.popPose()
 }
 
-fun RenderEvent.drawText(text: FormattedCharSequence?, pos: Vec3, scale: Float, depth: Boolean) {
+fun RenderEvent.drawText(text: FormattedCharSequence, pos: Vec3, scale: Float, depth: Boolean) {
     val stack = context.matrices() ?: return
 
     val camera = context.gameRenderer().mainCamera ?: return

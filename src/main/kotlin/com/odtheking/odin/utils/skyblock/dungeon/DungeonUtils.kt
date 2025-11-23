@@ -83,9 +83,8 @@ object DungeonUtils {
         get() = DungeonListener.leapTeammates
 
     inline val currentDungeonPlayer: DungeonPlayer
-        get() = dungeonTeammates.find { it.name == mc.player?.name?.string } ?: DungeonPlayer(
-            mc.player?.name?.string ?: "Unknown", DungeonClass.Unknown, 0, entity = mc.player
-        )
+        get() = dungeonTeammates.find { it.name == mc.player?.name?.string } ?:
+            DungeonPlayer(mc.player?.name?.string ?: "Unknown", DungeonClass.Unknown, 0, null)
 
     inline val doorOpener: String
         get() = DungeonListener.dungeonStats.doorOpener
@@ -192,23 +191,17 @@ object DungeonUtils {
     private val tablistRegex = Regex("^\\[(\\d+)] (?:\\[\\w+] )*(\\w+) .*?\\((\\w+)(?: (\\w+))*\\)$")
     var customLeapOrder: List<String> = emptyList()
 
-    fun getDungeonTeammates(
-        previousTeammates: ArrayList<DungeonPlayer>,
-        tabList: List<String>
-    ): ArrayList<DungeonPlayer> {
+    fun getDungeonTeammates(previousTeammates: ArrayList<DungeonPlayer>, tabList: List<String>): ArrayList<DungeonPlayer> {
         for (line in tabList) {
             val (_, name, clazz, clazzLevel) = tablistRegex.find(line)?.destructured ?: continue
 
             previousTeammates.find { it.name == name }?.let { player -> player.isDead = clazz == "DEAD" }
                 ?: previousTeammates.add(
                     DungeonPlayer(
-                        name,
-                        DungeonClass.entries.find { it.name == clazz } ?: continue,
-                        clazzLvl = romanToInt(clazzLevel),
-                        mc.connection?.getPlayerInfo(name)?.skin?.body?.id()
-                            ?: ResourceLocation.withDefaultNamespace("textures/entity/steve.png"),
-                        mc.level?.players()?.find { it.name?.string == name } ?: mc.player,
-                        false))
+                        name, DungeonClass.entries.find { it.name == clazz } ?: continue,
+                        romanToInt(clazzLevel), mc.connection?.getPlayerInfo(name)?.skin?.body?.id(), false
+                    )
+                )
         }
         return previousTeammates
     }

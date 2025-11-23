@@ -55,8 +55,8 @@ object KuudraUtils {
                         if (entity.mainHandItem?.hoverName?.string?.endsWith("Head") == true) giantZombies.add(entity)
 
                     is MagmaCube ->
-                        if (entity.size == 30 && entity.getAttributeBaseValue(Attributes.MAX_HEALTH) == 100000.0) kuudraEntity =
-                            entity
+                        if (entity.size == 30 && entity.getAttributeBaseValue(Attributes.MAX_HEALTH) == 100000.0)
+                            kuudraEntity = entity
 
                     is ArmorStand -> {
                         if (entity.name.string.matches(progressRegex)) buildingPiles.add(entity)

@@ -11,19 +11,23 @@ import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
-import com.odtheking.odin.utils.*
+import com.odtheking.odin.utils.Colors
+import com.odtheking.odin.utils.PersonalBest
 import com.odtheking.odin.utils.handlers.TickTask
+import com.odtheking.odin.utils.modMessage
+import com.odtheking.odin.utils.render.drawLine
 import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
+import com.odtheking.odin.utils.toFixed
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket
-import net.minecraft.world.entity.boss.enderdragon.EnderDragon
+import net.minecraft.world.phys.Vec3
 
 object WitherDragons : Module(
     name = "Wither Dragons",
@@ -48,6 +52,7 @@ object WitherDragons : Module(
 
     private val dragonTitleDropDown by DropdownSetting("Dragon Spawn Dropdown")
     val dragonTitle by BooleanSetting("Dragon Title", true, desc = "Displays a title for spawning dragons.").withDependency { dragonTitleDropDown }
+    private val dragonTracers by BooleanSetting("Dragon Tracer", false, desc = "Draws a line to spawning dragons.").withDependency { dragonTitleDropDown }
 
     private val dragonAlerts by DropdownSetting("Dragon Alerts Dropdown")
     private val sendNotification by BooleanSetting("Send Dragon Confirmation", true, desc = "Sends a confirmation message when a dragon dies.").withDependency { dragonAlerts }
@@ -59,11 +64,11 @@ object WitherDragons : Module(
     private val dragonHealth by BooleanSetting("Dragon Health", true, desc = "Displays the health of M7 dragons.")
 
     private val dragonPriorityDropDown by DropdownSetting("Dragon Priority Dropdown")
-    val dragonPriorityToggle by BooleanSetting("Dragon Priority", false, desc = "Displays the priority of dragons spawning.").withDependency { dragonPriorityDropDown }
-    val normalPower by NumberSetting("Normal Power", 22f, 0, 32, desc = "Power needed to split.").withDependency { dragonPriorityToggle && dragonPriorityDropDown }
-    val easyPower by NumberSetting("Easy Power", 19f, 0, 32, desc = "Power needed when its Purple and another dragon.").withDependency { dragonPriorityToggle && dragonPriorityDropDown }
+    val dragonPriorityToggle by BooleanSetting("Dragon Priority", true, desc = "Displays the priority of dragons spawning.").withDependency { dragonPriorityDropDown }
+    val normalPower by NumberSetting("Normal Power", 0, 0, 32, desc = "Power needed to split.").withDependency { dragonPriorityToggle && dragonPriorityDropDown }
+    val easyPower by NumberSetting("Easy Power", 0, 0, 32, desc = "Power needed when its Purple and another dragon.").withDependency { dragonPriorityToggle && dragonPriorityDropDown }
     val soloDebuff by SelectorSetting("Purple Solo Debuff", "Tank", arrayListOf("Tank", "Healer"), desc = "The class that solo debuffs purple, the other class helps b/m.").withDependency { dragonPriorityToggle && dragonPriorityDropDown }
-    val soloDebuffOnAll by BooleanSetting("Solo Debuff on All Splits", true, desc = "Same as Purple Solo Debuff but for all dragons (A will only have 1 debuff).").withDependency { dragonPriorityToggle && dragonPriorityDropDown }
+    val soloDebuffOnAll by BooleanSetting("Solo Debuff on All Splits", false, desc = "Same as Purple Solo Debuff but for all dragons (A will only have 1 debuff).").withDependency { dragonPriorityToggle && dragonPriorityDropDown }
     val paulBuff by BooleanSetting("Paul Buff", false, desc = "Multiplies the power in your run by 1.25.").withDependency { dragonPriorityToggle && dragonPriorityDropDown }
 
     val witherKingRegex = Regex("^\\[BOSS] Wither King: (Oh, this one hurts!|I have more of those\\.|My soul is disposable\\.)$")
@@ -94,7 +99,7 @@ object WitherDragons : Module(
             (DragonCheck.lastDragonDeath ?: WitherDragonsEnum.entries.find { it.state != WitherDragonState.DEAD })
                 ?.apply {
                     if (sendNotification) modMessage("§${colorCode}${name} dragon counts.")
-                    if (state != WitherDragonState.DEAD) setDead()
+                    if (state != WitherDragonState.DEAD) setDead(false)
                     DragonCheck.lastDragonDeath = null
                 }
         }
@@ -111,12 +116,15 @@ object WitherDragons : Module(
             if (DungeonUtils.getF7Phase() != M7Phases.P5) return@on
 
             WitherDragonsEnum.entries.forEach { dragon ->
-                val entity = mc.level?.getEntity(dragon.entityUUID ?: return@forEach) as? EnderDragon ?: return@forEach
-                if (dragonHealth && entity.isAlive) {
-                    drawText(
-                        Component.literal(colorHealth(dragon.health)).visualOrderText,
-                        entity.renderPos, 5f, false
-                    )
+                if (dragonHealth) {
+                    DragonCheck.dragonHealthMap.forEach { (_, data) ->
+                        if (data.second > 0) {
+                            context.drawText(
+                                Component.literal(colorHealth(data.second)).visualOrderText,
+                                data.first, 5f, false
+                            )
+                        }
+                    }
                 }
 
                 if (dragonTimer && dragon.timeToSpawn > 0) {
@@ -129,9 +137,15 @@ object WitherDragons : Module(
                 if (dragonBoxes && dragon.state != WitherDragonState.DEAD)
                     drawWireFrameBox(dragon.aabbDimensions, dragon.color, depth = true)
             }
+
+            priorityDragon?.let { drag ->
+                if (dragonTracers && drag.state == WitherDragonState.SPAWNING)
+                    mc.player?.let { drawLine(listOf(it.eyePosition, Vec3(drag.spawnPos)), color = drag.color, true) }
+            }
         }
 
         on<WorldLoadEvent> {
+            DragonCheck.dragonHealthMap.clear()
             WitherDragonsEnum.reset()
         }
     }

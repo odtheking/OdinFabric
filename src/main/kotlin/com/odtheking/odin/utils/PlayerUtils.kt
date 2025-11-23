@@ -1,13 +1,13 @@
 package com.odtheking.odin.utils
 
 import com.odtheking.odin.OdinMod.mc
-import net.minecraft.network.chat.Component
 import net.minecraft.core.BlockPos
+import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundEvents
 
 fun playSoundAtPlayer(event: SoundEvent, volume: Float = 1f, pitch: Float = 1f) =
-    mc.player?.playSound(event, volume, pitch)
+    mc.execute { mc.player?.playSound(event, volume, pitch) }
 
 fun setTitle(title: String) {
     mc.gui.setTimes(0, 20, 5)

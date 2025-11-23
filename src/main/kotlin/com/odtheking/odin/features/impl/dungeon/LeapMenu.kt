@@ -75,8 +75,9 @@ object LeapMenu : Module(
 
                     val expandValue = hoverHandler[index].anim.get(0f, 15f, !hoverHandler[index].isHovered)
                     NVGRenderer.rect(x - expandValue ,y - expandValue, boxWidth + expandValue * 2, boxHeight + expandValue * 2, (if (colorStyle) player.clazz.color else backgroundColor).rgba, 12f)
-                    imageCacheMap.getOrPut(player.locationSkin.path) {
-                        NVGRenderer.createNVGImage((mc.textureManager?.getTexture(player.locationSkin)?.texture as? GlTexture)?.glId() ?: 0, 64, 64)
+                    val locationSkin = player.locationSkin ?: mc.player?.skin?.texture ?: return@forEachIndexed
+                    imageCacheMap.getOrPut(locationSkin.path) {
+                        NVGRenderer.createNVGImage((mc.textureManager?.getTexture(locationSkin)?.texture as? GlTexture)?.glId() ?: 0, 64, 64)
                     }.let { glTextureId ->
                         NVGRenderer.image(glTextureId, 64, 64, 8, 8, 8, 8, x + 30f, y + 30f, 240f, 240f, 9f)
                     }
@@ -90,13 +91,13 @@ object LeapMenu : Module(
 
         on<GuiEvent.DrawBackground> {
             val chest = (screen as? AbstractContainerScreen<*>) ?: return@on
-            if (!chest.title.string.equalsOneOf("Spirit Leap", "Teleport to Player") || leapTeammates.isEmpty() || leapTeammates.all { it == EMPTY }) return@on
+            if (chest.title?.string?.equalsOneOf("Spirit Leap", "Teleport to Player") == false || leapTeammates.isEmpty() || leapTeammates.all { it == EMPTY }) return@on
             cancel()
         }
 
         on<GuiEvent.MouseClick> {
             val chest = (screen as? AbstractContainerScreen<*>) ?: return@on
-            if (!chest.title.string.equalsOneOf("Spirit Leap", "Teleport to Player") || leapTeammates.isEmpty() || leapTeammates.all { it == EMPTY }) return@on
+            if (chest.title?.string?.equalsOneOf("Spirit Leap", "Teleport to Player") == false || leapTeammates.isEmpty() || leapTeammates.all { it == EMPTY }) return@on
 
             val quadrant = getQuadrant()
             if ((type.equalsOneOf(1,2,3)) && leapTeammates.size < quadrant) return@on
@@ -139,10 +140,10 @@ object LeapMenu : Module(
     }
 
     /*private val leapTeammates: MutableList<DungeonPlayer> = mutableListOf(
-        DungeonPlayer("Stiviaisd", DungeonClass.Healer, 50),
-        DungeonPlayer("Odtheking", DungeonClass.Archer, 50),
-        DungeonPlayer("Bonzi", DungeonClass.Mage, 47),
-        DungeonPlayer("Cezar", DungeonClass.Tank, 38)
+        DungeonPlayer("Stiviaisd", DungeonClass.Healer, 50, null),
+        DungeonPlayer("Odtheking", DungeonClass.Archer, 50, null),
+        DungeonPlayer("Bonzi", DungeonClass.Mage, 47, null),
+        DungeonPlayer("Cezar", DungeonClass.Tank, 38, null)
     )*/
 
     /**

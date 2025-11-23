@@ -1,15 +1,16 @@
 package com.odtheking.odin.features.impl.floor7
 
 import com.odtheking.odin.features.impl.floor7.DragonCheck.lastDragonDeath
-import com.odtheking.odin.features.impl.floor7.DragonPriority.displaySpawningDragon
 import com.odtheking.odin.features.impl.floor7.DragonPriority.findPriority
 import com.odtheking.odin.features.impl.floor7.WitherDragons.currentTick
+import com.odtheking.odin.features.impl.floor7.WitherDragons.dragonPriorityToggle
 import com.odtheking.odin.features.impl.floor7.WitherDragons.priorityDragon
 import com.odtheking.odin.features.impl.floor7.WitherDragons.sendSpawned
 import com.odtheking.odin.features.impl.floor7.WitherDragons.sendSpawning
 import com.odtheking.odin.features.impl.floor7.WitherDragons.sendTime
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Colors
+import com.odtheking.odin.utils.alert
 import com.odtheking.odin.utils.modMessage
 import net.minecraft.core.BlockPos
 import net.minecraft.core.particles.ParticleTypes
@@ -30,7 +31,6 @@ enum class WitherDragonsEnum(
     var entityUUID: UUID? = null,
     var isSprayed: Boolean = false,
     var spawnedTime: Long = 0,
-    var health: Float = 0f,
     val skipKillTime: Int = 0
 ) {
     Red(BlockPos(27, 14, 59), AABB(14.5, 13.0, 45.5, 39.5, 28.0, 70.5), 'c', Colors.MINECRAFT_RED, 24.0..30.0, 56.0..62.0, skipKillTime = 50),
@@ -60,14 +60,14 @@ enum class WitherDragonsEnum(
         }
     }
 
-    fun setDead() {
+    fun setDead(realTime: Boolean) {
         state = WitherDragonState.DEAD
         entityUUID = null
         lastDragonDeath = this
 
         if (priorityDragon == this) priorityDragon = null
 
-        if (sendTime && WitherDragons.enabled)
+        if (sendTime && WitherDragons.enabled && realTime)
             WitherDragons.dragonPBs.time(name, (currentTick - spawnedTime) / 20f, "s§7!", "§${colorCode}${name} §7was alive for §6")
     }
 
@@ -82,7 +82,7 @@ enum class WitherDragonsEnum(
             }
 
             WitherDragonsEnum.entries.forEach {
-                it.timeToSpawn = 100
+                it.timeToSpawn = 0
                 it.timesSpawned = 0
                 it.state = WitherDragonState.DEAD
                 it.entityUUID = null
@@ -133,6 +133,9 @@ fun handleSpawnPacket(particle: ClientboundLevelParticlesPacket) {
     }
 
     if (dragons.isNotEmpty() && (dragons.size == 2 || spawned >= 2) && priorityDragon == null)
-        priorityDragon = findPriority(dragons).also { displaySpawningDragon(it) }
+        priorityDragon = findPriority(dragons).also { dragon ->
+            if (WitherDragons.dragonTitle && WitherDragons.enabled) alert("§${dragon.colorCode}${dragon.name} is spawning!", true)
+            if (dragonPriorityToggle && WitherDragons.enabled) modMessage("${dragons.joinToString(", ") { "§${it.colorCode}${it.name}" }}§r -> §${dragon.colorCode}${dragon.name} §7is your priority dragon!")
+        }
 }
 

@@ -23,30 +23,33 @@ import net.minecraft.world.level.ClipContext
 
 object Highlight : Module(
     name = "Highlight",
-    description = "Allows you to highlight selected mobs."
+    description = "Allows you to highlight selected entities."
 ) {
+    private val highlightStar by BooleanSetting("Highlight Starred Mobs", true, desc = "Highlights starred dungeon mobs.")
     private val color by ColorSetting("Highlight color", Colors.WHITE.withAlpha(0.75f), true, desc = "The color of the highlight.")
     private val renderStyle by SelectorSetting("Render Style", "Outline", listOf("Filled", "Outline", "Filled Outline"), desc = "Style of the box.")
     private val hideNonNames by BooleanSetting("Hide non-starred names", true, desc = "Hides names of entities that are not starred.")
 
+    private val teammateClassGlow by BooleanSetting("Teammate Class Glow", true, desc = "Highlights dungeon teammates based on their class color.")
+
+    private val dungeonMobSpawns = hashSetOf("Lurker", "Dreadlord", "Souleater", "Zombie", "Skeleton", "Skeletor", "Sniper", "Super Archer", "Spider", "Fels", "Withermancer")
     // https://regex101.com/r/QQf502/1
     private val starredRegex = Regex("^.*✯ .*\\d{1,3}(?:,\\d{3})*(?:\\.\\d+)?(?:[kM])?❤$")
-    private const val DEFAULT_STAND_NAME = "Armor Stand"
     private val entities = mutableSetOf<Entity>()
 
     init {
         on<TickEvent.End> {
-            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
+            if (!highlightStar || !DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
 
             val entitiesToRemove = mutableListOf<Entity>()
             mc.level?.entitiesForRendering()?.forEach { e ->
                 val entity = e ?: return@forEach
                 val entityName = mc.level?.getEntity(entity.id)?.takeIf { entity.isAlive }?.name?.string?.noControlCodes ?: return@forEach
 
-                if (hideNonNames && entity is ArmorStand && entity.isInvisible && entityName != DEFAULT_STAND_NAME && !starredRegex.matches(entityName))
+                if (hideNonNames && entity is ArmorStand && entity.isInvisible && dungeonMobSpawns.any { it in entityName } && !starredRegex.matches(entityName))
                     entitiesToRemove.add(entity)
 
-                if (entity !is ArmorStand || entityName == DEFAULT_STAND_NAME || !starredRegex.matches(entityName)) return@forEach
+                if (entity !is ArmorStand || dungeonMobSpawns.none { it in entityName } || !starredRegex.matches(entityName)) return@forEach
 
                 mc.level?.getEntities(entity, entity.boundingBox.move(0.0, -1.0, 0.0)) { isValidEntity(it) }
                     ?.firstOrNull()?.let { entities.add(it) }
@@ -56,7 +59,7 @@ object Highlight : Module(
         }
 
         on<RenderEvent.Last> {
-            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
+            if (!highlightStar || !DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
 
             entities.forEach { entity ->
                 if (!entity.isAlive) return@forEach
@@ -81,4 +84,10 @@ object Highlight : Module(
             is Player -> entity.uuid.version() == 2 && entity != mc.player
             else -> !entity.isInvisible
         }
+
+    @JvmStatic
+    fun getTeammateColor(entity: Entity): Int? {
+        if (!enabled || !teammateClassGlow || !DungeonUtils.inDungeons || entity !is Player) return null
+        return DungeonUtils.dungeonTeammatesNoSelf.find { it.name == entity.name?.string }?.clazz?.color?.rgba
+    }
 }

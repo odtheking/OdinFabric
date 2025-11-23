@@ -6,17 +6,17 @@ import com.odtheking.odin.OdinMod
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.features.ModuleManager.generateFeatureList
+import com.odtheking.odin.features.impl.floor7.MelodyMessage.melodyWebSocket
 import com.odtheking.odin.features.impl.floor7.WitherDragonState
 import com.odtheking.odin.features.impl.floor7.WitherDragons
 import com.odtheking.odin.features.impl.floor7.WitherDragonsEnum
-import com.odtheking.odin.features.impl.floor7.MelodyMessage.melodyWebSocket
 import com.odtheking.odin.features.impl.nether.NoPre
 import com.odtheking.odin.features.impl.render.ClickGUIModule.webSocketUrl
 import com.odtheking.odin.features.impl.render.PlayerSize
-import com.odtheking.odin.utils.customData
-import com.odtheking.odin.utils.modMessage
-import com.odtheking.odin.utils.sendCommand
-import com.odtheking.odin.utils.setClipboardContent
+import com.odtheking.odin.features.impl.render.PlayerSize.DEV_SERVER
+import com.odtheking.odin.features.impl.render.PlayerSize.buildDevBody
+import com.odtheking.odin.utils.*
+import com.odtheking.odin.utils.network.WebUtils.postData
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.odtheking.odin.utils.skyblock.Supply
@@ -27,6 +27,7 @@ import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils
 import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils.getRoomCenter
 import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils.getRoomData
 import kotlinx.coroutines.launch
+import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
 import net.minecraft.world.phys.BlockHitResult
@@ -61,6 +62,16 @@ val devCommand = Commodore("oddev") {
 
     literal("deletedevs").runs {
         PlayerSize.randoms.clear()
+    }
+
+    literal("adddev").runs { name: String, password: String, xSize: Float?, ySize: Float?, zSize: Float? ->
+        val x = xSize ?: 0.6f
+        val y = ySize ?: 0.6f
+        val z = zSize ?: 0.6f
+        modMessage("Sending data... name: $name, x: $x, y: $y, z: $z")
+        OdinMod.scope.launch {
+            modMessage(postData(DEV_SERVER, buildDevBody(name, Colors.WHITE, x, y, z, false, " ", password)).getOrNull())
+        }
     }
 
     literal("generatefeaturelist").runs {
@@ -126,22 +137,15 @@ val devCommand = Commodore("oddev") {
         WitherDragonsEnum.entries.forEach { dragon ->
             val stateInfo = buildString {
                 when (dragon.state) {
-                    WitherDragonState.ALIVE -> {
-                        append("§a✓ ALIVE")
-
-                        append(" §8│ Health: (${dragon.health}§8)")
-
-                    }
+                    WitherDragonState.ALIVE -> append("§a✓ ALIVE")
                     WitherDragonState.SPAWNING -> append("§e⚡ SPAWNING")
                     WitherDragonState.DEAD -> append("§7✗ DEAD")
                 }
-                append(" §8│ §eIn §f${String.format("%.1f", dragon.timeToSpawn / 20f)}§es")
+                append(" §8│ §eIn §f${(dragon.timeToSpawn / 20f).toFixed()}§es")
             }
 
-
-
             val spawnInfo = buildString {
-                if (dragon.timesSpawned > 0) append(" §8│ §7Spawned: §fx${dragon.timesSpawned}")
+                append(" §8│ §7Spawned: §fx${dragon.timesSpawned}")
             }
 
             val flags = buildString {
@@ -181,6 +185,17 @@ val devCommand = Commodore("oddev") {
             if (it !is BlockHitResult) return@runs
             DungeonUtils.currentRoom?.getRelativeCoords(it.blockPos)?.let { vec2 ->
                 modMessage("Relative coords: ${vec2.x}, ${vec2.z}")
+            }
+        }
+    }
+
+    literal("setblock").executable {
+        param("type").suggests { BuiltInRegistries.BLOCK.entrySet().map { it.value.descriptionId.replace("block.minecraft.", "") } }
+
+        runs { type: String ->
+            mc.hitResult?.let {
+                if (it !is BlockHitResult) return@runs
+                sendCommand("setblock ${it.blockPos.x} ${it.blockPos.y} ${it.blockPos.z} minecraft:$type")
             }
         }
     }

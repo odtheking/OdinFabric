@@ -20,9 +20,8 @@ object ServerUtils {
 
     init {
         onReceive<ClientboundSetTimePacket> {
-            if (prevTime != 0L) {
+            if (prevTime != 0L)
                 averageTps = (20000f / (System.currentTimeMillis() - prevTime + 1)).coerceIn(0f, 20f)
-            }
 
             prevTime = System.currentTimeMillis()
         }

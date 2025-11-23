@@ -39,7 +39,7 @@ object BlazeSolver {
         blazes.removeAll { mc.level?.getEntity(it.id) == null }
         if (blazes.isEmpty() && lastBlazeCount == 1) {
             DungeonListener.puzzles.find { it == Puzzle.BLAZE }?.status = PuzzleStatus.Completed
-            onPuzzleComplete(if (DungeonUtils.currentRoomName == "Higher Blaze") "Higher Blaze" else "Lower Blaze")
+            onPuzzleComplete(DungeonUtils.currentRoomName)
             if (blazeSendComplete) sendCommand("pc Blaze puzzle solved!")
             lastBlazeCount = 0
             return
