@@ -11,7 +11,7 @@ import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import kotlin.math.floor
 
-class StartsWithSim(private val letter: String = listOf("A", "B", "C", "G", "D", "M", "N", "R", "S", "T").random()) : TermSimGUI(
+class StartsWithSim(private val letter: String = listOf("A", "B", "C", "G", "D", "M", "N", "R", "S", "T", "W").random()) : TermSimGUI(
     "What starts with: \'$letter\'?",
     TerminalTypes.STARTS_WITH.windowSize
 ) {

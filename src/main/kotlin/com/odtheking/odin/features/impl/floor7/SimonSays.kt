@@ -63,9 +63,9 @@ object SimonSays : Module(
             when (pos.x) {
                 111 ->
                     if (optimizeSolution) {
-                        if (updated.block == Blocks.SEA_LANTERN && old.block == Blocks.OBSIDIAN && (clickInOrder.isEmpty() || pos !in clickInOrder))
-                            clickInOrder.add(pos)
-                    } else if (updated.block == Blocks.OBSIDIAN && old.block == Blocks.SEA_LANTERN && pos !in clickInOrder) clickInOrder.add(pos)
+                        if (updated.block == Blocks.SEA_LANTERN && old.block == Blocks.OBSIDIAN && pos !in clickInOrder)
+                            clickInOrder.add(pos.immutable())
+                    } else if (updated.block == Blocks.OBSIDIAN && old.block == Blocks.SEA_LANTERN && pos !in clickInOrder) clickInOrder.add(pos.immutable())
 
                 110 ->
                     if (updated.block == Blocks.AIR) {
