@@ -1,6 +1,5 @@
 package com.odtheking.odin.features.impl.floor7.terminalhandler
 
-import com.odtheking.odin.utils.modMessage
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.world.item.ItemStack
 
@@ -17,7 +16,6 @@ class StartsWithHandler(private val letter: String): TerminalHandler(TerminalTyp
     }
 
     override fun click(slotIndex: Int, button: Int, simulateClick: Boolean) {
-        modMessage("syncId: $syncId, lastSyncId: $lastSyncId")
         if (canClick(slotIndex, button) && lastSyncId != syncId) {
             clickedSlots.add(slotIndex)
             lastSyncId = syncId
