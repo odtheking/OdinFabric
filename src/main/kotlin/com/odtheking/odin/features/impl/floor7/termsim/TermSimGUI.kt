@@ -49,6 +49,7 @@ open class TermSimGUI(
     val guiInventorySlots get() = menu?.slots?.subList(0, size) ?: emptyList()
     private var doesAcceptClick = true
     protected var ping = 0L
+    private var syncId = 0
 
     open fun create() {
         guiInventorySlots.forEach { it.setSlot(blackPane) }
@@ -88,7 +89,7 @@ open class TermSimGUI(
         }
 
         onSend<ServerboundContainerClickPacket> (EventPriority.LOW) {
-            if (mc.screen !== this@TermSimGUI) return@onSend
+            if (mc.screen !== this@TermSimGUI || clickType == ClickType.PICKUP_ALL) return@onSend
             delaySlotClick(guiInventorySlots.getOrNull(slotNum.toInt()) ?: return@onSend, buttonNum.toInt())
             it.cancel()
         }
@@ -106,19 +107,15 @@ open class TermSimGUI(
         if (mc.screen == StartGUI) return slotClick(slot, button)
         if (!doesAcceptClick || slot.container != inv || slot.item?.item == Items.BLACK_STAINED_GLASS_PANE) return
         doesAcceptClick = false
-        LimitedTickTask((ping / 50).toInt().coerceAtLeast(1), 1) {
+        LimitedTickTask((ping / 50).toInt().coerceAtLeast(0), 1) {
             if (mc.screen != this) return@LimitedTickTask
             doesAcceptClick = true
             slotClick(slot, button)
         }
     }
 
-    override fun slotClicked(slot: Slot?, slotId: Int, button: Int, actionType: ClickType) {
-        slot?.let { delaySlotClick(it, button) }
-    }
-
     protected fun createNewGui(block: (Slot) -> ItemStack) {
-        PacketEvent.Receive(ClientboundOpenScreenPacket(0, MenuType.GENERIC_9x3, Component.literal(name))).postAndCatch()
+        PacketEvent.Receive(ClientboundOpenScreenPacket(syncId++, MenuType.GENERIC_9x3, Component.literal(name))).postAndCatch()
         guiInventorySlots.forEach { it.setSlot(block(it)) }
     }
 

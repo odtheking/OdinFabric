@@ -51,16 +51,14 @@ object EventDispatcher {
         }
 
         onReceive<ClientboundTakeItemEntityPacket> {
-            if (mc.player == null) return@onReceive
-            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
+            if (mc.player == null || !DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
             val itemEntity = mc.level?.getEntity(itemId) as? ItemEntity ?: return@onReceive
             if (itemEntity.item?.hoverName?.string?.containsOneOf(dungeonItemDrops, true) == true && itemEntity.distanceTo(mc.player ?: return@onReceive) <= 6)
                 SecretPickupEvent.Item(itemEntity).postAndCatch()
         }
 
         onReceive<ClientboundRemoveEntitiesPacket> {
-            if (mc.player == null) return@onReceive
-            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
+            if (mc.player == null || !DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
             entityIds.forEach { id ->
                 val entity = mc.level?.getEntity(id) as? ItemEntity ?: return@forEach
                 if (entity.item?.hoverName?.string?.containsOneOf(dungeonItemDrops, true) == true && entity.distanceTo(mc.player ?: return@onReceive) <= 6)

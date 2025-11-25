@@ -76,9 +76,9 @@ object TerminalSolver : Module(
         onReceive<ClientboundOpenScreenPacket> {
             currentTerm?.let {
                 if (!it.isClicked && mc.screen !is TermSimGUI) leftTerm()
-                it.openScreen()
+                it.openScreen(this)
             }
-            val windowName = title.string
+            val windowName = title.string ?: return@onReceive
             val newTermType = TerminalTypes.entries.find { terminal -> windowName.startsWith(terminal.windowName) }?.takeIf { it != currentTerm?.type } ?: return@onReceive
 
             currentTerm = when (newTermType) {
@@ -101,6 +101,7 @@ object TerminalSolver : Module(
                 devMessage("§aNew terminal: §6${it.type.name}")
                 TerminalEvent.Opened(it).postAndCatch()
                 lastTermOpened = it
+                it.openScreen(this)
             }
         }
 
