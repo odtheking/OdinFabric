@@ -18,7 +18,7 @@ import kotlin.math.floor
 class SelectAllSim(
     private val color: DyeColor = DyeColor.entries.random()
 ) : TermSimGUI(
-    "Select all the ${color.name.replace("_", " ")} items!",
+    "Select all the ${color.name.replace("LIGHT_GRAY", "SILVER").replace("_", " ")} items!",
     TerminalTypes.SELECT.windowSize
 ) {
     override fun create() {
