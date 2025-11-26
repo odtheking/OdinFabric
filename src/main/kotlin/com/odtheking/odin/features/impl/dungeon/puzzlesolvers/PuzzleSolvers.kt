@@ -19,6 +19,7 @@ import net.minecraft.core.BlockPos
 import net.minecraft.network.protocol.game.ClientboundBlockEventPacket
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket
+import net.minecraft.world.InteractionHand
 import net.minecraft.world.level.block.Blocks
 
 object PuzzleSolvers : Module(
@@ -156,7 +157,7 @@ object PuzzleSolvers : Module(
         }
 
         onSend<ServerboundUseItemOnPacket> {
-            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onSend
+            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss || this.hand == InteractionHand.OFF_HAND) return@onSend
             if (waterSolver) WaterSolver.waterInteract(this)
             if (boulderSolver) BoulderSolver.playerInteract(this)
        }

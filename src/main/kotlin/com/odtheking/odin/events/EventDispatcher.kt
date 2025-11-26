@@ -16,6 +16,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
 import net.minecraft.network.protocol.game.*
 import net.minecraft.sounds.SoundEvents
+import net.minecraft.world.InteractionHand
 import net.minecraft.world.entity.item.ItemEntity
 
 object EventDispatcher {
@@ -73,7 +74,7 @@ object EventDispatcher {
         }
 
         onSend<ServerboundUseItemOnPacket> {
-            if (!DungeonUtils.inDungeons) return@onSend
+            if (!DungeonUtils.inDungeons || hand == InteractionHand.OFF_HAND) return@onSend
             SecretPickupEvent.Interact(
                 hitResult.blockPos,
                 mc.level?.getBlockState(hitResult.blockPos)?.takeIf { isSecret(it, hitResult.blockPos) } ?: return@onSend
