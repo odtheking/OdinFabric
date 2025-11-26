@@ -29,7 +29,7 @@ import net.minecraft.resources.ResourceLocation
 object ModuleManager {
 
     private val HUD_LAYER: ResourceLocation = ResourceLocation.fromNamespaceAndPath(OdinMod.MOD_ID, "odin_hud")
-    private val keybindSettingsCache = mutableListOf<KeybindSetting>()
+    val keybindSettingsCache = mutableListOf<KeybindSetting>()
     val hudSettingsCache = mutableListOf<HUDSetting>()
 
     val modules: ArrayList<Module> = arrayListOf(

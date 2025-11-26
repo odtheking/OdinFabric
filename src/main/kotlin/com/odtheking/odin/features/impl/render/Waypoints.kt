@@ -15,8 +15,8 @@ import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.render.drawCustomBeacon
 import com.odtheking.odin.utils.sendChatMessage
-import net.minecraft.network.chat.Component
 import net.minecraft.core.BlockPos
+import net.minecraft.network.chat.Component
 import org.lwjgl.glfw.GLFW
 import kotlin.math.abs
 
