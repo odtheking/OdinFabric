@@ -19,6 +19,7 @@
     "mixins.ExperienceBarRendererMixin",
     "mixins.GuiMixin",
     "mixins.KeyBindingMixin",
+    "mixins.MinecraftMixin",
     "mixins.MouseHandlerMixin",
     "mixins.PlayerRendererMixin",
     "mixins.ScreenEffectRendererMixin"
