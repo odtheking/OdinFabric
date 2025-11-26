@@ -58,15 +58,6 @@ fun BlockPos.rotateToNorth(rotation: Rotations): BlockPos =
         else -> this
     }
 
-fun BlockPos.addRotationCoords(rotation: Rotations, x: Int, z: Int): BlockPos =
-    when (rotation) {
-        Rotations.NORTH -> BlockPos(this.x + x, this.y, this.z + z)
-        Rotations.SOUTH -> BlockPos(this.x - x, this.y, this.z - z)
-        Rotations.WEST ->  BlockPos(this.x + z, this.y, this.z - x)
-        Rotations.EAST ->  BlockPos(this.x - z, this.y, this.z + x)
-        else -> this
-    }
-
 fun isXZInterceptable(box: AABB, range: Double, pos: Vec3, yaw: Float, pitch: Float): Boolean {
     val start = pos.addVec(y = (mc.player?.eyeY ?: 0.0))
     val goal = start.add(getLook(yaw, pitch).multiply(range, range, range))

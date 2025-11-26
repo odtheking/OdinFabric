@@ -19,6 +19,7 @@ import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket
+import net.minecraft.world.InteractionHand
 import net.minecraft.world.level.block.Blocks
 
 object KingRelics : Module(
@@ -54,7 +55,7 @@ object KingRelics : Module(
         }
 
         onSend<ServerboundUseItemOnPacket> {
-            if (DungeonUtils.getF7Phase() != M7Phases.P5 || relicPlaceTick == 0L) return@onSend
+            if (DungeonUtils.getF7Phase() != M7Phases.P5 || relicPlaceTick == 0L || hand == InteractionHand.OFF_HAND) return@onSend
 
             val block = mc.level?.getBlockState(hitResult.blockPos)?.block
             if (!block.equalsOneOf(Blocks.CAULDRON, Blocks.ANVIL)) return@onSend
