@@ -16,8 +16,8 @@ import com.odtheking.odin.utils.render.drawCustomBeacon
 import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.skyblock.Supply
-import net.minecraft.network.chat.Component
 import net.minecraft.core.BlockPos
+import net.minecraft.network.chat.Component
 import kotlin.math.cos
 import kotlin.math.sin
 

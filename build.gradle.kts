@@ -6,8 +6,8 @@ plugins {
     `maven-publish`
 }
 
-group = property("maven_group")!!
-version = property("mod_version")!!
+group = property("maven_group") as String
+version = property("mod_version") as String
 
 repositories {
     mavenCentral()
@@ -100,5 +100,19 @@ tasks {
 }
 
 java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
     withSourcesJar()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "com.odtheking"
+            artifactId = "Odin"
+            version = version
+            from(components["java"])
+        }
+    }
 }
