@@ -49,11 +49,11 @@ object ArrowsDevice : Module(
             if (!DungeonUtils.inBoss || DungeonUtils.getF7Phase() != M7Phases.P3) return@on
 
             markedPositions.forEach { position ->
-                context.drawFilledBox(position, markedPositionColor, depth = depthCheck)
+                drawFilledBox(position, markedPositionColor, depth = depthCheck)
             }
 
             targetPosition?.let { position ->
-                context.drawFilledBox(position, targetPositionColor, depth = depthCheck)
+                drawFilledBox(position, targetPositionColor, depth = depthCheck)
             }
         }
     }
