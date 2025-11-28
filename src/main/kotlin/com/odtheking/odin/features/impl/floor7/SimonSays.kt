@@ -8,6 +8,7 @@ import com.odtheking.odin.events.BlockUpdateEvent
 import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.events.core.on
+import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.Colors
@@ -15,6 +16,9 @@ import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
 import net.minecraft.core.BlockPos
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
+import net.minecraft.world.entity.item.ItemEntity
+import net.minecraft.world.item.Items
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.state.properties.BlockStateProperties
 import net.minecraft.world.phys.AABB
@@ -62,6 +66,16 @@ object SimonSays : Module(
                         if (clickNeeded >= clickInOrder.size) resetSolution()
                     }
             }
+        }
+
+        onReceive<ClientboundSetEntityDataPacket> {
+            if (DungeonUtils.getF7Phase() != M7Phases.P3) return@onReceive
+            val entity = mc.level?.getEntity(id) as? ItemEntity ?: return@onReceive
+            if (entity.item?.item != Items.STONE_BUTTON) return@onReceive
+
+            val index = clickInOrder.indexOf(entity.blockPosition().east())
+            if (index == 2 && clickInOrder.size == 3) clickInOrder.removeFirst()
+            else if (index == 0 && clickInOrder.size == 2) clickInOrder.reverse()
         }
 
         on<BlockInteractEvent> {

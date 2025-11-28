@@ -33,7 +33,7 @@ object OdinMod : ClientModInitializer {
     val mc: Minecraft
         get() = Minecraft.getInstance()
 
-    const val MOD_ID = "odin-fabric"
+    const val MOD_ID = "odin"
 
     private val metadata: ModMetadata by lazy {
         FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow().metadata
