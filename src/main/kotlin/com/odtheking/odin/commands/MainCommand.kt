@@ -6,12 +6,10 @@ import com.github.stivais.commodore.utils.GreedyString
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.clickgui.ClickGUI
 import com.odtheking.odin.clickgui.HudManager
-import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.features.impl.render.ClickGUIModule
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.handlers.LimitedTickTask
-import net.minecraft.network.chat.Component
-import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
+import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 
 val mainCommand = Commodore("odin", "od") {
     runs {
@@ -53,13 +51,14 @@ val mainCommand = Commodore("odin", "od") {
         fillItemFromSack(64, "SUPERBOOM_TNT", "superboom_tnt", true)
     }
 
-    literal("simulate").runs { greedyString: GreedyString ->
-        PacketEvent.Receive(ClientboundSystemChatPacket(Component.literal(greedyString.string), false)).postAndCatch()
-        modMessage("§8Simulated message: ${greedyString.string}")
-    }
-
     literal("sendcoords").runs { message: GreedyString? ->
         sendChatMessage(getPositionString() + if (message == null) "" else " ${message.string}")
+    }
+
+    literal("leaporder").runs { player1: String?, player2: String?, player3: String?, player4: String? ->
+        val players = listOf(player1, player2, player3, player4).mapNotNull { it?.lowercase() }
+        DungeonUtils.customLeapOrder = players
+        modMessage("§aCustom leap order set to: §f${player1}, ${player2}, ${player3}, $player4")
     }
 
     runs { floor: Floors -> sendCommand("joininstance ${floor.instance()}") }

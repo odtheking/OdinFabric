@@ -198,7 +198,7 @@ object DungeonUtils {
                 ?: previousTeammates.add(
                     DungeonPlayer(
                         name, DungeonClass.entries.find { it.name == clazz } ?: continue,
-                        romanToInt(clazzLevel), mc.connection?.getPlayerInfo(name)?.skin?.texture, false
+                        romanToInt(clazzLevel), mc.connection?.getPlayerInfo(name)?.skin?.texture
                     )
                 )
         }

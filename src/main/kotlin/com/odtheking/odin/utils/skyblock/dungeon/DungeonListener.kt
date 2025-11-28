@@ -68,11 +68,9 @@ object DungeonListener {
 
         onReceive<ClientboundPlayerInfoUpdatePacket> {
             if (actions().none {
-                    it.equalsOneOf(
-                        ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME,
-                        ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER
-                    )
-                }) return@onReceive
+                it.equalsOneOf(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME,
+                               ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER)
+            }) return@onReceive
             val tabListEntries =
                 entries()?.mapNotNull { it.displayName?.string }?.ifEmpty { return@onReceive } ?: return@onReceive
             updateDungeonTeammates(tabListEntries)

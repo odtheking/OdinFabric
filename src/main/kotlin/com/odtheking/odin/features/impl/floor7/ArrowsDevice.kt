@@ -5,6 +5,7 @@ import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.ColorSetting
 import com.odtheking.odin.events.BlockUpdateEvent
 import com.odtheking.odin.events.RenderEvent
+import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color.Companion.withAlpha
@@ -55,6 +56,11 @@ object ArrowsDevice : Module(
             targetPosition?.let { position ->
                 context.drawFilledBox(position, targetPositionColor, depth = depthCheck)
             }
+        }
+
+        on<WorldLoadEvent> {
+            markedPositions.clear()
+            targetPosition = null
         }
     }
 

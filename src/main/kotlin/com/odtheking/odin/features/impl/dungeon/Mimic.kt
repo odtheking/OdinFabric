@@ -31,7 +31,7 @@ object Mimic : Module(
 
     init {
         onReceive<ClientboundRemoveEntitiesPacket> {
-            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss || DungeonUtils.mimicKilled) return@onReceive
+            if (!DungeonUtils.isFloor(6, 7) || DungeonUtils.inBoss || DungeonUtils.mimicKilled) return@onReceive
             entityIds.forEach { id ->
                 val entity = mc.level?.getEntity(id) ?: return@forEach
                 if (entity is Zombie && entity.isBaby) mimicKilled()
@@ -39,7 +39,7 @@ object Mimic : Module(
         }
 
         onReceive<ClientboundSetEntityDataPacket> {
-            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss || DungeonUtils.mimicKilled) return@onReceive
+            if (!DungeonUtils.isFloor(6, 7) || DungeonUtils.inBoss || DungeonUtils.mimicKilled) return@onReceive
             val entity = runCatching { mc.level?.getEntity(id) }.getOrNull() ?: return@onReceive
             if (entity is Zombie && entity.isBaby && entity.health <= 0f) mimicKilled()
         }

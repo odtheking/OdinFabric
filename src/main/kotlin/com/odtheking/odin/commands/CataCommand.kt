@@ -168,7 +168,7 @@ private fun hasItem(member: HypixelData.MemberData, vararg itemId: String) =
     member.inventory.invContents.itemStacks.any { item -> itemId.any { item?.id?.contains(it) == true } }
 
 private fun checkMissingItems(member: HypixelData.MemberData) = buildList {
-    if (!hasItem(member, "HYPERION", "ASTRAEA", "SCYLLA", "VALKYRIE")) add(MissingItem("Blade", "§5Blade"))
+    if (!hasItem(member, "HYPERION", "ASTRAEA", "SCYLLA", "VALKYRIE")) add(MissingItem("Blade", "§5Wither Blade"))
     if (!hasItem(member, "TERMINATOR")) add(MissingItem("Terminator", "§cTerm"))
     if (!member.pets.pets.any { it.type.equals("GOLDEN_DRAGON", true) })
         add(MissingItem("Golden Dragon", "§6GDrag"))

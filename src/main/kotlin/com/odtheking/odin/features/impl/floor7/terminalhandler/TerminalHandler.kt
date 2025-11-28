@@ -12,7 +12,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.HashedStack
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
-import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket
 import net.minecraft.world.inventory.ClickType
 import net.minecraft.world.item.ItemStack
@@ -24,7 +23,6 @@ open class TerminalHandler(val type: TerminalTypes) {
     val items: Array<ItemStack?> = arrayOfNulls(type.windowSize)
     val timeOpened = System.currentTimeMillis()
     var isClicked = false
-    var syncId = -1
 
     fun setSlot(packet: ClientboundContainerSetSlotPacket) {
         if (packet.slot !in 0 until type.windowSize) return
@@ -32,8 +30,7 @@ open class TerminalHandler(val type: TerminalTypes) {
         if (handleSlotUpdate(packet)) TerminalEvent.Updated(this@TerminalHandler).postAndCatch()
     }
 
-    fun openScreen(packet: ClientboundOpenScreenPacket) {
-        syncId = packet.containerId
+    fun openScreen() {
         isClicked = false
         items.fill(null)
     }
@@ -43,10 +40,10 @@ open class TerminalHandler(val type: TerminalTypes) {
     open fun simulateClick(slotIndex: Int, clickType: Int) {}
 
     open fun click(slotIndex: Int, button: Int, simulateClick: Boolean = true) {
-        if (mc.player == null) return
+        val screenHandler = (mc.screen as? ContainerScreen)?.menu ?: return
         if (simulateClick) simulateClick(slotIndex, button)
         isClicked = true
-        val screenHandler = (mc.screen as? ContainerScreen)?.menu ?: return
+
         if (mc.screen is TermSimGUI) {
             PacketEvent.Send(
                 ServerboundContainerClickPacket(

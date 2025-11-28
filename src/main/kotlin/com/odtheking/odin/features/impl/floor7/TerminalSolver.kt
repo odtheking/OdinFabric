@@ -76,7 +76,7 @@ object TerminalSolver : Module(
         onReceive<ClientboundOpenScreenPacket> {
             currentTerm?.let {
                 if (!it.isClicked && mc.screen !is TermSimGUI) leftTerm()
-                it.openScreen(this)
+                it.openScreen()
             }
             val windowName = title.string ?: return@onReceive
             val newTermType = TerminalTypes.entries.find { terminal -> windowName.startsWith(terminal.windowName) }?.takeIf { it != currentTerm?.type } ?: return@onReceive
@@ -101,7 +101,7 @@ object TerminalSolver : Module(
                 devMessage("§aNew terminal: §6${it.type.name}")
                 TerminalEvent.Opened(it).postAndCatch()
                 lastTermOpened = it
-                it.openScreen(this)
+                it.openScreen()
             }
         }
 
@@ -155,10 +155,7 @@ object TerminalSolver : Module(
             if (
                 (renderType == 1 && !(currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver)) ||
                 (blockIncorrectClicks && currentTerm?.canClick(slotId, button) == false)
-            ) {
-                cancel()
-                return@on
-            }
+            ) return@on cancel()
 
             if (middleClickGUI) {
                 currentTerm?.click(slotId, if (button == 0) GLFW.GLFW_MOUSE_BUTTON_3 else button, hideClicked && currentTerm?.isClicked == false)
@@ -166,10 +163,8 @@ object TerminalSolver : Module(
                 return@on
             }
 
-            if (hideClicked && currentTerm?.isClicked == false) {
-                currentTerm?.simulateClick(slotId, button)
-                currentTerm?.isClicked = true
-            }
+            if (hideClicked && currentTerm?.isClicked == false) currentTerm?.simulateClick(slotId, button)
+            currentTerm?.isClicked = true
         }
 
         on<GuiEvent.DrawBackground> {
