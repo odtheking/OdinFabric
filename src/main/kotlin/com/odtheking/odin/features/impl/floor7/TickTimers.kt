@@ -31,11 +31,11 @@ object TickTimers : Module(
 
     private val necronHud by HUD("Necron Hud", "Displays a timer for Necron's drop.") {
         if (it)                   textDim(formatTimer(35, 60, "§4Necron dropping in"), 0, 0, Colors.MINECRAFT_DARK_RED)
-        else if (necronTime >= 0) textDim(formatTimer(necronTime.toInt(), 60, "§4Necron dropping in"), 0, 0, Colors.MINECRAFT_DARK_RED)
+        else if (necronTime >= 0) textDim(formatTimer(necronTime, 60, "§4Necron dropping in"), 0, 0, Colors.MINECRAFT_DARK_RED)
         else 0 to 0
     }
 
-    private var necronTime: Byte = -1
+    private var necronTime = -1
 
     private val goldorHud: HudElement by HUD("Goldor Hud", "Displays a timer for Goldor's Core entrance opening.") {
         if (it) textDim(formatTimer(35, 60, "§7Tick:"), 0, 0, Colors.MINECRAFT_DARK_RED)
@@ -46,8 +46,8 @@ object TickTimers : Module(
     }
     private val startTimer by BooleanSetting("Start timer", false, desc = "Displays a timer counting down until devices/terms are able to be activated/completed.").withDependency { goldorHud.enabled }
 
-    private var goldorTickTime: Int = -1
-    private var goldorStartTime: Int = -1
+    private var goldorTickTime = -1
+    private var goldorStartTime = -1
 
     private val stormHud by HUD("Storm Pad Hud", "Displays a timer for Storm's Pad.") {
         if (it)                    textDim(formatTimer(15, 20, "§bPad:"), 0, 0, Colors.MINECRAFT_DARK_RED)
@@ -55,7 +55,7 @@ object TickTimers : Module(
         else 0 to 0
     }
 
-    private var padTickTime: Int = -1
+    private var padTickTime = -1
 
     private val outboundsHud by HUD("Outbounds Hud", "Displays a timer for out of bounds death ticks.") {
         if (it)                      textDim(formatTimer(15, 20, "§8Outbounds:"), 0, 0, Colors.MINECRAFT_DARK_RED)
@@ -63,7 +63,7 @@ object TickTimers : Module(
         else 0 to 0
     }
 
-    private var outboundsTime: Int = -1
+    private var outboundsTime = -1
 
     private val secretsHud by HUD("Secrets Hud", "Displays a timer for secret spawn ticks.") {
         if (it)                    textDim(formatTimer(15, 20, "§7Secret:"), 0, 0, Colors.MINECRAFT_DARK_RED)
@@ -71,7 +71,7 @@ object TickTimers : Module(
         else 0 to 0
     }
 
-    private var secretsTime: Int = -1
+    private var secretsTime = -1
 
     init {
         on<ChatPacketEvent> {
@@ -107,9 +107,8 @@ object TickTimers : Module(
 
         onReceive<ClientboundSetTimePacket> {
             if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
-            val dungeonNotStarted = DungeonUtils.openRoomCount == 0
             val gameTime = mc.level?.gameTime ?: -1
-            if (dungeonNotStarted) {
+            if (DungeonUtils.openRoomCount == 0) {
                 if (outboundsHud.enabled) outboundsTime = 40 - (gameTime % 40).toInt()
             } else {
                 if (secretsHud.enabled) secretsTime = 20 - (gameTime % 20).toInt()
