@@ -70,7 +70,7 @@ object BeamsSolver {
 
     fun onBlockChange(event: BlockUpdateEvent) {
         if (DungeonUtils.currentRoomName != "Creeper Beams") return
-        if (event.pos == DungeonUtils.currentRoom?.getRealCoords(BlockPos(15, 69, 15)) && event.old.block == Blocks.AIR && event.updated.block == Blocks.CHEST) onPuzzleComplete("Creeper Beams")
+        if (event.pos == DungeonUtils.currentRoom?.getRealCoords(BlockPos(15, 69, 15)) && event.old.isAir && event.updated.block == Blocks.CHEST) onPuzzleComplete("Creeper Beams")
         currentLanternPairs.forEach { (key, value) ->
             if (event.pos.equalsOneOf(key, value.first) &&
                 event.updated.block != Blocks.SEA_LANTERN &&

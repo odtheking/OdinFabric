@@ -61,7 +61,7 @@ object SimonSays : Module(
                         clickInOrder.add(pos.immutable())
 
                 110 ->
-                    if (updated.block != Blocks.AIR && old.block == Blocks.STONE_BUTTON && updated.getValue(BlockStateProperties.POWERED)) {
+                    if (!updated.isAir && old.block == Blocks.STONE_BUTTON && updated.getValue(BlockStateProperties.POWERED)) {
                         clickNeeded = clickInOrder.indexOf(pos.east()) + 1
                         if (clickNeeded >= clickInOrder.size) resetSolution()
                     }

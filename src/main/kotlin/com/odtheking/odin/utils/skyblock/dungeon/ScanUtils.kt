@@ -74,7 +74,7 @@ object ScanUtils {
             } // We want to use cached rooms instead of scanning it again if we have already passed through it and if we are already in it we don't want to trigger the event
 
             scanRoom(roomCenter)?.let { room -> if (room.rotation != Rotations.NONE) RoomEnterEvent(room).postAndCatch() } ?: run {
-                if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
+                if ((!DungeonUtils.inDungeons || DungeonUtils.inBoss) && !LocationUtils.currentArea.isArea(Island.SinglePlayer)) return@on
                 devMessage("Unable to determine room at $roomCenter core: ${getCore(roomCenter)}")
             }
         }
@@ -173,8 +173,8 @@ object ScanUtils {
     fun getTopLayerOfRoom(vec2: Vec2): Int {
         for (y in 140 downTo 12) {
             mutableBlockPos.set(vec2.x, y, vec2.z)
-            val block = mc.level?.getBlockState(mutableBlockPos)?.block
-            if (block != Blocks.AIR) return if (block == Blocks.GOLD_BLOCK) y - 1 else y
+            val blockState = mc.level?.getBlockState(mutableBlockPos)
+            if (blockState?.isAir == false) return if (blockState.block == Blocks.GOLD_BLOCK) y - 1 else y
         }
         return 0
     }

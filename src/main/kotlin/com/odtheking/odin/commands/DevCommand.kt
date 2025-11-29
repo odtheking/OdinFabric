@@ -148,6 +148,10 @@ val devCommand = Commodore("oddev") {
                 append(" §8│ §7Spawned: §fx${dragon.timesSpawned}")
             }
 
+            val uuid = buildString {
+                append(" §8│ §7UUID: §f${dragon.entityUUID}")
+            }
+
             val flags = buildString {
                 val flagList = mutableListOf<String>()
                 if (WitherDragons.priorityDragon == dragon) flagList.add("§6§l➤ PRIORITY")
@@ -158,7 +162,7 @@ val devCommand = Commodore("oddev") {
                 }
             }
 
-            modMessage("§${dragon.colorCode}§l${dragon.name.padEnd(7)}§r $stateInfo$spawnInfo$flags")
+            modMessage("§${dragon.colorCode}§l${dragon.name.padEnd(7)}§r $stateInfo$spawnInfo$uuid$flags")
         }
     }
 

@@ -7,6 +7,7 @@ import com.odtheking.odin.clickgui.settings.impl.StringSetting
 import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.GuiEvent
 import com.odtheking.odin.events.TerminalEvent
+import com.odtheking.odin.events.core.EventPriority
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
@@ -42,11 +43,11 @@ object TerminalSounds : Module(
             else if (shouldReplaceSounds && completeSounds && !clickSounds) playCompleteSound()
         }
 
-        on<GuiEvent.SlotClick> {
+        on<GuiEvent.SlotClick> (EventPriority.HIGHEST) {
             if (shouldReplaceSounds) playSoundForSlot(slotId, button)
         }
 
-        on<GuiEvent.CustomTermGuiClick> {
+        on<GuiEvent.CustomTermGuiClick> (EventPriority.HIGHEST) {
             if (shouldReplaceSounds) playSoundForSlot(slot, button)
         }
 
@@ -65,11 +66,13 @@ object TerminalSounds : Module(
     }
 
     private fun playSoundForSlot(slot: Int, button: Int) {
-        if (TerminalSolver.currentTerm?.isClicked == true || TerminalSolver.currentTerm?.canClick(slot, button) == false) return
-        if ((TerminalSolver.currentTerm?.solution?.size == 1 || (TerminalSolver.currentTerm?.type == TerminalTypes.MELODY && slot == 43)) && completeSounds) {
-            if (!cancelLastClick) playTerminalSound()
-            playSoundAtPlayer(SoundEvent.createVariableRangeEvent(ResourceLocation.withDefaultNamespace(customCompleteSound)))
-        } else playTerminalSound()
+        with(TerminalSolver.currentTerm ?: return) {
+            if ((isClicked && type != TerminalTypes.MELODY) || !canClick(slot, button)) return
+            if ((solution.size == 1 || (type == TerminalTypes.MELODY && slot == 43)) && completeSounds) {
+                if (!cancelLastClick) playTerminalSound()
+                playSoundAtPlayer(SoundEvent.createVariableRangeEvent(ResourceLocation.withDefaultNamespace(customCompleteSound)))
+            } else playTerminalSound()
+        }
     }
 
     private fun playTerminalSound() {

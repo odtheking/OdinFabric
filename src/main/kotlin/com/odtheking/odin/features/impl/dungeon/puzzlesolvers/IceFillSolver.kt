@@ -15,7 +15,6 @@ import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.Room
 import net.minecraft.core.BlockPos
-import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.phys.Vec3
 import java.io.InputStreamReader
 import java.lang.reflect.Type
@@ -65,7 +64,7 @@ object IceFillSolver {
     }
 
     private fun Room.isRealAir(pos: BlockPos): Boolean =
-        mc.level?.getBlockState(getRealCoords(pos))?.block == Blocks.AIR
+        mc.level?.getBlockState(getRealCoords(pos))?.isAir == true
 
     fun reset() {
         currentPatterns.clear()

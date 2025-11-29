@@ -11,7 +11,6 @@ import com.odtheking.odin.events.TerminalEvent
 import com.odtheking.odin.events.core.*
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.features.impl.floor7.terminalhandler.*
-import com.odtheking.odin.features.impl.floor7.termsim.TermSimGUI
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.Color.Companion.darker
 import com.odtheking.odin.utils.handlers.TickTask
@@ -75,8 +74,8 @@ object TerminalSolver : Module(
     init {
         onReceive<ClientboundOpenScreenPacket> {
             currentTerm?.let {
-                if (!it.isClicked && mc.screen !is TermSimGUI) leftTerm()
-                it.openScreen()
+                if (!it.isClicked) leftTerm()
+                it.openScreen(this)
             }
             val windowName = title.string ?: return@onReceive
             val newTermType = TerminalTypes.entries.find { terminal -> windowName.startsWith(terminal.windowName) }?.takeIf { it != currentTerm?.type } ?: return@onReceive
@@ -100,8 +99,8 @@ object TerminalSolver : Module(
             currentTerm?.let {
                 devMessage("§aNew terminal: §6${it.type.name}")
                 TerminalEvent.Opened(it).postAndCatch()
+                it.openScreen(this)
                 lastTermOpened = it
-                it.openScreen()
             }
         }
 
@@ -151,7 +150,6 @@ object TerminalSolver : Module(
 
         on<GuiEvent.SlotClick> (EventPriority.HIGH) {
             if (!enabled || currentTerm == null) return@on
-
             if (
                 (renderType == 1 && !(currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver)) ||
                 (blockIncorrectClicks && currentTerm?.canClick(slotId, button) == false)

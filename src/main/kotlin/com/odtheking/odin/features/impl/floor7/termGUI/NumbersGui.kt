@@ -9,7 +9,7 @@ import com.odtheking.odin.utils.ui.rendering.NVGRenderer
 object NumbersGui : TermGui() {
 
     override fun renderTerminal(slotCount: Int) {
-        renderBackground(slotCount, 7)
+        renderBackground(slotCount, 7, 2)
 
         for (index in 9..slotCount) {
             if ((index % 9).equalsOneOf(0, 8)) continue
