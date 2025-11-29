@@ -2,7 +2,6 @@ package com.odtheking.odin.features.impl.floor7.termGUI
 
 import com.odtheking.odin.features.impl.floor7.TerminalSolver
 import com.odtheking.odin.utils.Colors
-import com.odtheking.odin.utils.equalsOneOf
 
 object MelodyGui : TermGui() {
 
@@ -10,29 +9,26 @@ object MelodyGui : TermGui() {
         setCurrentGui(this)
         itemIndexMap.clear()
 
-        renderTerminal(TerminalSolver.currentTerm?.type?.windowSize ?: 0)
+        renderTerminal(TerminalSolver.currentTerm?.type?.windowSize?.minus(9) ?: 0)
     }
 
     override fun renderTerminal(slotCount: Int) {
-        renderBackground(slotCount, 7)
+        renderBackground(slotCount, 7, 3)
 
-        TerminalSolver.currentTerm?.items?.forEachIndexed { index, item ->
-            if ((index % 9).equalsOneOf(0, 6, 8) || ((index / 9).equalsOneOf(0, 6) && index % 9 == 7)) return@forEachIndexed
-            if ((index !in 9 until 45) && !currentSolution.contains(index)) return@forEachIndexed
+        (0..45).forEach { index ->
+            val colum = index % 9
+            val row = index / 9
 
-            val color = when {
-                currentSolution.contains(index) -> {
-                    when {
-                        (index % 9) in 1..5 && index / 9 != 0 && index / 9 != 5 -> TerminalSolver.melodyPointerColor
-                        index / 9 == 0 || index / 9 == 5 -> TerminalSolver.melodyColumColor
-
-                        else -> TerminalSolver.melodyPointerColor
+            val color =
+                when {
+                    row == 0 -> if (index in currentSolution) TerminalSolver.melodyColumColor else return@forEach
+                    colum == 7 && row in 1..4 -> if (index in currentSolution) TerminalSolver.melodyPointerColor else Colors.gray38
+                    colum in 1..5 -> {
+                        if (index in currentSolution) TerminalSolver.melodyPointerColor
+                        else Colors.gray38
                     }
+                    else -> return@forEach
                 }
-                (index % 9) in 1..5 && (index / 9).equalsOneOf(1, 2, 3, 4) && currentSolution.any { it / 9 == index / 9 } ->
-                    TerminalSolver.melodyRowColor
-                else -> Colors.gray26
-            }
 
             renderSlot(index, color)
         }

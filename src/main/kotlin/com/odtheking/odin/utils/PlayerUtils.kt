@@ -6,8 +6,13 @@ import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundEvents
 
-fun playSoundAtPlayer(event: SoundEvent, volume: Float = 1f, pitch: Float = 1f) =
-    mc.execute { mc.player?.playSound(event, volume, pitch) }
+fun playSoundAtPlayer(event: SoundEvent, volume: Float = 1f, pitch: Float = 1f) = mc.execute {
+    try {
+        mc.player?.playSound(event, volume, pitch)
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}
 
 fun setTitle(title: String) {
     mc.gui.setTimes(0, 20, 5)

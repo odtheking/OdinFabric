@@ -12,6 +12,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.HashedStack
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
+import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket
 import net.minecraft.world.inventory.ClickType
 import net.minecraft.world.item.ItemStack
@@ -23,6 +24,7 @@ open class TerminalHandler(val type: TerminalTypes) {
     val items: Array<ItemStack?> = arrayOfNulls(type.windowSize)
     val timeOpened = System.currentTimeMillis()
     var isClicked = false
+    var syncId = -1
 
     fun setSlot(packet: ClientboundContainerSetSlotPacket) {
         if (packet.slot !in 0 until type.windowSize) return
@@ -30,7 +32,8 @@ open class TerminalHandler(val type: TerminalTypes) {
         if (handleSlotUpdate(packet)) TerminalEvent.Updated(this@TerminalHandler).postAndCatch()
     }
 
-    fun openScreen() {
+    fun openScreen(packet: ClientboundOpenScreenPacket) {
+        syncId = packet.containerId
         isClicked = false
         items.fill(null)
     }

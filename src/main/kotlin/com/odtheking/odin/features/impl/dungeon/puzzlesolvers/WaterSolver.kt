@@ -129,7 +129,7 @@ object WaterSolver {
         RED(BlockPos(15, 56, 15));
 
         inline val isExtended: Boolean get() =
-            DungeonUtils.currentRoom?.let { mc.level?.getBlockState(it.getRealCoords(relativePosition))?.block == Blocks.AIR } == false
+            DungeonUtils.currentRoom?.let { mc.level?.getBlockState(it.getRealCoords(relativePosition))?.isAir == true } == false
     }
 
     private enum class LeverBlock(val relativePosition: BlockPos, var i: Int = 0) {

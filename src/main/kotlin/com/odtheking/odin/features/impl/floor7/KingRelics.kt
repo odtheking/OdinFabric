@@ -20,6 +20,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket
 import net.minecraft.world.InteractionHand
+import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.world.level.block.Blocks
 
 object KingRelics : Module(
@@ -72,8 +73,7 @@ object KingRelics : Module(
         onReceive<ClientboundSetEquipmentPacket> {
             if (DungeonUtils.getF7Phase() != M7Phases.P5 || currentRelic == null) return@onReceive
 
-            val equipmentSlot = slots.firstOrNull() ?: return@onReceive
-            if (equipmentSlot.first.index != 4) return@onReceive
+            val equipmentSlot = slots.find { it.first == EquipmentSlot.HEAD } ?: return@onReceive
 
             Relic.entries.find { it.id == equipmentSlot.second.itemId }?.let { relic ->
                 if (relicPlaceTick > 0 && !hasAnnouncedSpawn) {

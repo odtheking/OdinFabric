@@ -98,7 +98,18 @@ object PlayerDisplay : Module(
         }
         return@HUD textDim(generateText(text, "", true), 0, 0, ehpColor)
     }
-    private val ehpColor by ColorSetting("EHP", Colors.MINECRAFT_DARK_GREEN, true, "The color of the effective health text.")
+    private val ehpColor by ColorSetting("EHP color", Colors.MINECRAFT_DARK_GREEN, true, "The color of the effective health text.")
+
+    private val speedHud by HUD("Speed HUD", "Displays the player's speed buff.") { example ->
+        val text = when {
+            example -> 100
+            !LocationUtils.isInSkyblock -> return@HUD 0 to 0
+            SkyblockPlayer.currentSpeed != 0 -> SkyblockPlayer.currentSpeed
+            else -> return@HUD 0 to 0
+        }
+        return@HUD textDim(generateText(text, "✦", true), 0, 0, speedColor)
+    }
+    private val speedColor by ColorSetting("Speed color", Colors.WHITE, true, "The color of the speed text.")
 
     private val HEALTH_REGEX = Regex("[\\d|,]+/[\\d|,]+❤")
     private val MANA_REGEX = Regex("[\\d|,]+/[\\d|,]+✎( Mana)?")

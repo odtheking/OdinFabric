@@ -1,6 +1,7 @@
 package com.odtheking.odin.features.impl.floor7.termsim
 
 import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.events.GuiEvent
 import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.events.TerminalEvent
 import com.odtheking.odin.events.core.EventBus
@@ -79,6 +80,11 @@ open class TermSimGUI(
     override fun removed() {
         EventBus.unsubscribe(this)
         super.removed()
+    }
+
+    override fun slotClicked(slot: Slot?, slotId: Int, button: Int, actionType: ClickType) {
+        if (GuiEvent.SlotClick(this, slotId, button).postAndCatch()) return
+        slot?.let { delaySlotClick(it, button) }
     }
 
     init {

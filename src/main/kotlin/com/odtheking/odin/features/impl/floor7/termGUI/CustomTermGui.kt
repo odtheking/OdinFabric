@@ -17,13 +17,13 @@ abstract class TermGui {
 
     abstract fun renderTerminal(slotCount: Int)
 
-    protected fun renderBackground(slotCount: Int, slotWidth: Int) {
+    protected fun renderBackground(slotCount: Int, slotWidth: Int, rowOffset: Int) {
         val slotSize = 55f * TerminalSolver.customTermSize
         val gap = TerminalSolver.gap * TerminalSolver.customTermSize
         val totalSlotSpace = slotSize + gap
 
         val backgroundStartX = mc.window.width / 2f + -(slotWidth / 2f) * totalSlotSpace - 7.5f * TerminalSolver.customTermSize
-        val backgroundStartY = mc.window.height / 2f + ((-getRowOffset(slotCount) + 0.5f) * totalSlotSpace) - 7.5f * TerminalSolver.customTermSize
+        val backgroundStartY = mc.window.height / 2f + ((-rowOffset + 0.5f) * totalSlotSpace) - 7.5f * TerminalSolver.customTermSize
         val backgroundWidth = slotWidth * totalSlotSpace + 15f * TerminalSolver.customTermSize
         val backgroundHeight = ((slotCount) / 9) * totalSlotSpace + 15f * TerminalSolver.customTermSize
 
@@ -38,7 +38,6 @@ abstract class TermGui {
         val y = (index / 9 - 2) * totalSlotSpace + mc.window.height / 2f - slotSize / 2
 
         itemIndexMap[index] = Box(x, y, slotSize, slotSize)
-
 
         NVGRenderer.rect(floor(x), floor(y), ceil(slotSize), ceil(slotSize), color.rgba, TerminalSolver.roundness)
         return x to y
@@ -58,17 +57,6 @@ abstract class TermGui {
         itemIndexMap.clear()
 
         renderTerminal(TerminalSolver.currentTerm?.type?.windowSize?.minus(10) ?: 0)
-    }
-
-    private fun getRowOffset(slotCount: Int): Float {
-        return when (slotCount) {
-            in 0..9 -> 0f
-            in 10..18 -> 1f
-            in 19..27 -> 2f
-            in 28..36 -> 2f
-            in 37..45 -> 2f
-            else -> 3f
-        }
     }
 
     companion object {

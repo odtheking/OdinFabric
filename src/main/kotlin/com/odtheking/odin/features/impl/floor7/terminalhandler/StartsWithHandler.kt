@@ -1,7 +1,5 @@
 package com.odtheking.odin.features.impl.floor7.terminalhandler
 
-import com.odtheking.odin.OdinMod.mc
-import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.world.item.ItemStack
 
@@ -18,10 +16,9 @@ class StartsWithHandler(private val letter: String): TerminalHandler(TerminalTyp
     }
 
     override fun click(slotIndex: Int, button: Int, simulateClick: Boolean) {
-        val screenHandler = (mc.screen as? ContainerScreen)?.menu ?: return
-        if (canClick(slotIndex, button) && lastSyncId != screenHandler.containerId) {
+        if (canClick(slotIndex, button) && lastSyncId != syncId) {
             clickedSlots.add(slotIndex)
-            lastSyncId = screenHandler.containerId
+            lastSyncId = syncId
         }
         super.click(slotIndex, button, simulateClick)
     }

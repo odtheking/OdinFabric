@@ -11,7 +11,6 @@ import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.core.BlockPos
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket
-import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.phys.AABB
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
@@ -39,7 +38,7 @@ object BoulderSolver {
         var str = ""
         for (z in 24 downTo 9 step 3) {
             for (x in 24 downTo 6 step 3) {
-                str += if (mc.level?.getBlockState(getRealCoords(BlockPos(x, 66, z)))?.block == Blocks.AIR) "0" else "1"
+                str += if (mc.level?.getBlockState(getRealCoords(BlockPos(x, 66, z)))?.isAir == true) "0" else "1"
             }
         }
         currentPositions = solutions[str]?.map { sol ->

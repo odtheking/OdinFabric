@@ -8,7 +8,7 @@ import com.odtheking.odin.utils.ui.rendering.NVGRenderer
 object RubixGui : TermGui() {
 
     override fun renderTerminal(slotCount: Int) {
-        renderBackground(slotCount, 3)
+        renderBackground(slotCount, 3, 2)
 
         currentSolution.distinct().forEach { index ->
             val amount = currentSolution.count { it == index }

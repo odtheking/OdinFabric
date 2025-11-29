@@ -30,7 +30,7 @@ object SkyblockPlayer {
     var maxHealth: Int = 0
     var currentMana: Int = 0
     var maxMana: Int = 0
-    private var currentSpeed: Int = 0
+    var currentSpeed: Int = 0
     var currentDefense: Int = 0
     var overflowMana: Int = 0
     var effectiveHP: Int = 0
