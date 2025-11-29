@@ -64,7 +64,7 @@ object PlayerSize : Module(
 
     @JvmStatic
     fun preRenderCallbackScaleHook(entityRenderer: AvatarRenderState, matrix: PoseStack) {
-        if (enabled && entityRenderer.nameTag == mc.player?.name && !randoms.containsKey(entityRenderer.nameTag?.string)) {
+        if (enabled && entityRenderer.nameTag?.string == mc.player?.displayName?.string && !randoms.containsKey(entityRenderer.nameTag?.string)) {
             if (devSizeY < 0) matrix.translate(0f, devSizeY * 2, 0f)
             matrix.scale(devSizeX, devSizeY, devSizeZ)
         }

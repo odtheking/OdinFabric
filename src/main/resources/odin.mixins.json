@@ -22,7 +22,7 @@
     "mixins.KeyBindingMixin",
     "mixins.MinecraftMixin",
     "mixins.MouseHandlerMixin",
-    "mixins.PlayerRendererMixin",
+    "mixins.AvatarRendererMixin",
     "mixins.ScreenEffectRendererMixin"
   ],
   "mixins": [
