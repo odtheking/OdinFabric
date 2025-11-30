@@ -32,9 +32,9 @@ object InvincibilityTimer : Module(
 
         val visibleTypes = InvincibilityType.entries.filter { type ->
             when (type) {
-                InvincibilityType.SPIRIT -> showSpirit
-                InvincibilityType.BONZO -> showBonzo
-                InvincibilityType.PHOENIX -> showPhoenix
+                InvincibilityType.SPIRIT -> showSpirit || example
+                InvincibilityType.BONZO -> showBonzo || example
+                InvincibilityType.PHOENIX -> showPhoenix || example
             } && (when (showWhen) {
                 0 -> true
                 1 -> type.activeTime > 0 || type.currentCooldown > 0

@@ -18,21 +18,21 @@ import net.minecraft.network.chat.HoverEvent
 val cataCommand = Commodore("cata") {
     runs { playerName: GreedyString? ->
         val name = playerName?.string ?: mc.user?.name ?: return@runs modMessage("§cUnable to get player name!")
-        fetchAndDisplayCataStats(name)
+        modMessage("§aFetching dungeon stats for §6$name§a...")
+        scope.launch {
+            fetchAndDisplayCataStats(RequestUtils.getProfile(name))
+        }
     }
 }
 
-private fun fetchAndDisplayCataStats(name: String) {
-    modMessage("§aFetching dungeon stats for §6$name§a...")
-    scope.launch {
-        RequestUtils.getProfile(name).fold(
-            onSuccess = { playerInfo ->
-                playerInfo.memberData?.let { displayCataStats(playerInfo.name, it) }
-                    ?: modMessage("§cNo profile found for §6$name§c!")
-            },
-            onFailure = { modMessage("§cFailed to fetch stats: ${it.message}") }
-        )
-    }
+fun fetchAndDisplayCataStats(result: Result<HypixelData.PlayerInfo>) {
+    result.fold(
+        onSuccess = { playerInfo ->
+            playerInfo.memberData?.let { displayCataStats(playerInfo.name, it) }
+                ?: modMessage("§cNo profile found for §6${playerInfo.name}§c!")
+        },
+        onFailure = { modMessage("§cFailed to fetch stats: ${it.message}") }
+    )
 }
 
 private fun displayCataStats(name: String, member: HypixelData.MemberData) {
