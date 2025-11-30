@@ -64,12 +64,12 @@ object PlayerSize : Module(
 
     @JvmStatic
     fun preRenderCallbackScaleHook(entityRenderer: AvatarRenderState, matrix: PoseStack) {
-        if (enabled && entityRenderer.nameTag?.string == mc.player?.displayName?.string && !randoms.containsKey(entityRenderer.nameTag?.string)) {
+        if (enabled && entityRenderer.skin == mc.player?.skin && !randoms.containsKey(entityRenderer.nameTag?.string)) {
             if (devSizeY < 0) matrix.translate(0f, devSizeY * 2, 0f)
             matrix.scale(devSizeX, devSizeY, devSizeZ)
         }
         if (!randoms.containsKey(entityRenderer.nameTag?.string)) return
-        if (!devSize && entityRenderer.nameTag?.string == mc.player?.name?.string) return
+        if (!devSize && entityRenderer.skin == mc.player?.skin) return
         val random = randoms[entityRenderer.nameTag?.string] ?: return
         if (random.scale[1] < 0) matrix.translate(0f, random.scale[1] * 2, 1f)
         matrix.scale(random.scale[0], random.scale[1], random.scale[2])
@@ -78,7 +78,6 @@ object PlayerSize : Module(
     suspend fun updateCustomProperties() {
         val response = fetchJson<Array<RandomPlayer>>("https://api.odtheking.com/devs/").getOrNull() ?: return
         randoms.putAll(response.associateBy { it.name })
-        modMessage(randoms)
     }
 
     init {
