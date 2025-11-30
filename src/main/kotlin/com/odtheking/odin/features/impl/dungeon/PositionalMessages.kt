@@ -47,14 +47,14 @@ object PositionalMessages : Module(
             if (!showPositions || (onlyDungeons && !DungeonUtils.inDungeons)) return@on
             posMessageStrings.forEach { message ->
                 if (message.distance != null) {
-                    context.drawCylinder(Vec3(message.x, message.y, message.z), message.distance.toFloat(), cylinderHeight.toFloat(), color = message.color, depth = depthCheck)
-                    if (displayMessage) context.drawText(Component.literal(message.message).visualOrderText, Vec3(message.x, message.y + 1, message.z), messageSize, depthCheck)
+                    drawCylinder(Vec3(message.x, message.y, message.z), message.distance.toFloat(), cylinderHeight.toFloat(), color = message.color, depth = depthCheck)
+                    if (displayMessage) drawText(Component.literal(message.message).visualOrderText, Vec3(message.x, message.y + 1, message.z), messageSize, depthCheck)
                 } else {
                     val box = AABB(message.x, message.y, message.z, message.x2 ?: return@forEach, message.y2 ?: return@forEach,message.z2  ?: return@forEach)
-                    context.drawWireFrameBox(box, message.color, depth = depthCheck)
+                    drawWireFrameBox(box, message.color, depth = depthCheck)
                     if (!displayMessage) return@forEach
                     val center = Vec3((message.x + message.x2) / 2, (message.y + message.y2) / 2, (message.z + message.z2) / 2)
-                    context.drawText(Component.literal(message.message).visualOrderText, center.add(0.0, 1.0, 0.0), messageSize, depthCheck)
+                    drawText(Component.literal(message.message).visualOrderText, center.add(0.0, 1.0, 0.0), messageSize, depthCheck)
                 }
             }
         }

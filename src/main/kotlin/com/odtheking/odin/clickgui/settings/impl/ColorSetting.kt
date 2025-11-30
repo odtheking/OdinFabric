@@ -18,6 +18,9 @@ import com.odtheking.odin.utils.ui.animations.LinearAnimation
 import com.odtheking.odin.utils.ui.isAreaHovered
 import com.odtheking.odin.utils.ui.rendering.Gradient
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
+import net.minecraft.client.input.CharacterEvent
+import net.minecraft.client.input.KeyEvent
+import net.minecraft.client.input.MouseButtonEvent
 
 class ColorSetting(
     name: String,
@@ -132,7 +135,7 @@ class ColorSetting(
         return getHeight()
     }
 
-    override fun mouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int): Boolean {
+    override fun mouseClicked(mouseX: Float, mouseY: Float, click: MouseButtonEvent): Boolean {
         if (isHovered) {
             expandAnim.start()
             extended = !extended
@@ -140,7 +143,7 @@ class ColorSetting(
         }
 
         if (!extended) return false
-        textInputHandler.mouseClicked(mouseX, mouseY, mouseButton)
+        textInputHandler.mouseClicked(mouseX, mouseY, click)
 
         section = when {
             isAreaHovered(lastX + 6f, lastY + 36f, width - 12f, 170f) -> 0 // sat & brightness
@@ -152,18 +155,18 @@ class ColorSetting(
         return section != null
     }
 
-    override fun mouseReleased(state: Int) {
-        if (state == 0) textInputHandler.mouseReleased()
+    override fun mouseReleased(click: MouseButtonEvent) {
+        textInputHandler.mouseReleased()
         section = null
     }
 
-    override fun keyPressed(keyCode: Int, scanCode: Int): Boolean {
-        return if (extended) textInputHandler.keyPressed(keyCode)
+    override fun keyPressed(input: KeyEvent): Boolean {
+        return if (extended) textInputHandler.keyPressed(input)
         else false
     }
 
-    override fun keyTyped(typedChar: Char): Boolean {
-        return if (extended) textInputHandler.charTyped(typedChar)
+    override fun keyTyped(input: CharacterEvent): Boolean {
+        return if (extended) textInputHandler.keyTyped(input)
         else false
     }
 

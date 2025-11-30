@@ -36,10 +36,10 @@ object KuudraInfo : Module(
 
             KuudraUtils.kuudraEntity?.let {
                 if (highlightKuudra)
-                    context.drawWireFrameBox(it.boundingBox, kuudraColor, depth = true)
+                    drawWireFrameBox(it.boundingBox, kuudraColor, depth = true)
 
                 if (kuudraHPDisplay) {
-                    context.drawText(
+                    drawText(
                         Component.literal(getCurrentHealthDisplay(it.health)).visualOrderText,
                         it.position().add(it.lookAngle.multiply(13.0, 13.0, 13.0).addVec(y = 10.0)), healthSize, depth = true
                     )

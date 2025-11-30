@@ -48,7 +48,7 @@ object KeyHighlight : Module(
                     return@on
                 }
                 val position = keyType.entity?.position() ?: return@on
-                context.drawWireFrameBox(AABB.unitCubeFromLowerCorner(position.add(-0.5, 1.0, -0.5)), keyType.color(), 8f, true)
+                drawWireFrameBox(AABB.unitCubeFromLowerCorner(position.add(-0.5, 1.0, -0.5)), keyType.color(), 8f, true)
             }
         }
 

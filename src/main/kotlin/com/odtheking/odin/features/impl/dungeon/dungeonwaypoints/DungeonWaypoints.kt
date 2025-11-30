@@ -106,12 +106,12 @@ object DungeonWaypoints : Module(
             if (DungeonUtils.inBoss || !DungeonUtils.inDungeons) return@on
             val room = DungeonUtils.currentRoom ?: return@on
 
-            context.drawBoxes(room.waypoints, disableDepth)
+            drawBoxes(room.waypoints, disableDepth)
 
             if (renderTitle) {
                 for (waypoint in room.waypoints) {
                     if (waypoint.isClicked || waypoint.title == null) continue
-                    context.drawText(
+                    drawText(
                         Component.literal(waypoint.title).visualOrderText,
                         waypoint.blockPos.center.add(0.0, 0.1 * titleScale, 0.0), titleScale, waypoint.depth
                     )
@@ -122,7 +122,7 @@ object DungeonWaypoints : Module(
                 val aabb = if (!useBlockSize) AABB(pos).deflate((1.0 - size) / 2.0) else
                     pos.getBlockBounds()?.move(pos) ?: AABB(pos)
 
-                context.drawStyledBox(aabb, reachColor, style = if (filled) 0 else 1, depthCheck)
+                drawStyledBox(aabb, reachColor, style = if (filled) 0 else 1, depthCheck)
             }
         }
 

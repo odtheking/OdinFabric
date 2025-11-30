@@ -98,7 +98,7 @@ object ArrowAlign : Module(
                     clickNeeded < 5 -> '6'
                     else -> 'c'
                 }
-                context.drawText(
+                drawText(
                     Component.literal("§$colorCode$clickNeeded").visualOrderText,
                     getFramePositionFromIndex(index).center.addVec(y = 0.1, x = -0.3),
                     1f, false
