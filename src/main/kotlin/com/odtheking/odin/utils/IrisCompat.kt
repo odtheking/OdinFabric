@@ -2,7 +2,6 @@ package com.odtheking.odin.utils
 
 import com.mojang.blaze3d.pipeline.RenderPipeline
 import com.odtheking.mixin.accessors.CompositeRenderTypeAccessor
-import com.odtheking.odin.OdinMod
 import com.odtheking.odin.utils.render.CustomRenderLayer
 import net.fabricmc.loader.api.FabricLoader
 import net.irisshaders.iris.api.v0.IrisApi
