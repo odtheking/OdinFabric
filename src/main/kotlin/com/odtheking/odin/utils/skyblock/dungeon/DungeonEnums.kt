@@ -117,8 +117,7 @@ enum class Floor(val secretPercentage: Float = 1f) {
     M4,
     M5,
     M6,
-    M7,
-    None;
+    M7;
 
     /**
      * Gets the numerical representation of the floor.
@@ -136,7 +135,6 @@ enum class Floor(val secretPercentage: Float = 1f) {
                 F5, M5 -> 5
                 F6, M6 -> 6
                 F7, M7 -> 7
-                None -> -1
             }
         }
 
@@ -148,7 +146,7 @@ enum class Floor(val secretPercentage: Float = 1f) {
     inline val isMM: Boolean
         get() {
             return when (this) {
-                E, F1, F2, F3, F4, F5, F6, F7, None -> false
+                E, F1, F2, F3, F4, F5, F6, F7 -> false
                 M1, M2, M3, M4, M5, M6, M7 -> true
             }
         }

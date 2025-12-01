@@ -112,7 +112,7 @@ object HypixelData {
 
         val tunings get() = accessoryBagStorage.tuning.currentTunings.map { "${it.key.replace("_", " ").capitalizeWords()}§7: ${it.value}" }
 
-        @Transient val inventoryApi = inventory.eChestContents.itemStacks.isNotEmpty()
+        val inventoryApi get() = inventory.eChestContents.itemStacks.isNotEmpty()
 
         @Transient val allItems = (inventory.invContents.itemStacks + inventory.eChestContents.itemStacks + inventory.backpackContents.flatMap { it.value.itemStacks })
 
