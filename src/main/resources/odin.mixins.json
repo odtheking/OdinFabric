@@ -9,6 +9,7 @@
   "client": [
     "accessors.BeaconBeamAccessor",
     "accessors.AbstractContainerScreenAccessor",
+    "accessors.CompositeRenderTypeAccessor",
     "accessors.KeyMappingAccessor",
     "accessors.PictureInPictureRendererAccessor",
     "mixins.AbstractContainerScreenMixin",
