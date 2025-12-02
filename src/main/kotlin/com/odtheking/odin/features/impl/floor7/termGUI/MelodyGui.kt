@@ -1,7 +1,6 @@
 package com.odtheking.odin.features.impl.floor7.termGUI
 
 import com.odtheking.odin.features.impl.floor7.TerminalSolver
-import com.odtheking.odin.utils.Colors
 
 object MelodyGui : TermGui() {
 
@@ -22,10 +21,10 @@ object MelodyGui : TermGui() {
             val color =
                 when {
                     row == 0 -> if (index in currentSolution) TerminalSolver.melodyColumColor else return@forEach
-                    colum == 7 && row in 1..4 -> if (index in currentSolution) TerminalSolver.melodyPointerColor else Colors.gray38
+                    colum == 7 && row in 1..4 -> if (index in currentSolution) TerminalSolver.melodyPointerColor else TerminalSolver.melodyBackgroundColor
                     colum in 1..5 -> {
                         if (index in currentSolution) TerminalSolver.melodyPointerColor
-                        else Colors.gray38
+                        else TerminalSolver.melodyBackgroundColor
                     }
                     else -> return@forEach
                 }

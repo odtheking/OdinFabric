@@ -70,6 +70,7 @@
     "name": "Banners",
     "type": "NORMAL",
     "cores": [
+      -1092023380
     ],
     "crypts": 1,
     "secrets": 1
@@ -543,6 +544,7 @@
     "name": "Knight",
     "type": "NORMAL",
     "cores": [
+      -1519890056
     ],
     "secrets": 3
   },
@@ -924,6 +926,7 @@
     "name": "Rare Overgrown",
     "type": "RARE",
     "cores": [
+      -1907291752
     ],
     "secrets": 3
   },
@@ -1222,6 +1225,7 @@
     "name": "Vinny 8 Ball",
     "type": "RARE",
     "cores": [
+      8728155555
     ],
     "secrets": 1
   },

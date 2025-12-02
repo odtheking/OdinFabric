@@ -18,7 +18,10 @@ import com.odtheking.odin.utils.ui.rendering.NVGSpecialRenderer
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.network.HashedStack
-import net.minecraft.network.protocol.game.*
+import net.minecraft.network.protocol.game.ClientboundContainerClosePacket
+import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket
+import net.minecraft.network.protocol.game.ServerboundContainerClickPacket
+import net.minecraft.network.protocol.game.ServerboundContainerClosePacket
 import net.minecraft.world.inventory.ClickType
 import net.minecraft.world.item.DyeColor
 import org.lwjgl.glfw.GLFW
@@ -59,8 +62,8 @@ object TerminalSolver : Module(
     val selectColor by ColorSetting("Select", Colors.MINECRAFT_DARK_AQUA, true, desc = "Color of the select terminal solver.").withDependency { showColors }
 
     val melodyColumColor by ColorSetting("Melody Column", Colors.MINECRAFT_DARK_PURPLE, true, desc = "Color of the colum indicator for melody.").withDependency { showColors && !cancelMelodySolver }
-    val melodyRowColor by ColorSetting("Melody Row", Colors.MINECRAFT_RED, true, desc = "Color of the row indicator for melody.").withDependency { showColors && !cancelMelodySolver }
     val melodyPointerColor by ColorSetting("Melody Pointer", Colors.MINECRAFT_GREEN, true, desc = "Color of the location for pressing for melody.").withDependency { showColors && !cancelMelodySolver }
+    val melodyBackgroundColor by ColorSetting("Melody Background", Colors.gray38, true, desc = "Color of the background slot in melody.").withDependency { showColors && !cancelMelodySolver }
 
     var currentTerm: TerminalHandler? = null
         private set
@@ -73,10 +76,7 @@ object TerminalSolver : Module(
 
     init {
         onReceive<ClientboundOpenScreenPacket> {
-            currentTerm?.let {
-                if (!it.isClicked) leftTerm()
-                it.openScreen(this)
-            }
+            currentTerm?.let { if (!it.isClicked) leftTerm() }
             val windowName = title.string ?: return@onReceive
             val newTermType = TerminalTypes.entries.find { terminal -> windowName.startsWith(terminal.windowName) }?.takeIf { it != currentTerm?.type } ?: return@onReceive
 
@@ -99,13 +99,8 @@ object TerminalSolver : Module(
             currentTerm?.let {
                 devMessage("§aNew terminal: §6${it.type.name}")
                 TerminalEvent.Opened(it).postAndCatch()
-                it.openScreen(this)
                 lastTermOpened = it
             }
-        }
-
-        onReceive<ClientboundContainerSetSlotPacket> {
-            currentTerm?.setSlot(this)
         }
 
         onReceive<ClientboundContainerClosePacket> {
@@ -249,9 +244,9 @@ object TerminalSolver : Module(
 
     private fun leftTerm() {
         currentTerm?.let {
-            EventBus.unsubscribe(it)
             devMessage("§cLeft terminal: §6${it.type.name}")
             TerminalEvent.Closed(it).postAndCatch()
+            EventBus.unsubscribe(it)
             currentTerm = null
         }
     }

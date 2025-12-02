@@ -1,5 +1,6 @@
 package com.odtheking.odin.features.impl.floor7.terminalhandler
 
+import com.odtheking.odin.utils.noControlCodes
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
@@ -19,7 +20,7 @@ class NumbersHandler: TerminalHandler(TerminalTypes.NUMBERS) {
 
     private fun solveNumbers(items: Array<ItemStack?>): List<Int> {
         return items.mapIndexedNotNull { index, item ->
-            if (item?.item == Items.RED_STAINED_GLASS_PANE.asItem()) index else null
-        }.sortedBy { items[it]?.count }
+            if (item?.item == Items.RED_STAINED_GLASS_PANE) index else null
+        }.sortedBy { items[it]?.hoverName?.string?.noControlCodes?.toIntOrNull() ?: Int.MAX_VALUE }
     }
 }

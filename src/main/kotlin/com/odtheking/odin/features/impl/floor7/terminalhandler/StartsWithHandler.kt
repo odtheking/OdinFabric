@@ -6,7 +6,7 @@ import net.minecraft.world.item.ItemStack
 class StartsWithHandler(private val letter: String): TerminalHandler(TerminalTypes.STARTS_WITH) {
 
     private val clickedSlots = mutableSetOf<Int>()
-    private var lastSyncId = -1
+    private var lastContainerId = -1
 
     override fun handleSlotUpdate(packet: ClientboundContainerSetSlotPacket): Boolean {
         if (packet.slot != type.windowSize - 1) return false
@@ -16,9 +16,9 @@ class StartsWithHandler(private val letter: String): TerminalHandler(TerminalTyp
     }
 
     override fun click(slotIndex: Int, button: Int, simulateClick: Boolean) {
-        if (canClick(slotIndex, button) && lastSyncId != syncId) {
+        if (canClick(slotIndex, button) && lastContainerId != containerId) {
             clickedSlots.add(slotIndex)
-            lastSyncId = syncId
+            lastContainerId = containerId
         }
         super.click(slotIndex, button, simulateClick)
     }
