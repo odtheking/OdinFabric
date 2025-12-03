@@ -42,7 +42,7 @@ object DungeonWaypoints : Module(
     private val disableDepth by BooleanSetting("Global Depth", false, desc = "Disables depth testing for all waypoints.")
 
     private val settingsDropDown by DropdownSetting("Next Waypoint Settings")
-    var waypointType by SelectorSetting("Waypoint Type", WaypointType.NONE.displayName, WaypointType.getArrayList(), desc = "The type of waypoint you want to place.").withDependency { settingsDropDown }
+    var waypointType by SelectorSetting("Waypoint Type", WaypointType.NONE.displayName, WaypointType.entries.map { it.displayName }, desc = "The type of waypoint you want to place.").withDependency { settingsDropDown }
     private val colorPallet by SelectorSetting("Color pallet", "None", arrayListOf("None", "Aqua", "Magenta", "Yellow", "Lime", "Red"), desc = "The color pallet of the next waypoint you place.").withDependency { settingsDropDown }
     var color by ColorSetting("Color", Colors.MINECRAFT_GREEN, true, desc = "The color of the next waypoint you place.").withDependency { colorPallet == 0 && settingsDropDown }
     var filled by BooleanSetting("Filled", false, desc = "If the next waypoint you place should be 'filled'.").withDependency { settingsDropDown }
@@ -207,7 +207,6 @@ object DungeonWaypoints : Module(
         inline val displayName get() = name.lowercase().capitalizeFirst()
 
         companion object {
-            fun getArrayList() = ArrayList(entries.map { it.displayName })
             fun getByInt(i: Int) = entries.getOrNull(i).takeIf { it != NONE }
             fun getByName(name: String): WaypointType? = entries.find { it.name == name.uppercase() }
         }

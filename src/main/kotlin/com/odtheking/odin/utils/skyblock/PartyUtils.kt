@@ -2,6 +2,7 @@ package com.odtheking.odin.utils.skyblock
 
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.ChatPacketEvent
+import com.odtheking.odin.events.PartyEvent
 import com.odtheking.odin.events.core.on
 
 object PartyUtils {
@@ -140,9 +141,9 @@ object PartyUtils {
 
     private fun removeMember(playerName: String) {
         if (playerName !in members) return
-
         members.remove(playerName)
 
+        PartyEvent.Leave(members).postAndCatch()
         if (members.isEmpty()) disband()
     }
 

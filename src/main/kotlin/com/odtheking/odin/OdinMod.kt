@@ -57,7 +57,7 @@ object OdinMod : ClientModInitializer {
         listOf(
             this, LocationUtils, TickTasks, KuudraUtils,
             SkyblockPlayer, ServerUtils, EventDispatcher,
-             ModuleManager, DungeonListener, PartyUtils,
+            ModuleManager, DungeonListener, PartyUtils,
             ScanUtils, DungeonUtils, SplitsManager,
             IrisCompatability
         ).forEach { EventBus.subscribe(it) }

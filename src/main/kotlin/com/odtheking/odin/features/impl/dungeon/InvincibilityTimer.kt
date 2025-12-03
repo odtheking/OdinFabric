@@ -31,11 +31,11 @@ object InvincibilityTimer : Module(
         if ((!DungeonUtils.inDungeons && !example) || (showOnlyInBoss && !DungeonUtils.inBoss)) return@HUD 0 to 0
 
         val visibleTypes = InvincibilityType.entries.filter { type ->
-            when (type) {
-                InvincibilityType.SPIRIT -> showSpirit || example
-                InvincibilityType.BONZO -> showBonzo || example
-                InvincibilityType.PHOENIX -> showPhoenix || example
-            } && (when (showWhen) {
+            (when (type) {
+                InvincibilityType.SPIRIT -> showSpirit
+                InvincibilityType.BONZO -> showBonzo
+                InvincibilityType.PHOENIX -> showPhoenix
+            } || example) && (when (showWhen) {
                 0 -> true
                 1 -> type.activeTime > 0 || type.currentCooldown > 0
                 2 -> type.activeTime > 0

@@ -25,7 +25,7 @@ object PlayerSize : Module(
     private val devSizeZ by NumberSetting("Size Z", 1f, -1, 3f, 0.1, desc = "Z scale of the dev size.")
     private val devWings by BooleanSetting("Wings", false, desc = "Toggles dragon wings.").withDependency { isRandom }
     private val devWingsColor by ColorSetting("Wings Color", Colors.WHITE, desc = "Color of the dev wings.").withDependency { devWings && isRandom }
-    private var showHidden by DropdownSetting("Show Hidden", false).withDependency { isRandom }
+    private var showHidden by DropdownSetting("Show Hidden").withDependency { isRandom }
     private val passcode by StringSetting("Passcode", "odin", desc = "Passcode for dev features.").withDependency { showHidden && isRandom }
 
     const val DEV_SERVER = "https://api.odtheking.com/devs/"
@@ -78,7 +78,6 @@ object PlayerSize : Module(
     suspend fun updateCustomProperties() {
         val response = fetchJson<Array<RandomPlayer>>("https://api.odtheking.com/devs/").getOrNull() ?: return
         randoms.putAll(response.associateBy { it.name })
-        modMessage(randoms)
     }
 
     init {

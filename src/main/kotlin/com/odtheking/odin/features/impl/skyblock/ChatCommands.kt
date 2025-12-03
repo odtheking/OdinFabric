@@ -7,7 +7,7 @@ import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.MessageSentEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
-import com.odtheking.odin.features.impl.dungeon.DungeonRequeue
+import com.odtheking.odin.features.impl.dungeon.DungeonQueue
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.handlers.schedule
 import com.odtheking.odin.utils.skyblock.LocationUtils
@@ -172,7 +172,7 @@ object ChatCommands : Module(
                 if (dtReason.any { it.first == name }) return modMessage("§6${name} §calready has a reminder!")
                 modMessage("§aReminder set for the end of the run! §7(disabled auto requeue for this run)")
                 dtReason.add(name to reason)
-                DungeonRequeue.disableRequeue = true
+                DungeonQueue.disableRequeue = true
             }
 
             "undowntime", "undt" -> {
@@ -180,7 +180,7 @@ object ChatCommands : Module(
                 if (dtReason.none { it.first == name }) return modMessage("§6${name} §chas no reminder set!")
                 modMessage("§aReminder removed!")
                 dtReason.removeIf { it.first == name }
-                if (dtReason.isEmpty()) DungeonRequeue.disableRequeue = false
+                if (dtReason.isEmpty()) DungeonQueue.disableRequeue = false
             }
 
             "reinv", "reinvite" -> {
