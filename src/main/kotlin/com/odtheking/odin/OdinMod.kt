@@ -5,6 +5,7 @@ import com.odtheking.odin.config.Config
 import com.odtheking.odin.events.EventDispatcher
 import com.odtheking.odin.events.core.EventBus
 import com.odtheking.odin.features.ModuleManager
+import com.odtheking.odin.utils.IrisCompatability
 import com.odtheking.odin.utils.ServerUtils
 import com.odtheking.odin.utils.handlers.TickTasks
 import com.odtheking.odin.utils.network.WebUtils.createClient
@@ -57,7 +58,8 @@ object OdinMod : ClientModInitializer {
             this, LocationUtils, TickTasks, KuudraUtils,
             SkyblockPlayer, ServerUtils,
             EventDispatcher, ModuleManager, DungeonListener,
-            ScanUtils, DungeonUtils, SplitsManager, PartyUtils
+            ScanUtils, DungeonUtils, SplitsManager, PartyUtils,
+            IrisCompatability
         ).forEach { EventBus.subscribe(it) }
 
         SpecialGuiElementRegistry.register { context ->

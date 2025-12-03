@@ -14,6 +14,7 @@ repositories {
     maven("https://jitpack.io")
     maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
     maven("https://maven.terraformersmc.com/")
+    maven("https://api.modrinth.com/maven")
 }
 
 dependencies {
@@ -51,6 +52,8 @@ dependencies {
             include("org.lwjgl:lwjgl-nanovg:$it:natives-$v")
         }
     }
+
+    modCompileOnly("maven.modrinth:iris:${property("iris")}")
 }
 
 loom {

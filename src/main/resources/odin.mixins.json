@@ -8,6 +8,7 @@
   },
   "client": [
     "accessors.AbstractContainerScreenAccessor",
+    "accessors.CompositeRenderTypeAccessor",
     "accessors.KeyMappingAccessor",
     "accessors.PictureInPictureRendererAccessor",
     "mixins.AbstractContainerScreenMixin",
