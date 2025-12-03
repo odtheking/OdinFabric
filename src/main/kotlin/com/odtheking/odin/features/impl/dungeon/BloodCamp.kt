@@ -167,8 +167,10 @@ object BloodCamp : Module(
 
         onReceive<ClientboundSetEntityDataPacket> {
             if (!bloodAssist || currentWatcherEntity != null) return@onReceive
-            currentWatcherEntity = (mc.level?.getEntity(id) as? Zombie)?.takeIf { it.getItemBySlot(EquipmentSlot.HEAD)?.texture in watcherSkulls } ?: return@onReceive
-            devMessage("Watcher found at ${currentWatcherEntity?.position()}")
+            mc.execute {
+                currentWatcherEntity = (mc.level?.getEntity(id) as? Zombie)?.takeIf { it.getItemBySlot(EquipmentSlot.HEAD)?.texture in watcherSkulls } ?: return@execute
+                devMessage("Watcher found at ${currentWatcherEntity?.position()}")
+            }
         }
 
         onReceive<ClientboundRemoveEntitiesPacket> {

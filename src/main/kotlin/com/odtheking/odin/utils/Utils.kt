@@ -4,6 +4,11 @@ package com.odtheking.odin.utils
 
 import com.odtheking.odin.OdinMod
 import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
+import com.odtheking.odin.clickgui.settings.impl.ActionSetting
+import com.odtheking.odin.clickgui.settings.impl.NumberSetting
+import com.odtheking.odin.clickgui.settings.impl.StringSetting
+import com.odtheking.odin.features.Module
 import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.ClickEvent
 import net.minecraft.network.chat.Component
@@ -164,4 +169,13 @@ fun formatNumber(numStr: String): String {
         num >= 1_000 -> "%.2fK".format(num / 1_000)
         else -> "%.0f".format(num)
     }
+}
+
+fun Module.createSoundSettings(name: String, default: String, dependencies: () -> Boolean): () -> Triple<String, Float, Float> {
+    val customSound = +StringSetting(name, default, desc = "Name of a custom sound to play.", length = 64).withDependency { dependencies() }
+    val pitch = +NumberSetting("$name Pitch", 1.0f, 0.1f, 1.0f, 0.01f, desc = "Pitch of the sound to play.").withDependency { dependencies() }
+    val volume = +NumberSetting("$name Volume", 1.0f, 0.1f, 1.0f, 0.01f, desc = "Volume of the sound to play.").withDependency { dependencies() }
+    val soundSettings = { Triple(customSound.value, volume.value, pitch.value) }
+    +ActionSetting("Play sound", desc = "Plays the selected sound.") { playSoundSettings(soundSettings()) }.withDependency { dependencies() }
+    return soundSettings
 }
