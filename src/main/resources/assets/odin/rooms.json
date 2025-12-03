@@ -504,7 +504,8 @@
     "name": "Higher Blaze",
     "type": "PUZZLE",
     "cores": [
-      -1752027278
+      -1752027278,
+      -1477567187
     ],
     "secrets": 1
   },

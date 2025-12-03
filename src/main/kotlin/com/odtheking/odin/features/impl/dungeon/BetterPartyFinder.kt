@@ -12,7 +12,7 @@ import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.formatNumber
 import com.odtheking.odin.utils.formatTime
-import com.odtheking.odin.utils.handlers.LimitedTickTask
+import com.odtheking.odin.utils.handlers.schedule
 import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.network.hypixelapi.RequestUtils
 import com.odtheking.odin.utils.sendCommand
@@ -39,7 +39,7 @@ object BetterPartyFinder : Module(
     private val petMap = mapOf("SPIRIT" to { spiritKick })
 
     private val kickCache by BooleanSetting("Kick Cache", true, desc = "Caches kicked players to automatically kick when they attempt to rejoin.").withDependency { autoKickToggle }
-    private val action: () -> Unit by ActionSetting("Clear Cache", desc = "Clears the kick list cache.") { kickedList.clear() }.withDependency { kickCache }
+    private val action by ActionSetting("Clear Cache", desc = "Clears the kick list cache.") { kickedList.clear() }.withDependency { autoKickToggle && kickCache }
 
     //https://regex101.com/r/XYnAVm/2
     private val pfRegex = Regex("^Party Finder > (?:\\[.{1,7}])? ?(.{1,16}) joined the dungeon group! \\(.*\\)$")
@@ -90,7 +90,7 @@ object BetterPartyFinder : Module(
 
                     if (kickedReasons.isNotEmpty()) {
                         if (informKicked) {
-                            LimitedTickTask(5, 1) { sendCommand("party kick $name") }
+                            schedule(5) { sendCommand("party kick $name") }
                             sendCommand("pc Kicked $name for: ${kickedReasons.joinToString(", ")}")
                         } else sendCommand("party kick $name")
 

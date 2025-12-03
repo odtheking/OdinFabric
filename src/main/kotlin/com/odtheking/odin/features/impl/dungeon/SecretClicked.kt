@@ -12,7 +12,7 @@ import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.createSoundSettings
 import com.odtheking.odin.utils.getBlockBounds
-import com.odtheking.odin.utils.handlers.LimitedTickTask
+import com.odtheking.odin.utils.handlers.schedule
 import com.odtheking.odin.utils.playSoundSettings
 import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
@@ -86,6 +86,6 @@ object SecretClicked : Module(
     private fun secretBox(pos: BlockPos) {
         if (!boxes || (DungeonUtils.inBoss && !boxInBoss) || clickedSecretsList.any { it.aabb.intersects(pos) }) return
         clickedSecretsList.add(Secret(pos.getBlockBounds()?.move(pos) ?: AABB(pos)))
-        LimitedTickTask(timeToStay * 20, 1) { clickedSecretsList.removeFirstOrNull() }
+        schedule(timeToStay * 20) { clickedSecretsList.removeFirstOrNull() }
     }
 }

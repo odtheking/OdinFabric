@@ -4,13 +4,13 @@ import com.odtheking.odin.clickgui.settings.impl.ActionSetting
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.TerminalEvent
+import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.features.impl.floor7.termsim.TermSimGUI
 import com.odtheking.odin.utils.ChatManager.hideMessage
 import com.odtheking.odin.utils.PersonalBest
-import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.modMessage
 
 object TerminalTimes : Module(
@@ -70,7 +70,7 @@ object TerminalTimes : Module(
             }
         }
 
-        TickTask(0, true) {
+        on<TickEvent.Server> {
             if (!useRealTime) currentTick += 50
         }
 

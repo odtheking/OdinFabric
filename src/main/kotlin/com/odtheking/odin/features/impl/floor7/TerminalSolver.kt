@@ -4,16 +4,12 @@ import com.odtheking.mixin.accessors.AbstractContainerScreenAccessor
 import com.odtheking.odin.clickgui.settings.AlwaysActive
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.*
-import com.odtheking.odin.events.ChatPacketEvent
-import com.odtheking.odin.events.GuiEvent
-import com.odtheking.odin.events.PacketEvent
-import com.odtheking.odin.events.TerminalEvent
+import com.odtheking.odin.events.*
 import com.odtheking.odin.events.core.*
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.features.impl.floor7.terminalhandler.*
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.Color.Companion.darker
-import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.ui.rendering.NVGSpecialRenderer
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
@@ -99,6 +95,7 @@ object TerminalSolver : Module(
             currentTerm?.let {
                 devMessage("§aNew terminal: §6${it.type.name}")
                 TerminalEvent.Opened(it).postAndCatch()
+                it.containerId = containerId
                 lastTermOpened = it
             }
         }
@@ -126,7 +123,7 @@ object TerminalSolver : Module(
             leftTerm()
         }
 
-        TickTask(0, true) {
+        on<TickEvent.Server> {
             if (System.currentTimeMillis() - lastClickTime >= terminalReloadThreshold && currentTerm?.isClicked == true) currentTerm?.let {
                 PacketEvent.Send(ServerboundContainerClickPacket(mc.player?.containerMenu?.containerId ?: -1, 0, 0, 0, ClickType.PICKUP, Int2ObjectMaps.emptyMap(), HashedStack.EMPTY)).postAndCatch()
                 it.isClicked = false

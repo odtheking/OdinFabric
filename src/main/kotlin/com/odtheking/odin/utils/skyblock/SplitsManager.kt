@@ -1,13 +1,13 @@
 package com.odtheking.odin.utils.skyblock
 
 import com.odtheking.odin.events.ChatPacketEvent
+import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.impl.skyblock.Splits
 import com.odtheking.odin.utils.PersonalBest
 import com.odtheking.odin.utils.formatTime
-import com.odtheking.odin.utils.handlers.LimitedTickTask
-import com.odtheking.odin.utils.handlers.TickTask
+import com.odtheking.odin.utils.handlers.schedule
 import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonListener
 
@@ -61,7 +61,7 @@ object SplitsManager {
 
                 if (index == currentSplits.splits.size - 1) {
                     val (times, _, _) = getAndUpdateSplitsTimes(currentSplits)
-                    LimitedTickTask(10, 1) {
+                    schedule(10) {
                         currentSplits.personalBest?.time(currentSplits.splits[index - 1].name, currentSplitTime, "s§7!", "§6${currentSplits.splits[index - 1].name} §7took §6", true, Splits.sendOnlyPB, Splits.enabled)
                         currentSplits.personalBest?.time(currentSplits.splits[index].name, times.last() / 1000f, "s§7!", "§6Total time §7took §6", true, Splits.sendOnlyPB, Splits.enabled)
                         times.forEachIndexed { i, it ->
@@ -73,7 +73,7 @@ object SplitsManager {
             }
         }
 
-        TickTask(0, true) {
+        on<TickEvent.Server> {
             tickCounter++
         }
 

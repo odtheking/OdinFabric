@@ -4,12 +4,12 @@ import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.HudElement
 import com.odtheking.odin.events.ChatPacketEvent
+import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Colors
-import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.toFixed
@@ -90,13 +90,13 @@ object TickTimers : Module(
             }
         }
 
-        TickTask(0, true) {
-            if (!DungeonUtils.inDungeons) return@TickTask
+        on<TickEvent.Server> {
+            if (!DungeonUtils.inDungeons) return@on
             if (outboundsTime == 0 && outboundsHud.enabled) outboundsTime = 40
             if (outboundsTime >= 0 && outboundsHud.enabled) outboundsTime--
             if (secretsTime == 0 && secretsHud.enabled && !DungeonUtils.inBoss) secretsTime = 20
             if (secretsTime >= 0 && secretsHud.enabled) secretsTime--
-            if (!DungeonUtils.inBoss) return@TickTask
+            if (!DungeonUtils.inBoss) return@on
             if (goldorTickTime == 0 && goldorStartTime <= 0 && goldorHud.enabled) goldorTickTime = 60
             if (goldorStartTime >= 0 && goldorHud.enabled) goldorStartTime--
             if (goldorTickTime >= 0 && goldorHud.enabled) goldorTickTime--

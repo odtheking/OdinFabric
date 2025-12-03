@@ -9,7 +9,7 @@ import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.features.impl.dungeon.DungeonRequeue
 import com.odtheking.odin.utils.*
-import com.odtheking.odin.utils.handlers.LimitedTickTask
+import com.odtheking.odin.utils.handlers.schedule
 import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.odtheking.odin.utils.skyblock.PartyUtils
 import net.minecraft.network.chat.ClickEvent
@@ -64,7 +64,7 @@ object ChatCommands : Module(
         on<ChatPacketEvent> {
             if (value.matches(endRunRegex)) {
                 if (!dt || dtReason.isEmpty()) return@on
-                LimitedTickTask(30, 1) {
+                schedule(30) {
                     dtReason.find { it.first == mc.player?.name?.string }?.let { sendCommand("pc Downtime needed: ${it.second}") }
                     modMessage("DT Reasons: ${dtReason.groupBy({ it.second }, { it.first }).entries.joinToString(", ") { (reason, names) -> "${names.joinToString(", ")}: $reason" }}")
                     alert("§cPlayers need DT")
@@ -85,7 +85,7 @@ object ChatCommands : Module(
 
             if (!msg.startsWith("!")) return@on
 
-            LimitedTickTask(4, 1) {
+            schedule(4) {
                 handleChatCommands(msg, ign, channel)
             }
         }
@@ -186,7 +186,7 @@ object ChatCommands : Module(
             "reinv", "reinvite" -> {
                 if (!reinvite || channel != ChatChannel.PARTY && PartyUtils.isLeader()) return
                 modMessage("§aReinviting §6$name §ain 5 seconds...")
-                LimitedTickTask(100, 1) {
+                schedule(100) {
                     sendCommand("p invite $name")
                 }
             }

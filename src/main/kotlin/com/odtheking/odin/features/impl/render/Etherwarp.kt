@@ -80,18 +80,16 @@ object Etherwarp : Module(
 
             etherPos?.pos?.let {
                 if (etherPos?.succeeded == false) return@onSend
-                mc.execute {
-                    mc.player?.connection?.send(
-                        ServerboundMovePlayerPacket.PosRot(
-                            it.x + 0.5, it.y + 1.05, it.z + 0.5, mc.player?.yRot ?: 0f,
-                            mc.player?.xRot ?: 0f, false, false
-                        )
+                mc.player?.connection?.send(
+                    ServerboundMovePlayerPacket.PosRot(
+                        it.x + 0.5, it.y + 1.05, it.z + 0.5, mc.player?.yRot ?: 0f,
+                        mc.player?.xRot ?: 0f, false, false
                     )
-                    mc.player?.setPos(it.x + 0.5, it.y + 1.05, it.z + 0.5)
-                    mc.player?.setDeltaMovement(0.0, 0.0, 0.0)
-                    if (sounds) playSoundSettings(soundSettings())
-                    else playSoundAtPlayer(SoundEvents.ENDER_DRAGON_HURT, pitch = 0.53968257f)
-                }
+                )
+                mc.player?.setPos(it.x + 0.5, it.y + 1.05, it.z + 0.5)
+                mc.player?.setDeltaMovement(0.0, 0.0, 0.0)
+                if (sounds) playSoundSettings(soundSettings())
+                else playSoundAtPlayer(SoundEvents.ENDER_DRAGON_HURT, pitch = 0.53968257f)
             }
         }
     }

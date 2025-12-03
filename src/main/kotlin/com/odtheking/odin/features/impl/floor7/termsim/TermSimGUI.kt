@@ -9,7 +9,7 @@ import com.odtheking.odin.events.core.EventPriority
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onSend
 import com.odtheking.odin.features.impl.floor7.TerminalSounds
-import com.odtheking.odin.utils.handlers.LimitedTickTask
+import com.odtheking.odin.utils.handlers.schedule
 import com.odtheking.odin.utils.playSoundAtPlayer
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.core.component.DataComponents
@@ -57,7 +57,7 @@ open class TermSimGUI(
     }
 
     fun open(terminalPing: Long = 0L) {
-        LimitedTickTask(1, 1) {
+        schedule(0) {
             mc.setScreen(this)
             create()
             ping = terminalPing
@@ -113,8 +113,8 @@ open class TermSimGUI(
         if (mc.screen == StartGUI) return slotClick(slot, button)
         if (!doesAcceptClick || slot.container != inv || slot.item?.item == Items.BLACK_STAINED_GLASS_PANE) return
         doesAcceptClick = false
-        LimitedTickTask((ping / 50).toInt().coerceAtLeast(0), 1) {
-            if (mc.screen != this) return@LimitedTickTask
+        schedule((ping / 50).toInt().coerceAtLeast(0)) {
+            if (mc.screen != this) return@schedule
             doesAcceptClick = true
             slotClick(slot, button)
         }

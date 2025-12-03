@@ -26,7 +26,7 @@ open class TerminalHandler(val type: TerminalTypes) {
     val items: Array<ItemStack?> = arrayOfNulls(type.windowSize)
     val timeOpened = System.currentTimeMillis()
     var isClicked = false
-    var containerId = mc.player?.containerMenu?.containerId ?: -1
+    var containerId = -1
 
     init {
         @Suppress("LeakingThis")

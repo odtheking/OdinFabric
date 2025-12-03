@@ -7,13 +7,13 @@ import com.odtheking.odin.clickgui.settings.impl.NumberSetting
 import com.odtheking.odin.clickgui.settings.impl.SelectorSetting
 import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.RenderEvent
+import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.PersonalBest
-import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.render.drawLine
 import com.odtheking.odin.utils.render.drawText
@@ -104,7 +104,7 @@ object WitherDragons : Module(
                 }
         }
 
-        TickTask(0, true) {
+        on<TickEvent.Server> {
             WitherDragonsEnum.entries.forEach {
                 if (it.timeToSpawn > 0) it.timeToSpawn--
                 else if (it.state == WitherDragonState.SPAWNING) it.setAlive(null)

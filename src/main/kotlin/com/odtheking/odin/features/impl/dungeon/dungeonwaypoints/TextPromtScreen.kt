@@ -31,7 +31,7 @@ object TextPromptScreen : Screen(Component.literal("Enter Waypoint Text")) {
         addRenderableWidget(textField)
         addRenderableWidget(submitButton)
 
-        setFocused(textField)
+        focused = textField
     }
 
     override fun render(context: GuiGraphics, mouseX: Int, mouseY: Int, delta: Float) {

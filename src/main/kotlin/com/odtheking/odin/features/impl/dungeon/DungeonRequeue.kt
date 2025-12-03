@@ -6,7 +6,7 @@ import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
-import com.odtheking.odin.utils.handlers.LimitedTickTask
+import com.odtheking.odin.utils.handlers.schedule
 import com.odtheking.odin.utils.matchesOneOf
 import com.odtheking.odin.utils.sendCommand
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
@@ -37,7 +37,7 @@ object DungeonRequeue : Module(
                         disableRequeue = false
                         return@on
                     }
-                    LimitedTickTask(delay * 20, 1) {
+                    schedule(delay * 20) {
                         if (!disableRequeue)
                             sendCommand(if (type) "instancerequeue" else "od ${DungeonUtils.floor?.name?.lowercase()}")
                     }
