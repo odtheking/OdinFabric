@@ -15,12 +15,12 @@ class StartsWithHandler(private val letter: String): TerminalHandler(TerminalTyp
         return true
     }
 
-    override fun click(slotIndex: Int, button: Int, simulateClick: Boolean) {
+    override fun onClick(slotIndex: Int, button: Int) {
         if (canClick(slotIndex, button) && lastContainerId != containerId) {
             clickedSlots.add(slotIndex)
             lastContainerId = containerId
         }
-        super.click(slotIndex, button, simulateClick)
+        super.onClick(slotIndex, button)
     }
 
     override fun simulateClick(slotIndex: Int, clickType: Int) {
