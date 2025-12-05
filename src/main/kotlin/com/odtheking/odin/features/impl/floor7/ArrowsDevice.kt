@@ -93,6 +93,7 @@ object ArrowsDevice : Module(
             modMessage("§aSharp shooter device complete §7($method)")
             alert("§aDevice Complete")
         }
+        reset()
     }
 
     private val isPlayerInRoom: Boolean

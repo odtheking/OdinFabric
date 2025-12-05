@@ -12,7 +12,7 @@ import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 
 object BreakerDisplay : Module(
     name = "Breaker Display",
-    description = "Displays the amount of charges left in your Dungeon Breaker"
+    description = "Displays the amount of charges left in your Dungeon Breaker."
 ) {
     private val chargesRegex = Regex("Charges: (\\d+)/(\\d+)⸕")
     private var charges = 0

@@ -48,7 +48,9 @@ object DungeonWaypoints : Module(
     var filled by BooleanSetting("Filled", false, desc = "If the next waypoint you place should be 'filled'.").withDependency { settingsDropDown }
     var depthCheck by BooleanSetting("Depth check", false, desc = "Whether the next waypoint you place should have a depth check.").withDependency { settingsDropDown }
     var useBlockSize by BooleanSetting("Use block size", true, desc = "Use the size of the block you click for waypoint size.").withDependency { settingsDropDown }
-    var size by NumberSetting("Size", 1.0, .1, 1.0, 0.01, desc = "The size of the next waypoint you place.").withDependency { !useBlockSize && settingsDropDown }
+    var sizeX by NumberSetting("Size X", 1.0, .1, 5.0, 0.01, desc = "The X size of the next waypoint you place.").withDependency { !useBlockSize && settingsDropDown }
+    var sizeY by NumberSetting("Size Y", 1.0, .1, 5.0, 0.01, desc = "The Y size of the next waypoint you place.").withDependency { !useBlockSize && settingsDropDown }
+    var sizeZ by NumberSetting("Size Z", 1.0, .1, 5.0, 0.01, desc = "The Z size of the next waypoint you place.").withDependency { !useBlockSize && settingsDropDown }
 
     private val resetButton by ActionSetting("Reset Current Room", desc = "Resets the waypoints for the current room.") {
         val room = DungeonUtils.currentRoom ?: return@ActionSetting modMessage("§cRoom not found!")
@@ -119,7 +121,7 @@ object DungeonWaypoints : Module(
             }
 
             reachPosition?.takeIf { allowEdits }?.let { pos ->
-                val aabb = if (!useBlockSize) AABB(pos).deflate((1.0 - size) / 2.0) else
+                val aabb = if (!useBlockSize) AABB(BlockPos.ZERO).inflate((sizeX - 1.0) / 2.0, (sizeY - 1.0) / 2.0, (sizeZ - 1.0) / 2.0).move(pos) else
                     pos.getBlockBounds()?.move(pos) ?: AABB(pos)
 
                 context.drawStyledBox(aabb, reachColor, style = if (filled) 0 else 1, depthCheck)
@@ -141,7 +143,8 @@ object DungeonWaypoints : Module(
             val pos = reachPosition ?: return@on
             val blockPos = room.getRelativeCoords(pos)
 
-            val aabb = if (!useBlockSize) AABB(pos).deflate((1.0 - size) / 2.0) else pos.getBlockBounds() ?: AABB(pos)
+            val aabb = if (!useBlockSize) AABB(BlockPos.ZERO).inflate((sizeX - 1.0) / 2.0, (sizeY - 1.0) / 2.0, (sizeZ - 1.0) / 2.0) else
+                pos.getBlockBounds() ?: AABB(BlockPos.ZERO)
 
             val waypoints = getWaypoints(room)
 
