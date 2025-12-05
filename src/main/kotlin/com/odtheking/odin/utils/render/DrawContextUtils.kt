@@ -4,6 +4,7 @@ import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Colors
 import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.util.FormattedCharSequence
 import org.joml.Matrix3x2f
 import kotlin.math.atan2
 import kotlin.math.ceil
@@ -17,6 +18,10 @@ fun GuiGraphics.text(text: String, x: Int, y: Int, color: Color = Colors.WHITE, 
 fun GuiGraphics.textDim(text: String, x: Int, y: Int, color: Color = Colors.WHITE, shadow: Boolean = true): Pair<Int, Int> {
     text(text, x, y, color, shadow)
     return mc.font.width(text) to mc.font.lineHeight
+}
+
+fun GuiGraphics.text(text: FormattedCharSequence, x: Int, y: Int, color: Color = Colors.WHITE, shadow: Boolean = true) {
+    drawString(mc.font, text, x, y, color.rgba, shadow)
 }
 
 fun getStringWidth(text: String): Int = mc.font.width(text)

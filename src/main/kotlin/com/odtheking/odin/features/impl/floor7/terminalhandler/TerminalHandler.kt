@@ -26,7 +26,6 @@ open class TerminalHandler(val type: TerminalTypes) {
     val items: Array<ItemStack?> = arrayOfNulls(type.windowSize)
     val timeOpened = System.currentTimeMillis()
     var isClicked = false
-    var containerId = -1
 
     init {
         @Suppress("LeakingThis")
@@ -39,7 +38,6 @@ open class TerminalHandler(val type: TerminalTypes) {
         }
 
         onReceive<ClientboundOpenScreenPacket> {
-            this@TerminalHandler.containerId = containerId
             isClicked = false
             items.fill(null)
         }
@@ -49,18 +47,16 @@ open class TerminalHandler(val type: TerminalTypes) {
 
     open fun simulateClick(slotIndex: Int, clickType: Int) {}
 
-    open fun onClick(slotIndex: Int, button: Int) {}
 
     open fun click(slotIndex: Int, button: Int, simulateClick: Boolean = true) {
         val screenHandler = (mc.screen as? ContainerScreen)?.menu ?: return
-        onClick(slotIndex, button)
         if (simulateClick) simulateClick(slotIndex, button)
         isClicked = true
 
         if (mc.screen is TermSimGUI) {
             PacketEvent.Send(
                 ServerboundContainerClickPacket(
-                    screenHandler.containerId, containerId,
+                    -1, -1,
                     Shorts.checkedCast(slotIndex.toLong()), SignedBytes.checkedCast(button.toLong()),
                     if (button == GLFW.GLFW_MOUSE_BUTTON_3) ClickType.CLONE else ClickType.PICKUP,
                     Int2ObjectOpenHashMap(), HashedStack.EMPTY

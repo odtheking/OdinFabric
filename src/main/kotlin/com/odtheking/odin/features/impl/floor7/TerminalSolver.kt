@@ -95,7 +95,6 @@ object TerminalSolver : Module(
             currentTerm?.let {
                 devMessage("§aNew terminal: §6${it.type.name}")
                 TerminalEvent.Opened(it).postAndCatch()
-                it.containerId = containerId
                 lastTermOpened = it
             }
         }
