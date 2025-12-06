@@ -138,8 +138,8 @@ private fun buildFloorTimesLine(cata: HypixelData.DungeonTypeData, mm: HypixelDa
 private data class ArmorPiece(val slot: String, val itemStack: HypixelData.ItemData?)
 private data class MissingItem(val name: String, val shortName: String)
 
-private fun getArmorPieces(member: HypixelData.MemberData) = member.inventory.invArmor.itemStacks
-    .takeIf { it.size >= 4 }
+private fun getArmorPieces(member: HypixelData.MemberData) = member.inventory?.invArmor?.itemStacks
+    ?.takeIf { it.size >= 4 }
     ?.let { listOfNotNull(
         it[3]?.let { stack -> ArmorPiece("⛑", stack) },
         it[2]?.let { stack -> ArmorPiece("\uD83D\uDEE1", stack) },
@@ -165,7 +165,7 @@ private fun buildArmorLine(armorPieces: List<ArmorPiece>) = Component.literal("�
 }
 
 private fun hasItem(member: HypixelData.MemberData, vararg itemId: String) =
-    member.inventory.invContents.itemStacks.any { item -> itemId.any { item?.id?.contains(it) == true } }
+    member.inventory?.invContents?.itemStacks?.any { item -> itemId.any { item?.id?.contains(it) == true } } == true
 
 private fun checkMissingItems(member: HypixelData.MemberData) = buildList {
     if (!hasItem(member, "HYPERION", "ASTRAEA", "SCYLLA", "VALKYRIE")) add(MissingItem("Blade", "§5Wither Blade"))

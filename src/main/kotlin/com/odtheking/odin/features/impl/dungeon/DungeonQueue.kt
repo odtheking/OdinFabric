@@ -3,7 +3,6 @@ package com.odtheking.odin.features.impl.dungeon
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.NumberSetting
-import com.odtheking.odin.clickgui.settings.impl.StringSetting
 import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.PartyEvent
 import com.odtheking.odin.events.WorldLoadEvent
@@ -13,7 +12,6 @@ import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.handlers.schedule
 import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.sendCommand
-import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.toFixed
 
 object DungeonQueue : Module(
@@ -25,11 +23,9 @@ object DungeonQueue : Module(
         textDim("§eWarp: §a${if (it) "30" else ((warpTimer - System.currentTimeMillis()) / 1000f).toFixed()}s", 0, 0, Colors.WHITE)
     }
     private val announceKick by BooleanSetting("Announce Kick", false, desc = "Announce when you get kicked from skyblock.")
-    private val kickText by StringSetting("Kick Text", "Kicked!", desc = "The text sent in party chat when you get kicked from skyblock.").withDependency { announceKick }
 
     private val autoRequeue by BooleanSetting("Auto Requeue", false, desc = "Automatically starts a new dungeon at the end of a dungeon.")
     private val requeueDelay by NumberSetting("Requeue Delay", 2, 0, 30, 1, desc = "The delay in seconds before requeuing.", unit = "s").withDependency { autoRequeue }
-    private val requeueType by BooleanSetting("Normal Requeue", true, desc = "The type of command to execute to fulfill the requeue request.").withDependency { autoRequeue }
     private val disablePartyLeave by BooleanSetting("Disable on leave/kick", true, desc = "Disables the requeue on party leave message.").withDependency { autoRequeue }
 
     private val enterRegex = Regex("^-*\\n\\[[^]]+] (\\w+) entered (?:MM )?\\w+ Catacombs, Floor (\\w+)!\\n-*$")
@@ -43,16 +39,13 @@ object DungeonQueue : Module(
     init {
         on<ChatPacketEvent> {
             when {
-                announceKick && (value.matches(kickedJoiningRegex) || value.matches(kickedInstanceRegex)) -> sendCommand("pc $kickText")
+                announceKick && (value.matches(kickedJoiningRegex) || value.matches(kickedInstanceRegex)) -> sendCommand("pc I was kicked!")
                 value.matches(enterRegex) -> warpTimer = System.currentTimeMillis() + 30_000L
                 autoRequeue && value.matches(extraStatsRegex) -> {
-                    if (disableRequeue) {
-                        disableRequeue = false
-                        return@on
-                    }
+                    if (disableRequeue.also { disableRequeue = false }) return@on
+
                     schedule(requeueDelay * 20) {
-                        if (!disableRequeue)
-                            sendCommand(if (requeueType) "instancerequeue" else "od ${DungeonUtils.floor?.name?.lowercase()}")
+                        if (!disableRequeue) sendCommand("instancerequeue")
                     }
                 }
             }

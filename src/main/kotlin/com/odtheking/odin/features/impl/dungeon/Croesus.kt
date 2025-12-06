@@ -58,7 +58,7 @@ object Croesus : Module(
     private val chestEnchantsRegex = Regex("^\\{([a-zA-Z0-9_]+):(\\d+)}$")
     private val shardRegex = Regex("^([A-Za-z ]+) Shard$")
     private val previewEssenceRegex = Regex("^(\\w+) Essence x(\\d+)$")
-    private val extraStatsRegex = Regex(" {29}> EXTRA STATS <|^")
+    private val extraStatsRegex = Regex(" {29}> EXTRA STATS <")
     private val chestCostRegex = Regex("^([\\d,]+) Coins$")
 
     private val ultimateEnchants = setOf(
