@@ -196,18 +196,18 @@ object BloodCamp : Module(
                 renderData.lastPingPoint = pingPoint
 
                 val boxOffset = Vec3(boxSize / -2.0, 1.5, boxSize / -2.0)
-                val pingAABB = AABB(boxSize, boxSize, boxSize, 0.0, 0.0, 0.0).move(boxOffset.add(calcEndVector(pingPoint, renderData.lastPingPoint, context.tickCounter().gameTimeDeltaTicks, !interpolation)))
-                val endAABB = AABB(boxSize, boxSize, boxSize, 0.0, 0.0, 0.0).move(boxOffset.add(calcEndVector(endPoint, renderData.lastEndPoint, context.tickCounter().gameTimeDeltaTicks, !interpolation)))
+                val pingAABB = AABB(boxSize, boxSize, boxSize, 0.0, 0.0, 0.0).move(boxOffset.add(calcEndVector(pingPoint, renderData.lastPingPoint, context.gameRenderer().mainCamera.partialTickTime, !interpolation)))
+                val endAABB = AABB(boxSize, boxSize, boxSize, 0.0, 0.0, 0.0).move(boxOffset.add(calcEndVector(endPoint, renderData.lastEndPoint, context.gameRenderer().mainCamera.partialTickTime, !interpolation)))
 
                 val time = getTime(firstSpawn,  currentTickTime - started)
 
                 if (mobOffset < time) {
-                    context.drawWireFrameBox(pingAABB, mboxColor, depth = true)
-                    context.drawWireFrameBox(endAABB, pboxColor, depth = true)
-                } else context.drawWireFrameBox(endAABB, fboxColor, depth = true)
+                    drawWireFrameBox(pingAABB, mboxColor, depth = true)
+                    drawWireFrameBox(endAABB, pboxColor, depth = true)
+                } else drawWireFrameBox(endAABB, fboxColor, depth = true)
 
                 if (drawLine)
-                    context.drawLine(listOf(currVector.addVec(y = 2.0), endPoint.addVec(y = 2.0)), Colors.MINECRAFT_RED, depth = true)
+                    drawLine(listOf(currVector.addVec(y = 2.0), endPoint.addVec(y = 2.0)), Colors.MINECRAFT_RED, depth = true)
 
                 val timeDisplay = ((time.toFloat() - offset) / 1000).also { renderData.time = it }
                 val colorTime = when {
@@ -216,7 +216,7 @@ object BloodCamp : Module(
                     timeDisplay in 0.0..0.5 -> 'c'
                     else -> 'b'
                 }
-                if (drawTime) context.drawText(Component.literal("§$colorTime${timeDisplay.toFixed()}s").visualOrderText, endPoint.addVec(y = 2.0), 2f, true)
+                if (drawTime) drawText(Component.literal("§$colorTime${timeDisplay.toFixed()}s").visualOrderText, endPoint.addVec(y = 2.0), 2f, true)
             }
         }
     }

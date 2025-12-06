@@ -71,7 +71,7 @@ object Etherwarp : Module(
             etherPos?.pos?.let { pos ->
                 val box = if (fullBlock) AABB(pos) else pos.getBlockBounds()?.move(pos) ?: AABB(pos)
 
-                context.drawStyledBox(box, color, renderStyle, depth)
+                drawStyledBox(box, color, renderStyle, depth)
             }
         }
 

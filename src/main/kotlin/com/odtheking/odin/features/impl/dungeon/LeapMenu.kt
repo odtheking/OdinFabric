@@ -75,7 +75,7 @@ object LeapMenu : Module(
 
                     val expandValue = hoverHandler[index].anim.get(0f, 15f, !hoverHandler[index].isHovered)
                     NVGRenderer.rect(x - expandValue ,y - expandValue, boxWidth + expandValue * 2, boxHeight + expandValue * 2, (if (colorStyle) player.clazz.color else backgroundColor).rgba, 12f)
-                    val locationSkin = player.locationSkin ?: mc.player?.skin?.texture ?: return@forEachIndexed
+                    val locationSkin = player.locationSkin ?: mc.player?.skin?.body?.id() ?: return@forEachIndexed
                     imageCacheMap.getOrPut(locationSkin.path) {
                         NVGRenderer.createNVGImage((mc.textureManager?.getTexture(locationSkin)?.texture as? GlTexture)?.glId() ?: 0, 64, 64)
                     }.let { glTextureId ->
@@ -113,9 +113,9 @@ object LeapMenu : Module(
 
         on<GuiEvent.KeyPress> {
             val chest = (screen as? AbstractContainerScreen<*>) ?: return@on
-            if (!useNumberKeys || chest.title?.string?.equalsOneOf("Spirit Leap", "Teleport to Player") == false || keybindList.none { it.value == keyCode } || leapTeammates.isEmpty()) return@on
+            if (!useNumberKeys || chest.title?.string?.equalsOneOf("Spirit Leap", "Teleport to Player") == false || keybindList.none { it.value == key } || leapTeammates.isEmpty()) return@on
 
-            val index = keybindList.indexOfFirst { it.value == keyCode }
+            val index = keybindList.indexOfFirst { it.value == key }
             val playerToLeap = if (index + 1 > leapTeammates.size) return@on else leapTeammates[index]
             if (playerToLeap == EMPTY) return@on
             if (playerToLeap.isDead) return@on modMessage("This player is dead, can't leap.")

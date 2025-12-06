@@ -14,6 +14,7 @@ import com.odtheking.odin.utils.ui.HoverHandler
 import com.odtheking.odin.utils.ui.animations.EaseInOutAnimation
 import com.odtheking.odin.utils.ui.isAreaHovered
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
+import net.minecraft.client.input.MouseButtonEvent
 
 class SelectorSetting(
     name: String,
@@ -82,8 +83,8 @@ class SelectorSetting(
         return displayHeight
     }
 
-    override fun mouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int): Boolean {
-        if (mouseButton == 0) {
+    override fun mouseClicked(mouseX: Float, mouseY: Float, click: MouseButtonEvent): Boolean {
+        if (click.button() == 0) {
             if (isHovered) {
                 settingAnim.start()
                 extended = !extended
@@ -100,7 +101,7 @@ class SelectorSetting(
                     return true
                 }
             }
-        } else if (mouseButton == 1) {
+        } else if (click.button() == 1) {
             if (isHovered) {
                 index++
                 return true

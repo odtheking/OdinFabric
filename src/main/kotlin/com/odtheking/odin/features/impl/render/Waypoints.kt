@@ -60,7 +60,7 @@ object Waypoints : Module(
 
         on<RenderEvent.Last> {
             temporaryWaypoints.removeAll {
-                context.drawCustomBeacon(Component.literal(it.name).visualOrderText, it.blockPos, it.color)
+                drawCustomBeacon(Component.literal(it.name).visualOrderText, it.blockPos, it.color)
                 System.currentTimeMillis() > it.timeAdded + it.duration
             }
         }

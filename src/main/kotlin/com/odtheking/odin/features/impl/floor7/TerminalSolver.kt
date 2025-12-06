@@ -133,7 +133,7 @@ object TerminalSolver : Module(
             if (!enabled || currentTerm == null) return@on
 
             if (renderType == 1 && !(currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver)) {
-                currentTerm?.type?.getGUI()?.mouseClicked(screen, button)
+                currentTerm?.type?.getGUI()?.mouseClicked(screen, click.button())
                 cancel()
                 return@on
             }

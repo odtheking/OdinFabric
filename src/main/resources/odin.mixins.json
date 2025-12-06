@@ -7,6 +7,7 @@
     "defaultRequire": 1
   },
   "client": [
+    "accessors.BeaconBeamAccessor",
     "accessors.AbstractContainerScreenAccessor",
     "accessors.CompositeRenderTypeAccessor",
     "accessors.KeyMappingAccessor",
@@ -22,7 +23,7 @@
     "mixins.KeyBindingMixin",
     "mixins.MinecraftMixin",
     "mixins.MouseHandlerMixin",
-    "mixins.PlayerRendererMixin",
+    "mixins.AvatarRendererMixin",
     "mixins.ScreenEffectRendererMixin"
   ],
   "mixins": [
