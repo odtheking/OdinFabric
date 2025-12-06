@@ -4,33 +4,34 @@ import com.odtheking.odin.events.PacketEvent
 import net.minecraft.network.protocol.Packet
 import net.minecraft.util.profiling.Profiler
 import net.minecraft.util.profiling.ProfilerFiller
-import java.util.concurrent.ConcurrentHashMap
 
 object EventBus {
 
     @JvmField
-    internal val listenerArrays = mutableMapOf<Class<out Event>, Array<ListenerEntry<*>>>()
+    internal val listenerArrays = mutableMapOf<Class<out Event>, Array<ListenerEntry<out Event>>>()
     @JvmField
     internal val activeSubscribers = mutableSetOf<Any>()
     @JvmField
     internal val subscriberClasses = mutableMapOf<Any, Class<*>>()
     @JvmField
-    internal val invokers = ConcurrentHashMap<Class<out Event>, Invoker>()
+    internal val invokers = HashMap<Class<out Event>, Invoker>()
 
     fun subscribe(subscriber: Any) {
         if (activeSubscribers.add(subscriber)) {
             subscriberClasses[subscriber] = subscriber.javaClass
-            rebuildAffectedCaches(subscriber)
+            rebuildAffectedCaches(subscriber.javaClass)
         }
     }
 
     fun unsubscribe(subscriber: Any) {
         if (activeSubscribers.remove(subscriber)) {
-            subscriberClasses.remove(subscriber)
-            rebuildAffectedCaches(subscriber)
+            subscriberClasses.remove(subscriber)?.let {
+                rebuildAffectedCaches(it)
+            }
         }
     }
 
+    @JvmStatic
     fun <T : Event> post(event: T) {
         val profiler = Profiler.get()
         profiler.push("Odin: ${event.javaClass.simpleName}")
@@ -42,43 +43,48 @@ object EventBus {
     }
 
     fun <T : Event> registerListener(
-        subscriber: Class<*>,
+        subscriberClass: Class<*>,
         eventClass: Class<T>,
         priority: Int,
         ignoreCancelled: Boolean,
         handler: (T) -> Unit
     ) {
-        val subscriberName = subscriber.simpleName ?: "Unknown"
-        val entry = ListenerEntry(subscriber, EventListener(priority, ignoreCancelled, subscriberName, handler))
+        val name = subscriberClass.simpleName.ifEmpty { subscriberClass.name }
+        val entry = ListenerEntry(subscriberClass, EventListener(priority, ignoreCancelled, name, handler))
 
         val existing = listenerArrays[eventClass] ?: emptyArray()
         val newArray = (existing + entry).sortedByDescending { it.listener.priority }.toTypedArray()
         listenerArrays[eventClass] = newArray
-
         rebuildInvoker(eventClass, newArray)
     }
 
-    private fun rebuildAffectedCaches(subscriber: Any) {
-        val subscriberClass = subscriber::class.java
+    private fun rebuildAffectedCaches(changedClass: Class<*>) {
         for ((eventClass, listeners) in listenerArrays) {
-            if (listeners.any { it.subscriber == subscriberClass }) rebuildInvoker(eventClass, listeners)
+            if (listeners.any { it.subscriber == changedClass }) rebuildInvoker(eventClass, listeners)
         }
     }
 
-    private fun rebuildInvoker(eventClass: Class<out Event>, allListeners: Array<ListenerEntry<*>>) {
-        val activeSubscriberClasses = activeSubscribers.mapNotNull { subscriberClasses[it] }.toSet()
-        @Suppress("UNCHECKED_CAST")
-        val activeListeners = allListeners
-            .filter { it.subscriber in activeSubscriberClasses }
-            .map { it.listener as EventListener<Event> }
-            .toTypedArray()
-
-        if (activeListeners.isEmpty()) {
+    private fun rebuildInvoker(
+        eventClass: Class<out Event>,
+        allListeners: Array<ListenerEntry<*>>
+    ) {
+        if (activeSubscribers.isEmpty()) {
             invokers[eventClass] = EmptyInvoker
             return
         }
 
-        invokers[eventClass] = InvokerFactory.build(activeListeners)
+        val activeClasses = subscriberClasses.values
+
+        @Suppress("UNCHECKED_CAST")
+        val activeListeners = allListeners
+            .filter { it.subscriber in activeClasses }
+            .map { it.listener as EventListener<Event> }
+            .toTypedArray()
+
+        invokers[eventClass] = when {
+            activeListeners.isEmpty() -> EmptyInvoker
+            else -> InvokerFactory.build(activeListeners)
+        }
     }
 
     data class ListenerEntry<T : Event>(
@@ -88,12 +94,15 @@ object EventBus {
 
     class EventListener<T : Event>(
         val priority: Int,
-        val ignoreCancelled: Boolean,
+        ignoreCancelled: Boolean,
         val subscriberName: String,
         val handler: (T) -> Unit
     ) {
+        @JvmField
+        val checkCancelled = ignoreCancelled
+
         fun invoke(event: T) {
-            if (!ignoreCancelled || event !is CancellableEvent || !event.isCancelled)
+            if (!checkCancelled || event !is CancellableEvent || !event.isCancelled)
                 handler(event)
         }
     }
@@ -108,8 +117,6 @@ object EventBus {
 
     private object InvokerFactory {
         fun build(listeners: Array<EventListener<Event>>): Invoker {
-            if (listeners.isEmpty()) return EmptyInvoker
-
             return object : Invoker {
                 override fun invoke(event: Event, profiler: ProfilerFiller) {
                     for (listener in listeners) {
@@ -130,7 +137,9 @@ inline fun <reified T : Event> Any.on(
     priority: Int = 0,
     ignoreCancelled: Boolean = false,
     noinline handler: T.() -> Unit
-) = EventBus.registerListener(this.javaClass, T::class.java, priority, ignoreCancelled) { it.handler() }
+) = EventBus.registerListener(this.javaClass, T::class.java, priority, ignoreCancelled) {
+    it.handler()
+}
 
 inline fun <reified P : Packet<*>> Any.onReceive(
     priority: Int = 0,

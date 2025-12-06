@@ -6,6 +6,7 @@ import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.Colors
+import com.odtheking.odin.utils.getBlockBounds
 import com.odtheking.odin.utils.isXZInterceptable
 import com.odtheking.odin.utils.render.drawFilledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
@@ -47,10 +48,11 @@ object TPMazeSolver {
     fun onRenderWorld(event: RenderEvent, mazeColorOne: Color, mazeColorMultiple: Color, mazeColorVisited: Color) {
         if (DungeonUtils.currentRoomName != "Teleport Maze") return
         tpPads.forEach {
+            val aabb = it.getBlockBounds()?.move(it) ?: AABB(it)
             when (it) {
-                in correctPortals -> event.drawFilledBox(AABB(it), if (correctPortals.size == 1) mazeColorOne else mazeColorMultiple, depth = false)
-                in visited -> event.drawFilledBox(AABB(it), mazeColorVisited, depth = true)
-                else -> event.drawFilledBox(AABB(it), Colors.WHITE.withAlpha(0.5f), depth = true)
+                in correctPortals -> event.drawFilledBox(aabb, if (correctPortals.size == 1) mazeColorOne else mazeColorMultiple, false)
+                in visited -> event.drawFilledBox(aabb, mazeColorVisited, true)
+                else -> event.drawFilledBox(aabb, Colors.WHITE.withAlpha(0.5f), true)
             }
         }
     }

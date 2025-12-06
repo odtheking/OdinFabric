@@ -12,7 +12,7 @@ object NoCursorReset : Module(
     private var wasNotNull = false
 
     init {
-        on<TickEvent.Start> {
+        on<TickEvent.End> {
             if (mc.screen != null) {
                 wasNotNull = true
                 clock = System.currentTimeMillis()

@@ -6,4 +6,6 @@ abstract class TickEvent : Event() {
     class Start : TickEvent()
 
     class End : TickEvent()
+
+    class Server : TickEvent()
 }

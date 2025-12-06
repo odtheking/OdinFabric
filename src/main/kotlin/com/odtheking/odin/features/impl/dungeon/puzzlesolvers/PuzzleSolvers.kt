@@ -95,13 +95,13 @@ object PuzzleSolvers : Module(
 
     init {
         TickTask(10) {
-            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@TickTask
+            if (!enabled || !DungeonUtils.inDungeons || DungeonUtils.inBoss) return@TickTask
             if (blazeSolver) BlazeSolver.getBlaze()
             if (waterSolver) WaterSolver.scan(optimizedSolutions)
         }
 
-        TickTask(0, true) {
-            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@TickTask
+        on<TickEvent.Server> {
+            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
             if (waterSolver) WaterSolver.onServerTick()
         }
 

@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.HoverEvent
 
-val cataCommand = Commodore("cata") {
+val cataCommand = Commodore("cata", "catacombs", "catacomb") {
     runs { playerName: GreedyString? ->
         val name = playerName?.string ?: mc.user?.name ?: return@runs modMessage("§cUnable to get player name!")
         modMessage("§aFetching dungeon stats for §6$name§a...")

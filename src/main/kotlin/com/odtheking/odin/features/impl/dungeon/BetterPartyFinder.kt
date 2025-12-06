@@ -12,7 +12,7 @@ import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.formatNumber
 import com.odtheking.odin.utils.formatTime
-import com.odtheking.odin.utils.handlers.LimitedTickTask
+import com.odtheking.odin.utils.handlers.schedule
 import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.network.hypixelapi.RequestUtils
 import com.odtheking.odin.utils.sendCommand
@@ -26,12 +26,11 @@ object BetterPartyFinder : Module(
 ) {
     private val statsDisplay by BooleanSetting("Stats display", true, desc = "Displays stats of players who join your party")
 
-    private val floor by SelectorSetting("Floor", "F7", Floor.entries.mapNotNull { if (!it.isMM) it.name else null }, desc = "Determines which floor to check pb.")
-    private val mmToggle by BooleanSetting("Master Mode", true, desc = "Use master mode times")
-
     private val autoKickToggle by BooleanSetting("Auto Kick", desc = "Automatically kicks players who don't meet requirements.")
+    private val floor by SelectorSetting("Floor", "F7", Floor.entries.mapNotNull { if (!it.isMM) it.name else null }, desc = "Determines which floor to check pb.").withDependency { autoKickToggle }
+    private val mmToggle by BooleanSetting("Master Mode", true, desc = "Use master mode times").withDependency { autoKickToggle }
     private val informKicked by BooleanSetting("Inform Kicked", desc = "Informs the player why they were kicked.").withDependency { autoKickToggle }
-    private val secondsMin by NumberSetting("Minimum Seconds", 0, 0, 480, desc = "Minimum of seconds for kicking.", unit = "s").withDependency { autoKickToggle }
+    private val secondsMin by NumberSetting("Minimum Seconds", 0, 0, 600, desc = "Minimum of seconds for kicking.", unit = "s").withDependency { autoKickToggle }
     private val secretsMin by NumberSetting("Minimum Secrets", 0, 0, 200, desc = "Secret minimum in thousands for kicking.", unit = "k").withDependency { autoKickToggle }
     private val apiOffKick by BooleanSetting("Api Off Kick", true, desc = "Kicks if the player's api is off. If this setting is disabled, it will ignore the item check when players have api disabled.").withDependency { autoKickToggle }
     private val magicalPowerReq by NumberSetting("Magical Power", 1300, 0, 2000, 20, desc = "Magical power minimum for kicking.").withDependency { autoKickToggle  }
@@ -40,7 +39,7 @@ object BetterPartyFinder : Module(
     private val petMap = mapOf("SPIRIT" to { spiritKick })
 
     private val kickCache by BooleanSetting("Kick Cache", true, desc = "Caches kicked players to automatically kick when they attempt to rejoin.").withDependency { autoKickToggle }
-    private val action: () -> Unit by ActionSetting("Clear Cache", desc = "Clears the kick list cache.") { kickedList.clear() }.withDependency { kickCache }
+    private val action by ActionSetting("Clear Cache", desc = "Clears the kick list cache.") { kickedList.clear() }.withDependency { autoKickToggle && kickCache }
 
     //https://regex101.com/r/XYnAVm/2
     private val pfRegex = Regex("^Party Finder > (?:\\[.{1,7}])? ?(.{1,16}) joined the dungeon group! \\(.*\\)$")
@@ -91,7 +90,7 @@ object BetterPartyFinder : Module(
 
                     if (kickedReasons.isNotEmpty()) {
                         if (informKicked) {
-                            LimitedTickTask(5, 1) { sendCommand("party kick $name") }
+                            schedule(5) { sendCommand("party kick $name") }
                             sendCommand("pc Kicked $name for: ${kickedReasons.joinToString(", ")}")
                         } else sendCommand("party kick $name")
 

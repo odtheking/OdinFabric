@@ -26,22 +26,12 @@ open class TickTask(
     }
 }
 
-class LimitedTickTask(
-    ticksPerCycle: Int,
-    private val maxCycles: Int,
-    serverTick: Boolean = false,
-    task: () -> Unit
-) : TickTask(ticksPerCycle, serverTick, task) {
-
-    private var cycleCount = 0
-
-    override fun run() {
-        if (cycleCount >= maxCycles) return
-        super.run()
-
-        if ((ticks == 0)) cycleCount++
-        if (cycleCount >= maxCycles) TickTasks.unregister(this)
-    }
+fun schedule(ticks: Int, serverTick: Boolean = false, task: () -> Unit) {
+    lateinit var tickTask: TickTask
+    tickTask = object : TickTask(ticks, serverTick, {
+        task()
+        TickTasks.unregister(tickTask)
+    }) {}
 }
 
 object TickTasks {

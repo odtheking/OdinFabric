@@ -2,9 +2,9 @@ package com.odtheking.odin.features.impl.dungeon
 
 import com.odtheking.odin.events.BlockUpdateEvent
 import com.odtheking.odin.events.RenderEvent
+import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
-import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.toFixed
@@ -26,7 +26,7 @@ object TerracottaTimer : Module(
                 terracottaSpawning.add(Terracotta(pos, if (DungeonUtils.floor?.isMM == true) 12f else 15f))
         }
 
-        TickTask(0, true) {
+        on<TickEvent.Server> {
             terracottaSpawning.removeAll {
                 it.time -= .05f
                 it.time <= 0

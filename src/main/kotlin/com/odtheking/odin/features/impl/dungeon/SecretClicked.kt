@@ -10,14 +10,13 @@ import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.Colors
+import com.odtheking.odin.utils.createSoundSettings
 import com.odtheking.odin.utils.getBlockBounds
-import com.odtheking.odin.utils.handlers.LimitedTickTask
-import com.odtheking.odin.utils.playSoundAtPlayer
+import com.odtheking.odin.utils.handlers.schedule
+import com.odtheking.odin.utils.playSoundSettings
 import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import net.minecraft.core.BlockPos
-import net.minecraft.resources.ResourceLocation
-import net.minecraft.sounds.SoundEvent
 import net.minecraft.world.phys.AABB
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -37,9 +36,7 @@ object SecretClicked : Module(
 
     private val chimeDropdownSetting by DropdownSetting("Secret Chime Dropdown")
     private val chime by BooleanSetting("Secret Chime", true, desc = "Whether or not to play a sound when a secret is clicked.").withDependency { chimeDropdownSetting }
-    private val customSound by StringSetting("Custom Sound", "entity.blaze.hurt", desc = "Name of a custom sound to play. Do not use the bat death sound or your game will freeze!", length = 64).withDependency { chimeDropdownSetting && chime }
-    private val reset by ActionSetting("Play Sound", desc = "Plays the sound with the current settings.") { playSoundAtPlayer(SoundEvent.createVariableRangeEvent(ResourceLocation.withDefaultNamespace(customSound))) }.withDependency { chimeDropdownSetting && chime }
-
+    private val soundSettings = createSoundSettings("Chime Sound", "entity.blaze.hurt") { chimeDropdownSetting && chime }
     private val chimeInBoss by BooleanSetting("Chime In Boss", false, desc = "Prevent playing the sound if in boss room.").withDependency { chimeDropdownSetting && chime }
 
     private data class Secret(val aabb: AABB, var locked: Boolean = false)
@@ -82,13 +79,13 @@ object SecretClicked : Module(
 
     private fun secretChime() {
         if (!chime || (DungeonUtils.inBoss && !chimeInBoss) || System.currentTimeMillis() - lastPlayed <= 10) return
-        playSoundAtPlayer(SoundEvent.createVariableRangeEvent(ResourceLocation.withDefaultNamespace(customSound)))
+        playSoundSettings(soundSettings())
         lastPlayed = System.currentTimeMillis()
     }
 
     private fun secretBox(pos: BlockPos) {
         if (!boxes || (DungeonUtils.inBoss && !boxInBoss) || clickedSecretsList.any { it.aabb.intersects(pos) }) return
         clickedSecretsList.add(Secret(pos.getBlockBounds()?.move(pos) ?: AABB(pos)))
-        LimitedTickTask(timeToStay * 20, 1) { clickedSecretsList.removeFirstOrNull() }
+        schedule(timeToStay * 20) { clickedSecretsList.removeFirstOrNull() }
     }
 }

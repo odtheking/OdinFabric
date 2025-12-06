@@ -31,7 +31,7 @@ object HudManager : Screen(Component.literal("HUD Manager")) {
         }
 
         context.pose()?.pushMatrix()
-        val sf = mc.window.guiScale.toFloat()
+        val sf = mc.window.guiScale
         context.pose().scale(1f / sf, 1f / sf)
 
         for (hud in hudSettingsCache) {

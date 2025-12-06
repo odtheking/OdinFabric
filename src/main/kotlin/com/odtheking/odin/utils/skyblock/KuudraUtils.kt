@@ -5,8 +5,8 @@ import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
-import com.odtheking.odin.utils.handlers.LimitedTickTask
 import com.odtheking.odin.utils.handlers.TickTask
+import com.odtheking.odin.utils.handlers.schedule
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket
 import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.entity.decoration.ArmorStand
@@ -95,14 +95,14 @@ object KuudraUtils {
 
             partyFreshRegex.find(value)?.groupValues?.get(2)?.let { playerName ->
                 freshers[playerName] = System.currentTimeMillis()
-                LimitedTickTask(200, 1, true) {
+                schedule(200, true) {
                     freshers[playerName] = null
                 }
             }
 
             ownFreshRegex.find(value)?.let {
                 freshers[mc.player?.name?.string ?: "self"] = System.currentTimeMillis()
-                LimitedTickTask(200, 1, true) {
+                schedule(200, true) {
                     freshers[mc.player?.name?.string ?: "self"] = null
                 }
             }

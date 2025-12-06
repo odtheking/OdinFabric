@@ -1,7 +1,10 @@
 package com.odtheking.odin.features.impl.render
 
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
-import com.odtheking.odin.clickgui.settings.impl.*
+import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
+import com.odtheking.odin.clickgui.settings.impl.ColorSetting
+import com.odtheking.odin.clickgui.settings.impl.DropdownSetting
+import com.odtheking.odin.clickgui.settings.impl.SelectorSetting
 import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.core.EventPriority
 import com.odtheking.odin.events.core.on
@@ -19,8 +22,6 @@ import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.protocol.game.ClientboundSoundPacket
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket
 import net.minecraft.network.protocol.game.ServerboundUseItemPacket
-import net.minecraft.resources.ResourceLocation
-import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.piston.PistonHeadBlock
@@ -47,15 +48,13 @@ object Etherwarp : Module(
 
     private val dropdown by DropdownSetting("Sounds", false)
     private val sounds by BooleanSetting("Custom Sounds", false, desc = "Plays the selected custom sound when you etherwarp.").withDependency { dropdown }
-    private val customSound by StringSetting("Custom Sound", "entity.experience_orb.pickup", desc = "Name of a custom sound to play.", length = 64).withDependency { sounds && dropdown }
-    private val reset by ActionSetting("Play sound", desc = "Plays the selected sound.") { playSoundAtPlayer(SoundEvent.createVariableRangeEvent(ResourceLocation.withDefaultNamespace(customSound))) }.withDependency { sounds && dropdown }
-
+    private val soundSettings = createSoundSettings("Etherwarp Sound", "entity.experience_orb.pickup") { sounds && dropdown }
     private var etherPos: EtherPos? = null
 
     init {
         onReceive<ClientboundSoundPacket> {
             if (!sounds || sound.value() != SoundEvents.ENDER_DRAGON_HURT || volume != 1f || pitch != 0.53968257f) return@onReceive
-            playSoundAtPlayer(SoundEvent.createVariableRangeEvent(ResourceLocation.withDefaultNamespace(customSound)))
+            playSoundSettings(soundSettings())
             it.cancel()
         }
 
@@ -81,18 +80,16 @@ object Etherwarp : Module(
 
             etherPos?.pos?.let {
                 if (etherPos?.succeeded == false) return@onSend
-                mc.execute {
-                    mc.player?.connection?.send(
-                        ServerboundMovePlayerPacket.PosRot(
-                            it.x + 0.5, it.y + 1.05, it.z + 0.5, mc.player?.yRot ?: 0f,
-                            mc.player?.xRot ?: 0f, false, false
-                        )
+                mc.player?.connection?.send(
+                    ServerboundMovePlayerPacket.PosRot(
+                        it.x + 0.5, it.y + 1.05, it.z + 0.5, mc.player?.yRot ?: 0f,
+                        mc.player?.xRot ?: 0f, false, false
                     )
-                    mc.player?.setPos(it.x + 0.5, it.y + 1.05, it.z + 0.5)
-                    mc.player?.setDeltaMovement(0.0, 0.0, 0.0)
-                    if (sounds) playSoundAtPlayer(SoundEvent.createVariableRangeEvent(ResourceLocation.withDefaultNamespace(customSound)))
-                    else playSoundAtPlayer(SoundEvents.ENDER_DRAGON_HURT, pitch = 0.53968257f)
-                }
+                )
+                mc.player?.setPos(it.x + 0.5, it.y + 1.05, it.z + 0.5)
+                mc.player?.setDeltaMovement(0.0, 0.0, 0.0)
+                if (sounds) playSoundSettings(soundSettings())
+                else playSoundAtPlayer(SoundEvents.ENDER_DRAGON_HURT, pitch = 0.53968257f)
             }
         }
     }

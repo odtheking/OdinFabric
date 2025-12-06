@@ -50,13 +50,13 @@ object IceFillSolver {
         if (this?.data?.name != "Ice Fill" || currentPatterns.isNotEmpty()) return
         val patterns = if (optimizePatterns) iceFillFloors.hard else iceFillFloors.easy
 
-        (0..2).forEach { index ->
+        repeat(3) { index ->
             val floorIdentifiers = iceFillFloors.identifier[index]
 
             for (patternIndex in floorIdentifiers.indices) {
                 if (isRealAir(floorIdentifiers[patternIndex][0]) && !isRealAir(floorIdentifiers[patternIndex][1])) {
                     currentPatterns.addAll(patterns[index][patternIndex].map { Vec3(getRealCoords(it)).add(0.5, 0.1, 0.5) })
-                    return@forEach
+                    return@repeat
                 }
             }
             modMessage("§cFailed to scan floor $index")

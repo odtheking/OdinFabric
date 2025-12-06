@@ -62,7 +62,7 @@ object InactiveWaypoints : Module(
 
     init {
         TickTask(10) {
-            if (DungeonUtils.getF7Phase() != M7Phases.P3) return@TickTask
+            if (!enabled || DungeonUtils.getF7Phase() != M7Phases.P3) return@TickTask
             inactiveList = mc.level?.entitiesForRendering()?.filterIsInstance<ArmorStand>()?.filter {
                 it.name.string.containsOneOf("Inactive", "Not Activated", "CLICK HERE", ignoreCase = true)
             }?.toSet().orEmpty()

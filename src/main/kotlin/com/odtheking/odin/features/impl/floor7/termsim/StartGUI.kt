@@ -2,7 +2,7 @@ package com.odtheking.odin.features.impl.floor7.termsim
 
 import com.odtheking.odin.features.impl.floor7.TerminalSimulator
 import com.odtheking.odin.features.impl.floor7.TerminalSimulator.openRandomTerminal
-import com.odtheking.odin.utils.handlers.LimitedTickTask
+import com.odtheking.odin.utils.handlers.schedule
 import com.odtheking.odin.utils.modMessage
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
@@ -51,14 +51,14 @@ object StartGUI : TermSimGUI(
                 if (!areYouSure) {
                     modMessage("§cAre you sure you want to reset your PBs? Click again to confirm.")
                     areYouSure = true
-                    LimitedTickTask(60, 1) {
-                        if (!areYouSure) return@LimitedTickTask
+                    schedule(60,) {
+                        if (!areYouSure) return@schedule
                         modMessage("§aPBs reset cancelled.")
                         areYouSure = false
                     }
                     return
                 }
-                repeat(6) { TerminalSimulator.termSimPBs.reset() }
+                TerminalSimulator.termSimPBs.reset()
                 modMessage("§cPBs reset!")
             }
             10 -> PanesSim.open(ping)

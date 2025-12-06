@@ -7,9 +7,9 @@ import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.MessageSentEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
-import com.odtheking.odin.features.impl.dungeon.DungeonRequeue
+import com.odtheking.odin.features.impl.dungeon.DungeonQueue
 import com.odtheking.odin.utils.*
-import com.odtheking.odin.utils.handlers.LimitedTickTask
+import com.odtheking.odin.utils.handlers.schedule
 import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.odtheking.odin.utils.skyblock.PartyUtils
 import net.minecraft.network.chat.ClickEvent
@@ -40,6 +40,7 @@ object ChatCommands : Module(
     private val eightBall by BooleanSetting("Eightball", true, desc = "Sends a random 8ball response.").withDependency { showSettings }
     private val dice by BooleanSetting("Dice", true, desc = "Rolls a dice.").withDependency { showSettings }
     private val partyTransfer by BooleanSetting("Party transfer (pt)", false, desc = "Executes the /party transfer command.").withDependency { showSettings }
+    private val reinvite by BooleanSetting("Reinvite", false, desc = "Reinvites the player who sent it a few seconds later.").withDependency { showSettings }
     private val ping by BooleanSetting("Ping", true, desc = "Sends your current Ping.").withDependency { showSettings }
     private val tps by BooleanSetting("Tps", true, desc = "Sends your server's current TPS.").withDependency { showSettings }
     private val fps by BooleanSetting("FPS", true, desc = "Sends your current FPS.").withDependency { showSettings }
@@ -63,7 +64,7 @@ object ChatCommands : Module(
         on<ChatPacketEvent> {
             if (value.matches(endRunRegex)) {
                 if (!dt || dtReason.isEmpty()) return@on
-                LimitedTickTask(30, 1) {
+                schedule(30) {
                     dtReason.find { it.first == mc.player?.name?.string }?.let { sendCommand("pc Downtime needed: ${it.second}") }
                     modMessage("DT Reasons: ${dtReason.groupBy({ it.second }, { it.first }).entries.joinToString(", ") { (reason, names) -> "${names.joinToString(", ")}: $reason" }}")
                     alert("§cPlayers need DT")
@@ -84,7 +85,7 @@ object ChatCommands : Module(
 
             if (!msg.startsWith("!")) return@on
 
-            LimitedTickTask(4, 1) {
+            schedule(4) {
                 handleChatCommands(msg, ign, channel)
             }
         }
@@ -114,7 +115,7 @@ object ChatCommands : Module(
             ChatChannel.PARTY -> mapOf(
                 "coords" to coords, "odin" to odin, "boop" to boop, "kick" to kick, "cf" to coinFlip, "8ball" to eightBall, "dice" to dice, "racism" to racism, "tps" to tps, "warp" to partyWarp,
                 "allinvite" to partyAllInvite, "pt" to partyTransfer, "m?" to queInstance, "f?" to queInstance, "t?" to queInstance, "time" to time,
-                "demote" to partyDemote, "promote" to partyPromote
+                "demote" to partyDemote, "promote" to partyPromote, "reinvite" to reinvite
             )
             ChatChannel.GUILD -> mapOf("coords" to coords, "odin" to odin, "boop" to boop, "cf" to coinFlip, "8ball" to eightBall, "dice" to dice, "racism" to racism, "ping" to ping, "tps" to tps, "time" to time)
             ChatChannel.PRIVATE -> mapOf("coords" to coords, "odin" to odin, "boop" to boop, "cf" to coinFlip, "8ball" to eightBall, "dice" to dice, "racism" to racism, "ping" to ping, "tps" to tps, "invite" to invite, "time" to time)
@@ -171,14 +172,23 @@ object ChatCommands : Module(
                 if (dtReason.any { it.first == name }) return modMessage("§6${name} §calready has a reminder!")
                 modMessage("§aReminder set for the end of the run! §7(disabled auto requeue for this run)")
                 dtReason.add(name to reason)
-                DungeonRequeue.disableRequeue = true
+                DungeonQueue.disableRequeue = true
             }
+
             "undowntime", "undt" -> {
                 if (!dt || channel != ChatChannel.PARTY) return
                 if (dtReason.none { it.first == name }) return modMessage("§6${name} §chas no reminder set!")
                 modMessage("§aReminder removed!")
                 dtReason.removeIf { it.first == name }
-                if (dtReason.isEmpty()) DungeonRequeue.disableRequeue = false
+                if (dtReason.isEmpty()) DungeonQueue.disableRequeue = false
+            }
+
+            "reinv", "reinvite" -> {
+                if (!reinvite || channel != ChatChannel.PARTY && PartyUtils.isLeader()) return
+                modMessage("§aReinviting §6$name §ain 5 seconds...")
+                schedule(100) {
+                    sendCommand("p invite $name")
+                }
             }
 
             // private commands

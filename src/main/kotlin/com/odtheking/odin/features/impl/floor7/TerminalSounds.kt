@@ -1,9 +1,7 @@
 package com.odtheking.odin.features.impl.floor7
 
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
-import com.odtheking.odin.clickgui.settings.impl.ActionSetting
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
-import com.odtheking.odin.clickgui.settings.impl.StringSetting
 import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.GuiEvent
 import com.odtheking.odin.events.TerminalEvent
@@ -12,11 +10,11 @@ import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.features.impl.floor7.terminalhandler.TerminalTypes
+import com.odtheking.odin.utils.createSoundSettings
 import com.odtheking.odin.utils.playSoundAtPlayer
+import com.odtheking.odin.utils.playSoundSettings
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import net.minecraft.network.protocol.game.ClientboundSoundPacket
-import net.minecraft.resources.ResourceLocation
-import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundEvents
 
 object TerminalSounds : Module(
@@ -24,14 +22,10 @@ object TerminalSounds : Module(
     description = "Plays a sound whenever you click a correct item in a terminal."
 ){
     val clickSounds by BooleanSetting("Click Sounds", true, desc = "Replaces the click sounds in terminals.")
-    private val clickSound by StringSetting("Custom Click Sound", "entity.blaze.hurt", desc = "Name of a custom sound to play. This is used when Custom is selected in the Sound setting.", length = 32).withDependency { clickSounds }
-    private val reset by ActionSetting("Play click sound", desc = "Plays the sound with the current settings.") { playSoundAtPlayer(SoundEvent.createVariableRangeEvent(ResourceLocation.withDefaultNamespace(clickSound))) }
+    private val clickSoundSettings = createSoundSettings("Click Sound", "entity.blaze.hurt") { clickSounds }
     private val completeSounds by BooleanSetting("Complete Sounds", false, desc = "Plays a sound when you complete a terminal.")
+    private val completeSoundSettings = createSoundSettings("Completion Sound", "entity.experience_orb.pickup") { completeSounds }
     private val cancelLastClick by BooleanSetting("Cancel Last Click", false, desc = "Cancels the last click sound instead of playing both click and completion sound.").withDependency { clickSounds && completeSounds }
-    private val customCompleteSound by StringSetting("Custom Completion Sound", "entity.blaze.hurt", desc = "Name of a custom sound to play. This is used when Custom is selected in the Sound setting.", length = 32).withDependency { completeSounds }
-    private val playCompleteSound by ActionSetting("Play complete sound", desc = "Plays the sound with the current settings.") {
-        playSoundAtPlayer(SoundEvent.createVariableRangeEvent(ResourceLocation.withDefaultNamespace(customCompleteSound)))
-    }
 
     private val coreRegex = Regex("^The Core entrance is opening!$")
     private val gateRegex = Regex("^The gate has been destroyed!$")
@@ -40,7 +34,7 @@ object TerminalSounds : Module(
     init {
         on<TerminalEvent.Solved> {
             if (shouldReplaceSounds && (!completeSounds && !clickSounds)) playSoundAtPlayer(SoundEvents.NOTE_BLOCK_PLING.value(), 8f, 4f)
-            else if (shouldReplaceSounds && completeSounds && !clickSounds) playCompleteSound()
+            else if (shouldReplaceSounds && completeSounds && !clickSounds) playSoundSettings(completeSoundSettings())
         }
 
         on<GuiEvent.SlotClick> (EventPriority.HIGHEST) {
@@ -70,14 +64,14 @@ object TerminalSounds : Module(
             if ((isClicked && type != TerminalTypes.MELODY) || !canClick(slot, button)) return
             if ((solution.size == 1 || (type == TerminalTypes.MELODY && slot == 43)) && completeSounds) {
                 if (!cancelLastClick) playTerminalSound()
-                playSoundAtPlayer(SoundEvent.createVariableRangeEvent(ResourceLocation.withDefaultNamespace(customCompleteSound)))
+                playSoundSettings(completeSoundSettings())
             } else playTerminalSound()
         }
     }
 
     private fun playTerminalSound() {
         if (System.currentTimeMillis() - lastPlayed <= 2) return
-        playSoundAtPlayer(SoundEvent.createVariableRangeEvent(ResourceLocation.withDefaultNamespace(clickSound)))
+        playSoundSettings(clickSoundSettings())
         lastPlayed = System.currentTimeMillis()
     }
 

@@ -32,6 +32,7 @@ object SimonSays : Module(
     private val thirdColor by ColorSetting("Third Color", Colors.MINECRAFT_RED.withAlpha(0.5f), true, desc = "The color of the buttons after the second.")
     private val style by SelectorSetting("Style", "Filled Outline", arrayListOf("Filled", "Outline", "Filled Outline"), desc = "The style of the box rendering.")
     private val blockWrong by BooleanSetting("Block Wrong Clicks", false, desc = "Blocks wrong clicks, shift will override this.")
+    private val optimizeSolution by BooleanSetting("Optimized Solution", true, desc = "Use optimized solution, might fix ss-skip")
 
     private val startButton = BlockPos(110, 121, 91)
     private val clickInOrder = ArrayList<BlockPos>()
@@ -51,19 +52,26 @@ object SimonSays : Module(
         on<BlockUpdateEvent> {
             if (DungeonUtils.getF7Phase() != M7Phases.P3) return@on
 
-            if (pos == startButton && updated.block == Blocks.STONE_BUTTON && updated.getValue(BlockStateProperties.POWERED)) return@on
+            if (pos == startButton && updated.block == Blocks.STONE_BUTTON && updated.getValue(BlockStateProperties.POWERED)) {
+                if (!optimizeSolution) resetSolution()
+                return@on
+            }
 
             if (pos.y !in 120..123 || pos.z !in 92..95) return@on
 
             when (pos.x) {
                 111 ->
-                    if (updated.block == Blocks.SEA_LANTERN && old.block == Blocks.OBSIDIAN && pos !in clickInOrder)
-                        clickInOrder.add(pos.immutable())
+                    if (optimizeSolution) {
+                        if (updated.block == Blocks.SEA_LANTERN && old.block == Blocks.OBSIDIAN && pos !in clickInOrder)
+                            clickInOrder.add(pos.immutable())
+                    } else if (updated.block == Blocks.OBSIDIAN && old.block == Blocks.SEA_LANTERN && pos !in clickInOrder) clickInOrder.add(pos.immutable())
 
                 110 ->
-                    if (!updated.isAir && old.block == Blocks.STONE_BUTTON && updated.getValue(BlockStateProperties.POWERED)) {
+                    if (updated.block == Blocks.AIR) {
+                        if (!optimizeSolution) resetSolution()
+                    } else if (old.block == Blocks.STONE_BUTTON && updated.getValue(BlockStateProperties.POWERED)) {
                         clickNeeded = clickInOrder.indexOf(pos.east()) + 1
-                        if (clickNeeded >= clickInOrder.size) resetSolution()
+                        if (clickNeeded >= clickInOrder.size) if (optimizeSolution) resetSolution() else clickNeeded = 0
                     }
             }
         }
@@ -81,7 +89,10 @@ object SimonSays : Module(
         on<BlockInteractEvent> {
             if (DungeonUtils.getF7Phase() != M7Phases.P3) return@on
 
-            if (pos == startButton) return@on resetSolution()
+            if (pos == startButton) {
+                if (optimizeSolution) resetSolution()
+                return@on
+            }
 
             if (
                 blockWrong && mc.player?.isShiftKeyDown == false &&

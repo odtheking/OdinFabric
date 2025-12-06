@@ -39,7 +39,7 @@ object ArrowAlign : Module(
 
     init {
         TickTask(1) {
-            if (DungeonUtils.getF7Phase() != M7Phases.P3) return@TickTask
+            if (!enabled || DungeonUtils.getF7Phase() != M7Phases.P3) return@TickTask
             clicksRemaining.clear()
             if ((mc.player?.blockPosition()?.distSqr(centerBlock) ?: return@TickTask) > 200) {
                 currentFrameRotations = null

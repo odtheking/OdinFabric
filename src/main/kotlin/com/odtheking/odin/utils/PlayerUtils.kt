@@ -3,15 +3,18 @@ package com.odtheking.odin.utils
 import com.odtheking.odin.OdinMod.mc
 import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.Component
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundEvents
 
+fun playSoundSettings(soundSettings: Triple<String, Float, Float>) {
+    val (soundName, volume, pitch) = soundSettings
+    val soundEvent = SoundEvent.createVariableRangeEvent(ResourceLocation.withDefaultNamespace(soundName) ?: return)
+    playSoundAtPlayer(soundEvent, volume, pitch)
+}
+
 fun playSoundAtPlayer(event: SoundEvent, volume: Float = 1f, pitch: Float = 1f) = mc.execute {
-    try {
-        mc.player?.playSound(event, volume, pitch)
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
+    mc.player?.playSound(event, volume, pitch)
 }
 
 fun setTitle(title: String) {
@@ -21,7 +24,7 @@ fun setTitle(title: String) {
 
 fun alert(title: String, playSound: Boolean = true) {
     setTitle(title)
-    if (playSound) playSoundAtPlayer(SoundEvent.createVariableRangeEvent(SoundEvents.FIREWORK_ROCKET_LAUNCH.location))
+    if (playSound) playSoundAtPlayer(SoundEvents.FIREWORK_ROCKET_LAUNCH)
 }
 
 fun getPositionString(): String {

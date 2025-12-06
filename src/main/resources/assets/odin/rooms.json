@@ -70,6 +70,7 @@
     "name": "Banners",
     "type": "NORMAL",
     "cores": [
+      -1092023380
     ],
     "crypts": 1,
     "secrets": 1
@@ -503,7 +504,8 @@
     "name": "Higher Blaze",
     "type": "PUZZLE",
     "cores": [
-      -1752027278
+      -1752027278,
+      -1477567187
     ],
     "secrets": 1
   },
@@ -543,6 +545,7 @@
     "name": "Knight",
     "type": "NORMAL",
     "cores": [
+      -1519890056
     ],
     "secrets": 3
   },
@@ -622,7 +625,8 @@
     "name": "Lower Blaze",
     "type": "PUZZLE",
     "cores": [
-      -441650545
+      -441650545,
+      911747293
     ],
     "secrets": 1
   },
@@ -828,7 +832,8 @@
       -1477466539,
       -19869269,
       419868305,
-      968300381
+      968300381,
+      634229450
     ],
     "crypts": 4,
     "secrets": 5
@@ -924,6 +929,7 @@
     "name": "Rare Overgrown",
     "type": "RARE",
     "cores": [
+      -1907291752
     ],
     "secrets": 3
   },
@@ -1222,6 +1228,7 @@
     "name": "Vinny 8 Ball",
     "type": "RARE",
     "cores": [
+      8728155555
     ],
     "secrets": 1
   },

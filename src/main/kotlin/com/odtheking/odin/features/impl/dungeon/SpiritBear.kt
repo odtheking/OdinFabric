@@ -1,11 +1,11 @@
 package com.odtheking.odin.features.impl.dungeon
 
 import com.odtheking.odin.events.BlockUpdateEvent
+import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Colors
-import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.toFixed
@@ -50,7 +50,7 @@ object SpiritBear : Module(
             }
         }
 
-        TickTask(0, true) {
+        on<TickEvent.Server> {
             if (timer > 0) timer--
         }
 

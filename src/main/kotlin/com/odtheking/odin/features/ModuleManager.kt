@@ -34,9 +34,9 @@ object ModuleManager {
 
     val modules: ArrayList<Module> = arrayListOf(
         // dungeon
-        PuzzleSolvers, BlessingDisplay, LeapMenu, SecretClicked, MapInfo, Mimic, WarpCooldown, KeyHighlight, BloodCamp,
-        PositionalMessages, TerracottaTimer, DungeonRequeue, BreakerDisplay, LividSolver, InvincibilityTimer, SpiritBear,
-        DungeonWaypoints, ExtraStats, BetterPartyFinder,
+        PuzzleSolvers, BlessingDisplay, LeapMenu, SecretClicked, MapInfo, Mimic, DungeonQueue, KeyHighlight, BloodCamp,
+        PositionalMessages, TerracottaTimer, BreakerDisplay, LividSolver, InvincibilityTimer, SpiritBear,
+        DungeonWaypoints, ExtraStats, BetterPartyFinder, Croesus,
 
         // floor 7
         TerminalSimulator, TerminalSolver, TerminalTimes, TerminalSounds, TickTimers, ArrowAlign, InactiveWaypoints,
@@ -77,9 +77,9 @@ object ModuleManager {
     }
 
     fun render(context: GuiGraphics, tickCounter: DeltaTracker) {
-        if (mc.level == null || mc.player == null || mc.screen == HudManager) return
+        if (mc.level == null || mc.player == null || mc.screen == HudManager || mc.options.hideGui) return
         context.pose().pushMatrix()
-        val sf = mc.window.guiScale.toFloat()
+        val sf = mc.window.guiScale
         context.pose().scale(1f / sf, 1f / sf)
         for (hudSettings in hudSettingsCache) {
             if (hudSettings.isEnabled) hudSettings.value.draw(context, false)

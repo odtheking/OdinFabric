@@ -24,10 +24,13 @@ val dungeonWaypointsCommand = Commodore("dwp", "dungeonwaypoints") {
         modMessage("Fill status changed to: ${DungeonWaypoints.filled}")
     }
 
-    literal("size").runs { size: Double ->
-        if (size !in 0.1..1.0) return@runs modMessage("§cSize must be between 0.1 and 1.0!")
-        DungeonWaypoints.size = size
-        modMessage("Size changed to: ${DungeonWaypoints.size}")
+    literal("size").runs { sizeX: Double, sizeY: Double, sizeZ: Double ->
+        fun valid(size: Double) = size in 0.1..1.0
+        if (!valid(sizeX) || !valid(sizeY) || !valid(sizeZ)) return@runs modMessage("§cSize must be between 0.1 and 1.0!")
+        DungeonWaypoints.sizeX = sizeX
+        DungeonWaypoints.sizeY = sizeY
+        DungeonWaypoints.sizeZ = sizeZ
+        modMessage("Size changed to: ${sizeX}, ${sizeY}, $sizeZ")
     }
 
     literal("resetsecrets").runs {

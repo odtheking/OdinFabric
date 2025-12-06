@@ -5,6 +5,8 @@ import com.google.common.primitives.SignedBytes
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.events.TerminalEvent
+import com.odtheking.odin.events.core.EventBus
+import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.impl.floor7.termsim.TermSimGUI
 import com.odtheking.odin.utils.clickSlot
 import com.odtheking.odin.utils.equalsOneOf
@@ -24,18 +26,21 @@ open class TerminalHandler(val type: TerminalTypes) {
     val items: Array<ItemStack?> = arrayOfNulls(type.windowSize)
     val timeOpened = System.currentTimeMillis()
     var isClicked = false
-    var syncId = -1
 
-    fun setSlot(packet: ClientboundContainerSetSlotPacket) {
-        if (packet.slot !in 0 until type.windowSize) return
-        items[packet.slot] = packet.item
-        if (handleSlotUpdate(packet)) TerminalEvent.Updated(this@TerminalHandler).postAndCatch()
-    }
+    init {
+        @Suppress("LeakingThis")
+        EventBus.subscribe(this)
 
-    fun openScreen(packet: ClientboundOpenScreenPacket) {
-        syncId = packet.containerId
-        isClicked = false
-        items.fill(null)
+        onReceive<ClientboundContainerSetSlotPacket> {
+            if (slot !in 0 until type.windowSize) return@onReceive
+            items[slot] = item
+            if (handleSlotUpdate(this)) TerminalEvent.Updated(this@TerminalHandler).postAndCatch()
+        }
+
+        onReceive<ClientboundOpenScreenPacket> {
+            isClicked = false
+            items.fill(null)
+        }
     }
 
     open fun handleSlotUpdate(packet: ClientboundContainerSetSlotPacket): Boolean = false
@@ -50,7 +55,7 @@ open class TerminalHandler(val type: TerminalTypes) {
         if (mc.screen is TermSimGUI) {
             PacketEvent.Send(
                 ServerboundContainerClickPacket(
-                    screenHandler.containerId, mc.player?.containerMenu?.stateId ?: 0,
+                    -1, -1,
                     Shorts.checkedCast(slotIndex.toLong()), SignedBytes.checkedCast(button.toLong()),
                     if (button == GLFW.GLFW_MOUSE_BUTTON_3) ClickType.CLONE else ClickType.PICKUP,
                     Int2ObjectOpenHashMap(), HashedStack.EMPTY

@@ -6,7 +6,7 @@ import com.odtheking.odin.clickgui.settings.impl.NumberSetting
 import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
-import com.odtheking.odin.utils.handlers.LimitedTickTask
+import com.odtheking.odin.utils.handlers.schedule
 import com.odtheking.odin.utils.sendCommand
 
 object Misc : Module(
@@ -30,7 +30,7 @@ object Misc : Module(
             }
 
             if (autoRequeue && endRunRegex.matches(value))
-                LimitedTickTask(requeueDelay, 1) { sendCommand("instancerequeue") }
+                schedule(requeueDelay) { sendCommand("instancerequeue") }
         }
     }
 }

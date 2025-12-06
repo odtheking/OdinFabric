@@ -5,17 +5,16 @@ import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.ColorSetting
 import com.odtheking.odin.clickgui.settings.impl.DropdownSetting
 import com.odtheking.odin.clickgui.settings.impl.NumberSetting
-import com.odtheking.odin.events.ChatPacketEvent
-import com.odtheking.odin.events.RenderBossBarEvent
-import com.odtheking.odin.events.RenderEvent
-import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.*
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.*
-import com.odtheking.odin.utils.handlers.LimitedTickTask
-import com.odtheking.odin.utils.handlers.TickTask
-import com.odtheking.odin.utils.render.*
+import com.odtheking.odin.utils.handlers.schedule
+import com.odtheking.odin.utils.render.drawLine
+import com.odtheking.odin.utils.render.drawText
+import com.odtheking.odin.utils.render.drawWireFrameBox
+import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket
@@ -49,27 +48,6 @@ object BloodCamp : Module(
 
     private val assistDropdown by DropdownSetting("Blood Assist Dropdown", true)
     private val bloodAssist by BooleanSetting("Blood Camp Assist", true, desc = "Draws boxes to spawning mobs in the blood room. WARNING: not perfectly accurate. Mobs spawn randomly between 37 - 41 ticks, adjust offset to adjust between ticks.").withDependency { assistDropdown }
-
-    private val timerHud by HUD("Timer Hud", "Displays the time left for each mob to spawn.") { example ->
-        if ((!bloodAssist || (!DungeonUtils.inDungeons || DungeonUtils.inBoss)) && !example) return@HUD 0 to 0
-        if (example) {
-            text("1.15s", 0, 0, Colors.MINECRAFT_RED)
-            textDim("2.15s", 0, 9, Colors.MINECRAFT_GREEN).first
-        } else {
-            renderDataMap.entries.sortedBy { it.value.time }.fold(0) { acc, data ->
-                val time = data.takeUnless { !it.key.isAlive }?.value?.time ?: return@fold acc
-                val color = when {
-                    time > 1.5f -> Colors.MINECRAFT_GREEN
-                    time in 0.5f..1.5f -> Colors.MINECRAFT_GOLD
-                    time in 0f..0.5f -> Colors.MINECRAFT_RED
-                    else -> Colors.MINECRAFT_AQUA
-                }
-                text("${time.toFixed()}s", 0, 9 * acc, color)
-                acc + 1
-            }
-            getStringWidth("2.15s")
-        } to 18
-    }.withDependency { bloodAssist && assistDropdown }
 
     private val pboxColor by ColorSetting("Spawn Color", Colors.MINECRAFT_RED, true, desc = "Color for Spawn render box. Set alpha to 0 to disable.").withDependency { bloodAssist && assistDropdown}
     private val fboxColor by ColorSetting("Final Color", Colors.MINECRAFT_DARK_AQUA, true, desc = "Color for when Spawn and Mob boxes are merged. Set alpha to 0 to disable.").withDependency { bloodAssist && assistDropdown }
@@ -158,7 +136,7 @@ object BloodCamp : Module(
                 val moveTime = ((predictionTicks - moveTicks) * 20 - 3).toInt()
                 finalTime = normalTickTime + moveTime
 
-                LimitedTickTask(moveTime, 1) {
+                schedule(moveTime) {
                     if (killTitle) alert("Kill Mobs")
                     finalTime = null
                 }
@@ -167,8 +145,10 @@ object BloodCamp : Module(
 
         onReceive<ClientboundSetEntityDataPacket> {
             if (!bloodAssist || currentWatcherEntity != null) return@onReceive
-            currentWatcherEntity = (mc.level?.getEntity(id) as? Zombie)?.takeIf { it.getItemBySlot(EquipmentSlot.HEAD)?.texture in watcherSkulls } ?: return@onReceive
-            devMessage("Watcher found at ${currentWatcherEntity?.position()}")
+            mc.execute {
+                currentWatcherEntity = (mc.level?.getEntity(id) as? Zombie)?.takeIf { it.getItemBySlot(EquipmentSlot.HEAD)?.texture in watcherSkulls } ?: return@execute
+                devMessage("Watcher found at ${currentWatcherEntity?.position()}")
+            }
         }
 
         onReceive<ClientboundRemoveEntitiesPacket> {
@@ -176,7 +156,7 @@ object BloodCamp : Module(
             if (entityIds.any { it == currentWatcherEntity?.id }) currentWatcherEntity = null
         }
 
-        TickTask(0, true) {
+        on<TickEvent.Server> {
             currentTickTime += 50
         }
 
