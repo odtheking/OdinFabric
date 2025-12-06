@@ -58,7 +58,7 @@ object StartGUI : TermSimGUI(
                     }
                     return
                 }
-                repeat(6) { TerminalSimulator.termSimPBs.reset() }
+                TerminalSimulator.termSimPBs.reset()
                 modMessage("§cPBs reset!")
             }
             10 -> PanesSim.open(ping)

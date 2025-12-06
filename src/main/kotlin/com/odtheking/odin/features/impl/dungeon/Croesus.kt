@@ -4,7 +4,6 @@ import com.odtheking.odin.OdinMod.scope
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.NumberSetting
-import com.odtheking.odin.config.Config
 import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.GuiEvent
 import com.odtheking.odin.events.core.on
@@ -47,9 +46,9 @@ object Croesus : Module(
     }
 
     private val chestWarning by NumberSetting("Chest Warning Threshold", 55, 0, 60, desc = "Displays a warning in the chest profit HUD if the profit is below this amount.")
-    private var currentChestCount by NumberSetting("Current Chest Count", 0, 0, 60, desc = "The number of chests opened in the current Croesus session.").hide()
 
     private var cachedPrices = emptyMap<String, Double>()
+    private var currentChestCount = 0
 
     private val chestNameRegex = Regex("^(Wood|Iron|Gold|Diamond|Emerald|Obsidian|Bedrock) Chest$")
     private val previewEnchantedBookRegex = Regex("^Enchanted Book \\(?([\\w ]+) (\\w+)\\)$")
@@ -59,7 +58,7 @@ object Croesus : Module(
     private val chestEnchantsRegex = Regex("^\\{([a-zA-Z0-9_]+):(\\d+)}$")
     private val shardRegex = Regex("^([A-Za-z ]+) Shard$")
     private val previewEssenceRegex = Regex("^(\\w+) Essence x(\\d+)$")
-    private val extraStatsRegex = Regex("^ {29}> EXTRA STATS <|^")
+    private val extraStatsRegex = Regex(" {29}> EXTRA STATS <|^")
     private val chestCostRegex = Regex("^([\\d,]+) Coins$")
 
     private val ultimateEnchants = setOf(
@@ -133,8 +132,7 @@ object Croesus : Module(
             tabListEntries.forEach { tabListEntry ->
                 unclaimedChestsRegex.find(tabListEntry)?.groupValues?.get(1)?.toIntOrNull()?.let { unclaimedChests ->
                     currentChestCount = unclaimedChests
-                    if (currentChestCount > chestWarning) alert("§cChest limited reached!")
-                    Config.save()
+                    if (currentChestCount > chestWarning) alert("§cChest limit reached!")
                 }
             }
         }
@@ -142,7 +140,7 @@ object Croesus : Module(
         on<ChatPacketEvent> {
             if (DungeonUtils.inBoss && value.matches(extraStatsRegex)) {
                 currentChestCount++
-                if (currentChestCount > chestWarning) alert("§cChest limited reached!")
+                if (currentChestCount > chestWarning) alert("§cChest limit reached!")
             }
         }
     }
@@ -289,16 +287,11 @@ object Croesus : Module(
     }
 
     private val itemReplacements = mapOf(
-        "Shiny Wither Boots" to "WITHER_BOOTS",
-        "Shiny Wither Leggings" to "WITHER_LEGGINGS",
         "Shiny Wither Chestplate" to "WITHER_CHESTPLATE",
-        "Shiny Wither Helmet" to "WITHER_HELMET",
+        "Shiny Wither Leggings" to "WITHER_LEGGINGS",
         "Shiny Necron's Handle" to "NECRON_HANDLE",
-        "Wither Shard" to "SHARD_WITHER",
-        "Thorn Shard" to "SHARD_THORN",
-        "Apex Dragon Shard" to "SHARD_APEX_DRAGON",
-        "Power Dragon Shard" to "SHARD_POWER_DRAGON",
-        "Scarf Shard" to "SHARD_SCARF",
+        "Shiny Wither Helmet" to "WITHER_HELMET",
+        "Shiny Wither Boots" to "WITHER_BOOTS",
         "Necron Dye" to "DYE_NECRON",
         "Livid Dye" to "DYE_LIVID",
     )

@@ -1,6 +1,7 @@
 package com.odtheking.odin.features.impl.floor7.terminalhandler
 
 import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.utils.hasGlint
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.world.item.ItemStack
@@ -32,6 +33,6 @@ class StartsWithHandler(private val letter: String): TerminalHandler(TerminalTyp
 
     private fun solveStartsWith(items: Array<ItemStack?>, letter: String): List<Int> =
         items.mapIndexedNotNull { index, item ->
-            if (item?.hoverName?.string?.startsWith(letter, true) == true && index !in clickedSlots) index else null
+            if (item?.hoverName?.string?.startsWith(letter, true) == true && !item.hasGlint() && index !in clickedSlots) index else null
         }
 }

@@ -19,7 +19,7 @@ object TerminalTimes : Module(
 ) {
     private val sendMessage by BooleanSetting("Send Message", false, desc = "Send a message when a terminal is completed.")
     private val reset by ActionSetting("Reset pbs", desc = "Resets the terminal PBs.") {
-        repeat(6) { terminalPBs.reset() }
+        terminalPBs.reset()
         modMessage("§6Terminal PBs §fhave been reset.")
     }
 

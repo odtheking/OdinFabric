@@ -50,7 +50,7 @@ object IceFillSolver {
         if (this?.data?.name != "Ice Fill" || currentPatterns.isNotEmpty()) return
         val patterns = if (optimizePatterns) iceFillFloors.hard else iceFillFloors.easy
 
-        repeat(2) { index ->
+        repeat(3) { index ->
             val floorIdentifiers = iceFillFloors.identifier[index]
 
             for (patternIndex in floorIdentifiers.indices) {
