@@ -51,7 +51,6 @@ object BetterPartyFinder : Module(
 
     init {
         on<ChatPacketEvent> {
-            modMessage("AAA")
             if (!statsDisplay && !autoKickToggle) return@on
             val (name) = pfRegex.find(value)?.destructured ?: return@on
             if (name == mc.player?.name?.string) return@on
