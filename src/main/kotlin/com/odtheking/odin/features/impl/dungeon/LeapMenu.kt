@@ -29,7 +29,7 @@ object LeapMenu : Module(
     private val onlyClass by BooleanSetting("Only Classes", false, desc = "Renders classes instead of names.")
     private val colorStyle by BooleanSetting("Color Style", false, desc = "Which color style to use.")
     private val backgroundColor by ColorSetting("Background Color", Colors.gray38.withAlpha(0.75f), true, desc = "Color of the background of the leap menu.").withDependency { !colorStyle }
-    private val scale by NumberSetting("Scale", 0.5f, 0.1f, 1f, 0.1f, desc = "Scale of the leap menu.", unit = "x")
+    private val scale by NumberSetting("Scale", 0.5f, 0.1f, 2f, 0.1f, desc = "Scale of the leap menu.", unit = "x")
     private val useNumberKeys by BooleanSetting("Use Number Keys", false, desc = "Use keyboard keys to leap to the player you want, going from left to right, top to bottom.")
     private val topLeftKeybind by KeybindSetting("Top Left", GLFW.GLFW_KEY_1, "Used to click on the first person in the leap menu.").withDependency { useNumberKeys }
     private val topRightKeybind by KeybindSetting("Top Right", GLFW.GLFW_KEY_2, "Used to click on the second person in the leap menu.").withDependency { useNumberKeys }

@@ -7,6 +7,7 @@ import com.odtheking.odin.features.impl.dungeon.dungeonwaypoints.DungeonWaypoint
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Color.Companion.multiplyAlpha
 import com.odtheking.odin.utils.addVec
+import com.odtheking.odin.utils.unaryMinus
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.client.gui.Font
 import net.minecraft.client.renderer.LightTexture
@@ -142,8 +143,8 @@ fun WorldRenderContext.drawText(text: FormattedCharSequence, pos: Vec3, scale: F
     stack.pushPose()
     val matrix = stack.last().pose()
     with(scale * 0.025f) {
-        val cameraPos = camera().position
-        matrix.translate(pos.toVector3f()).translate(-cameraPos.x.toFloat() , cameraPos.y.toFloat(), cameraPos.z.toFloat()).rotate(camera().rotation()).scale(this, -this, this)
+        val cameraPos = -camera().position
+        matrix.translate(pos.toVector3f()).translate(cameraPos.x.toFloat() , cameraPos.y.toFloat(), cameraPos.z.toFloat()).rotate(camera().rotation()).scale(this, -this, this)
     }
 
     val consumers = MultiBufferSource.immediate(ALLOCATOR)
