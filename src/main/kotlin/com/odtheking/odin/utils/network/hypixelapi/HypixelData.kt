@@ -96,10 +96,10 @@ object HypixelData {
         @SerializedName("player_stats")
         val playerStats: PlayerStats = PlayerStats(),
         val slayer: Slayers = Slayers(),
-        val inventory: Inventory = Inventory(),
+        val inventory: Inventory? = Inventory(),
         val collection: Map<String, Long> = mapOf()
     ) {
-        val magicalPower get() = inventory.bagContents["talisman_bag"]?.itemStacks?.mapNotNull {
+        val magicalPower get() = inventory?.bagContents?.get("talisman_bag")?.itemStacks?.mapNotNull {
             if (it == null || it.lore.any { item -> mpRegex.matches(item) }) return@mapNotNull null
             val mp = it.magicalPower + (if (it.id == "ABICASE") floor(crimsonIsle.abiphone.activeContacts.size / 2f).toInt() else 0)
             val itemId = it.id.takeUnless { it.startsWithOneOf("PARTY_HAT", "BALLOON_HAT") } ?: "PARTY_HAT"
@@ -112,9 +112,9 @@ object HypixelData {
 
         val tunings get() = accessoryBagStorage.tuning.currentTunings.map { "${it.key.replace("_", " ").capitalizeWords()}§7: ${it.value}" }
 
-        val inventoryApi get() = inventory.eChestContents.itemStacks.isNotEmpty()
+        val inventoryApi get() = inventory?.eChestContents?.itemStacks?.isNotEmpty() == true
 
-        @Transient val allItems = (inventory.invContents.itemStacks + inventory.eChestContents.itemStacks + inventory.backpackContents.flatMap { it.value.itemStacks })
+        @Transient val allItems = ((inventory?.invContents?.itemStacks ?: emptyList()) + (inventory?.eChestContents?.itemStacks ?: emptyList()) + (inventory?.backpackContents?.flatMap { it.value.itemStacks } ?: emptyList()))
 
         val assumedMagicalPower get() = magicalPower.takeUnless { it == 0 } ?: (accessoryBagStorage.tuning.currentTunings.values.sum() * 10)
     }

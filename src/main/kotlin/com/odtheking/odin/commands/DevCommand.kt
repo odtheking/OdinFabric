@@ -4,7 +4,7 @@ import com.github.stivais.commodore.Commodore
 import com.github.stivais.commodore.utils.GreedyString
 import com.odtheking.odin.OdinMod
 import com.odtheking.odin.OdinMod.mc
-import com.odtheking.odin.events.PacketEvent
+import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.features.ModuleManager.generateFeatureList
 import com.odtheking.odin.features.impl.floor7.MelodyMessage.melodyWebSocket
 import com.odtheking.odin.features.impl.floor7.WitherDragonState
@@ -19,6 +19,7 @@ import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.network.WebUtils.postData
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.skyblock.LocationUtils
+import com.odtheking.odin.utils.skyblock.PartyUtils
 import com.odtheking.odin.utils.skyblock.Supply
 import com.odtheking.odin.utils.skyblock.dungeon.Blessing
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
@@ -29,7 +30,6 @@ import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils.getRoomData
 import kotlinx.coroutines.launch
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.chat.Component
-import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
 import net.minecraft.world.phys.BlockHitResult
 
 val devCommand = Commodore("oddev") {
@@ -49,7 +49,7 @@ val devCommand = Commodore("oddev") {
     }
 
     literal("simulate").runs { greedyString: GreedyString ->
-        PacketEvent.Receive(ClientboundSystemChatPacket(Component.literal(greedyString.string), false)).postAndCatch()
+        ChatPacketEvent(greedyString.string, Component.literal(greedyString.string)).postAndCatch()
         modMessage("§8Simulated message: ${greedyString.string}")
     }
 
@@ -81,7 +81,7 @@ val devCommand = Commodore("oddev") {
 
     literal("debug").executable {
 
-        param("type").suggests { setOf("kuudra", "dungeon", "none") }
+        param("type").suggests { setOf("kuudra", "dungeon", "none", "party") }
 
         runs { type: String ->
             modMessage(
@@ -123,6 +123,10 @@ val devCommand = Commodore("oddev") {
                             |Blessings: ${Blessing.entries.joinToString { "${it.name}: ${it.current}" }}
                         """.trimIndent()
 
+                        "party" -> """
+                            |Party > ${PartyUtils.isInParty}, ${PartyUtils.partyLeader}, ${PartyUtils.members}}
+                        """.trimIndent()
+                        
                         else -> """
                             |Current Area: ${LocationUtils.currentArea.displayName}
                         """.trimIndent()

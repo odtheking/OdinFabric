@@ -5,7 +5,6 @@ import com.odtheking.odin.utils.skyblock.dungeon.tiles.Rotations
 import net.minecraft.core.BlockPos
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
-import org.joml.Matrix4f
 import kotlin.math.cos
 import kotlin.math.floor
 import kotlin.math.sin
@@ -24,8 +23,6 @@ operator fun Vec3.unaryMinus(): Vec3 = Vec3(-x, -y, -z)
 
 fun Vec3.floorVec(): Vec3 =
     Vec3(floor(x), floor(y), floor(z))
-
-fun Matrix4f.translate(vec: Vec3): Matrix4f = this.translate(vec.x.toFloat(), vec.y.toFloat(), vec.z.toFloat())
 
 fun Vec3.addVec(x: Number = 0.0, y: Number = 0.0, z: Number = 0.0): Vec3 =
     Vec3(this.x + x.toDouble(), this.y + y.toDouble(), this.z + z.toDouble())

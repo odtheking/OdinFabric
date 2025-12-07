@@ -19,12 +19,15 @@ import com.odtheking.odin.utils.sendCommand
 import com.odtheking.odin.utils.skyblock.PartyUtils
 import com.odtheking.odin.utils.skyblock.dungeon.Floor
 import kotlinx.coroutines.launch
+import net.minecraft.network.chat.ClickEvent
+import net.minecraft.network.chat.Component
 
 object BetterPartyFinder : Module(
     name = "Better Party Finder",
     description = "Provides stats when a player joins your party. Includes autokick functionality.",
 ) {
     private val statsDisplay by BooleanSetting("Stats display", true, desc = "Displays stats of players who join your party")
+    private val sendKickLine by BooleanSetting("Send Kick Line", true, desc = "Sends a line in party chat to kick a player.").withDependency { statsDisplay }
 
     private val autoKickToggle by BooleanSetting("Auto Kick", desc = "Automatically kicks players who don't meet requirements.")
     private val floor by SelectorSetting("Floor", "F7", Floor.entries.mapNotNull { if (!it.isMM) it.name else null }, desc = "Determines which floor to check pb.").withDependency { autoKickToggle }
@@ -55,6 +58,9 @@ object BetterPartyFinder : Module(
             scope.launch {
                 val profile = RequestUtils.getProfile(name)
                 if (statsDisplay) fetchAndDisplayCataStats(profile)
+                if (sendKickLine) modMessage(Component.literal("§aPress to kick $name").withStyle {
+                    it.withClickEvent(ClickEvent.RunCommand("/party kick $name"))
+                })
 
                 if (autoKickToggle && PartyUtils.isLeader()) {
                     if (kickCache && name in kickedList ) {

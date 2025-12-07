@@ -6,7 +6,6 @@ import com.mojang.blaze3d.opengl.GlStateManager
 import com.mojang.blaze3d.opengl.GlTexture
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.PoseStack
-import com.odtheking.odin.OdinMod.mc
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.navigation.ScreenRectangle
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer
@@ -27,12 +26,13 @@ class NVGSpecialRenderer(vertexConsumers: MultiBufferSource.BufferSource)
         val bufferManager = (RenderSystem.getDevice() as? GlDevice)?.directStateAccess() ?: return
         val glDepthTex = (RenderSystem.outputDepthTextureOverride?.texture() as? GlTexture) ?: return
 
-        (colorTex?.texture() as? GlTexture)?.getFbo(bufferManager, glDepthTex)?.apply {
+        val (width, height) = colorTex?.let { it.getWidth(0)to it.getHeight(0) } ?: return
+        (colorTex.texture() as? GlTexture)?.getFbo(bufferManager, glDepthTex)?.apply {
             GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, this)
-            GlStateManager._viewport(0, 0, colorTex.getWidth(0), colorTex.getHeight(0))
+            GlStateManager._viewport(0, 0, width, height)
         }
 
-        NVGRenderer.beginFrame(mc.window.width.toFloat(), mc.window.height.toFloat())
+        NVGRenderer.beginFrame(width.toFloat(), height.toFloat())
         state.renderContent()
         NVGRenderer.endFrame()
         GlStateManager._disableDepthTest()

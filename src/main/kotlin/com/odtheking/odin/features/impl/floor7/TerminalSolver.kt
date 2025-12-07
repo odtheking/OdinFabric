@@ -72,7 +72,7 @@ object TerminalSolver : Module(
 
     init {
         onReceive<ClientboundOpenScreenPacket> {
-            currentTerm?.let { if (!it.isClicked) leftTerm() }
+            currentTerm?.let { if (!it.isClicked && System.currentTimeMillis() - it.timeOpened < 500) leftTerm() }
             val windowName = title.string ?: return@onReceive
             val newTermType = TerminalTypes.entries.find { terminal -> windowName.startsWith(terminal.windowName) }?.takeIf { it != currentTerm?.type } ?: return@onReceive
 

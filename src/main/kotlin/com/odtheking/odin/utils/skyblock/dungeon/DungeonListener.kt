@@ -112,10 +112,10 @@ object DungeonListener {
             }
 
             when (partyMessageRegex.find(message)?.groupValues?.get(1)?.lowercase() ?: return@onReceive) {
-                "mimic killed", "mimic slain", "mimic killed!", "mimic dead", "mimic dead!", "\$skytils-dungeon-score-mimic\$", Mimic.mimicMessage ->
+                "mimic killed", "mimic slain", "mimic killed!", "mimic dead", "mimic dead!", $$"$skytils-dungeon-score-mimic$", Mimic.mimicMessage ->
                     dungeonStats.mimicKilled = true
 
-                "prince killed", "prince slain", "prince killed!", "prince dead", "prince dead!", "\$skytils-dungeon-score-prince\$", Mimic.princeMessage ->
+                "prince killed", "prince slain", "prince killed!", "prince dead", "prince dead!", $$"$skytils-dungeon-score-prince$", Mimic.princeMessage ->
                     dungeonStats.princeKilled = true
 
                 "blaze done!", "blaze done", "blaze puzzle solved!" ->
@@ -178,9 +178,9 @@ object DungeonListener {
     private val clearedRegex = Regex("^Cleared: (\\d+)% \\(\\d+\\)$")
     private val secretCountRegex = Regex("^ Secrets Found: (\\d+)$")
     private val openedRoomsRegex = Regex("^ Opened Rooms: (\\d+)$")
-    private val floorRegex = Regex("The Catacombs \\((\\w+)\\)\$")
-    private val partyMessageRegex = Regex("^Party > .*?: (.+)\$")
-    private val puzzleCountRegex = Regex("^Puzzles: \\((\\d+)\\)\$")
+    private val floorRegex = Regex("The Catacombs \\((\\w+)\\)$")
+    private val partyMessageRegex = Regex("^Party > .*?: (.+)$")
+    private val puzzleCountRegex = Regex("^Puzzles: \\((\\d+)\\)$")
     private val deathsRegex = Regex("^Team Deaths: (\\d+)$")
     private val cryptRegex = Regex("^ Crypts: (\\d+)$")
 

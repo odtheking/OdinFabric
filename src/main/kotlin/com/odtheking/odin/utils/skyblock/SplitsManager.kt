@@ -61,11 +61,14 @@ object SplitsManager {
 
                 if (index == currentSplits.splits.size - 1) {
                     val (times, _, _) = getAndUpdateSplitsTimes(currentSplits)
+                    val capturedSplits = currentSplits.splits.toList()
+                    val capturedPB = currentSplits.personalBest
                     schedule(10) {
-                        currentSplits.personalBest?.time(currentSplits.splits[index - 1].name, currentSplitTime, "s§7!", "§6${currentSplits.splits[index - 1].name} §7took §6", true, Splits.sendOnlyPB, Splits.enabled)
-                        currentSplits.personalBest?.time(currentSplits.splits[index].name, times.last() / 1000f, "s§7!", "§6Total time §7took §6", true, Splits.sendOnlyPB, Splits.enabled)
+                        if (capturedSplits.isEmpty()) return@schedule
+                        capturedPB?.time(capturedSplits[index - 1].name, currentSplitTime, "s§7!", "§6${capturedSplits[index - 1].name} §7took §6", true, Splits.sendOnlyPB, Splits.enabled)
+                        capturedPB?.time(capturedSplits[index].name, times.last() / 1000f, "s§7!", "§6Total time §7took §6", true, Splits.sendOnlyPB, Splits.enabled)
                         times.forEachIndexed { i, it ->
-                            val name = if (i == currentSplits.splits.size - 1) "Total" else currentSplits.splits[i].name
+                            val name = if (i == capturedSplits.size - 1) "Total" else capturedSplits[i].name
                             if (Splits.sendSplits && Splits.enabled) modMessage("§6$name §7took §6${formatTime((it))} §7to complete.")
                         }
                     }
