@@ -1,5 +1,6 @@
 package com.odtheking.odin.features.impl.skyblock
 
+import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.core.on
@@ -7,6 +8,9 @@ import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.alert
 import com.odtheking.odin.utils.itemId
+import com.odtheking.odin.utils.modMessage
+import com.odtheking.odin.utils.partyMessage
+import com.odtheking.odin.utils.strength
 import net.minecraft.network.protocol.game.ClientboundSoundPacket
 import net.minecraft.sounds.SoundEvents
 
@@ -16,18 +20,29 @@ object Ragnarock : Module(
 ) {
     private val castAlert by BooleanSetting("Cast alert", true, "Alerts when you cast Ragnarock.")
     private val cancelAlert by BooleanSetting("Cancel alert", true, "Alerts when Ragnarock is cancelled.")
+    private val strengthGainedMessage by BooleanSetting("Strength gained", true, "Shows Ragnarock strength gained.")
+    private val announceStrengthGained by BooleanSetting("Announce gained strength", false, "Announce gained strength in party chat").withDependency { strengthGainedMessage }
 
     private val cancelRegex = Regex("Ragnarock was cancelled due to (?:being hit|taking damage)!")
 
     init {
         on<ChatPacketEvent> {
-            if (castAlert && value.matches(cancelRegex)) alert("§cRagnarock Cancelled!")
+            if (cancelAlert && value.matches(cancelRegex)) alert("§cRagnarock Cancelled!")
         }
 
         onReceive<ClientboundSoundPacket> {
-            if (cancelAlert && pitch == 1.4920635f && mc.player?.mainHandItem?.itemId == "RAGNAROCK_AXE" &&
+            if (pitch == 1.4920635f && mc.player?.mainHandItem?.itemId == "RAGNAROCK_AXE" &&
                 SoundEvents.WOLF_SOUNDS.entries.any { it.value.deathSound.value().location == sound.value().location }
-            ) alert("§aCasted Rag")
+            ) {
+                if (castAlert) alert("§aCasted Rag")
+                val strengthGained = ((mc.player?.mainHandItem?.strength ?: return@onReceive) * 1.5).toInt()
+                if (strengthGainedMessage) {
+                    modMessage("§7Gained strength: §4$strengthGained")
+                    if (announceStrengthGained) {
+                        partyMessage("Gained strength from Ragnarock: $strengthGained")
+                    }
+                }
+            }
         }
     }
 }
