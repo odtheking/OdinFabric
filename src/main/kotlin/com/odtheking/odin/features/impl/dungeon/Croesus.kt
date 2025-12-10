@@ -299,6 +299,7 @@ object Croesus : Module(
         "Shiny Wither Chestplate" to "WITHER_CHESTPLATE",
         "Shiny Wither Leggings" to "WITHER_LEGGINGS",
         "Shiny Necron's Handle" to "NECRON_HANDLE",
+        "Necron's Handle" to "NECRON_HANDLE",
         "Shiny Wither Helmet" to "WITHER_HELMET",
         "Shiny Wither Boots" to "WITHER_BOOTS",
         "Wither Shield" to "WITHER_SHIELD_SCROLL",
