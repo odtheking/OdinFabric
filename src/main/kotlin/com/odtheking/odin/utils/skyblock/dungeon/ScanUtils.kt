@@ -149,7 +149,7 @@ object ScanUtils {
 
     fun getCore(vec2: Vec2, height: Int? = null): Int {
         val sb = StringBuilder(150)
-        val roomHeight = height ?: getTopLayerOfRoom(vec2)
+        val roomHeight = (height ?: getTopLayerOfRoom(vec2)).coerceIn(11..140)
         sb.append(CharArray(140 - roomHeight) { '0' })
         var bedrock = 0
         for (y in roomHeight downTo 12) {
@@ -171,7 +171,7 @@ object ScanUtils {
     }
 
     fun getTopLayerOfRoom(vec2: Vec2): Int {
-        for (y in 140 downTo 12) {
+        for (y in 160 downTo 12) {
             mutableBlockPos.set(vec2.x, y, vec2.z)
             val blockState = mc.level?.getBlockState(mutableBlockPos)
             if (blockState?.isAir == false) return if (blockState.block == Blocks.GOLD_BLOCK) y - 1 else y

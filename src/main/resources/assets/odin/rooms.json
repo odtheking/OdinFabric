@@ -180,7 +180,8 @@
     "name": "Carpets",
     "type": "NORMAL",
     "cores": [
-      238642395
+      238642395,
+      -76292695
     ],
     "crypts": 3,
     "secrets": 1
