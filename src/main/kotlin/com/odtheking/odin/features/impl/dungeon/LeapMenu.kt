@@ -42,6 +42,8 @@ object LeapMenu : Module(
     private val keybindList = listOf(topLeftKeybind, topRightKeybind, bottomLeftKeybind, bottomRightKeybind)
     private val leapedRegex = Regex("You have teleported to (\\w{1,16})!")
     private val imageCacheMap = mutableMapOf<String, Int>()
+    const val BOX_WIDTH = 800f
+    const val BOX_HEIGHT = 300f
 
     init {
         on<GuiEvent.Draw> {
@@ -59,22 +61,20 @@ object LeapMenu : Module(
             NVGSpecialRenderer.draw(guiGraphics, 0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight()) {
                 NVGRenderer.scale(scale, scale)
                 NVGRenderer.translate(halfWidth / scale, halfHeight / scale)
-                val boxWidth = 800f
-                val boxHeight = 300f
                 leapTeammates.forEachIndexed { index, player ->
                     if (player == EMPTY) return@forEachIndexed
 
                     val x = when (index) {
-                        0, 2 -> -((mc.window.width - (boxWidth * 2f)) / 6f + boxWidth)
-                        else -> ((mc.window.width - (boxWidth * 2f)) / 6f)
+                        0, 2 -> -((mc.window.width - (BOX_WIDTH * 2f)) / 6f + BOX_WIDTH)
+                        else -> ((mc.window.width - (BOX_WIDTH * 2f)) / 6f)
                     }
                     val y = when (index) {
-                        0, 1 -> -((mc.window.height - (boxHeight * 2f)) / 8f + boxHeight)
-                        else -> ((mc.window.height - (boxHeight * 2f)) / 8f)
+                        0, 1 -> -((mc.window.height - (BOX_HEIGHT * 2f)) / 8f + BOX_HEIGHT)
+                        else -> ((mc.window.height - (BOX_HEIGHT * 2f)) / 8f)
                     }
 
                     val expandValue = hoverHandler[index].anim.get(0f, 15f, !hoverHandler[index].isHovered)
-                    NVGRenderer.rect(x - expandValue ,y - expandValue, boxWidth + expandValue * 2, boxHeight + expandValue * 2, (if (colorStyle) player.clazz.color else backgroundColor).rgba, 12f)
+                    NVGRenderer.rect(x - expandValue ,y - expandValue, BOX_WIDTH + expandValue * 2, BOX_HEIGHT + expandValue * 2, (if (colorStyle) player.clazz.color else backgroundColor).rgba, 12f)
                     val locationSkin = player.locationSkin ?: mc.player?.skin?.texture ?: return@forEachIndexed
                     imageCacheMap.getOrPut(locationSkin.path) {
                         NVGRenderer.createNVGImage((mc.textureManager?.getTexture(locationSkin)?.texture as? GlTexture)?.glId() ?: 0, 64, 64)
@@ -107,7 +107,6 @@ object LeapMenu : Module(
             if (playerToLeap.isDead) return@on modMessage("This player is dead, can't leap.")
 
             leapTo(playerToLeap.name, chest)
-
             cancel()
         }
 
@@ -121,7 +120,6 @@ object LeapMenu : Module(
             if (playerToLeap.isDead) return@on modMessage("This player is dead, can't leap.")
 
             leapTo(playerToLeap.name, chest)
-
             cancel()
         }
 
