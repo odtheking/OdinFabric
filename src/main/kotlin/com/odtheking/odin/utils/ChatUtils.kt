@@ -42,10 +42,6 @@ fun getCenteredText(text: String): String {
     return " ".repeat(spacesNeeded) + text
 }
 
-fun partyMessage(text: String) {
-    sendCommand("pc $text")
-}
-
 fun getChatBreak(): String =
     mc.gui?.chat?.width?.let {
         "§9§m" + "-".repeat(it / mc.font.width("-"))

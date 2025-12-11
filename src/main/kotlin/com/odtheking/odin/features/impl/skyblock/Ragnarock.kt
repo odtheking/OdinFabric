@@ -6,11 +6,7 @@ import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
-import com.odtheking.odin.utils.alert
-import com.odtheking.odin.utils.itemId
-import com.odtheking.odin.utils.modMessage
-import com.odtheking.odin.utils.partyMessage
-import com.odtheking.odin.utils.strength
+import com.odtheking.odin.utils.*
 import net.minecraft.network.protocol.game.ClientboundSoundPacket
 import net.minecraft.sounds.SoundEvents
 
@@ -39,7 +35,7 @@ object Ragnarock : Module(
                 if (strengthGainedMessage) {
                     modMessage("§7Gained strength: §4$strengthGained")
                     if (announceStrengthGained) {
-                        partyMessage("Gained strength from Ragnarock: $strengthGained")
+                        sendCommand("pc Gained strength from Ragnarock: $strengthGained")
                     }
                 }
             }

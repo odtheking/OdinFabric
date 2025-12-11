@@ -53,10 +53,10 @@ val ItemStack.texture: String?
 val strengthRegex = Regex("Strength: \\+(\\d+)")
 
 inline val ItemStack.strength: Int
-    get() = this.lore.firstOrNull {
-        it.string.noControlCodes.startsWith("Strength:")
+    get() = this.loreString.firstOrNull {
+        it.noControlCodes.startsWith("Strength:")
     }?.let { lineComponent ->
-        strengthRegex.find(lineComponent.string.noControlCodes)?.groups?.get(1)?.value?.toIntOrNull()
+        strengthRegex.find(lineComponent.noControlCodes)?.groups?.get(1)?.value?.toIntOrNull()
     } ?: 0
 
 enum class ItemRarity(
