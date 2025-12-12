@@ -121,7 +121,7 @@ object WitherDragons : Module(
                 if (dragonHealth) {
                     DragonCheck.dragonHealthMap.forEach { (_, data) ->
                         if (data.second > 0) {
-                            context.drawText(
+                            drawText(
                                 Component.literal(colorHealth(data.second)).visualOrderText,
                                 data.first, 5f, false
                             )
@@ -130,19 +130,19 @@ object WitherDragons : Module(
                 }
 
                 if (dragonTimer && dragon.timeToSpawn > 0) {
-                    context.drawText(
+                    drawText(
                         Component.literal("§${dragon.colorCode}${dragon.name.first()}: ${getDragonTimer(dragon.timeToSpawn)}").visualOrderText,
                         dragon.spawnPos.center, 5f, false
                     )
                 }
 
                 if (dragonBoxes && dragon.state != WitherDragonState.DEAD)
-                    context.drawWireFrameBox(dragon.aabbDimensions, dragon.color, depth = true)
+                    drawWireFrameBox(dragon.aabbDimensions, dragon.color, depth = true)
             }
 
             priorityDragon?.let { drag ->
                 if (dragonTracers && drag.state == WitherDragonState.SPAWNING)
-                    mc.player?.let { context.drawLine(listOf(it.eyePosition, Vec3(drag.spawnPos)), color = drag.color, true) }
+                    mc.player?.let { drawLine(listOf(it.eyePosition, Vec3(drag.spawnPos)), color = drag.color, true) }
             }
         }
 

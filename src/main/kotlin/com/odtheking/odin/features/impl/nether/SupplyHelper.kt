@@ -57,7 +57,7 @@ object SupplyHelper : Module(
             if (supplyDropWaypoints) {
                 Supply.entries.forEach { type ->
                     if (type.equalsOneOf(Supply.None, Supply.Square) || !type.isActive) return@forEach
-                    context.drawCustomBeacon(
+                    drawCustomBeacon(
                         Component.literal("§ePlace Here!").visualOrderText,
                         type.dropOffSpot,
                         if (NoPre.missing == type) Colors.MINECRAFT_GREEN else Colors.MINECRAFT_RED,
@@ -68,7 +68,7 @@ object SupplyHelper : Module(
 
             if (suppliesWaypoints) {
                 KuudraUtils.giantZombies.forEach {
-                    context.drawCustomBeacon(
+                    drawCustomBeacon(
                         Component.literal("Pick Up!").visualOrderText,
                         BlockPos((it.x + (3.7 * cos((it.yRot + 130) * (Math.PI / 180)))).toInt(), 73, ((it.z + (3.7 * sin((it.yRot + 130) * (Math.PI / 180)))).toInt())),
                         supplyWaypointColor, increase = false
@@ -78,7 +78,7 @@ object SupplyHelper : Module(
 
             if (renderArea) {
                 Supply.entries.forEach { type ->
-                    context.drawText(
+                    drawText(
                         Component.literal("§e${type.name}").visualOrderText,
                         type.pickUpSpot.center, 2f, true
                     )

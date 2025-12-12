@@ -2,6 +2,7 @@ package com.odtheking.odin.features.impl.render
 
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
+import com.mojang.authlib.GameProfile
 import com.mojang.blaze3d.vertex.PoseStack
 import com.odtheking.odin.OdinMod
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
@@ -13,7 +14,8 @@ import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.network.WebUtils.fetchJson
 import com.odtheking.odin.utils.network.WebUtils.postData
 import kotlinx.coroutines.launch
-import net.minecraft.client.renderer.entity.state.PlayerRenderState
+import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey
+import net.minecraft.client.renderer.entity.state.AvatarRenderState
 
 object PlayerSize : Module(
     name = "Player Size",
@@ -63,14 +65,15 @@ object PlayerSize : Module(
     )
 
     @JvmStatic
-    fun preRenderCallbackScaleHook(entityRenderer: PlayerRenderState, matrix: PoseStack) {
-        if (enabled && entityRenderer.name == mc.player?.name?.string && !randoms.containsKey(entityRenderer.name)) {
+    fun preRenderCallbackScaleHook(entityRenderer: AvatarRenderState, matrix: PoseStack) {
+        val gameProfile = entityRenderer.getData(GAME_PROFILE_KEY) ?: return
+        if (enabled && gameProfile.name == mc.player?.gameProfile?.name && !randoms.containsKey(gameProfile.name)) {
             if (devSizeY < 0) matrix.translate(0f, devSizeY * 2, 0f)
             matrix.scale(devSizeX, devSizeY, devSizeZ)
         }
-        if (!randoms.containsKey(entityRenderer.name)) return
-        if (!devSize && entityRenderer.name == mc.player?.name?.string) return
-        val random = randoms[entityRenderer.name] ?: return
+        if (!randoms.containsKey(gameProfile.name)) return
+        if (!devSize && gameProfile.name == mc.player?.gameProfile?.name) return
+        val random = randoms[gameProfile.name] ?: return
         if (random.scale[1] < 0) matrix.translate(0f, random.scale[1] * 2, 1f)
         matrix.scale(random.scale[0], random.scale[1], random.scale[2])
     }
@@ -96,4 +99,6 @@ object PlayerSize : Module(
             "password" to password
         ))
     }
+
+    val GAME_PROFILE_KEY: RenderStateDataKey<GameProfile> = RenderStateDataKey.create { "odin:game_profile" }
 }
