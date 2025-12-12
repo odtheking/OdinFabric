@@ -173,8 +173,8 @@ fun formatNumber(numStr: String): String {
 
 fun Module.createSoundSettings(name: String, default: String, dependencies: () -> Boolean): () -> Triple<String, Float, Float> {
     val customSound = +StringSetting(name, default, desc = "Name of a custom sound to play.", length = 64).withDependency { dependencies() }
-    val pitch = +NumberSetting("$name Pitch", 1.0f, 0.1f, 1.0f, 0.01f, desc = "Pitch of the sound to play.").withDependency { dependencies() }
-    val volume = +NumberSetting("$name Volume", 1.0f, 0.1f, 1.0f, 0.01f, desc = "Volume of the sound to play.").withDependency { dependencies() }
+    val pitch = +NumberSetting("$name Pitch", 1f, 0.1f, 2f, 0.01f, desc = "Pitch of the sound to play.").withDependency { dependencies() }
+    val volume = +NumberSetting("$name Volume", 1f, 0.1f, 1f, 0.01f, desc = "Volume of the sound to play.").withDependency { dependencies() }
     val soundSettings = { Triple(customSound.value, volume.value, pitch.value) }
     +ActionSetting("Play sound", desc = "Plays the selected sound.") { playSoundSettings(soundSettings()) }.withDependency { dependencies() }
     return soundSettings

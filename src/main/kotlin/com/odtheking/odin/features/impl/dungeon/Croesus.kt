@@ -54,12 +54,14 @@ object Croesus : Module(
     private val previewEnchantedBookRegex = Regex("^Enchanted Book \\(?([\\w ]+) (\\w+)\\)$")
     private val chestPreviewScreenRegex = Regex("^(?:Master )?Catacombs - ([FloorVI\\d ]*)$")
     private val chestStatusRegex = Regex("^Opened Chest: (.+)$|^No more chests to open!$")
+    private val chestOpenedRegex = Regex("^Opened Chest: (.+)$")
     private val unclaimedChestsRegex = Regex("^ Unclaimed chests: (\\d+)$")
     private val chestEnchantsRegex = Regex("^\\{([a-zA-Z0-9_]+):(\\d+)}$")
-    private val shardRegex = Regex("^([A-Za-z ]+) Shard$")
     private val previewEssenceRegex = Regex("^(\\w+) Essence x(\\d+)$")
+    private val previewShardRegex = Regex("^(\\w+) Shard$")
     private val extraStatsRegex = Regex(" {29}> EXTRA STATS <")
     private val chestCostRegex = Regex("^([\\d,]+) Coins$")
+    private val shardRegex = Regex("^([A-Za-z ]+) Shard$")
 
     private val ultimateEnchants = setOf(
         "Soul Eater", "Combo", "Legion", "One For All", "Rend",
@@ -93,13 +95,15 @@ object Croesus : Module(
             }
         }
 
-
         on<GuiEvent.DrawSlot> {
             if (screen.title?.string == "Croesus" && slot.item?.hoverName?.string.equalsOneOf("The Catacombs", "Master Mode The Catacombs")) {
                 val lore = slot.item?.lore ?: return@on
+                val loreString = slot.item?.loreString ?: return@on
 
-                if (hideClaimed && lore.map { it.string }.any { it.matches(chestStatusRegex) } && (!includeKey || hasStrikeThrough("Dungeon Chest Key", lore))) cancel()
-                else if (highlightState) guiGraphics.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, if (hasStrikeThrough("Kismet Feather", lore)) Colors.MINECRAFT_GOLD.rgba else Colors.MINECRAFT_GREEN.rgba)
+                if (hideClaimed && loreString.any { it.matches(chestStatusRegex) } && (!includeKey || hasStrikeThrough("Dungeon Chest Key", lore))) cancel()
+                else if (highlightState)
+                    guiGraphics.fill(slot.x, slot.y, slot.x + 16, slot.y + 16,
+                        if (loreString.any { it.matches(chestOpenedRegex) }) Colors.MINECRAFT_GOLD.rgba else Colors.MINECRAFT_GREEN.rgba)
 
             } else if (highlightProfitable && screen.title?.string?.matches(chestPreviewScreenRegex) == true && slot.index in mostProfitableSlots) {
                 val color = when (mostProfitableSlots.indexOf(slot.index)) {
@@ -174,7 +178,7 @@ object Croesus : Module(
         }
 
         chestData = chests.sortedByDescending { it.profit }
-        mostProfitableSlots = chestData.take(2).map { it.slotIndex }.toSet()
+        mostProfitableSlots = chestData.filter { it.profit > 0 }.take(2).map { it.slotIndex }.toSet()
     }
 
     private fun parseItemValue(item: String): Double? {
@@ -229,6 +233,11 @@ object Croesus : Module(
                         val price = cachedPrices["ESSENCE_${name.uppercase()}"] ?: return@forEachIndexed
                         chestItems += ChestItem(stack.hoverName.string, price * quantity.toDouble())
                         profit += price * quantity.toDouble()
+                    } ?: previewShardRegex.find(stack.hoverName.string)?.destructured?.let { (shardName) ->
+                        cachedPrices["SHARD_${shardName.uppercase().replace(" ", "_")}"]?.let {
+                            chestItems += ChestItem(stack.hoverName.string, it)
+                            profit += it
+                        }
                     } ?: cachedPrices[stack.itemId]?.let {
                         chestItems += ChestItem(stack.hoverName.string, it)
                         profit += it
@@ -290,8 +299,12 @@ object Croesus : Module(
         "Shiny Wither Chestplate" to "WITHER_CHESTPLATE",
         "Shiny Wither Leggings" to "WITHER_LEGGINGS",
         "Shiny Necron's Handle" to "NECRON_HANDLE",
+        "Necron's Handle" to "NECRON_HANDLE",
         "Shiny Wither Helmet" to "WITHER_HELMET",
         "Shiny Wither Boots" to "WITHER_BOOTS",
+        "Wither Shield" to "WITHER_SHIELD_SCROLL",
+        "Implosion" to "IMPLOSION_SCROLL",
+        "Shadow Warp" to "SHADOW_WARP_SCROLL",
         "Necron Dye" to "DYE_NECRON",
         "Livid Dye" to "DYE_LIVID",
     )

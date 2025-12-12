@@ -44,7 +44,7 @@ object Highlight : Module(
             val entitiesToRemove = mutableListOf<Entity>()
             mc.level?.entitiesForRendering()?.forEach { e ->
                 val entity = e ?: return@forEach
-                val entityName = mc.level?.getEntity(entity.id)?.takeIf { entity.isAlive }?.name?.string?.noControlCodes ?: return@forEach
+                val entityName = entity.takeIf { entity.isAlive }?.name?.string?.noControlCodes ?: return@forEach
 
                 if (hideNonNames && entity is ArmorStand && entity.isInvisible && dungeonMobSpawns.any { it in entityName } && !starredRegex.matches(entityName))
                     entitiesToRemove.add(entity)

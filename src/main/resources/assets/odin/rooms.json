@@ -180,7 +180,8 @@
     "name": "Carpets",
     "type": "NORMAL",
     "cores": [
-      238642395
+      238642395,
+      -76292695
     ],
     "crypts": 3,
     "secrets": 1
@@ -1190,7 +1191,7 @@
     "name": "Three Floors",
     "type": "RARE",
     "cores": [
-      633179672
+      -1444508608
     ],
     "secrets": 1
   },

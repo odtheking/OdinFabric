@@ -5,10 +5,7 @@ import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.DropdownSetting
 import com.odtheking.odin.clickgui.settings.impl.NumberSetting
 import com.odtheking.odin.clickgui.settings.impl.SelectorSetting
-import com.odtheking.odin.events.ChatPacketEvent
-import com.odtheking.odin.events.RenderEvent
-import com.odtheking.odin.events.TickEvent
-import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.*
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
@@ -92,6 +89,11 @@ object WitherDragons : Module(
 
         onReceive<ClientboundSetEntityDataPacket> {
             if (DungeonUtils.getF7Phase() == M7Phases.P5) DragonCheck.dragonUpdate(this)
+        }
+
+        on<BlockUpdateEvent> {
+            if (DungeonUtils.getF7Phase() == M7Phases.P5 && updated.isAir)
+                WitherDragonsEnum.entries.find { it.statuePos == pos }?.setDead(false)
         }
 
         on<ChatPacketEvent> {
