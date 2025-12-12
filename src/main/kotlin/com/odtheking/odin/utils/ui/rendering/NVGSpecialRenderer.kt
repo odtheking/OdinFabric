@@ -13,20 +13,14 @@ import net.minecraft.client.gui.render.state.pip.PictureInPictureRenderState
 import net.minecraft.client.renderer.MultiBufferSource
 import org.joml.Matrix3x2f
 
-class NVGSpecialRenderer(vertexConsumers: MultiBufferSource.BufferSource)
-    : PictureInPictureRenderer<NVGSpecialRenderer.NVGRenderState>(vertexConsumers) {
-
-    private var lastState: NVGRenderState? = null
+class NVGSpecialRenderer(vertexConsumers: MultiBufferSource.BufferSource) : PictureInPictureRenderer<NVGSpecialRenderer.NVGRenderState>(vertexConsumers) {
 
     override fun renderToTexture(state: NVGRenderState, poseStack: PoseStack) {
-        lastState = state
-
-        val colorTex = RenderSystem.outputColorTextureOverride
-
+        val colorTex = RenderSystem.outputColorTextureOverride ?: return
         val bufferManager = (RenderSystem.getDevice() as? GlDevice)?.directStateAccess() ?: return
         val glDepthTex = (RenderSystem.outputDepthTextureOverride?.texture() as? GlTexture) ?: return
 
-        val (width, height) = colorTex?.let { it.getWidth(0)to it.getHeight(0) } ?: return
+        val (width, height) = colorTex.let { it.getWidth(0) to it.getHeight(0) }
         (colorTex.texture() as? GlTexture)?.getFbo(bufferManager, glDepthTex)?.apply {
             GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, this)
             GlStateManager._viewport(0, 0, width, height)

@@ -57,8 +57,6 @@ object PuzzleSolvers : Module(
     private val blazeFirstColor by ColorSetting("First Color", Colors.MINECRAFT_GREEN.withAlpha(.75f), true, desc = "Color for the first blaze.").withDependency { blazeSolver && blazeDropDown }
     private val blazeSecondColor by ColorSetting("Second Color", Colors.MINECRAFT_GOLD.withAlpha(.75f), true, desc = "Color for the second blaze.").withDependency { blazeSolver && blazeDropDown }
     private val blazeAllColor by ColorSetting("Other Color", Colors.WHITE.withAlpha(.3f), true, desc = "Color for the other blazes.").withDependency { blazeSolver && blazeDropDown }
-    private val blazeWidth by NumberSetting("Box Width", 1f, 0.5, 2.0, 0.1, desc = "Width of the box.").withDependency { blazeSolver && blazeDropDown }
-    private val blazeHeight by NumberSetting("Box Height", 2f, 1.0, 3.0, 0.1, desc = "Height of the box.").withDependency { blazeSolver && blazeDropDown }
     private val blazeSendComplete by BooleanSetting("Send Complete", false, desc = "Send complete message.").withDependency { blazeSolver && blazeDropDown }
     private val blazeReset by ActionSetting("Reset", desc = "Resets the solver.") { BlazeSolver.reset() }.withDependency { blazeSolver && blazeDropDown }
 
@@ -167,7 +165,7 @@ object PuzzleSolvers : Module(
             if (iceFillSolver) IceFillSolver.onRenderWorld(context, iceFillColor)
             if (weirdosSolver) WeirdosSolver.onRenderWorld(context, weirdosColor, weirdosWrongColor, weirdosStyle)
             if (boulderSolver) BoulderSolver.onRenderWorld(context, showAllBoulderClicks, boulderStyle, boulderColor)
-            if (blazeSolver)   BlazeSolver.onRenderWorld(context, blazeLineNext, blazeLineAmount, blazeStyle, blazeFirstColor, blazeSecondColor, blazeAllColor, blazeWidth, blazeHeight, blazeSendComplete, blazeLineWidth)
+            if (blazeSolver)   BlazeSolver.onRenderWorld(context, blazeLineNext, blazeLineAmount, blazeStyle, blazeFirstColor, blazeSecondColor, blazeAllColor, blazeSendComplete, blazeLineWidth)
             if (beamsSolver)   BeamsSolver.onRenderWorld(context, beamStyle, beamsTracer, beamsAlpha)
             if (waterSolver)   WaterSolver.onRenderWorld(context, showTracer, tracerColorFirst, tracerColorSecond)
             if (quizSolver)    QuizSolver.onRenderWorld(context, quizColor, quizDepth)

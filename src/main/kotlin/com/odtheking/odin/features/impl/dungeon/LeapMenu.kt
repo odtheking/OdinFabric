@@ -124,15 +124,15 @@ object LeapMenu : Module(
         }
 
         on<ChatPacketEvent> {
-            if (!DungeonUtils.inDungeons || !leapAnnounce) return@on
-            leapedRegex.find(value)?.groupValues?.let { sendCommand("pc Leaped to ${it[1]}!") }
+            if (!leapAnnounce || !DungeonUtils.inDungeons) return@on
+            leapedRegex.find(value)?.groupValues?.get(1)?.let { sendCommand("pc Leaped to ${it}!") }
         }
     }
 
     private fun leapTo(name: String, screenHandler: AbstractContainerScreen<*>) {
         val index = screenHandler.menu.slots.subList(11, 16).firstOrNull {
             it.item?.hoverName?.string?.substringAfter(' ').equals(name.noControlCodes, ignoreCase = true)
-        }?.index ?: return modMessage("Can't find player $name. This shouldn't be possible! are you nicked?")
+        }?.index ?: return
         mc.player?.clickSlot(screenHandler.menu.containerId, index)
         modMessage("Teleporting to $name.")
     }

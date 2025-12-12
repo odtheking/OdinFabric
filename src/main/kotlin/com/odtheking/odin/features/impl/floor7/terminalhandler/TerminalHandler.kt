@@ -26,6 +26,7 @@ open class TerminalHandler(val type: TerminalTypes) {
     val items: Array<ItemStack?> = arrayOfNulls(type.windowSize)
     val timeOpened = System.currentTimeMillis()
     var isClicked = false
+    var windowCount = 0
 
     init {
         @Suppress("LeakingThis")
@@ -40,6 +41,7 @@ open class TerminalHandler(val type: TerminalTypes) {
         onReceive<ClientboundOpenScreenPacket> {
             isClicked = false
             items.fill(null)
+            windowCount++
         }
     }
 

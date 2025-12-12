@@ -75,13 +75,9 @@ object BloodCamp : Module(
             val entity = getEntity(level) as? ArmorStand ?: return@onReceive
             if (currentWatcherEntity?.let { it.distanceTo(entity) <= 20 } != true || entity.getItemBySlot(EquipmentSlot.HEAD).item != Items.PLAYER_HEAD || entity.getItemBySlot(EquipmentSlot.HEAD)?.texture !in allowedMobSkulls) return@onReceive
 
-            val packetVector = Vec3(
-                entity.x + (xa / 4096.0),
-                entity.y + (ya / 4096.0),
-                entity.z + (za / 4096.0),
-            )
+            val packetVector = Vec3(entity.x + (xa / 4096), entity.y + (ya / 4096), entity.z + (za / 4096),)
 
-            if (!entityDataMap.containsKey(entity)) entityDataMap[entity] = EntityData(startVector = packetVector, started = currentTickTime, firstSpawns = firstSpawns)
+            if (!entityDataMap.containsKey(entity)) entityDataMap[entity] = EntityData(packetVector, currentTickTime, firstSpawns)
             val data = entityDataMap[entity] ?: return@onReceive
 
             val timeTook = currentTickTime - data.started

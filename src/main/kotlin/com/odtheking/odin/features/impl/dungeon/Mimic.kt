@@ -41,7 +41,8 @@ object Mimic : Module(
         onReceive<ClientboundSetEntityDataPacket> {
             if (!DungeonUtils.isFloor(6, 7) || DungeonUtils.inBoss || DungeonUtils.mimicKilled) return@onReceive
             val entity = runCatching { mc.level?.getEntity(id) }.getOrNull() ?: return@onReceive
-            if (entity is Zombie && entity.isBaby && entity.health <= 0f) mimicKilled()
+            val health = (packedItems.find { it.id == 9 }?.value as? Float) ?: return@onReceive
+            if (entity is Zombie && entity.isBaby && health <= 0f) mimicKilled()
         }
 
         on<ChatPacketEvent> {
