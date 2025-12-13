@@ -32,8 +32,7 @@ object SlotBinds : Module(
     init {
         on<GuiEvent.SlotClick> (EventPriority.HIGHEST) {
             if (!Screen.hasShiftDown() || screen !is InventoryScreen) return@on
-            val clickedSlot = (screen as AbstractContainerScreenAccessor).hoveredSlot?.index?.takeIf { it in 5 until 45 }
-                ?: return@on modMessage("§cYou must be hovering over a valid slot (5–44).")
+            val clickedSlot = (screen as AbstractContainerScreenAccessor).hoveredSlot?.index?.takeIf { it in 5 until 45 } ?: return@on
             val boundSlot = slotBinds[clickedSlot] ?: return@on
 
             val (from, to) = when {
