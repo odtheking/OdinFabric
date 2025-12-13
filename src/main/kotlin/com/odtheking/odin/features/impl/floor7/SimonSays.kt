@@ -12,6 +12,7 @@ import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.Colors
+import com.odtheking.odin.utils.devMessage
 import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
@@ -32,7 +33,7 @@ object SimonSays : Module(
     private val thirdColor by ColorSetting("Third Color", Colors.MINECRAFT_RED.withAlpha(0.5f), true, desc = "The color of the buttons after the second.")
     private val style by SelectorSetting("Style", "Filled Outline", arrayListOf("Filled", "Outline", "Filled Outline"), desc = "The style of the box rendering.")
     private val blockWrong by BooleanSetting("Block Wrong Clicks", false, desc = "Blocks wrong clicks, shift will override this.")
-    private val optimizeSolution by BooleanSetting("Optimized Solution", true, desc = "Use optimized solution, might fix ss-skip")
+    private val optimizeSolution by BooleanSetting("Optimized Solution", false, desc = "Use optimized solution, might fix ss-skip")
 
     private val startButton = BlockPos(110, 121, 91)
     private val clickInOrder = ArrayList<BlockPos>()
@@ -82,7 +83,8 @@ object SimonSays : Module(
             if (entity.item?.item != Items.STONE_BUTTON) return@onReceive
 
             val index = clickInOrder.indexOf(entity.blockPosition().east())
-            if (index == 2 && clickInOrder.size == 3) clickInOrder.removeFirst()
+            devMessage("Simon says button $index (${clickInOrder.size}) pos: ${entity.blockPosition().east()}")
+            if (index == -1 && clickInOrder.size == 3) clickInOrder.removeFirst()
             else if (index == 0 && clickInOrder.size == 2) clickInOrder.reverse()
         }
 

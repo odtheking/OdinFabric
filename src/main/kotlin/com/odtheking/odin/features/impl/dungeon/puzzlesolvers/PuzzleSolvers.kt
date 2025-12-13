@@ -7,10 +7,8 @@ import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.events.core.onSend
 import com.odtheking.odin.features.Module
+import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.Color.Companion.withAlpha
-import com.odtheking.odin.utils.Colors
-import com.odtheking.odin.utils.PersonalBest
-import com.odtheking.odin.utils.equalsOneOf
 import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
@@ -87,13 +85,17 @@ object PuzzleSolvers : Module(
     private val boulderColor by ColorSetting("Boulder Color", Colors.MINECRAFT_GREEN.withAlpha(.5f), true, desc = "The color of the box.").withDependency { boulderDropDown && boulderSolver }
 
     private val puzzleTimers by BooleanSetting("Puzzle Timers", true, desc = "Shows the time it took to solve each puzzle.")
+    private val autoDraft by BooleanSetting("Auto Draft", false, desc = "Automatically gets architect's draft when failing a puzzle room.")
+    private val failRegex = Regex("^PUZZLE FAIL! (\\w{1,16}) .+$|^\\[STATUE] Oruo the Omniscient: (\\w{1,16}) chose the wrong answer! I shall never forget this moment of misrememberance\\.$")
     private val puzzleTimersMap = hashMapOf<String, PuzzleTimer>()
     private data class PuzzleTimer(val timeEntered: Long = System.currentTimeMillis(), var sentMessage: Boolean = false)
     private val weirdosRegex = Regex("\\[NPC] (.+): (.+).?")
 
+    private inline val isInPuzzle get() = DungeonUtils.currentRoom?.data?.type == RoomType.PUZZLE
+
     init {
         TickTask(10) {
-            if (!enabled || !DungeonUtils.inDungeons || DungeonUtils.inBoss) return@TickTask
+            if (!enabled || !isInPuzzle) return@TickTask
             if (blazeSolver) BlazeSolver.getBlaze()
             if (waterSolver) WaterSolver.scan(optimizedSolutions)
         }
@@ -130,12 +132,16 @@ object PuzzleSolvers : Module(
         }
 
         onReceive<ClientboundPlayerPositionPacket> {
-            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
+            if (!isInPuzzle) return@onReceive
             if (tpMaze) TPMazeSolver.tpPacket(this)
         }
 
         on<ChatPacketEvent> {
             if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
+            if (autoDraft && isInPuzzle) failRegex.find(value)?.destructured?.let {
+                modMessage("§7Fetching Draft from sack...")
+                sendCommand("gfs architect's first draft 1")
+            }
             if (weirdosSolver) weirdosRegex.find(value)?.destructured?.let { (npc, message) -> WeirdosSolver.onNPCMessage(npc, message) }
             if (quizSolver) QuizSolver.onMessage(value)
         }
@@ -161,7 +167,7 @@ object PuzzleSolvers : Module(
        }
 
         on<RenderEvent.Last> {
-            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
+            if (!isInPuzzle) return@on
             if (iceFillSolver) IceFillSolver.onRenderWorld(context, iceFillColor)
             if (weirdosSolver) WeirdosSolver.onRenderWorld(context, weirdosColor, weirdosWrongColor, weirdosStyle)
             if (boulderSolver) BoulderSolver.onRenderWorld(context, showAllBoulderClicks, boulderStyle, boulderColor)

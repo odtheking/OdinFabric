@@ -24,9 +24,9 @@ object ChatCommands : Module(
     name = "Chat Commands",
     description = "Adds various chat commands (boop, kick, coinFlip, 8ball, etc..)."
 ) {
-    private val chatEmotes by BooleanSetting("Chat Emotes", true, desc = "Replaces chat emotes with their corresponding emojis.")
+    private val chatEmotes by BooleanSetting("Chat Emotes", false, desc = "Replaces chat emotes with their corresponding emojis.")
     private val partyChatCommands by BooleanSetting("Party Commands", true, "Enables party chat commands.")
-    private val guildChatCommands by BooleanSetting("Guild Commands", true, "Enables guild chat commands.")
+    private val guildChatCommands by BooleanSetting("Guild Commands", false, "Enables guild chat commands.")
     private val privateChatCommands by BooleanSetting("Private Commands", true, "Enables private chat commands.")
 
     private val showSettings by DropdownSetting("Show Settings", false)

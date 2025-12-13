@@ -80,7 +80,7 @@ object ArrowsDevice : Module(
         onReceive<ClientboundSetEntityDataPacket> {
             if (!DungeonUtils.inBoss || !isPlayerInRoom || isDeviceComplete) return@onReceive
             val entity = mc.level?.getEntity(id) ?: return@onReceive
-            if (entity.name?.string == "§aDevice") onComplete("Entity")
+            if (entity.name?.string == "Device") onComplete("Entity")
         }
     }
 
