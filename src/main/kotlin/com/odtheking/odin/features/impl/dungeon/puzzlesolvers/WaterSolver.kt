@@ -13,7 +13,6 @@ import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import com.odtheking.odin.utils.toFixed
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.core.BlockPos
-import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.phys.Vec3
@@ -89,11 +88,11 @@ object WaterSolver {
             times.drop(lever.i).forEachIndexed { index, time ->
                 val timeInTicks = (time * 20).toInt()
                 context.drawText(
-                    Component.literal(when (openedWaterTicks) {
+                    when (openedWaterTicks) {
                         -1 if timeInTicks == 0 -> "§a§lCLICK ME!"
                         -1 -> "§e${time}s"
                         else -> (openedWaterTicks + timeInTicks - tickCounter).takeIf { it > 0 }?.let { "§e${(it / 20f).toFixed()}s" } ?: "§a§lCLICK ME!"
-                    }).visualOrderText,
+                    },
                     Vec3(lever.leverPos).add(0.5, (index + lever.i) * 0.5 + 1.5, 0.5),
                     scale = 1f, true
                 )
