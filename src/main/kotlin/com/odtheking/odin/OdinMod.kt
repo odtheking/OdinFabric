@@ -11,6 +11,7 @@ import com.odtheking.odin.utils.handlers.TickTasks
 import com.odtheking.odin.utils.network.WebUtils.createClient
 import com.odtheking.odin.utils.network.WebUtils.postData
 import com.odtheking.odin.utils.render.ItemStateRenderer
+import com.odtheking.odin.utils.render.RenderBatchManager
 import com.odtheking.odin.utils.skyblock.*
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonListener
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
@@ -59,7 +60,7 @@ object OdinMod : ClientModInitializer {
             SkyblockPlayer, ServerUtils, EventDispatcher,
             ModuleManager, DungeonListener, PartyUtils,
             ScanUtils, DungeonUtils, SplitsManager,
-            IrisCompatability
+            IrisCompatability, RenderBatchManager
         ).forEach { EventBus.subscribe(it) }
 
         SpecialGuiElementRegistry.register { context ->
