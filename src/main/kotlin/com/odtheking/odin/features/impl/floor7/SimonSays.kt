@@ -81,7 +81,7 @@ object SimonSays : Module(
                 if (entity.item?.item != Items.STONE_BUTTON) return@schedule
 
                 val index = clickInOrder.indexOf(entity.blockPosition().east())
-                devMessage("Simon says button $index (${clickInOrder.size}) pos: ${entity.blockPosition().east()} ${clickInOrder.joinToString(", ")}")
+                devMessage("Simon says button $index (${clickInOrder.size}) pos: ${entity.blockPosition().east()}")
                 if (index == -1 && clickInOrder.size == 2) clickInOrder.removeFirst()
                 else if (index == 0 && clickInOrder.size == 2) clickInOrder.reverse()
             }

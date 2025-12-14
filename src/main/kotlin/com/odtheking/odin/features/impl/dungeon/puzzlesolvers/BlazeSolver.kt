@@ -2,9 +2,12 @@ package com.odtheking.odin.features.impl.dungeon.puzzlesolvers
 
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.features.impl.dungeon.puzzlesolvers.PuzzleSolvers.onPuzzleComplete
-import com.odtheking.odin.utils.*
+import com.odtheking.odin.utils.Color
+import com.odtheking.odin.utils.equalsOneOf
 import com.odtheking.odin.utils.render.drawLine
 import com.odtheking.odin.utils.render.drawStyledBox
+import com.odtheking.odin.utils.renderPos
+import com.odtheking.odin.utils.sendCommand
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonListener
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.Puzzle
@@ -50,7 +53,7 @@ object BlazeSolver {
                 1 -> blazeSecondColor
                 else -> blazeAllColor
             }
-            val aabb = entity.renderBoundingBox
+            val aabb = entity.boundingBox
 
             context.drawStyledBox(aabb, color, blazeStyle, depth = true)
 
