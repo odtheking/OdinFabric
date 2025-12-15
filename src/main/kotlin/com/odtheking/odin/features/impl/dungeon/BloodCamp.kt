@@ -75,13 +75,9 @@ object BloodCamp : Module(
             val entity = getEntity(level) as? ArmorStand ?: return@onReceive
             if (currentWatcherEntity?.let { it.distanceTo(entity) <= 20 } != true || entity.getItemBySlot(EquipmentSlot.HEAD).item != Items.PLAYER_HEAD || entity.getItemBySlot(EquipmentSlot.HEAD)?.texture !in allowedMobSkulls) return@onReceive
 
-            val packetVector = Vec3(
-                entity.x + (xa / 4096.0),
-                entity.y + (ya / 4096.0),
-                entity.z + (za / 4096.0),
-            )
+            val packetVector = Vec3(entity.x + (xa / 4096), entity.y + (ya / 4096), entity.z + (za / 4096),)
 
-            if (!entityDataMap.containsKey(entity)) entityDataMap[entity] = EntityData(startVector = packetVector, started = currentTickTime, firstSpawns = firstSpawns)
+            if (!entityDataMap.containsKey(entity)) entityDataMap[entity] = EntityData(packetVector, currentTickTime, firstSpawns)
             val data = entityDataMap[entity] ?: return@onReceive
 
             val timeTook = currentTickTime - data.started
@@ -170,8 +166,8 @@ object BloodCamp : Module(
             startTime = null
         }
 
-        on<RenderBossBarEvent> {
-            if (!watcherBar || !DungeonUtils.inDungeons || DungeonUtils.inBoss || bossBar.name.string.noControlCodes != "The Watcher") return@on
+        on<RenderBossBarEvent> { // get the actual name with color code and compare that
+            if (!watcherBar || !DungeonUtils.inDungeons || DungeonUtils.inBoss || bossBar.name.string?.endsWith("The Watcher") == false) return@on
             val amount = 12 + (DungeonUtils.floor?.floorNumber ?: 0)
             bossBar.name = Component.literal(bossBar.progress.takeIf { it >= 0.05 }?.let { "${bossBar.name.string} ${(amount * it).roundToInt()}/$amount" } ?: return@on)
         }
@@ -196,18 +192,18 @@ object BloodCamp : Module(
                 renderData.lastPingPoint = pingPoint
 
                 val boxOffset = Vec3(boxSize / -2.0, 1.5, boxSize / -2.0)
-                val pingAABB = AABB(boxSize, boxSize, boxSize, 0.0, 0.0, 0.0).move(boxOffset.add(calcEndVector(pingPoint, renderData.lastPingPoint, context.gameRenderer().mainCamera.partialTickTime, !interpolation)))
-                val endAABB = AABB(boxSize, boxSize, boxSize, 0.0, 0.0, 0.0).move(boxOffset.add(calcEndVector(endPoint, renderData.lastEndPoint, context.gameRenderer().mainCamera.partialTickTime, !interpolation)))
+                val pingAABB = AABB(boxSize, boxSize, boxSize, 0.0, 0.0, 0.0).move(boxOffset.add(calcEndVector(pingPoint, renderData.lastPingPoint, context.tickCounter().gameTimeDeltaTicks, !interpolation)))
+                val endAABB = AABB(boxSize, boxSize, boxSize, 0.0, 0.0, 0.0).move(boxOffset.add(calcEndVector(endPoint, renderData.lastEndPoint, context.tickCounter().gameTimeDeltaTicks, !interpolation)))
 
                 val time = getTime(firstSpawn,  currentTickTime - started)
 
                 if (mobOffset < time) {
-                    drawWireFrameBox(pingAABB, mboxColor, depth = true)
-                    drawWireFrameBox(endAABB, pboxColor, depth = true)
-                } else drawWireFrameBox(endAABB, fboxColor, depth = true)
+                    context.drawWireFrameBox(pingAABB, mboxColor, depth = true)
+                    context.drawWireFrameBox(endAABB, pboxColor, depth = true)
+                } else context.drawWireFrameBox(endAABB, fboxColor, depth = true)
 
                 if (drawLine)
-                    drawLine(listOf(currVector.addVec(y = 2.0), endPoint.addVec(y = 2.0)), Colors.MINECRAFT_RED, depth = true)
+                    context.drawLine(listOf(currVector.addVec(y = 2.0), endPoint.addVec(y = 2.0)), Colors.MINECRAFT_RED, depth = true)
 
                 val timeDisplay = ((time.toFloat() - offset) / 1000).also { renderData.time = it }
                 val colorTime = when {
@@ -216,7 +212,7 @@ object BloodCamp : Module(
                     timeDisplay in 0.0..0.5 -> 'c'
                     else -> 'b'
                 }
-                if (drawTime) drawText(Component.literal("§$colorTime${timeDisplay.toFixed()}s").visualOrderText, endPoint.addVec(y = 2.0), 2f, true)
+                if (drawTime) context.drawText("§$colorTime${timeDisplay.toFixed()}s", endPoint.addVec(y = 2.0), 2f, true)
             }
         }
     }

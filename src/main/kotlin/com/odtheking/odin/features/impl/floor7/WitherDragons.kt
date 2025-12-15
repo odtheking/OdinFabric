@@ -19,7 +19,6 @@ import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
 import com.odtheking.odin.utils.toFixed
-import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
@@ -121,8 +120,8 @@ object WitherDragons : Module(
                 if (dragonHealth) {
                     DragonCheck.dragonHealthMap.forEach { (_, data) ->
                         if (data.second > 0) {
-                            drawText(
-                                Component.literal(colorHealth(data.second)).visualOrderText,
+                            context.drawText(
+                                colorHealth(data.second),
                                 data.first, 5f, false
                             )
                         }
@@ -130,19 +129,19 @@ object WitherDragons : Module(
                 }
 
                 if (dragonTimer && dragon.timeToSpawn > 0) {
-                    drawText(
-                        Component.literal("§${dragon.colorCode}${dragon.name.first()}: ${getDragonTimer(dragon.timeToSpawn)}").visualOrderText,
+                    context.drawText(
+                        "§${dragon.colorCode}${dragon.name.first()}: ${getDragonTimer(dragon.timeToSpawn)}",
                         dragon.spawnPos.center, 5f, false
                     )
                 }
 
                 if (dragonBoxes && dragon.state != WitherDragonState.DEAD)
-                    drawWireFrameBox(dragon.aabbDimensions, dragon.color, depth = true)
+                    context.drawWireFrameBox(dragon.aabbDimensions, dragon.color, depth = true)
             }
 
             priorityDragon?.let { drag ->
                 if (dragonTracers && drag.state == WitherDragonState.SPAWNING)
-                    mc.player?.let { drawLine(listOf(it.eyePosition, Vec3(drag.spawnPos)), color = drag.color, true) }
+                    mc.player?.let { context.drawLine(listOf(it.eyePosition, Vec3(drag.spawnPos)), color = drag.color, true) }
             }
         }
 

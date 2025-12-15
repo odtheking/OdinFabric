@@ -154,18 +154,18 @@ object ScanUtils {
         var bedrock = 0
         for (y in roomHeight downTo 12) {
             mutableBlockPos.set(vec2.x, y, vec2.z)
-            val id = mc.level?.getBlockState(mutableBlockPos)?.block
-            if (id == Blocks.AIR && bedrock >= 2 && y < 69) {
+            val block = mc.level?.getBlockState(mutableBlockPos)?.block
+            if (block == Blocks.AIR && bedrock >= 2 && y < 69) {
                 sb.append(CharArray(y - 11) { '0' })
                 break
             }
 
-            if (id == Blocks.BEDROCK) bedrock++
+            if (block == Blocks.BEDROCK) bedrock++
             else {
                 bedrock = 0
-                if (id.equalsOneOf(Blocks.OAK_PLANKS, Blocks.TRAPPED_CHEST, Blocks.CHEST)) continue
+                if (block.equalsOneOf(Blocks.OAK_PLANKS, Blocks.TRAPPED_CHEST, Blocks.CHEST)) continue
             }
-            sb.append(id)
+            sb.append(block)
         }
         return sb.toString().hashCode()
     }

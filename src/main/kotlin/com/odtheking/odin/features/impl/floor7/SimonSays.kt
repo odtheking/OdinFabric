@@ -12,11 +12,14 @@ import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.Colors
+import com.odtheking.odin.utils.devMessage
+import com.odtheking.odin.utils.handlers.schedule
 import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
 import net.minecraft.core.BlockPos
-import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
+import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.item.ItemEntity
 import net.minecraft.world.item.Items
 import net.minecraft.world.level.block.Blocks
@@ -32,7 +35,6 @@ object SimonSays : Module(
     private val thirdColor by ColorSetting("Third Color", Colors.MINECRAFT_RED.withAlpha(0.5f), true, desc = "The color of the buttons after the second.")
     private val style by SelectorSetting("Style", "Filled Outline", arrayListOf("Filled", "Outline", "Filled Outline"), desc = "The style of the box rendering.")
     private val blockWrong by BooleanSetting("Block Wrong Clicks", false, desc = "Blocks wrong clicks, shift will override this.")
-    private val optimizeSolution by BooleanSetting("Optimized Solution", true, desc = "Use optimized solution, might fix ss-skip")
 
     private val startButton = BlockPos(110, 121, 91)
     private val clickInOrder = ArrayList<BlockPos>()
@@ -53,7 +55,7 @@ object SimonSays : Module(
             if (DungeonUtils.getF7Phase() != M7Phases.P3) return@on
 
             if (pos == startButton && updated.block == Blocks.STONE_BUTTON && updated.getValue(BlockStateProperties.POWERED)) {
-                if (!optimizeSolution) resetSolution()
+                resetSolution()
                 return@on
             }
 
@@ -61,38 +63,32 @@ object SimonSays : Module(
 
             when (pos.x) {
                 111 ->
-                    if (optimizeSolution) {
-                        if (updated.block == Blocks.SEA_LANTERN && old.block == Blocks.OBSIDIAN && pos !in clickInOrder)
-                            clickInOrder.add(pos.immutable())
-                    } else if (updated.block == Blocks.OBSIDIAN && old.block == Blocks.SEA_LANTERN && pos !in clickInOrder) clickInOrder.add(pos.immutable())
+                    if (updated.block == Blocks.OBSIDIAN && old.block == Blocks.SEA_LANTERN && pos !in clickInOrder) clickInOrder.add(pos.immutable())
 
                 110 ->
-                    if (updated.block == Blocks.AIR) {
-                        if (!optimizeSolution) resetSolution()
-                    } else if (old.block == Blocks.STONE_BUTTON && updated.getValue(BlockStateProperties.POWERED)) {
+                    if (updated.block == Blocks.AIR) resetSolution()
+                    else if (old.block == Blocks.STONE_BUTTON && updated.getValue(BlockStateProperties.POWERED)) {
                         clickNeeded = clickInOrder.indexOf(pos.east()) + 1
-                        if (clickNeeded >= clickInOrder.size) if (optimizeSolution) resetSolution() else clickNeeded = 0
+                        if (clickNeeded >= clickInOrder.size) clickNeeded = 0
                     }
             }
         }
 
-        onReceive<ClientboundSetEntityDataPacket> {
-            if (DungeonUtils.getF7Phase() != M7Phases.P3) return@onReceive
-            val entity = mc.level?.getEntity(id) as? ItemEntity ?: return@onReceive
-            if (entity.item?.item != Items.STONE_BUTTON) return@onReceive
+        onReceive<ClientboundAddEntityPacket> {
+            if (type != EntityType.ITEM || DungeonUtils.getF7Phase() != M7Phases.P3) return@onReceive
+            schedule(0) {
+                val entity = mc.level?.getEntity(id) as? ItemEntity ?: return@schedule
+                if (entity.item?.item != Items.STONE_BUTTON) return@schedule
 
-            val index = clickInOrder.indexOf(entity.blockPosition().east())
-            if (index == 2 && clickInOrder.size == 3) clickInOrder.removeFirst()
-            else if (index == 0 && clickInOrder.size == 2) clickInOrder.reverse()
+                val index = clickInOrder.indexOf(entity.blockPosition().east())
+                devMessage("Simon says button $index (${clickInOrder.size}) pos: ${entity.blockPosition().east()}")
+                if (index == -1 && clickInOrder.size == 2) clickInOrder.removeFirst()
+                else if (index == 0 && clickInOrder.size == 2) clickInOrder.reverse()
+            }
         }
 
         on<BlockInteractEvent> {
             if (DungeonUtils.getF7Phase() != M7Phases.P3) return@on
-
-            if (pos == startButton) {
-                if (optimizeSolution) resetSolution()
-                return@on
-            }
 
             if (
                 blockWrong && mc.player?.isShiftKeyDown == false &&

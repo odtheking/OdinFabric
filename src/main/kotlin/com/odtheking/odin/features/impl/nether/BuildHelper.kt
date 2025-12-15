@@ -13,7 +13,6 @@ import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.render.text
 import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.KuudraUtils
-import net.minecraft.network.chat.Component
 import net.minecraft.world.phys.Vec3
 
 object BuildHelper : Module(
@@ -38,16 +37,16 @@ object BuildHelper : Module(
             if (!KuudraUtils.inKuudra || KuudraUtils.phase != 2) return@on
             if (stunNotificationNumber != 0f && KuudraUtils.buildDonePercentage >= stunNotificationNumber) alert("§l§3Go to stun", false)
             if (buildHelperDraw)
-                drawText(
-                    Component.literal("§bBuild §c${colorBuild(KuudraUtils.buildDonePercentage)}%").visualOrderText,
+                context.drawText(
+                    "§bBuild §c${colorBuild(KuudraUtils.buildDonePercentage)}%",
                     Vec3(-101.5, 82.0, -105.5),
                     3f,
                     false
                 )
 
             if (buildHelperDraw)
-                drawText(
-                    Component.literal("§bBuilders ${colorBuilders(KuudraUtils.playersBuildingAmount)}").visualOrderText,
+                context.drawText(
+                    "§bBuilders ${colorBuilders(KuudraUtils.playersBuildingAmount)}",
                     Vec3(-101.5, 81.0, -105.5),
                     3f,
                     false
@@ -55,8 +54,8 @@ object BuildHelper : Module(
 
             if (unfinishedWaypoints)
                 KuudraUtils.buildingPiles.forEach {
-                    drawCustomBeacon(
-                        it.name.visualOrderText,
+                    context.drawCustomBeacon(
+                        it.name.visualOrderText.toString(),
                         it.blockPosition(),
                         Colors.MINECRAFT_DARK_RED,
                         increase = false,

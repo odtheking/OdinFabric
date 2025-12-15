@@ -9,7 +9,6 @@ import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.toFixed
 import net.minecraft.core.BlockPos
-import net.minecraft.network.chat.Component
 import net.minecraft.world.level.block.FlowerPotBlock
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -36,7 +35,7 @@ object TerracottaTimer : Module(
         on<RenderEvent.Last> {
             if (!DungeonUtils.inBoss || !DungeonUtils.isFloor(6) || terracottaSpawning.isEmpty()) return@on
             terracottaSpawning.forEach {
-                drawText(Component.literal("§${getColor(it.time)}${it.time.toFixed()}s").visualOrderText, it.pos.center, 2f, false)
+                context.drawText("§${getColor(it.time)}${it.time.toFixed()}s", it.pos.center, 2f, false)
             }
         }
     }

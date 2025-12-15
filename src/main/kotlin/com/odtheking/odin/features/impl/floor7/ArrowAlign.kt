@@ -16,7 +16,6 @@ import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
 import net.minecraft.core.BlockPos
-import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ServerboundInteractPacket
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.entity.decoration.ItemFrame
@@ -98,8 +97,8 @@ object ArrowAlign : Module(
                     clickNeeded < 5 -> '6'
                     else -> 'c'
                 }
-                drawText(
-                    Component.literal("§$colorCode$clickNeeded").visualOrderText,
+                context.drawText(
+                    "§$colorCode$clickNeeded",
                     getFramePositionFromIndex(index).center.addVec(y = 0.1, x = -0.3),
                     1f, false
                 )

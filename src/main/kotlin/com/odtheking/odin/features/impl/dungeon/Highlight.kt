@@ -8,8 +8,6 @@ import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
-import com.odtheking.odin.utils.Color.Companion.multiplyAlpha
-import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.noControlCodes
 import com.odtheking.odin.utils.render.drawStyledBox
@@ -26,7 +24,7 @@ object Highlight : Module(
     description = "Allows you to highlight selected entities."
 ) {
     private val highlightStar by BooleanSetting("Highlight Starred Mobs", true, desc = "Highlights starred dungeon mobs.")
-    private val color by ColorSetting("Highlight color", Colors.WHITE.withAlpha(0.75f), true, desc = "The color of the highlight.")
+    private val color by ColorSetting("Highlight color", Colors.WHITE, true, desc = "The color of the highlight.")
     private val renderStyle by SelectorSetting("Render Style", "Outline", listOf("Filled", "Outline", "Filled Outline"), desc = "Style of the box.")
     private val hideNonNames by BooleanSetting("Hide non-starred names", true, desc = "Hides names of entities that are not starred.")
 
@@ -35,7 +33,9 @@ object Highlight : Module(
     private val dungeonMobSpawns = hashSetOf("Lurker", "Dreadlord", "Souleater", "Zombie", "Skeleton", "Skeletor", "Sniper", "Super Archer", "Spider", "Fels", "Withermancer")
     // https://regex101.com/r/QQf502/1
     private val starredRegex = Regex("^.*✯ .*\\d{1,3}(?:,\\d{3})*(?:\\.\\d+)?(?:[kM])?❤$")
-    private val entities = mutableSetOf<Entity>()
+
+    private data class TrackedEntity(val entity: Entity, var canSee: Boolean = false)
+    private val trackedEntities = mutableListOf<TrackedEntity>()
 
     init {
         on<TickEvent.End> {
@@ -52,28 +52,32 @@ object Highlight : Module(
                 if (entity !is ArmorStand || dungeonMobSpawns.none { it in entityName } || !starredRegex.matches(entityName)) return@forEach
 
                 mc.level?.getEntities(entity, entity.boundingBox.move(0.0, -1.0, 0.0)) { isValidEntity(it) }
-                    ?.firstOrNull()?.let { entities.add(it) }
+                    ?.firstOrNull()?.let { foundEntity ->
+                        if (trackedEntities.none { it.entity == foundEntity }) {
+                            val canSee = mc.player?.hasLineOfSight(
+                                foundEntity, ClipContext.Block.VISUAL,
+                                ClipContext.Fluid.NONE, foundEntity.eyeY
+                            ) ?: false
+                            trackedEntities.add(TrackedEntity(foundEntity, canSee))
+                        }
+                    }
             }
             entitiesToRemove.forEach { it.remove(Entity.RemovalReason.DISCARDED) }
-            entities.removeIf { entity -> !entity.isAlive }
+            trackedEntities.removeIf { !it.entity.isAlive }
         }
 
         on<RenderEvent.Last> {
             if (!highlightStar || !DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
 
-            entities.forEach { entity ->
-                if (!entity.isAlive) return@forEach
-                val canSee = mc.player?.hasLineOfSight(
-                    entity, ClipContext.Block.VISUAL,
-                    ClipContext.Fluid.NONE, entity.eyeY
-                ) ?: false
+            trackedEntities.forEach { tracked ->
+                if (!tracked.entity.isAlive) return@forEach
 
-                drawStyledBox(entity.renderBoundingBox, color.multiplyAlpha(0.5f), renderStyle, !canSee)
+                context.drawStyledBox(tracked.entity.renderBoundingBox, color, renderStyle, !tracked.canSee)
             }
         }
 
         on<WorldLoadEvent> {
-            entities.clear()
+            trackedEntities.clear()
         }
     }
 

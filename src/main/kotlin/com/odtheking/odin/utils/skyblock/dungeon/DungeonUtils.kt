@@ -62,7 +62,7 @@ object DungeonUtils {
         get() = if (completedRoomCount == 0 || percentCleared == 0) 0 else floor((completedRoomCount / (percentCleared * 0.01).toFloat()) + 0.4).toInt()
 
     inline val puzzles: List<Puzzle>
-        get() = DungeonListener.puzzles
+        get() = DungeonListener.puzzles.toList()
 
     inline val puzzleCount: Int
         get() = DungeonListener.dungeonStats.puzzleCount
@@ -73,14 +73,14 @@ object DungeonUtils {
     inline val currentRoomName: String
         get() = DungeonListener.currentRoom?.data?.name ?: "Unknown"
 
-    inline val dungeonTeammates: ArrayList<DungeonPlayer>
-        get() = DungeonListener.dungeonTeammates
+    inline val dungeonTeammates: List<DungeonPlayer>
+        get() = DungeonListener.dungeonTeammates.toList()
 
     inline val dungeonTeammatesNoSelf: List<DungeonPlayer>
-        get() = DungeonListener.dungeonTeammatesNoSelf
+        get() = DungeonListener.dungeonTeammatesNoSelf.toList()
 
     inline val leapTeammates: List<DungeonPlayer>
-        get() = DungeonListener.leapTeammates
+        get() = DungeonListener.leapTeammates.toList()
 
     inline val currentDungeonPlayer: DungeonPlayer
         get() = dungeonTeammates.find { it.name == mc.player?.name?.string } ?:

@@ -14,7 +14,6 @@ import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.toFixed
-import net.minecraft.network.chat.Component
 
 object KuudraInfo : Module(
     name = "Kuudra Info",
@@ -36,11 +35,11 @@ object KuudraInfo : Module(
 
             KuudraUtils.kuudraEntity?.let {
                 if (highlightKuudra)
-                    drawWireFrameBox(it.boundingBox, kuudraColor, depth = true)
+                    context.drawWireFrameBox(it.boundingBox, kuudraColor, depth = true)
 
                 if (kuudraHPDisplay) {
-                    drawText(
-                        Component.literal(getCurrentHealthDisplay(it.health)).visualOrderText,
+                    context.drawText(
+                        getCurrentHealthDisplay(it.health),
                         it.position().add(it.lookAngle.multiply(13.0, 13.0, 13.0).addVec(y = 10.0)), healthSize, depth = true
                     )
                 }

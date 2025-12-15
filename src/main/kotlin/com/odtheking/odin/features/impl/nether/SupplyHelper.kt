@@ -17,7 +17,6 @@ import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.skyblock.Supply
 import net.minecraft.core.BlockPos
-import net.minecraft.network.chat.Component
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -57,8 +56,8 @@ object SupplyHelper : Module(
             if (supplyDropWaypoints) {
                 Supply.entries.forEach { type ->
                     if (type.equalsOneOf(Supply.None, Supply.Square) || !type.isActive) return@forEach
-                    drawCustomBeacon(
-                        Component.literal("§ePlace Here!").visualOrderText,
+                    context.drawCustomBeacon(
+                        "§ePlace Here!",
                         type.dropOffSpot,
                         if (NoPre.missing == type) Colors.MINECRAFT_GREEN else Colors.MINECRAFT_RED,
                         increase = false, distance = false
@@ -68,8 +67,8 @@ object SupplyHelper : Module(
 
             if (suppliesWaypoints) {
                 KuudraUtils.giantZombies.forEach {
-                    drawCustomBeacon(
-                        Component.literal("Pick Up!").visualOrderText,
+                    context.drawCustomBeacon(
+                        "Pick Up!",
                         BlockPos((it.x + (3.7 * cos((it.yRot + 130) * (Math.PI / 180)))).toInt(), 73, ((it.z + (3.7 * sin((it.yRot + 130) * (Math.PI / 180)))).toInt())),
                         supplyWaypointColor, increase = false
                     )
@@ -78,8 +77,8 @@ object SupplyHelper : Module(
 
             if (renderArea) {
                 Supply.entries.forEach { type ->
-                    drawText(
-                        Component.literal("§e${type.name}").visualOrderText,
+                    context.drawText(
+                        "§e${type.name}",
                         type.pickUpSpot.center, 2f, true
                     )
                 }

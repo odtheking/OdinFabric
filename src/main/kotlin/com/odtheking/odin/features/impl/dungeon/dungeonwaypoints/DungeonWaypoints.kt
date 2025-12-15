@@ -17,7 +17,6 @@ import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRelativeCoords
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.Room
 import net.minecraft.core.BlockPos
-import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.BlockHitResult
@@ -108,13 +107,13 @@ object DungeonWaypoints : Module(
             if (DungeonUtils.inBoss || !DungeonUtils.inDungeons) return@on
             val room = DungeonUtils.currentRoom ?: return@on
 
-            drawBoxes(room.waypoints, disableDepth)
+            context.drawBoxes(room.waypoints, disableDepth)
 
             if (renderTitle) {
                 for (waypoint in room.waypoints) {
                     if (waypoint.isClicked || waypoint.title == null) continue
-                    drawText(
-                        Component.literal(waypoint.title).visualOrderText,
+                    context.drawText(
+                        waypoint.title,
                         waypoint.blockPos.center.add(0.0, 0.1 * titleScale, 0.0), titleScale, waypoint.depth
                     )
                 }
@@ -124,7 +123,7 @@ object DungeonWaypoints : Module(
                 val aabb = if (!useBlockSize) AABB(BlockPos.ZERO).inflate((sizeX - 1.0) / 2.0, (sizeY - 1.0) / 2.0, (sizeZ - 1.0) / 2.0).move(pos) else
                     pos.getBlockBounds()?.move(pos) ?: AABB(pos)
 
-                drawStyledBox(aabb, reachColor, style = if (filled) 0 else 1, depthCheck)
+                context.drawStyledBox(aabb, reachColor, style = if (filled) 0 else 1, depthCheck)
             }
         }
 

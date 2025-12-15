@@ -16,7 +16,6 @@ import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
 import net.minecraft.core.BlockPos
-import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket
 import net.minecraft.world.InteractionHand
@@ -85,7 +84,7 @@ object KingRelics : Module(
 
             Relic.entries.forEach {
                 if (currentRelic?.id == it.id) {
-                    drawCustomBeacon(Component.empty().visualOrderText, it.cauldronPosition, it.color, distance = false)
+                    context.drawCustomBeacon("", it.cauldronPosition, it.color, distance = false)
                 }
             }
         }

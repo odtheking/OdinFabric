@@ -15,7 +15,6 @@ import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.render.*
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
-import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.decoration.ArmorStand
 import net.minecraft.world.phys.AABB
 
@@ -117,7 +116,7 @@ object InactiveWaypoints : Module(
             inactiveList.forEach {
                 val name = it.name.string
                 if ((name == "Inactive Terminal" && showTerminals) || (name == "Inactive" && showDevices) || (name == "Not Activated" && showLevers)) {
-                    val customName = Component.literal(if (name == "Inactive Terminal") "Terminal" else if (name == "Inactive") "Device" else "Lever").visualOrderText
+                    val customName = if (name == "Inactive Terminal") "Terminal" else if (name == "Inactive") "Device" else "Lever"
                     if (renderBox)
                         drawWireFrameBox(AABB.unitCubeFromLowerCorner(it.position().addVec(-0.5, z = -0.5)), color, depth = depthCheck)
                     if (renderText)

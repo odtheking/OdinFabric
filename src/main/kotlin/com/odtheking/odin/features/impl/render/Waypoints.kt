@@ -16,7 +16,6 @@ import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.render.drawCustomBeacon
 import com.odtheking.odin.utils.sendChatMessage
 import net.minecraft.core.BlockPos
-import net.minecraft.network.chat.Component
 import org.lwjgl.glfw.GLFW
 import kotlin.math.abs
 
@@ -60,7 +59,7 @@ object Waypoints : Module(
 
         on<RenderEvent.Last> {
             temporaryWaypoints.removeAll {
-                drawCustomBeacon(Component.literal(it.name).visualOrderText, it.blockPos, it.color)
+                context.drawCustomBeacon(it.name, it.blockPos, it.color)
                 System.currentTimeMillis() > it.timeAdded + it.duration
             }
         }
