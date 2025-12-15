@@ -111,7 +111,7 @@ object InactiveWaypoints : Module(
             resetState()
         }
 
-        on<RenderEvent.Last> {
+        on<RenderEvent.Extract> {
             if (inactiveList.isEmpty() || DungeonUtils.getF7Phase() != M7Phases.P3) return@on
             inactiveList.forEach {
                 val name = it.name.string

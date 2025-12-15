@@ -31,7 +31,7 @@ object WeirdosSolver {
         } else wrongPositions.add(pos)
     }
 
-    fun onRenderWorld(event: RenderEvent, weirdosColor: Color, weirdosWrongColor: Color, weirdosStyle: Int) {
+    fun onRenderWorld(event: RenderEvent.Extract, weirdosColor: Color, weirdosWrongColor: Color, weirdosStyle: Int) {
         if (DungeonUtils.currentRoomName != "Three Weirdos") return
         correctPos?.let { event.drawStyledBox(AABB(it), weirdosColor, weirdosStyle) }
         wrongPositions.forEach {

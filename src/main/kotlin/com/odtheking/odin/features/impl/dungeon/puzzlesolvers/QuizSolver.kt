@@ -68,7 +68,7 @@ object QuizSolver {
         triviaOptions[2].blockPos = getRealCoords(BlockPos(10, 70, 6))
     }
 
-    fun onRenderWorld(event: RenderEvent, quizColor: Color, quizDepth: Boolean) {
+    fun onRenderWorld(event: RenderEvent.Extract, quizColor: Color, quizDepth: Boolean) {
         if (triviaAnswers == null || triviaOptions.isEmpty()) return
         triviaOptions.forEach { answer ->
             if (!answer.isCorrect) return@forEach

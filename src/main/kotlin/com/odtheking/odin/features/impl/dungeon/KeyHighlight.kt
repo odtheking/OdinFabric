@@ -39,7 +39,7 @@ object KeyHighlight : Module(
             if (announceKeySpawn) alert("§${currentKey?.colorCode}${entity.name?.string}§7 spawned!")
         }
 
-        on<RenderEvent.Last> {
+        on<RenderEvent.Extract> {
             if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
             if (currentKey == null || currentKey?.entity == null) return@on
             currentKey?.let { keyType ->

@@ -66,13 +66,13 @@ object Highlight : Module(
             trackedEntities.removeIf { !it.entity.isAlive }
         }
 
-        on<RenderEvent.Last> {
+        on<RenderEvent.Extract> {
             if (!highlightStar || !DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
 
             trackedEntities.forEach { tracked ->
                 if (!tracked.entity.isAlive) return@forEach
 
-                context.drawStyledBox(tracked.entity.renderBoundingBox, color, renderStyle, !tracked.canSee)
+                drawStyledBox(tracked.entity.renderBoundingBox, color, renderStyle, !tracked.canSee)
             }
         }
 

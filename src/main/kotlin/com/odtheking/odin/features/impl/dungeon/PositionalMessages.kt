@@ -42,7 +42,7 @@ object PositionalMessages : Module(
             posMessageSend()
         }
 
-        on<RenderEvent.Last> {
+        on<RenderEvent.Extract> {
             if (!showPositions || (onlyDungeons && !DungeonUtils.inDungeons)) return@on
             val player = mc.player ?: return@on
             posMessageStrings.forEach { message ->
@@ -57,14 +57,14 @@ object PositionalMessages : Module(
                 if (distanceToMessage > 1024) return@forEach
 
                 if (message.distance != null) {
-                    context.drawCylinder(Vec3(message.x, message.y, message.z), message.distance.toFloat(), cylinderHeight.toFloat(), color = message.color, depth = depthCheck)
-                    if (displayMessage) context.drawText(message.message, Vec3(message.x, message.y + 1, message.z), messageSize, depthCheck)
+                    drawCylinder(Vec3(message.x, message.y, message.z), message.distance.toFloat(), cylinderHeight.toFloat(), color = message.color, depth = depthCheck)
+                    if (displayMessage) drawText(message.message, Vec3(message.x, message.y + 1, message.z), messageSize, depthCheck)
                 } else {
                     val box = AABB(message.x, message.y, message.z, message.x2 ?: return@forEach, message.y2 ?: return@forEach,message.z2  ?: return@forEach)
-                    context.drawWireFrameBox(box, message.color, depth = depthCheck)
+                    drawWireFrameBox(box, message.color, depth = depthCheck)
                     if (!displayMessage) return@forEach
                     val center = Vec3((message.x + message.x2) / 2, (message.y + message.y2) / 2, (message.z + message.z2) / 2)
-                    context.drawText(message.message, center.add(0.0, 1.0, 0.0), messageSize, depthCheck)
+                    drawText(message.message, center.add(0.0, 1.0, 0.0), messageSize, depthCheck)
                 }
             }
         }

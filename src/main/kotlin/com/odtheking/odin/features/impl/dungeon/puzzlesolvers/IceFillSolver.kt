@@ -41,7 +41,7 @@ object IceFillSolver {
         }
     }
 
-    fun onRenderWorld(event: RenderEvent, color: Color) {
+    fun onRenderWorld(event: RenderEvent.Extract, color: Color) {
         if (!currentPatterns.isEmpty() && DungeonUtils.currentRoomName == "Ice Fill")
             event.drawLine(currentPatterns, color, true)
     }

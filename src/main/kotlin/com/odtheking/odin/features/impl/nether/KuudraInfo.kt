@@ -30,15 +30,15 @@ object KuudraInfo : Module(
     }
 
     init {
-        on<RenderEvent.Last> {
+        on<RenderEvent.Extract> {
             if (!KuudraUtils.inKuudra) return@on
 
             KuudraUtils.kuudraEntity?.let {
                 if (highlightKuudra)
-                    context.drawWireFrameBox(it.boundingBox, kuudraColor, depth = true)
+                    drawWireFrameBox(it.boundingBox, kuudraColor, depth = true)
 
                 if (kuudraHPDisplay) {
-                    context.drawText(
+                    drawText(
                         getCurrentHealthDisplay(it.health),
                         it.position().add(it.lookAngle.multiply(13.0, 13.0, 13.0).addVec(y = 10.0)), healthSize, depth = true
                     )

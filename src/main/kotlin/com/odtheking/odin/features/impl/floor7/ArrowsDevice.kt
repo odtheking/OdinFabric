@@ -55,7 +55,7 @@ object ArrowsDevice : Module(
             }
         }
 
-        on<RenderEvent.Last> {
+        on<RenderEvent.Extract> {
             if (!DungeonUtils.inBoss || DungeonUtils.getF7Phase() != M7Phases.P3) return@on
 
             markedPositions.forEach { position ->

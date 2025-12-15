@@ -42,7 +42,7 @@ object LividSolver : Module(
             }
         }
 
-        on<RenderEvent.Last> {
+        on<RenderEvent.Extract> {
             if (!DungeonUtils.inBoss || !DungeonUtils.isFloor(5) || mc.player?.getEffect(MobEffects.BLINDNESS) != null) return@on
             currentLivid.entity?.let { entity ->
                 drawWireFrameBox(entity.boundingBox, currentLivid.color, 8f, true)

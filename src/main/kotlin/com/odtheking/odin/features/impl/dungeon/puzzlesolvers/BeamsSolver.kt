@@ -54,7 +54,7 @@ object BeamsSolver {
         }
     }
 
-    fun onRenderWorld(event: RenderEvent, beamStyle: Int, beamsTracer: Boolean, beamsAlpha: Float) {
+    fun onRenderWorld(event: RenderEvent.Extract, beamStyle: Int, beamsTracer: Boolean, beamsAlpha: Float) {
         if (DungeonUtils.currentRoomName != "Creeper Beams" || currentLanternPairs.isEmpty()) return
 
         currentLanternPairs.entries.forEach { positions ->

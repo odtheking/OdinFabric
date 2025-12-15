@@ -79,12 +79,12 @@ object KingRelics : Module(
             }
         }
 
-        on<RenderEvent.Last> {
+        on<RenderEvent.Extract> {
             if (DungeonUtils.getF7Phase() != M7Phases.P5 || !relicBeacon) return@on
 
             Relic.entries.forEach {
                 if (currentRelic?.id == it.id) {
-                    context.drawCustomBeacon("", it.cauldronPosition, it.color, distance = false)
+                    drawCustomBeacon("", it.cauldronPosition, it.color, distance = false)
                 }
             }
         }

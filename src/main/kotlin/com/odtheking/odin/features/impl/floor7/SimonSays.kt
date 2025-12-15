@@ -97,7 +97,7 @@ object SimonSays : Module(
             ) cancel()
         }
 
-        on<RenderEvent.Last> {
+        on<RenderEvent.Extract> {
             if (DungeonUtils.getF7Phase() != M7Phases.P3 || clickNeeded >= clickInOrder.size) return@on
 
             for (index in clickNeeded until clickInOrder.size) {

@@ -28,7 +28,7 @@ object PearlWaypoints : Module(
     private val hideFarWaypoints by BooleanSetting("Hide Far Waypoints", true, desc = "Hides the waypoints that are not the closest to you.").withDependency { presetWaypoints }
 
     init {
-        on<RenderEvent.Last> {
+        on<RenderEvent.Extract> {
             if (!KuudraUtils.inKuudra || KuudraUtils.phase != 1) return@on
 
             var closest = true

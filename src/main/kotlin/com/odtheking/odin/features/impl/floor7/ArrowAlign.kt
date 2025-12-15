@@ -88,7 +88,7 @@ object ArrowAlign : Module(
             })
         }
 
-        on<RenderEvent.Last> {
+        on<RenderEvent.Extract> {
             if (clicksRemaining.isEmpty() || DungeonUtils.getF7Phase() != M7Phases.P3) return@on
             clicksRemaining.forEach { (index, clickNeeded) ->
                 val colorCode = when {
@@ -97,7 +97,7 @@ object ArrowAlign : Module(
                     clickNeeded < 5 -> '6'
                     else -> 'c'
                 }
-                context.drawText(
+                drawText(
                     "§$colorCode$clickNeeded",
                     getFramePositionFromIndex(index).center.addVec(y = 0.1, x = -0.3),
                     1f, false

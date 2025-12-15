@@ -48,7 +48,7 @@ object BoulderSolver {
         }?.toMutableList() ?: return
     }
 
-    fun onRenderWorld(event: RenderEvent, showAllBoulderClicks: Boolean, boulderStyle: Int, boulderColor: Color) {
+    fun onRenderWorld(event: RenderEvent.Extract, showAllBoulderClicks: Boolean, boulderStyle: Int, boulderColor: Color) {
         if (DungeonUtils.currentRoomName != "Boulder" || currentPositions.isEmpty()) return
         if (showAllBoulderClicks) currentPositions.forEach {
             event.drawStyledBox(it.render, boulderColor, boulderStyle, false)

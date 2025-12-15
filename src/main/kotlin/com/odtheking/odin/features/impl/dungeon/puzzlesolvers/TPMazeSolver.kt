@@ -45,7 +45,7 @@ object TPMazeSolver {
         }
     }
 
-    fun onRenderWorld(event: RenderEvent, mazeColorOne: Color, mazeColorMultiple: Color, mazeColorVisited: Color) {
+    fun onRenderWorld(event: RenderEvent.Extract, mazeColorOne: Color, mazeColorMultiple: Color, mazeColorVisited: Color) {
         if (DungeonUtils.currentRoomName != "Teleport Maze") return
         tpPads.forEach {
             val aabb = it.getBlockBounds()?.move(it) ?: AABB(it)

@@ -16,7 +16,6 @@ import net.minecraft.world.item.component.CustomData
 import net.minecraft.world.item.component.ItemLore
 import net.minecraft.world.item.component.ResolvableProfile
 import java.util.*
-import kotlin.text.set
 
 const val ID = "id"
 const val UUID_STRING = "uuid"

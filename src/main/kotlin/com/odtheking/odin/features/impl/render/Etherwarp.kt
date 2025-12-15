@@ -58,7 +58,7 @@ object Etherwarp : Module(
             it.cancel()
         }
 
-        on<RenderEvent.Last> (EventPriority.LOW) {
+        on<RenderEvent.Extract> (EventPriority.LOW) {
             if (mc.player?.isShiftKeyDown == false || mc.screen != null || !render) return@on
 
             etherPos = getEtherPos(

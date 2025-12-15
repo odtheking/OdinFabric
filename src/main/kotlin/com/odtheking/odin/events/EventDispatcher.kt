@@ -7,6 +7,7 @@ import com.odtheking.odin.utils.ChatManager
 import com.odtheking.odin.utils.containsOneOf
 import com.odtheking.odin.utils.equalsOneOf
 import com.odtheking.odin.utils.noControlCodes
+import com.odtheking.odin.utils.render.RenderBatchManager
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.isSecret
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
@@ -37,6 +38,10 @@ object EventDispatcher {
 
         ClientTickEvents.END_CLIENT_TICK.register { _ ->
             mc.level?.let { TickEvent.End().postAndCatch() }
+        }
+
+        WorldRenderEvents.END_EXTRACTION.register { handler ->
+            mc.level?.let { RenderEvent.Extract(handler, RenderBatchManager.renderConsumer).postAndCatch() }
         }
 
         WorldRenderEvents.END_MAIN.register { context ->
