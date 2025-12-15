@@ -3,6 +3,7 @@ package com.odtheking.odin.utils.skyblock.dungeon
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.OdinMod.scope
 import com.odtheking.odin.events.RoomEnterEvent
+import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
@@ -31,14 +32,14 @@ object DungeonListener {
     inline val passedRooms: MutableSet<Room> get() = ScanUtils.passedRooms
     inline val currentRoom: Room? get() = ScanUtils.currentRoom
     private var expectingBloodUpdate = false
-    val inBoss: Boolean get() = getBoss()
     var dungeonStats = DungeonStats()
     var puzzles = ArrayList<Puzzle>()
     var floor: Floor? = null
+    var inBoss = false
     var paul = false
 
     private fun getBoss(): Boolean = with(mc.player) {
-        if (this == null) return false
+        if (this == null || floor?.floorNumber == null) return false
         when (floor?.floorNumber) {
             1 -> x > -71 && z > -39
             in 2..4 -> x > -39 && z > -39
@@ -49,6 +50,10 @@ object DungeonListener {
     }
 
     init {
+        on<TickEvent.End> {
+            if (DungeonUtils.inDungeons) inBoss = getBoss()
+        }
+
         on<WorldLoadEvent> {
             Blessing.entries.forEach { it.reset() }
             dungeonTeammatesNoSelf = emptyList()

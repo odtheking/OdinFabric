@@ -17,7 +17,6 @@ import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRelativeCoords
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.Room
 import net.minecraft.core.BlockPos
-import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.BlockHitResult
@@ -114,7 +113,7 @@ object DungeonWaypoints : Module(
                 for (waypoint in room.waypoints) {
                     if (waypoint.isClicked || waypoint.title == null) continue
                     context.drawText(
-                        Component.literal(waypoint.title).visualOrderText,
+                        waypoint.title,
                         waypoint.blockPos.center.add(0.0, 0.1 * titleScale, 0.0), titleScale, waypoint.depth
                     )
                 }
