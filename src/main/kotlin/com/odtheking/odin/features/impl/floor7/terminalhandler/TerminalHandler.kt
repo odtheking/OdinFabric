@@ -13,6 +13,7 @@ import com.odtheking.odin.utils.equalsOneOf
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.HashedStack
+import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket
@@ -42,6 +43,17 @@ open class TerminalHandler(val type: TerminalTypes) {
             isClicked = false
             items.fill(null)
             windowCount++
+        }
+
+        onReceive<ClientboundContainerSetContentPacket> {
+            this.items.forEachIndexed { index, stack ->
+                if (stack == null || stack.isEmpty) return@forEachIndexed
+                if (index !in 0 until type.windowSize) return@forEachIndexed
+
+                items[index] = stack
+                if (handleSlotUpdate(ClientboundContainerSetSlotPacket(this.containerId, this.stateId, index, stack)))
+                    TerminalEvent.Updated(this@TerminalHandler).postAndCatch()
+            }
         }
     }
 
