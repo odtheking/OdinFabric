@@ -1,6 +1,8 @@
 package com.odtheking.odin.utils.render
 
+import net.minecraft.client.renderer.RenderStateShard
 import net.minecraft.client.renderer.RenderType
+import java.util.*
 
 object CustomRenderLayer {
 
@@ -8,8 +10,10 @@ object CustomRenderLayer {
         "line-list",
         RenderType.TRANSIENT_BUFFER_SIZE,
         CustomRenderPipelines.LINE_LIST,
+
         RenderType.CompositeState.builder()
             .setLayeringState(RenderType.VIEW_OFFSET_Z_LAYERING)
+            .setLineState(RenderStateShard.LineStateShard(OptionalDouble.of(8.0)))
             .createCompositeState(false)
     )
 
@@ -17,7 +21,10 @@ object CustomRenderLayer {
         "line-list-esp",
         RenderType.TRANSIENT_BUFFER_SIZE,
         CustomRenderPipelines.LINE_LIST_ESP,
-        RenderType.CompositeState.builder().createCompositeState(false)
+        RenderType.CompositeState
+            .builder()
+            .setLineState(RenderStateShard.LineStateShard(OptionalDouble.of(8.0)))
+            .createCompositeState(false)
     )
 
     val TRIANGLE_STRIP: RenderType.CompositeRenderType = RenderType.create(

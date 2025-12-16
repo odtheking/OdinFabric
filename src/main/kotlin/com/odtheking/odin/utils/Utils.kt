@@ -20,13 +20,28 @@ import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
 import java.util.*
 
-val FORMATTING_CODE_PATTERN = Regex("§[0-9a-fk-or]", RegexOption.IGNORE_CASE)
-
-/**
- * Returns the string without any minecraft formatting codes.
- */
 inline val String?.noControlCodes: String
-    get() = this?.replace(FORMATTING_CODE_PATTERN, "") ?: ""
+    get() {
+        val s = this ?: return ""
+        val len = s.length
+
+        if (s.indexOf('§') == -1) return s
+
+        val out = CharArray(len)
+        var outPos = 0
+        var i = 0
+
+        while (i < len) {
+            val c = s[i]
+            if (c == '§') i += 2
+            else {
+                out[outPos++] = c
+                i++
+            }
+        }
+
+        return String(out, 0, outPos)
+    }
 
 /**
  * Checks if the current string contains at least one of the specified strings.

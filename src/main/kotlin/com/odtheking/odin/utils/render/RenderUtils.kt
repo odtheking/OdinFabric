@@ -1,6 +1,5 @@
 package com.odtheking.odin.utils.render
 
-import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.PoseStack
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.RenderEvent
@@ -82,7 +81,6 @@ private fun flushBatch(ctx: WorldRenderContext) {
 
     matrix.pushPose()
     matrix.translate(-camera.x, -camera.y, -camera.z)
-    RenderSystem.lineWidth(8f)
 
     val lineRenderLayers = listOf(CustomRenderLayer.LINE_LIST, CustomRenderLayer.LINE_LIST_ESP)
     for ((depthState, lines) in currentBatch.lines.withIndex()) {
@@ -141,8 +139,6 @@ private fun flushBatch(ctx: WorldRenderContext) {
     bufferSource.endBatch(CustomRenderLayer.LINE_LIST_ESP)
     bufferSource.endBatch(CustomRenderLayer.TRIANGLE_STRIP)
     bufferSource.endBatch(CustomRenderLayer.TRIANGLE_STRIP_ESP)
-
-    RenderSystem.lineWidth(1f)
 
     renderBeaconBeams(matrix, bufferSource, camera)
     renderTexts(matrix, bufferSource, camera)

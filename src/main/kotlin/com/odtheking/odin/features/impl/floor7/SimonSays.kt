@@ -48,8 +48,7 @@ object SimonSays : Module(
 
     init {
         on<WorldLoadEvent> {
-            clickInOrder.clear()
-            clickNeeded = 0
+            resetSolution()
         }
 
         on<BlockUpdateEvent> {
