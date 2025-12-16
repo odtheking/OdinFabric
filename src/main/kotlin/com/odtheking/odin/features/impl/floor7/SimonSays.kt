@@ -35,6 +35,7 @@ object SimonSays : Module(
     private val thirdColor by ColorSetting("Third Color", Colors.MINECRAFT_RED.withAlpha(0.5f), true, desc = "The color of the buttons after the second.")
     private val style by SelectorSetting("Style", "Filled Outline", arrayListOf("Filled", "Outline", "Filled Outline"), desc = "The style of the box rendering.")
     private val blockWrong by BooleanSetting("Block Wrong Clicks", false, desc = "Blocks wrong clicks, shift will override this.")
+    private val removeFirst by BooleanSetting("Remove First", false, desc = "Removes the first button if a button entity is detected.")
 
     private val startButton = BlockPos(110, 121, 91)
     private val clickInOrder = ArrayList<BlockPos>()
@@ -82,8 +83,7 @@ object SimonSays : Module(
 
                 val index = clickInOrder.indexOf(entity.blockPosition().east())
                 devMessage("Simon says button $index (${clickInOrder.size}) pos: ${entity.blockPosition().east()}")
-                if (index == -1 && clickInOrder.size == 2) clickInOrder.removeFirst()
-                else if (index == 0 && clickInOrder.size == 2) clickInOrder.reverse()
+                if (removeFirst && clickInOrder.size == 2) clickInOrder.removeFirst()
             }
         }
 
