@@ -10,10 +10,9 @@ object CustomRenderLayer {
         "line-list",
         RenderType.TRANSIENT_BUFFER_SIZE,
         CustomRenderPipelines.LINE_LIST,
-
         RenderType.CompositeState.builder()
             .setLayeringState(RenderType.VIEW_OFFSET_Z_LAYERING)
-            .setLineState(RenderStateShard.LineStateShard(OptionalDouble.of(8.0)))
+            .setLineState(RenderStateShard.LineStateShard(OptionalDouble.of(3.0)))
             .createCompositeState(false)
     )
 
@@ -23,7 +22,7 @@ object CustomRenderLayer {
         CustomRenderPipelines.LINE_LIST_ESP,
         RenderType.CompositeState
             .builder()
-            .setLineState(RenderStateShard.LineStateShard(OptionalDouble.of(8.0)))
+            .setLineState(RenderStateShard.LineStateShard(OptionalDouble.of(3.0)))
             .createCompositeState(false)
     )
 

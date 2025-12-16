@@ -2,18 +2,22 @@ package com.odtheking.odin.features.impl.dungeon
 
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.*
+import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.events.core.on
+import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.alert
 import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.modMessage
+import com.odtheking.odin.utils.noControlCodes
 import com.odtheking.odin.utils.render.getStringWidth
 import com.odtheking.odin.utils.render.text
 import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
+import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
 
 object MapInfo : Module(
     name = "Map Info",
@@ -189,6 +193,24 @@ object MapInfo : Module(
     private val compactScoreMargin by NumberSetting("Score Margin", 0f, 0f, 5f, 1f, desc = "The margin around the hud.").withDependency { compactScoreBackground && compactScore.enabled }
     private val compactScoreColor by ColorSetting("Score Background Color", Colors.MINECRAFT_DARK_GRAY.withAlpha(0.5f), true, desc = "The color of the background.").withDependency { compactScoreBackground && compactScore.enabled }
 
+    private val roomSecrets by HUD("Room Secrets", "Displays the number of secrets in the current room.") {
+        if ((!DungeonUtils.inDungeons ||  DungeonUtils.inBoss) && !it) return@HUD 0 to 0
+
+        val secrets = currentRoomSecrets ?: return@HUD 0 to 0
+        val roomText = buildString {
+            append("§7Secrets: §b")
+            append(secrets.first)
+            append("§7/§c")
+            append(secrets.second)
+        }
+
+        val width = getStringWidth(roomText)
+        text(roomText, 0, 0, Colors.WHITE)
+        width to 9
+    }
+
+    private var currentRoomSecrets: Pair<Int, Int>? = null
+    private val secretRegex = Regex("(\\d+)/(\\d+) Secrets")
     var shownTitle = false
 
     init {
@@ -210,6 +232,18 @@ object MapInfo : Module(
             if (scoreTitle) alert(scoreText.replace("&", "§"))
             if (printWhenScore) modMessage("§b${DungeonUtils.score} §ascore reached in §6${DungeonUtils.dungeonTime} || ${DungeonUtils.floor?.name}.")
             shownTitle = true
+        }
+
+        onReceive<ClientboundSystemChatPacket> {
+            if (!overlay) return@onReceive
+            val msg = content?.string?.noControlCodes ?: return@onReceive
+            secretRegex.find(msg)?.destructured?.let { (found, total) ->
+                currentRoomSecrets = Pair(found.toIntOrNull() ?: 0, total.toIntOrNull() ?: 0)
+            }
+        }
+
+        on<RoomEnterEvent> {
+            currentRoomSecrets = null
         }
 
         on<WorldLoadEvent> {
