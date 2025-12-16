@@ -75,7 +75,7 @@ object LeapMenu : Module(
 
                     val expandValue = hoverHandler[index].anim.get(0f, 15f, !hoverHandler[index].isHovered)
                     NVGRenderer.rect(x - expandValue ,y - expandValue, BOX_WIDTH + expandValue * 2, BOX_HEIGHT + expandValue * 2, (if (colorStyle) player.clazz.color else backgroundColor).rgba, 12f)
-                    val locationSkin = player.locationSkin ?: mc.player?.skin?.texture ?: return@forEachIndexed
+                    val locationSkin = player.locationSkin ?: mc.player?.skin?.body?.id() ?: return@forEachIndexed
                     imageCacheMap.getOrPut(locationSkin.path) {
                         NVGRenderer.createNVGImage((mc.textureManager?.getTexture(locationSkin)?.texture as? GlTexture)?.glId() ?: 0, 64, 64)
                     }.let { glTextureId ->
@@ -113,9 +113,9 @@ object LeapMenu : Module(
         on<GuiEvent.KeyPress> {
             val chest = (screen as? AbstractContainerScreen<*>) ?: return@on
             val keybindList = listOf(archerKeybind, berserkerKeybind, healerKeybind, mageKeybind, tankKeybind)
-            if (chest.title?.string?.equalsOneOf("Spirit Leap", "Teleport to Player") == false || keybindList.none { it.value == keyCode } || leapTeammates.isEmpty()) return@on
+            if (chest.title?.string?.equalsOneOf("Spirit Leap", "Teleport to Player") == false || keybindList.none { it.value == key } || leapTeammates.isEmpty()) return@on
 
-            val index = DungeonClass.entries.find { clazz -> clazz.ordinal == keybindList.indexOfFirst { it.value == keyCode } }?.let { clazz -> leapTeammates.indexOfFirst { it.clazz == clazz } } ?: return@on
+            val index = DungeonClass.entries.find { clazz -> clazz.ordinal == keybindList.indexOfFirst { it.value == key } }?.let { clazz -> leapTeammates.indexOfFirst { it.clazz == clazz } } ?: return@on
             if (index == -1) return@on
             val playerToLeap = leapTeammates[index]
             if (playerToLeap == EMPTY) return@on

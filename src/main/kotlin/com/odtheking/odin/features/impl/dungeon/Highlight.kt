@@ -63,7 +63,7 @@ object Highlight : Module(
             entities.removeIf { entity -> !entity.isAlive }
         }
 
-        on<RenderEvent.Last> {
+        on<RenderEvent.Extract> {
             if (!highlightStar || !DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
 
             entities.forEach { entity ->
@@ -73,7 +73,7 @@ object Highlight : Module(
                     ClipContext.Fluid.NONE, entity.eyeY
                 ) ?: false
 
-                context.drawStyledBox(entity.renderBoundingBox, color, renderStyle, !canSee)
+                drawStyledBox(entity.renderBoundingBox, color, renderStyle, !canSee)
             }
         }
 
