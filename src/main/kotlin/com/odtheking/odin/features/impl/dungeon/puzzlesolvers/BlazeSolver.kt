@@ -2,16 +2,18 @@ package com.odtheking.odin.features.impl.dungeon.puzzlesolvers
 
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.features.impl.dungeon.puzzlesolvers.PuzzleSolvers.onPuzzleComplete
-import com.odtheking.odin.utils.*
+import com.odtheking.odin.utils.Color
+import com.odtheking.odin.utils.equalsOneOf
 import com.odtheking.odin.utils.render.drawLine
 import com.odtheking.odin.utils.render.drawStyledBox
+import com.odtheking.odin.utils.renderPos
+import com.odtheking.odin.utils.sendCommand
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonListener
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.Puzzle
 import com.odtheking.odin.utils.skyblock.dungeon.PuzzleStatus
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.world.entity.decoration.ArmorStand
-import net.minecraft.world.phys.AABB
 
 object BlazeSolver {
     private var blazes = mutableListOf<ArmorStand>()
@@ -33,7 +35,7 @@ object BlazeSolver {
         else blazes.sortBy { hpMap[it] }
     }
 
-    fun onRenderWorld(context: WorldRenderContext, blazeLineNext: Boolean, blazeLineAmount: Int, blazeStyle: Int, blazeFirstColor: Color, blazeSecondColor: Color, blazeAllColor: Color, blazeWidth: Float, blazeHeight: Float, blazeSendComplete: Boolean, blazeLineWidth: Float) {
+    fun onRenderWorld(context: WorldRenderContext, blazeLineNext: Boolean, blazeLineAmount: Int, blazeStyle: Int, blazeFirstColor: Color, blazeSecondColor: Color, blazeAllColor: Color, blazeSendComplete: Boolean, blazeLineWidth: Float) {
         if (!DungeonUtils.currentRoomName.equalsOneOf("Lower Blaze", "Higher Blaze")) return
         if (blazes.isEmpty()) return
         blazes.removeAll { mc.level?.getEntity(it.id) == null }
@@ -51,12 +53,12 @@ object BlazeSolver {
                 1 -> blazeSecondColor
                 else -> blazeAllColor
             }
-            val aabb = AABB(-blazeWidth / 2.0, -1 - (blazeHeight / 2.0), -blazeWidth / 2.0, blazeWidth / 2.0, (blazeHeight / 2.0) - 1, blazeWidth / 2.0).move(entity.position())
+            val aabb = entity.boundingBox.inflate(1.0, 2.0, 1.0)
 
             context.drawStyledBox(aabb, color, blazeStyle, depth = true)
 
             if (blazeLineNext && index > 0 && index <= blazeLineAmount)
-                context.drawLine(listOf(blazes[index - 1].renderPos, entity.renderBoundingBox.center), color = color, thickness = blazeLineWidth, depth = true)
+                context.drawLine(listOf(blazes[index - 1].renderPos, aabb.center), color = color, thickness = blazeLineWidth, depth = true)
         }
     }
 

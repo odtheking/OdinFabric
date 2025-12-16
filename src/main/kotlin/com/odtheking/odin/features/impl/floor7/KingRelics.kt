@@ -16,11 +16,10 @@ import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
 import net.minecraft.core.BlockPos
-import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket
 import net.minecraft.world.InteractionHand
-import net.minecraft.world.entity.EquipmentSlot
+import net.minecraft.world.item.Items
 import net.minecraft.world.level.block.Blocks
 
 object KingRelics : Module(
@@ -43,7 +42,7 @@ object KingRelics : Module(
     private var relicTicksToSpawn = 0
     private var hasAnnouncedSpawn = false
 
-    private val relicPickupRegex = Regex("^\\[BOSS] Wither King: (You have proven yourself\\. You may be worthy of my .* relic\\.)$")
+    private val relicPickupRegex = Regex("^\\[BOSS] Necron: All this, for nothing...$")
 
     private val relicPBs = PersonalBest(this, "Relics")
 
@@ -61,9 +60,6 @@ object KingRelics : Module(
             val block = mc.level?.getBlockState(hitResult.blockPos)?.block
             if (!block.equalsOneOf(Blocks.CAULDRON, Blocks.ANVIL)) return@onSend
 
-            val heldItem = mc.player?.getItemInHand(hand)
-            if (Relic.entries.none { heldItem?.itemId == it.id }) return@onSend
-
             Relic.entries.find { it.id == currentRelic?.id }?.let {
                 relicPBs.time(it.name, (serverTickCounter - relicPlaceTick) / 20f, message = "§${it.colorCode}${it.name} relic §7placed in §6", sendMessage = relicAnnounceTime)
                 relicPlaceTick = 0L
@@ -73,7 +69,7 @@ object KingRelics : Module(
         onReceive<ClientboundSetEquipmentPacket> {
             if (DungeonUtils.getF7Phase() != M7Phases.P5 || currentRelic == null) return@onReceive
 
-            val equipmentSlot = slots.find { it.first == EquipmentSlot.HEAD } ?: return@onReceive
+            val equipmentSlot = slots.find { it.second == Items.PLAYER_HEAD } ?: return@onReceive
 
             Relic.entries.find { it.id == equipmentSlot.second.itemId }?.let { relic ->
                 if (relicPlaceTick > 0 && !hasAnnouncedSpawn) {
@@ -88,7 +84,7 @@ object KingRelics : Module(
 
             Relic.entries.forEach {
                 if (currentRelic?.id == it.id) {
-                    context.drawCustomBeacon(Component.empty().visualOrderText, it.cauldronPosition, it.color, distance = false)
+                    context.drawCustomBeacon("", it.cauldronPosition, it.color, distance = false)
                 }
             }
         }

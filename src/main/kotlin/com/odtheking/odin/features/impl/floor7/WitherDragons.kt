@@ -19,7 +19,6 @@ import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
 import com.odtheking.odin.utils.toFixed
-import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
@@ -122,7 +121,7 @@ object WitherDragons : Module(
                     DragonCheck.dragonHealthMap.forEach { (_, data) ->
                         if (data.second > 0) {
                             context.drawText(
-                                Component.literal(colorHealth(data.second)).visualOrderText,
+                                colorHealth(data.second),
                                 data.first, 5f, false
                             )
                         }
@@ -131,7 +130,7 @@ object WitherDragons : Module(
 
                 if (dragonTimer && dragon.timeToSpawn > 0) {
                     context.drawText(
-                        Component.literal("§${dragon.colorCode}${dragon.name.first()}: ${getDragonTimer(dragon.timeToSpawn)}").visualOrderText,
+                        "§${dragon.colorCode}${dragon.name.first()}: ${getDragonTimer(dragon.timeToSpawn)}",
                         dragon.spawnPos.center, 5f, false
                     )
                 }

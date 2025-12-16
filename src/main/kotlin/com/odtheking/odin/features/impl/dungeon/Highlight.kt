@@ -8,10 +8,7 @@ import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
-import com.odtheking.odin.utils.Color.Companion.multiplyAlpha
-import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.Colors
-import com.odtheking.odin.utils.noControlCodes
 import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.renderBoundingBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
@@ -26,15 +23,16 @@ object Highlight : Module(
     description = "Allows you to highlight selected entities."
 ) {
     private val highlightStar by BooleanSetting("Highlight Starred Mobs", true, desc = "Highlights starred dungeon mobs.")
-    private val color by ColorSetting("Highlight color", Colors.WHITE.withAlpha(0.75f), true, desc = "The color of the highlight.")
+    private val color by ColorSetting("Highlight color", Colors.WHITE, true, desc = "The color of the highlight.")
     private val renderStyle by SelectorSetting("Render Style", "Outline", listOf("Filled", "Outline", "Filled Outline"), desc = "Style of the box.")
     private val hideNonNames by BooleanSetting("Hide non-starred names", true, desc = "Hides names of entities that are not starred.")
 
     private val teammateClassGlow by BooleanSetting("Teammate Class Glow", true, desc = "Highlights dungeon teammates based on their class color.")
 
-    private val dungeonMobSpawns = hashSetOf("Lurker", "Dreadlord", "Souleater", "Zombie", "Skeleton", "Skeletor", "Sniper", "Super Archer", "Spider", "Fels", "Withermancer")
+    private val dungeonMobSpawns = hashSetOf("Lurker", "Dreadlord", "Souleater", "Zombie", "Skeleton", "Skeletor", "Sniper", "Super Archer", "Spider", "Fels", "Withermancer", "Lost Adventurer", "Angry Archeologist")
     // https://regex101.com/r/QQf502/1
     private val starredRegex = Regex("^.*✯ .*\\d{1,3}(?:,\\d{3})*(?:\\.\\d+)?(?:[kM])?❤$")
+
     private val entities = mutableSetOf<Entity>()
 
     init {
@@ -44,12 +42,19 @@ object Highlight : Module(
             val entitiesToRemove = mutableListOf<Entity>()
             mc.level?.entitiesForRendering()?.forEach { e ->
                 val entity = e ?: return@forEach
-                val entityName = mc.level?.getEntity(entity.id)?.takeIf { entity.isAlive }?.name?.string?.noControlCodes ?: return@forEach
+                if (!entity.isAlive || entity !is ArmorStand) return@forEach
 
-                if (hideNonNames && entity is ArmorStand && entity.isInvisible && dungeonMobSpawns.any { it in entityName } && !starredRegex.matches(entityName))
+                val entityName = entity.name?.string ?: return@forEach
+                if (!dungeonMobSpawns.any { it in entityName }) return@forEach
+
+                val isStarred = starredRegex.matches(entityName)
+
+                if (hideNonNames && entity.isInvisible && !isStarred) {
                     entitiesToRemove.add(entity)
+                    return@forEach
+                }
 
-                if (entity !is ArmorStand || dungeonMobSpawns.none { it in entityName } || !starredRegex.matches(entityName)) return@forEach
+                if (!isStarred) return@forEach
 
                 mc.level?.getEntities(entity, entity.boundingBox.move(0.0, -1.0, 0.0)) { isValidEntity(it) }
                     ?.firstOrNull()?.let { entities.add(it) }
@@ -68,7 +73,7 @@ object Highlight : Module(
                     ClipContext.Fluid.NONE, entity.eyeY
                 ) ?: false
 
-                context.drawStyledBox(entity.renderBoundingBox, color.multiplyAlpha(0.5f), renderStyle, !canSee)
+                context.drawStyledBox(entity.renderBoundingBox, color, renderStyle, !canSee)
             }
         }
 

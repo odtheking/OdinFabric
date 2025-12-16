@@ -15,7 +15,6 @@ import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.sendCommand
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
-import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
@@ -45,16 +44,27 @@ object PositionalMessages : Module(
 
         on<RenderEvent.Last> {
             if (!showPositions || (onlyDungeons && !DungeonUtils.inDungeons)) return@on
+            val player = mc.player ?: return@on
             posMessageStrings.forEach { message ->
+                val distanceToMessage = if (message.distance != null)
+                    player.distanceToSqr(message.x, message.y, message.z)
+                else {
+                    val centerX = (message.x + (message.x2 ?: message.x)) / 2
+                    val centerY = (message.y + (message.y2 ?: message.y)) / 2
+                    val centerZ = (message.z + (message.z2 ?: message.z)) / 2
+                    player.distanceToSqr(centerX, centerY, centerZ)
+                }
+                if (distanceToMessage > 1024) return@forEach
+
                 if (message.distance != null) {
                     context.drawCylinder(Vec3(message.x, message.y, message.z), message.distance.toFloat(), cylinderHeight.toFloat(), color = message.color, depth = depthCheck)
-                    if (displayMessage) context.drawText(Component.literal(message.message).visualOrderText, Vec3(message.x, message.y + 1, message.z), messageSize, depthCheck)
+                    if (displayMessage) context.drawText(message.message, Vec3(message.x, message.y + 1, message.z), messageSize, depthCheck)
                 } else {
                     val box = AABB(message.x, message.y, message.z, message.x2 ?: return@forEach, message.y2 ?: return@forEach,message.z2  ?: return@forEach)
                     context.drawWireFrameBox(box, message.color, depth = depthCheck)
                     if (!displayMessage) return@forEach
                     val center = Vec3((message.x + message.x2) / 2, (message.y + message.y2) / 2, (message.z + message.z2) / 2)
-                    context.drawText(Component.literal(message.message).visualOrderText, center.add(0.0, 1.0, 0.0), messageSize, depthCheck)
+                    context.drawText(message.message, center.add(0.0, 1.0, 0.0), messageSize, depthCheck)
                 }
             }
         }

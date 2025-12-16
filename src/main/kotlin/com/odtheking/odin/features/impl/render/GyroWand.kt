@@ -13,6 +13,7 @@ import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.itemId
 import com.odtheking.odin.utils.render.drawCylinder
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getAbilityCooldown
+import net.minecraft.world.item.Items
 
 object GyroWand : Module(
     name = "Gyro Wand",
@@ -32,7 +33,8 @@ object GyroWand : Module(
         }
 
         on<RenderEvent.Last> {
-            if (mc.player?.mainHandItem?.itemId != "GYROKINETIC_WAND") return@on
+            val mainHand = mc.player?.mainHandItem ?: return@on
+            if (mainHand.item != Items.BLAZE_ROD || mainHand.itemId != "GYROKINETIC_WAND") return@on
             val position = Etherwarp.getEtherPos(mc.player?.position(), distance = 25.0, etherWarp = false).takeIf { it.state?.isAir == false }?: return@on
             context.drawCylinder(
                 position.vec3.add(0.5, 1.0, 0.5), 10f, 0.3f,

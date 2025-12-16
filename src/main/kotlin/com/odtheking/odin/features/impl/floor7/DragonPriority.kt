@@ -18,7 +18,6 @@ object DragonPriority {
     private val defaultOrder = listOf(WitherDragonsEnum.Red, WitherDragonsEnum.Orange, WitherDragonsEnum.Blue, WitherDragonsEnum.Purple, WitherDragonsEnum.Green)
     private val dragonList = listOf(WitherDragonsEnum.Orange, WitherDragonsEnum.Green, WitherDragonsEnum.Red, WitherDragonsEnum.Blue, WitherDragonsEnum.Purple)
 
-
     fun findPriority(spawningDragons: MutableList<WitherDragonsEnum>): WitherDragonsEnum =
         if (!dragonPriorityToggle) spawningDragons.minBy { defaultOrder.indexOf(it) }
         else sortPriority(spawningDragons)

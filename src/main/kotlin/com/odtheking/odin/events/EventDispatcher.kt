@@ -10,7 +10,6 @@ import com.odtheking.odin.utils.noControlCodes
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.isSecret
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
@@ -24,15 +23,12 @@ object EventDispatcher {
 
     init {
         ClientPlayConnectionEvents.JOIN.register { handler, _, _ ->
+            WorldLoadEvent().postAndCatch()
             ServerEvent.Connect(handler.serverData?.ip ?: "SinglePlayer").postAndCatch()
         }
 
         ClientPlayConnectionEvents.DISCONNECT.register { handler, _ ->
             ServerEvent.Disconnect(handler.serverData?.ip ?: "SinglePlayer").postAndCatch()
-        }
-
-        ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register { _, _ ->
-            WorldLoadEvent().postAndCatch()
         }
 
         ClientTickEvents.START_CLIENT_TICK.register { _ ->
