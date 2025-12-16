@@ -16,7 +16,6 @@ import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.boss.wither.WitherBoss
 import net.minecraft.world.entity.decoration.ArmorStand
 import net.minecraft.world.entity.player.Player
-import net.minecraft.world.level.ClipContext
 
 object Highlight : Module(
     name = "Highlight",
@@ -29,7 +28,7 @@ object Highlight : Module(
 
     private val teammateClassGlow by BooleanSetting("Teammate Class Glow", true, desc = "Highlights dungeon teammates based on their class color.")
 
-    private val dungeonMobSpawns = hashSetOf("Lurker", "Dreadlord", "Souleater", "Zombie", "Skeleton", "Skeletor", "Sniper", "Super Archer", "Spider", "Fels", "Withermancer", "Lost Adventurer", "Angry Archeologist")
+    private val dungeonMobSpawns = hashSetOf("Lurker", "Dreadlord", "Souleater", "Zombie", "Skeleton", "Skeletor", "Sniper", "Super Archer", "Spider", "Fels", "Withermancer", "Lost Adventurer", "Angry Archeologist", "Frozen Adventurer")
     // https://regex101.com/r/QQf502/1
     private val starredRegex = Regex("^.*✯ .*\\d{1,3}(?:,\\d{3})*(?:\\.\\d+)?(?:[kM])?❤$")
 
@@ -68,12 +67,9 @@ object Highlight : Module(
 
             entities.forEach { entity ->
                 if (!entity.isAlive) return@forEach
-                val canSee = mc.player?.hasLineOfSight(
-                    entity, ClipContext.Block.VISUAL,
-                    ClipContext.Fluid.NONE, entity.eyeY
-                ) ?: false
 
-                drawStyledBox(entity.renderBoundingBox, color, renderStyle, !canSee)
+                drawStyledBox(entity.renderBoundingBox, color, renderStyle, true)
+
             }
         }
 
@@ -93,6 +89,6 @@ object Highlight : Module(
     @JvmStatic
     fun getTeammateColor(entity: Entity): Int? {
         if (!enabled || !teammateClassGlow || !DungeonUtils.inDungeons || entity !is Player) return null
-        return DungeonUtils.dungeonTeammatesNoSelf.find { it.name == entity.name?.string }?.clazz?.color?.rgba
+        return DungeonUtils.dungeonTeammates.find { it.name == entity.name?.string }?.clazz?.color?.rgba
     }
 }

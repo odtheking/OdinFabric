@@ -3,25 +3,16 @@ package com.odtheking.odin.features.impl.floor7
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.ColorSetting
 import com.odtheking.odin.clickgui.settings.impl.SelectorSetting
-import com.odtheking.odin.events.BlockInteractEvent
-import com.odtheking.odin.events.BlockUpdateEvent
-import com.odtheking.odin.events.RenderEvent
-import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.*
 import com.odtheking.odin.events.core.on
-import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.devMessage
-import com.odtheking.odin.utils.handlers.schedule
 import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
 import net.minecraft.core.BlockPos
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
-import net.minecraft.world.entity.EntityType
-import net.minecraft.world.entity.item.ItemEntity
-import net.minecraft.world.item.Items
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.state.properties.BlockStateProperties
 import net.minecraft.world.phys.AABB
@@ -35,15 +26,16 @@ object SimonSays : Module(
     private val thirdColor by ColorSetting("Third Color", Colors.MINECRAFT_RED.withAlpha(0.5f), true, desc = "The color of the buttons after the second.")
     private val style by SelectorSetting("Style", "Filled Outline", arrayListOf("Filled", "Outline", "Filled Outline"), desc = "The style of the box rendering.")
     private val blockWrong by BooleanSetting("Block Wrong Clicks", false, desc = "Blocks wrong clicks, shift will override this.")
-    private val removeFirst by BooleanSetting("Remove First", false, desc = "Removes the first button if a button entity is detected.")
 
     private val startButton = BlockPos(110, 121, 91)
     private val clickInOrder = ArrayList<BlockPos>()
     private var clickNeeded = 0
+    private var lastLanternTick = -1
 
     private fun resetSolution() {
         clickInOrder.clear()
         clickNeeded = 0
+        lastLanternTick = -1
     }
 
     init {
@@ -63,7 +55,13 @@ object SimonSays : Module(
 
             when (pos.x) {
                 111 ->
-                    if (updated.block == Blocks.OBSIDIAN && old.block == Blocks.SEA_LANTERN && pos !in clickInOrder) clickInOrder.add(pos.immutable())
+                    if (updated.block == Blocks.OBSIDIAN && old.block == Blocks.SEA_LANTERN && pos !in clickInOrder) {
+                        clickInOrder.add(pos.immutable())
+                        if (lastLanternTick != -1) {
+                            devMessage("§eLantern spawned after §a${lastLanternTick} §eserver ticks")
+                        }
+                        lastLanternTick = 0
+                    }
 
                 110 ->
                     if (updated.block == Blocks.AIR) resetSolution()
@@ -74,15 +72,18 @@ object SimonSays : Module(
             }
         }
 
-        onReceive<ClientboundAddEntityPacket> {
-            if (type != EntityType.ITEM || DungeonUtils.getF7Phase() != M7Phases.P3) return@onReceive
-            schedule(0) {
-                val entity = mc.level?.getEntity(id) as? ItemEntity ?: return@schedule
-                if (entity.item?.item != Items.STONE_BUTTON) return@schedule
+        on<TickEvent.Server> {
+            if (DungeonUtils.getF7Phase() != M7Phases.P3) return@on
 
-                val index = clickInOrder.indexOf(entity.blockPosition().east())
-                devMessage("Simon says button $index (${clickInOrder.size}) pos: ${entity.blockPosition().east()}")
-                if (removeFirst && clickInOrder.size == 2) clickInOrder.removeFirst()
+            if (lastLanternTick != -1) {
+                lastLanternTick++
+                if (lastLanternTick == 12) {
+                    devMessage("§aSkip should be over?")
+                    when {
+                        clickInOrder.size >= 3 -> clickInOrder.removeFirst()
+                        clickInOrder.size == 2 -> clickInOrder.reverse()
+                    }
+                }
             }
         }
 

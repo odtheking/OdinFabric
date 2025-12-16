@@ -53,7 +53,7 @@ object BlazeSolver {
                 1 -> blazeSecondColor
                 else -> blazeAllColor
             }
-            val aabb = entity.boundingBox.inflate(1.0, 2.0, 1.0)
+            val aabb = entity.boundingBox.inflate(0.5, 1.0, 0.5).move(0.0, -1.0, 0.0)
 
             event.drawStyledBox(aabb, color, blazeStyle, depth = true)
 
