@@ -81,9 +81,7 @@ object SimonSays : Module(
             if (DungeonUtils.getF7Phase() != M7Phases.P3 || !firstPhase) return@on
 
             if (lastLanternTick != -1) {
-                lastLanternTick++
-
-                if (lastLanternTick > adjustTicks && grid.all { mc.level?.getBlockState(it)?.block != Blocks.STONE_BUTTON }) {
+                if (lastLanternTick++ > adjustTicks && grid.count { mc.level?.getBlockState(it)?.block == Blocks.STONE_BUTTON } > 8) {
                     devMessage("§aSkip should be over?")
                     when {
                         clickInOrder.size >= 3 -> clickInOrder.removeFirst()

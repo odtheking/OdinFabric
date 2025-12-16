@@ -19,10 +19,12 @@ import com.odtheking.odin.utils.skyblock.LocationUtils
 import net.minecraft.core.BlockPos
 import net.minecraft.core.SectionPos
 import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.protocol.game.ClientboundSoundPacket
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket
 import net.minecraft.network.protocol.game.ServerboundUseItemPacket
 import net.minecraft.sounds.SoundEvents
+import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.piston.PistonHeadBlock
 import net.minecraft.world.level.block.state.BlockState
@@ -51,6 +53,9 @@ object Etherwarp : Module(
     private val soundSettings = createSoundSettings("Etherwarp Sound", "entity.experience_orb.pickup") { sounds && dropdown }
     private var etherPos: EtherPos? = null
 
+    private var cachedMainHandItem: ItemStack? = null
+    private var cachedEtherData: CompoundTag? = null
+
     init {
         onReceive<ClientboundSoundPacket> {
             if (!sounds || sound.value() != SoundEvents.ENDER_DRAGON_HURT || volume != 1f || pitch != 0.53968257f) return@onReceive
@@ -61,9 +66,18 @@ object Etherwarp : Module(
         on<RenderEvent.Last> (EventPriority.LOW) {
             if (mc.player?.isShiftKeyDown == false || mc.screen != null || !render) return@on
 
+            val mainHandItem = mc.player?.mainHandItem ?: return@on
+
+            if (cachedMainHandItem !== mainHandItem) {
+                cachedMainHandItem = mainHandItem
+                cachedEtherData = mainHandItem.isEtherwarpItem()
+            }
+
+            if (cachedEtherData == null) return@on
+
             etherPos = getEtherPos(
                 if (useServerPosition) mc.player?.oldPosition() else mc.player?.position(),
-                56.0 + (mc.player?.mainHandItem?.isEtherwarpItem()?.getInt("tuned_transmission")?.orElse(0) ?: return@on),
+                56.0 + (cachedEtherData?.getInt("tuned_transmission")?.orElse(0) ?: 0),
                 etherWarp = true
             )
             if (etherPos?.succeeded != true && !renderFail) return@on
@@ -76,7 +90,7 @@ object Etherwarp : Module(
         }
 
         onSend<ServerboundUseItemPacket> {
-            if (!LocationUtils.currentArea.isArea(Island.SinglePlayer) || mc.player?.isShiftKeyDown == false || mc.player?.mainHandItem?.isEtherwarpItem() == null) return@onSend
+            if (!LocationUtils.currentArea.isArea(Island.SinglePlayer) || mc.player?.isShiftKeyDown == false || cachedEtherData == null) return@onSend
 
             etherPos?.pos?.let {
                 if (etherPos?.succeeded == false) return@onSend
