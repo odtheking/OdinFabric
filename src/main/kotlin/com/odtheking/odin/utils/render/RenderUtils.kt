@@ -89,14 +89,14 @@ private fun flushBatch(ctx: WorldRenderContext) {
         val buffer = bufferSource.getBuffer(lineRenderLayers[depthState])
 
         for (line in lines) {
-            val dirX = (line.to.x - line.from.x).toFloat()
-            val dirY = (line.to.y - line.from.y).toFloat()
-            val dirZ = (line.to.z - line.from.z).toFloat()
+            val dirX = line.to.x - line.from.x
+            val dirY = line.to.y - line.from.y
+            val dirZ = line.to.z - line.from.z
 
             ShapeRenderer.renderVector(
                 matrix, buffer,
                 Vector3f(line.from.x.toFloat(), line.from.y.toFloat(), line.from.z.toFloat()),
-                Vec3(dirX.toDouble(), dirY.toDouble(), dirZ.toDouble()),
+                Vec3(dirX, dirY, dirZ),
                 line.color
             )
         }
