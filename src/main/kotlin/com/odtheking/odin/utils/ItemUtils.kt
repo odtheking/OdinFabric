@@ -50,6 +50,15 @@ val ItemStack.texture: String?
     get() =
         get(DataComponents.PROFILE)?.gameProfile()?.properties?.get("textures")?.firstOrNull()?.value
 
+val strengthRegex = Regex("Strength: \\+(\\d+)")
+
+inline val ItemStack.strength: Int
+    get() = this.loreString.firstOrNull {
+        it.startsWith("Strength:")
+    }?.let { lineString ->
+        strengthRegex.find(lineString)?.groups?.get(1)?.value?.toIntOrNull()
+    } ?: 0
+
 enum class ItemRarity(
     val loreName: String,
     val colorCode: String,
