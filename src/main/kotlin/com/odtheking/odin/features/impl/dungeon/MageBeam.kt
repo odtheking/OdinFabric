@@ -94,7 +94,7 @@ object MageBeam : Module(
             }
         }
 
-        on<RenderEvent.Last> {
+        on<RenderEvent.Extract> {
             if (!DungeonUtils.inDungeons) return@on
 
             for (beam in activeBeams) {
@@ -102,7 +102,7 @@ object MageBeam : Module(
                 val furthest = beam.furthestPoint ?: continue
                 if (closest == furthest) continue
 
-                context.drawLine(listOf(closest, furthest), color, depth, 8f)
+                drawLine(listOf(closest, furthest), color, depth, 8f)
             }
         }
 
