@@ -39,7 +39,8 @@ class Panel(private val category: Category) {
     private val textWidth = NVGRenderer.textWidth(category.displayName, 22f, NVGRenderer.defaultFont)
     private var previousHeight = 0f
     private var scrollOffset = 0f
-    private var dragging = false
+    var dragging = false
+        private set
     private var deltaX = 0f
     private var deltaY = 0f
 

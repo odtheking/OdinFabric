@@ -25,31 +25,92 @@ object MapInfo : Module(
     private val printWhenScore by BooleanSetting("Print Score Time", true, desc = "Sends elapsed time in chat when 300 score is reached.")
     val togglePaul by SelectorSetting("Paul Settings", "Automatic", arrayListOf("Automatic", "Force Disable", "Force Enable"), desc = "Toggle Paul's settings.")
 
+    private var cachedScore = 0
+    private var cachedSecretCount = 0
+    private var cachedNeededSecrets = 0
+    private var cachedTotalSecrets = 0
+    private var cachedKnownSecrets = 0
+    private var cachedMimicKilled = false
+    private var cachedPrinceKilled = false
+    private var cachedCryptCount = 0
+    private var cachedDeathCount = 0
+
     private val fullHud: HudElement by HUD("Full Hud", "Displays a full hud with score, secrets, crypts, and mimic info.") {
         if ((!DungeonUtils.inDungeons || (disableInBoss && DungeonUtils.inBoss)) && !it) return@HUD 0 to 0
 
-        val scoreText = "§7Score: ${colorizeScore(DungeonUtils.score)}"
-        val secretText = "§7Secrets: §b${DungeonUtils.secretCount}" +
-                (if (fullAddRemaining && alternate) "§7-§d${(DungeonUtils.neededSecretsAmount - DungeonUtils.secretCount).coerceAtLeast(0)}" else "") +
-                "§7-§e${if (fullRemaining != 0 || (fullAddRemaining && alternate)) DungeonUtils.neededSecretsAmount else (DungeonUtils.neededSecretsAmount - DungeonUtils.secretCount).coerceAtLeast(0)}"+
-                "§7-§c${DungeonUtils.totalSecrets}"
-        val unknownSecretsText = if (unknown == 0) "§7Deaths: §c${colorizeDeaths(DungeonUtils.deathCount)}" else "§7Unfound: §e${(DungeonUtils.totalSecrets - DungeonUtils.knownSecrets).coerceAtLeast(0)}"
-        val mimicText = "§7M: ${if (DungeonUtils.mimicKilled) "§a✔" else "§c✘"} §8| §7P: ${if (DungeonUtils.princeKilled) "§a✔" else "§c✘"}"
-        val cryptText = "§7Crypts: ${colorizeCrypts(DungeonUtils.cryptCount.coerceAtMost(5))}"
+        val score = cachedScore
+        val secretCount = cachedSecretCount
+        val neededSecrets = cachedNeededSecrets
+        val totalSecrets = cachedTotalSecrets
+        val mimicKilled = cachedMimicKilled
+        val princeKilled = cachedPrinceKilled
+        val cryptCount = cachedCryptCount
+
+        val showRemaining = fullAddRemaining && alternate
+        val useNeededSecrets = fullRemaining != 0 || showRemaining
+
+        val scoreText = buildString {
+            append("§7Score: ")
+            append(colorizeScore(score))
+        }
+
+        val secretText = buildString {
+            append("§7Secrets: §b")
+            append(secretCount)
+            if (showRemaining) {
+                append("§7-§d")
+                append((neededSecrets - secretCount).coerceAtLeast(0))
+            }
+            append("§7-§e")
+            append(if (useNeededSecrets) neededSecrets else (neededSecrets - secretCount).coerceAtLeast(0))
+            append("§7-§c")
+            append(totalSecrets)
+        }
+
+        val unknownSecretsText = if (unknown == 0) {
+            buildString {
+                append("§7Deaths: §c")
+                append(colorizeDeaths(cachedDeathCount))
+            }
+        } else {
+            buildString {
+                append("§7Unfound: §e")
+                append((totalSecrets - cachedKnownSecrets).coerceAtLeast(0))
+            }
+        }
+
+        val mimicText = buildString {
+            append("§7M: ")
+            append(if (mimicKilled) "§a✔" else "§c✘")
+            append(" §8| §7P: ")
+            append(if (princeKilled) "§a✔" else "§c✘")
+        }
+
+        val cryptText = buildString {
+            append("§7Crypts: ")
+            append(colorizeCrypts(cryptCount))
+        }
 
         val trText = if (alternate) cryptText else scoreText
         val brText = if (alternate) scoreText else cryptText
 
-        if (fullBackground) fill((-fullMargin).toInt(), 0, (fullWidth + (fullMargin * 2)).toInt(), 19, fullColor.rgba)
+        val hudWidth = fullWidth
         val brWidth = getStringWidth(brText)
+        val trWidth = getStringWidth(trText)
+        val mimicWidth = getStringWidth(mimicText)
+
+        if (fullBackground) {
+            val margin = fullMargin
+            fill((-margin).toInt(), 0, (hudWidth + (margin * 2)).toInt(), 19, fullColor.rgba)
+        }
 
         text(secretText, 0, 0, Colors.WHITE)
-        text(trText, fullWidth - 1 - getStringWidth(trText), 1, Colors.WHITE)
+        text(trText, hudWidth - 1 - trWidth, 1, Colors.WHITE)
         val unknownWidth = textDim(unknownSecretsText, 1, 10, Colors.WHITE).first
-        val centerX = (unknownWidth + 1 + (fullWidth - 1 - unknownWidth - brWidth) / 2) - getStringWidth(mimicText) / 2
+        val centerX = (unknownWidth + 1 + (hudWidth - 1 - unknownWidth - brWidth) / 2) - mimicWidth / 2
         text(mimicText, centerX, 10, Colors.WHITE)
-        text(brText, fullWidth - 1 - brWidth, 10, Colors.WHITE)
-        fullWidth to 18
+        text(brText, hudWidth - 1 - brWidth, 10, Colors.WHITE)
+        hudWidth to 18
     }
 
     private val alternate by BooleanSetting("Flip Crypts and Score", false, desc = "Flips crypts and score.").withDependency { fullHud.enabled }
@@ -63,13 +124,30 @@ object MapInfo : Module(
 
     private val compactSecrets: HudElement by HUD("Compact Secrets", "Displays a compact secrets hud with score and secrets.") {
         if ((!DungeonUtils.inDungeons || (disableInBoss && DungeonUtils.inBoss)) && !it) return@HUD 0 to 0
-        val secretText = "§7Secrets: §b${DungeonUtils.secretCount}" +
-                (if (compactAddRemaining) "§7-§d${(DungeonUtils.neededSecretsAmount - DungeonUtils.secretCount).coerceAtLeast(0)}" else "") +
-                "§7-§e${if (compactRemaining == 0 || fullAddRemaining) DungeonUtils.neededSecretsAmount else (DungeonUtils.neededSecretsAmount - DungeonUtils.secretCount).coerceAtLeast(0)}"+
-                "§7-§c${DungeonUtils.totalSecrets}"
+
+        val secretCount = cachedSecretCount
+        val neededSecrets = cachedNeededSecrets
+        val totalSecrets = cachedTotalSecrets
+
+        val secretText = buildString {
+            append("§7Secrets: §b")
+            append(secretCount)
+            if (compactAddRemaining) {
+                append("§7-§d")
+                append((neededSecrets - secretCount).coerceAtLeast(0))
+            }
+            append("§7-§e")
+            append(if (compactRemaining == 0 || fullAddRemaining) neededSecrets else (neededSecrets - secretCount).coerceAtLeast(0))
+            append("§7-§c")
+            append(totalSecrets)
+        }
+
         val width = getStringWidth(secretText)
 
-        if (compactSecretBackground) fill((-compactSecretMargin).toInt(), 0, (width + 2 + (compactSecretMargin * 2)).toInt(), 9, compactSecretColor.rgba)
+        if (compactSecretBackground) {
+            val margin = compactSecretMargin
+            fill((-margin).toInt(), 0, (width + 2 + (margin * 2)).toInt(), 9, compactSecretColor.rgba)
+        }
         text(secretText, 0, 0, Colors.WHITE)
         width to 9
     }
@@ -82,10 +160,27 @@ object MapInfo : Module(
 
     private val compactScore: HudElement by HUD("Compact Score", "Displays a compact score hud with score info.") {
         if ((!DungeonUtils.inDungeons || (disableInBoss && DungeonUtils.inBoss)) && !it) return@HUD 0 to 0
-        val missing = (if (DungeonUtils.mimicKilled) 0 else 2) + (if (DungeonUtils.princeKilled) 0 else 1)
-        val scoreText = "§7Score: ${colorizeScore(DungeonUtils.score)}" + if (missing > 0) " §7(§6+${missing}?§7)" else ""
+
+        val score = cachedScore
+        val mimicKilled = cachedMimicKilled
+        val princeKilled = cachedPrinceKilled
+
+        val missing = (if (mimicKilled) 0 else 2) + (if (princeKilled) 0 else 1)
+        val scoreText = buildString {
+            append("§7Score: ")
+            append(colorizeScore(score))
+            if (missing > 0) {
+                append(" §7(§6+")
+                append(missing)
+                append("?§7)")
+            }
+        }
+
         val width = getStringWidth(scoreText)
-        if (compactScoreBackground) fill((-compactScoreMargin).toInt(), 0, (width + 2 + (compactScoreMargin * 2)).toInt(), 9, compactScoreColor.rgba)
+        if (compactScoreBackground) {
+            val margin = compactScoreMargin
+            fill((-margin).toInt(), 0, (width + 2 + (margin * 2)).toInt(), 9, compactScoreColor.rgba)
+        }
         text(scoreText, 0, 0, Colors.WHITE)
         width to 9
     }
@@ -97,6 +192,19 @@ object MapInfo : Module(
     var shownTitle = false
 
     init {
+        TickTask(1) {
+            if (!enabled || !DungeonUtils.inDungeons) return@TickTask
+            cachedScore = DungeonUtils.score
+            cachedSecretCount = DungeonUtils.secretCount
+            cachedNeededSecrets = DungeonUtils.neededSecretsAmount
+            cachedTotalSecrets = DungeonUtils.totalSecrets
+            cachedKnownSecrets = DungeonUtils.knownSecrets
+            cachedMimicKilled = DungeonUtils.mimicKilled
+            cachedPrinceKilled = DungeonUtils.princeKilled
+            cachedCryptCount = DungeonUtils.cryptCount.coerceAtMost(5)
+            cachedDeathCount = DungeonUtils.deathCount
+        }
+
         TickTask(10) {
             if (!enabled || !DungeonUtils.inDungeons || shownTitle || (!scoreTitle && !printWhenScore) || DungeonUtils.score < 300) return@TickTask
             if (scoreTitle) alert(scoreText.replace("&", "§"))

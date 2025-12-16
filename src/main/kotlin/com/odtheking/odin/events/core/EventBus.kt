@@ -16,6 +16,8 @@ object EventBus {
     @JvmField
     internal val invokers = HashMap<Class<out Event>, Invoker>()
 
+    private val profilerNameCache = HashMap<Class<out Event>, String>()
+
     fun subscribe(subscriber: Any) {
         if (activeSubscribers.add(subscriber)) {
             subscriberClasses[subscriber] = subscriber.javaClass
@@ -33,10 +35,14 @@ object EventBus {
 
     @JvmStatic
     fun <T : Event> post(event: T) {
+        val eventClass = event.javaClass
+        val invoker = invokers[eventClass] ?: return
+
         val profiler = Profiler.get()
-        profiler.push("Odin: ${event.javaClass.simpleName}")
+        val profilerName = profilerNameCache.getOrPut(eventClass) { "Odin: ${eventClass.simpleName}" }
+        profiler.push(profilerName)
         try {
-            invokers[event.javaClass]?.invoke(event, profiler)
+            invoker.invoke(event, profiler)
         } finally {
             profiler.pop()
         }
