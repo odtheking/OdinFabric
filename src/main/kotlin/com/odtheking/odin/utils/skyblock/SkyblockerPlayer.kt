@@ -1,6 +1,8 @@
 package com.odtheking.odin.utils.skyblock
 
 import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.events.TickEvent
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.utils.noControlCodes
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
@@ -25,8 +27,8 @@ object SkyblockPlayer {
     private val OVERFLOW_MANA_REGEX = Regex("([\\d|,]+)ʬ")
     private val DEFENSE_REGEX = Regex("([\\d|,]+)❈ Defense")
 
-    inline val currentHealth: Int
-        get() = (mc.player?.let { player -> (maxHealth * player.health / player.maxHealth).toInt() } ?: 0)
+    var currentHealth: Int = 0
+        private set
     var maxHealth: Int = 0
     var currentMana: Int = 0
     var maxMana: Int = 0
@@ -36,6 +38,10 @@ object SkyblockPlayer {
     var effectiveHP: Int = 0
 
     init {
+        on<TickEvent.End> {
+            currentHealth = (mc.player?.let { player -> (maxHealth * player.health / player.maxHealth).toInt() } ?: 0)
+        }
+
         onReceive<ClientboundSystemChatPacket> {
             if (!overlay) return@onReceive
             val msg = content?.string?.noControlCodes ?: return@onReceive
