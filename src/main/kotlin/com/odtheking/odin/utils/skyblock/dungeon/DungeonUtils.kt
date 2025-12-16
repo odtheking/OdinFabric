@@ -73,13 +73,13 @@ object DungeonUtils {
         get() = DungeonListener.currentRoom?.data?.name ?: "Unknown"
 
     inline val dungeonTeammates: List<DungeonPlayer>
-        get() = DungeonListener.dungeonTeammates.toList()
+        get() = DungeonListener.dungeonTeammates
 
     inline val dungeonTeammatesNoSelf: List<DungeonPlayer>
-        get() = DungeonListener.dungeonTeammatesNoSelf.toList()
+        get() = DungeonListener.dungeonTeammatesNoSelf
 
     inline val leapTeammates: List<DungeonPlayer>
-        get() = DungeonListener.leapTeammates.toList()
+        get() = DungeonListener.leapTeammates
 
     inline val currentDungeonPlayer: DungeonPlayer
         get() = dungeonTeammates.find { it.name == mc.player?.name?.string } ?:

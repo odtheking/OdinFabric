@@ -196,11 +196,11 @@ object MapInfo : Module(
     private val roomSecrets by HUD("Room Secrets", "Displays the number of secrets in the current room.") {
         if ((!DungeonUtils.inDungeons ||  DungeonUtils.inBoss) && !it) return@HUD 0 to 0
 
-        val secrets = currentRoomSecrets ?: return@HUD 0 to 0
+        val secrets = if (it) 0 to 2 else currentRoomSecrets ?: return@HUD 0 to 0
         val roomText = buildString {
-            append("§7Secrets: §b")
+            append("§7\uD83D\uDDDD §f")
             append(secrets.first)
-            append("§7/§c")
+            append("§7/§f")
             append(secrets.second)
         }
 

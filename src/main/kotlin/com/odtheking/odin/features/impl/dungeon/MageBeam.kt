@@ -26,6 +26,7 @@ object MageBeam : Module(
     private val color by ColorSetting("Color", Colors.MINECRAFT_DARK_RED, true, desc = "The color of the beam.")
     private val depth by BooleanSetting("Depth Check", true, desc = "Whether or not to depth check the beam.")
     private val hideParticles by BooleanSetting("Hide Particles", true, desc = "Whether or not to hide the particles.")
+    private val minPoints by NumberSetting("Min Points", 3, 2, 10, 1, desc = "Minimum number of points required to render a beam.")
 
     private data class MageBeamData(
         val points: CopyOnWriteArrayList<Vec3> = CopyOnWriteArrayList(),
@@ -34,15 +35,16 @@ object MageBeam : Module(
         var furthestPoint: Vec3? = null
     ) {
         fun updateEndpoints(playerPos: Vec3) {
-            if (points.isEmpty()) return
+            val pointsList = points.toList()
+            if (pointsList.isEmpty()) return
 
-            var closest = points[0]
-            var furthest = points[0]
+            var closest = pointsList[0]
+            var furthest = pointsList[0]
             var minDistSqr = closest.distanceToSqr(playerPos)
             var maxDistSqr = minDistSqr
 
-            for (i in 1 until points.size) {
-                val point = points[i]
+            for (i in 1 until pointsList.size) {
+                val point = pointsList[i]
                 val distSqr = point.distanceToSqr(playerPos)
 
                 if (distSqr < minDistSqr) {
@@ -98,6 +100,9 @@ object MageBeam : Module(
             if (!DungeonUtils.inDungeons) return@on
 
             for (beam in activeBeams) {
+                val pointsSize = beam.points.size
+                if (pointsSize < minPoints) continue
+
                 val closest = beam.closestPoint ?: continue
                 val furthest = beam.furthestPoint ?: continue
                 if (closest == furthest) continue
