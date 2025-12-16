@@ -8,6 +8,7 @@ import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.Colors
+import com.odtheking.odin.utils.devMessage
 import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
@@ -28,12 +29,14 @@ object SimonSays : Module(
 
     private val startButton = BlockPos(110, 121, 91)
     private val clickInOrder = ArrayList<BlockPos>()
+    private var lastLanternTick = -1
     private var clickNeeded = 0
     private var firstPhase = true
 
     private fun resetSolution() {
         clickInOrder.clear()
         clickNeeded = 0
+        lastLanternTick = -1
         firstPhase = true
     }
 
@@ -75,6 +78,7 @@ object SimonSays : Module(
             if (DungeonUtils.getF7Phase() != M7Phases.P3 || !firstPhase) return@on
 
             if (grid.count { mc.level?.getBlockState(it)?.block == Blocks.STONE_BUTTON } > 8) {
+                devMessage("Grid reset detected. (${clickInOrder.size})")
                 if (clickInOrder.size == 2) clickInOrder.reverse()
                 firstPhase = false
             }
@@ -90,7 +94,7 @@ object SimonSays : Module(
             ) cancel()
         }
 
-        on<RenderEvent.Extract> {
+        on<RenderEvent.Last> {
             if (DungeonUtils.getF7Phase() != M7Phases.P3 || clickNeeded >= clickInOrder.size) return@on
 
             for (index in clickNeeded until clickInOrder.size) {
@@ -101,7 +105,7 @@ object SimonSays : Module(
                         else -> thirdColor
                     }
 
-                    drawStyledBox(AABB(x + 0.05, y + 0.37, z + 0.3, x - 0.15, y + 0.63, z + 0.7), color, style, true)
+                    context.drawStyledBox(AABB(x + 0.05, y + 0.37, z + 0.3, x - 0.15, y + 0.63, z + 0.7), color, style, true)
                 }
             }
         }

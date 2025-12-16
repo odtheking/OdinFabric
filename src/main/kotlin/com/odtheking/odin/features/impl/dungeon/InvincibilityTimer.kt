@@ -28,7 +28,7 @@ object InvincibilityTimer : Module(
     private val showPhoenix by BooleanSetting("Show Phoenix Pet", true, desc = "Shows the Phoenix Pet in the HUD.")
 
     private val hud by HUD(name, "Shows the invincibility time in the HUD.") { example ->
-        if ((!DungeonUtils.inDungeons && !example) || (showOnlyInBoss && !DungeonUtils.inBoss)) return@HUD 0 to 0
+        if ((!DungeonUtils.inDungeons && !example) || (showOnlyInBoss && !DungeonUtils.inBoss && !example)) return@HUD 0 to 0
 
         val visibleTypes = InvincibilityType.entries.filter { type ->
             (when (type) {
