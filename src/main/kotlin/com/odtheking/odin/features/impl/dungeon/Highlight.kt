@@ -9,7 +9,6 @@ import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Colors
-import com.odtheking.odin.utils.noControlCodes
 import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.renderBoundingBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
@@ -30,12 +29,11 @@ object Highlight : Module(
 
     private val teammateClassGlow by BooleanSetting("Teammate Class Glow", true, desc = "Highlights dungeon teammates based on their class color.")
 
-    private val dungeonMobSpawns = hashSetOf("Lurker", "Dreadlord", "Souleater", "Zombie", "Skeleton", "Skeletor", "Sniper", "Super Archer", "Spider", "Fels", "Withermancer")
+    private val dungeonMobSpawns = hashSetOf("Lurker", "Dreadlord", "Souleater", "Zombie", "Skeleton", "Skeletor", "Sniper", "Super Archer", "Spider", "Fels", "Withermancer", "Lost Adventurer", "Angry Archeologist")
     // https://regex101.com/r/QQf502/1
     private val starredRegex = Regex("^.*✯ .*\\d{1,3}(?:,\\d{3})*(?:\\.\\d+)?(?:[kM])?❤$")
 
-    private data class TrackedEntity(val entity: Entity, var canSee: Boolean = false)
-    private val trackedEntities = mutableListOf<TrackedEntity>()
+    private val entities = mutableSetOf<Entity>()
 
     init {
         on<TickEvent.End> {
@@ -44,40 +42,43 @@ object Highlight : Module(
             val entitiesToRemove = mutableListOf<Entity>()
             mc.level?.entitiesForRendering()?.forEach { e ->
                 val entity = e ?: return@forEach
-                val entityName = entity.takeIf { entity.isAlive }?.name?.string?.noControlCodes ?: return@forEach
+                if (!entity.isAlive || entity !is ArmorStand) return@forEach
 
-                if (hideNonNames && entity is ArmorStand && entity.isInvisible && dungeonMobSpawns.any { it in entityName } && !starredRegex.matches(entityName))
+                val entityName = entity.name?.string ?: return@forEach
+                if (!dungeonMobSpawns.any { it in entityName }) return@forEach
+
+                val isStarred = starredRegex.matches(entityName)
+
+                if (hideNonNames && entity.isInvisible && !isStarred) {
                     entitiesToRemove.add(entity)
+                    return@forEach
+                }
 
-                if (entity !is ArmorStand || dungeonMobSpawns.none { it in entityName } || !starredRegex.matches(entityName)) return@forEach
+                if (!isStarred) return@forEach
 
                 mc.level?.getEntities(entity, entity.boundingBox.move(0.0, -1.0, 0.0)) { isValidEntity(it) }
-                    ?.firstOrNull()?.let { foundEntity ->
-                        if (trackedEntities.none { it.entity == foundEntity }) {
-                            val canSee = mc.player?.hasLineOfSight(
-                                foundEntity, ClipContext.Block.VISUAL,
-                                ClipContext.Fluid.NONE, foundEntity.eyeY
-                            ) ?: false
-                            trackedEntities.add(TrackedEntity(foundEntity, canSee))
-                        }
-                    }
+                    ?.firstOrNull()?.let { entities.add(it) }
             }
             entitiesToRemove.forEach { it.remove(Entity.RemovalReason.DISCARDED) }
-            trackedEntities.removeIf { !it.entity.isAlive }
+            entities.removeIf { entity -> !entity.isAlive }
         }
 
         on<RenderEvent.Last> {
             if (!highlightStar || !DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
 
-            trackedEntities.forEach { tracked ->
-                if (!tracked.entity.isAlive) return@forEach
+            entities.forEach { entity ->
+                if (!entity.isAlive) return@forEach
+                val canSee = mc.player?.hasLineOfSight(
+                    entity, ClipContext.Block.VISUAL,
+                    ClipContext.Fluid.NONE, entity.eyeY
+                ) ?: false
 
-                context.drawStyledBox(tracked.entity.renderBoundingBox, color, renderStyle, !tracked.canSee)
+                context.drawStyledBox(entity.renderBoundingBox, color, renderStyle, !canSee)
             }
         }
 
         on<WorldLoadEvent> {
-            trackedEntities.clear()
+            entities.clear()
         }
     }
 

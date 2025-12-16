@@ -45,9 +45,13 @@ object ClickGUI : Screen(Component.literal("Click GUI")) {
                 NVGRenderer.globalAlpha(openAnim.get(0f, 1f))
             }
 
-            for (element in panels) {
-                element.draw(odinMouseX, odinMouseY)
+            val draggedPanel = panels.firstOrNull { it.dragging }
+            for (panel in panels) {
+                if (panel != draggedPanel) panel.draw(odinMouseX, odinMouseY)
             }
+
+            draggedPanel?.draw(odinMouseX, odinMouseY)
+
             SearchBar.draw(mc.window.width / 2f - 175f, mc.window.height - 110f, odinMouseX, odinMouseY)
             desc.render()
         }

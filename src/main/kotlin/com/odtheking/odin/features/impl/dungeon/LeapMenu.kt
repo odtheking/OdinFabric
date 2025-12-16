@@ -30,16 +30,16 @@ object LeapMenu : Module(
     private val colorStyle by BooleanSetting("Color Style", false, desc = "Which color style to use.")
     private val backgroundColor by ColorSetting("Background Color", Colors.gray38.withAlpha(0.75f), true, desc = "Color of the background of the leap menu.").withDependency { !colorStyle }
     private val scale by NumberSetting("Scale", 0.5f, 0.1f, 2f, 0.1f, desc = "Scale of the leap menu.", unit = "x")
-    private val useNumberKeys by BooleanSetting("Use Number Keys", false, desc = "Use keyboard keys to leap to the player you want, going from left to right, top to bottom.")
-    private val topLeftKeybind by KeybindSetting("Top Left", GLFW.GLFW_KEY_1, "Used to click on the first person in the leap menu.").withDependency { useNumberKeys }
-    private val topRightKeybind by KeybindSetting("Top Right", GLFW.GLFW_KEY_2, "Used to click on the second person in the leap menu.").withDependency { useNumberKeys }
-    private val bottomLeftKeybind by KeybindSetting("Bottom Left", GLFW.GLFW_KEY_3, "Used to click on the third person in the leap menu.").withDependency { useNumberKeys }
-    private val bottomRightKeybind by KeybindSetting("Bottom right", GLFW.GLFW_KEY_4, "Used to click on the fourth person in the leap menu.").withDependency { useNumberKeys }
+    private val archerKeybind by KeybindSetting("Archer", GLFW.GLFW_KEY_UNKNOWN, "Used to click on the first person in the leap menu.")
+    private val berserkerKeybind by KeybindSetting("Berserker", GLFW.GLFW_KEY_UNKNOWN, "Used to click on the second person in the leap menu.")
+    private val mageKeybind by KeybindSetting("Healer", GLFW.GLFW_KEY_UNKNOWN, "Used to click on the third person in the leap menu.")
+    private val tankKeybind by KeybindSetting("Mage", GLFW.GLFW_KEY_UNKNOWN, "Used to click on the fourth person in the leap menu.")
+    private val healerKeybind by KeybindSetting("Tank", GLFW.GLFW_KEY_UNKNOWN, "Used to click on the fourth person in the leap menu.")
+
     private val leapAnnounce by BooleanSetting("Leap Announce", false, desc = "Announces when you leap to a player.")
     private val hoverHandler = List(4) { HoverHandler(200L) }
 
     private val EMPTY = DungeonPlayer("Empty", DungeonClass.Unknown, 0, ResourceLocation.withDefaultNamespace("textures/entity/steve.png"))
-    private val keybindList = listOf(topLeftKeybind, topRightKeybind, bottomLeftKeybind, bottomRightKeybind)
     private val leapedRegex = Regex("You have teleported to (\\w{1,16})!")
     private val imageCacheMap = mutableMapOf<String, Int>()
     const val BOX_WIDTH = 800f
@@ -112,10 +112,12 @@ object LeapMenu : Module(
 
         on<GuiEvent.KeyPress> {
             val chest = (screen as? AbstractContainerScreen<*>) ?: return@on
-            if (!useNumberKeys || chest.title?.string?.equalsOneOf("Spirit Leap", "Teleport to Player") == false || keybindList.none { it.value == keyCode } || leapTeammates.isEmpty()) return@on
+            val keybindList = listOf(archerKeybind, berserkerKeybind, healerKeybind, mageKeybind, tankKeybind)
+            if (chest.title?.string?.equalsOneOf("Spirit Leap", "Teleport to Player") == false || keybindList.none { it.value == keyCode } || leapTeammates.isEmpty()) return@on
 
-            val index = keybindList.indexOfFirst { it.value == keyCode }
-            val playerToLeap = if (index + 1 > leapTeammates.size) return@on else leapTeammates[index]
+            val index = DungeonClass.entries.find { clazz -> clazz.ordinal == keybindList.indexOfFirst { it.value == keyCode } }?.let { clazz -> leapTeammates.indexOfFirst { it.clazz == clazz } } ?: return@on
+            if (index == -1) return@on
+            val playerToLeap = leapTeammates[index]
             if (playerToLeap == EMPTY) return@on
             if (playerToLeap.isDead) return@on modMessage("This player is dead, can't leap.")
 

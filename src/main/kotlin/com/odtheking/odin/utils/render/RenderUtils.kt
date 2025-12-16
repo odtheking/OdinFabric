@@ -21,7 +21,10 @@ import net.minecraft.core.BlockPos
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
 import org.joml.Vector3f
-import kotlin.math.*
+import kotlin.math.cos
+import kotlin.math.max
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 private class RenderBatch {
     val lines = listOf(mutableListOf<LineData>(), mutableListOf<LineData>())
@@ -79,6 +82,7 @@ private fun flushBatch(ctx: WorldRenderContext) {
 
     matrix.pushPose()
     matrix.translate(-camera.x, -camera.y, -camera.z)
+    RenderSystem.lineWidth(8f)
 
     val lineRenderLayers = listOf(CustomRenderLayer.LINE_LIST, CustomRenderLayer.LINE_LIST_ESP)
     for ((depthState, lines) in currentBatch.lines.withIndex()) {
@@ -86,29 +90,31 @@ private fun flushBatch(ctx: WorldRenderContext) {
 
         val buffer = bufferSource.getBuffer(lineRenderLayers[depthState])
 
-        val thicknessMap = mutableMapOf<Float, MutableList<RenderBatch.LineData>>()
         for (line in lines) {
-            val dist = camera.distanceToSqr(line.from)
-            val adjustedThickness = (line.thickness * (1f / dist.pow(0.15)))
-            val t = (adjustedThickness * 2).roundToInt() / 2f
-            thicknessMap.getOrPut(t) { mutableListOf() }.add(line)
+            val dirX = (line.to.x - line.from.x).toFloat()
+            val dirY = (line.to.y - line.from.y).toFloat()
+            val dirZ = (line.to.z - line.from.z).toFloat()
+
+            ShapeRenderer.renderVector(
+                matrix, buffer,
+                Vector3f(line.from.x.toFloat(), line.from.y.toFloat(), line.from.z.toFloat()),
+                Vec3(dirX.toDouble(), dirY.toDouble(), dirZ.toDouble()),
+                line.color
+            )
         }
+    }
 
-        for ((thickness, group) in thicknessMap) {
-            RenderSystem.lineWidth(thickness)
+    for ((depthState, boxes) in currentBatch.wireBoxes.withIndex()) {
+        if (boxes.isEmpty()) continue
+        val buffer = bufferSource.getBuffer(lineRenderLayers[depthState])
 
-            for (line in group) {
-                val dirX = (line.to.x - line.from.x).toFloat()
-                val dirY = (line.to.y - line.from.y).toFloat()
-                val dirZ = (line.to.z - line.from.z).toFloat()
+        for (box in boxes) {
+           if (frustum?.isVisible(box.aabb) == false) continue
 
-                ShapeRenderer.renderVector(
-                    matrix, buffer,
-                    Vector3f(line.from.x.toFloat(), line.from.y.toFloat(), line.from.z.toFloat()),
-                    Vec3(dirX.toDouble(), dirY.toDouble(), dirZ.toDouble()),
-                    line.color
-                )
-            }
+           ShapeRenderer.renderLineBox(
+               matrix, buffer, box.aabb,
+               box.color.redFloat, box.color.greenFloat, box.color.blueFloat, box.color.alphaFloat
+           )
         }
     }
 
@@ -126,34 +132,6 @@ private fun flushBatch(ctx: WorldRenderContext) {
                 box.aabb.maxX, box.aabb.maxY, box.aabb.maxZ,
                 box.color.redFloat, box.color.greenFloat, box.color.blueFloat, box.color.alphaFloat
             )
-        }
-    }
-
-    for ((depthState, boxes) in currentBatch.wireBoxes.withIndex()) {
-        if (boxes.isEmpty()) continue
-
-        val buffer = bufferSource.getBuffer(lineRenderLayers[depthState])
-
-        val thicknessMap = mutableMapOf<Float, MutableList<RenderBatch.BoxData>>()
-        for (box in boxes) {
-            val dist = camera.distanceToSqr(box.aabb.center)
-            val distFactor = 1.0 / dist.pow(0.15)
-            val adjustedThickness = (box.thickness * distFactor).toFloat()
-            val t = (adjustedThickness * 2).roundToInt() / 2f
-            thicknessMap.getOrPut(t) { mutableListOf() }.add(box)
-        }
-
-        for ((thickness, group) in thicknessMap) {
-            RenderSystem.lineWidth(thickness)
-
-            for (box in group) {
-                if (frustum?.isVisible(box.aabb) == false) continue
-
-                ShapeRenderer.renderLineBox(
-                    matrix, buffer, box.aabb,
-                    box.color.redFloat, box.color.greenFloat, box.color.blueFloat, box.color.alphaFloat
-                )
-            }
         }
     }
 
