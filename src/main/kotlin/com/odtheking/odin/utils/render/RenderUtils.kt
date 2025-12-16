@@ -63,6 +63,7 @@ object RenderBatchManager {
 
             matrix.pushPose()
             matrix.translate(-camera.x, -camera.y, -camera.z)
+            RenderSystem.lineWidth(8f)
 
             matrix.renderBatchedLinesAndWireBoxes(renderConsumer.lines, renderConsumer.wireBoxes, bufferSource)
             matrix.renderBatchedFilledBoxes(renderConsumer.filledBoxes, bufferSource)
@@ -87,11 +88,8 @@ private fun PoseStack.renderBatchedLinesAndWireBoxes(
         if (lines[depthState].isEmpty() && wireBoxes[depthState].isEmpty()) continue
         val buffer = bufferSource.getBuffer(lineRenderLayers[depthState])
 
-        val linesByThickness = lines[depthState].groupBy { it.thickness }
-        for ((thickness, thicknessLines) in linesByThickness) {
-            RenderSystem.lineWidth(thickness)
-
-            for (line in thicknessLines) {
+        for (lineType in lines) {
+            for (line in lineType) {
                 val dirX = (line.to.x - line.from.x).toFloat()
                 val dirY = (line.to.y - line.from.y).toFloat()
                 val dirZ = (line.to.z - line.from.z).toFloat()
@@ -105,11 +103,8 @@ private fun PoseStack.renderBatchedLinesAndWireBoxes(
             }
         }
 
-        val boxesByThickness = wireBoxes[depthState].groupBy { it.thickness }
-        for ((thickness, thicknessBoxes) in boxesByThickness) {
-            RenderSystem.lineWidth(thickness)
-
-            for (box in thicknessBoxes) {
+        for (boxes in wireBoxes) {
+            for (box in boxes) {
                 ShapeRenderer.renderLineBox(
                     last(), buffer, box.aabb,
                     box.r, box.g, box.b, box.a
