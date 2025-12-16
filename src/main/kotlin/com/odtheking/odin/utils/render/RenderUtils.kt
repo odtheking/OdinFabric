@@ -1,6 +1,5 @@
 package com.odtheking.odin.utils.render
 
-import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.PoseStack
 import com.odtheking.mixin.accessors.BeaconBeamAccessor
 import com.odtheking.odin.OdinMod.mc
@@ -63,12 +62,10 @@ object RenderBatchManager {
 
             matrix.pushPose()
             matrix.translate(-camera.x, -camera.y, -camera.z)
-            RenderSystem.lineWidth(8f)
 
             matrix.renderBatchedLinesAndWireBoxes(renderConsumer.lines, renderConsumer.wireBoxes, bufferSource)
             matrix.renderBatchedFilledBoxes(renderConsumer.filledBoxes, bufferSource)
 
-            RenderSystem.lineWidth(1f)
             matrix.popPose()
 
             matrix.renderBatchedBeaconBeams(renderConsumer.beaconBeams, camera)
