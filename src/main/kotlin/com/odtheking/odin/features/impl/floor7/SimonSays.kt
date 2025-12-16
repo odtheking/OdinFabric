@@ -2,14 +2,12 @@ package com.odtheking.odin.features.impl.floor7
 
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.ColorSetting
-import com.odtheking.odin.clickgui.settings.impl.NumberSetting
 import com.odtheking.odin.clickgui.settings.impl.SelectorSetting
 import com.odtheking.odin.events.*
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.Colors
-import com.odtheking.odin.utils.devMessage
 import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
@@ -27,18 +25,15 @@ object SimonSays : Module(
     private val thirdColor by ColorSetting("Third Color", Colors.MINECRAFT_RED.withAlpha(0.5f), true, desc = "The color of the buttons after the second.")
     private val style by SelectorSetting("Style", "Filled Outline", arrayListOf("Filled", "Outline", "Filled Outline"), desc = "The style of the box rendering.")
     private val blockWrong by BooleanSetting("Block Wrong Clicks", false, desc = "Blocks wrong clicks, shift will override this.")
-    private val adjustTicks by NumberSetting("Reload Ticks", 12, 0, 30, 1, desc = "Adjust the timing of the solver to wait until the device is done highlighting.")
 
     private val startButton = BlockPos(110, 121, 91)
     private val clickInOrder = ArrayList<BlockPos>()
-    private var lastLanternTick = -1
     private var clickNeeded = 0
     private var firstPhase = true
 
     private fun resetSolution() {
         clickInOrder.clear()
         clickNeeded = 0
-        lastLanternTick = -1
         firstPhase = true
     }
 
@@ -61,8 +56,7 @@ object SimonSays : Module(
                 111 ->
                     if (updated.block == Blocks.OBSIDIAN && old.block == Blocks.SEA_LANTERN && pos !in clickInOrder) {
                         clickInOrder.add(pos.immutable())
-                        if (lastLanternTick != -1) devMessage("§eLantern spawned after §a${lastLanternTick} §eserver ticks")
-                        lastLanternTick = 0
+                        if (clickInOrder.size >= 3) clickNeeded = 1
                     }
 
                 110 ->
@@ -80,15 +74,9 @@ object SimonSays : Module(
         on<TickEvent.Server> {
             if (DungeonUtils.getF7Phase() != M7Phases.P3 || !firstPhase) return@on
 
-            if (lastLanternTick != -1) {
-                if (lastLanternTick++ > adjustTicks && grid.count { mc.level?.getBlockState(it)?.block == Blocks.STONE_BUTTON } > 8) {
-                    devMessage("§aSkip should be over?")
-                    when {
-                        clickInOrder.size >= 3 -> clickInOrder.removeFirst()
-                        clickInOrder.size == 2 -> clickInOrder.reverse()
-                    }
-                    firstPhase = false
-                }
+            if (grid.count { mc.level?.getBlockState(it)?.block == Blocks.STONE_BUTTON } > 8) {
+                if (clickInOrder.size == 2) clickInOrder.reverse()
+                firstPhase = false
             }
         }
 
