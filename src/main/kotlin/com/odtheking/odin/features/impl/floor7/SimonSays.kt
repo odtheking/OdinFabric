@@ -59,7 +59,15 @@ object SimonSays : Module(
                 111 ->
                     if (updated.block == Blocks.OBSIDIAN && old.block == Blocks.SEA_LANTERN && pos !in clickInOrder) {
                         clickInOrder.add(pos.immutable())
-                        if (clickInOrder.size >= 3) clickNeeded = 1
+                        if (!firstPhase) return@on
+                        devMessage(if (clickInOrder.size == 2) "size == 2 reverse." else if (clickInOrder.size == 3) "size == 3 reverse again + skip first" else "No Skip?")
+                        when (clickInOrder.size) {
+                            2 -> clickInOrder.reverse()
+                            3 -> {
+                                clickInOrder.reverse()
+                                clickNeeded = 1
+                            }
+                        }
                     }
 
                 110 ->
@@ -79,7 +87,6 @@ object SimonSays : Module(
 
             if (grid.count { mc.level?.getBlockState(it)?.block == Blocks.STONE_BUTTON } > 8) {
                 devMessage("Grid reset detected. (${clickInOrder.size})")
-                if (clickInOrder.size == 2) clickInOrder.reverse()
                 firstPhase = false
             }
         }
@@ -94,7 +101,7 @@ object SimonSays : Module(
             ) cancel()
         }
 
-        on<RenderEvent.Last> {
+        on<RenderEvent.Extract> {
             if (DungeonUtils.getF7Phase() != M7Phases.P3 || clickNeeded >= clickInOrder.size) return@on
 
             for (index in clickNeeded until clickInOrder.size) {
@@ -105,7 +112,7 @@ object SimonSays : Module(
                         else -> thirdColor
                     }
 
-                    context.drawStyledBox(AABB(x + 0.05, y + 0.37, z + 0.3, x - 0.15, y + 0.63, z + 0.7), color, style, true)
+                    drawStyledBox(AABB(x + 0.05, y + 0.37, z + 0.3, x - 0.15, y + 0.63, z + 0.7), color, style, true)
                 }
             }
         }
