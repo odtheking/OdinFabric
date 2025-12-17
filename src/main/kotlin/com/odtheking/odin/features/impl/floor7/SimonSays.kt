@@ -60,13 +60,12 @@ object SimonSays : Module(
                 111 ->
                     if (updated.block == Blocks.OBSIDIAN && old.block == Blocks.SEA_LANTERN && pos !in clickInOrder) {
                         clickInOrder.add(pos.immutable())
-                        if (lastLanternTick != -1) devMessage("§eLantern spawned after §a${lastLanternTick} §eserver ticks")
                         lastLanternTick = 0
                         if (!firstPhase) return@on
                         devMessage(if (clickInOrder.size == 2) "size == 2 reverse." else if (clickInOrder.size == 3) "size == 3 reverse again + skip first" else return@on)
                         when (clickInOrder.size) {
                             2 -> clickInOrder.reverse()
-                            3 -> clickInOrder.removeAt(1)
+                            3 -> clickInOrder.removeAt(clickInOrder.lastIndex - 1)
                         }
                     }
 

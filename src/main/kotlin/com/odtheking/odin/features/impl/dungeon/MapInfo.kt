@@ -21,7 +21,7 @@ import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
 
 object MapInfo : Module(
     name = "Map Info",
-    description = "Displays stats about the dungeon such as score, secrets, and deaths."
+    description = "Displays stats about the dungeon such as score, secrets, and deaths. \nRequires \"Mimic\" enabled to be accurate"
 ) {
     private val disableInBoss by BooleanSetting("Disable in boss", true, desc = "Disables the information display when you're in boss.")
     private val scoreTitle by BooleanSetting("300 Score Title", true, desc = "Displays a title on 300 score.")
@@ -197,10 +197,17 @@ object MapInfo : Module(
         if ((!DungeonUtils.inDungeons ||  DungeonUtils.inBoss) && !it) return@HUD 0 to 0
 
         val secrets = if (it) 0 to 2 else currentRoomSecrets ?: return@HUD 0 to 0
+        val color = when {
+            secrets.first * 2 < secrets.second -> "§c"
+            secrets.first * 4 < secrets.second * 3 -> "§e"
+            else -> "§a"
+        }
         val roomText = buildString {
-            append("§7\uD83D\uDDDD §f")
+            append("§7\uD83D\uDDDD ")
+            append(color)
             append(secrets.first)
-            append("§7/§f")
+            append("§7/")
+            append(color)
             append(secrets.second)
         }
 
