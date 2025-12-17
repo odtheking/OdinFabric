@@ -94,15 +94,9 @@ object WebUtils {
     }.build()
 
     suspend fun hasBonusPaulScore(): Boolean {
-        val response = fetchJson<JsonObject>("https://api.hypixel.net/resources/skyblock/election")
-            .getOrElse {
-                logger.warn("Failed to fetch election data: ${it.message}")
-                return false
-            }
-
+        val response = fetchJson<JsonObject>("https://api.hypixel.net/resources/skyblock/election").getOrNull() ?: return false
         val mayor = response.getAsJsonObject("mayor") ?: return false
-        val name = mayor.get("name")?.asString ?: return false
-        return name == "Paul" && mayor.getAsJsonArray("perks")?.any { it.asJsonObject.get("name")?.asString == "EZPZ" } == true
+        return mayor.get("name")?.asString == "Paul" && mayor.getAsJsonArray("perks")?.any { it.asJsonObject.get("name")?.asString == "EZPZ" } == true
     }
 
     class InputStreamException(code: Int, url: String) : Exception("Failed to get input stream from $url: ${EnglishReasonPhraseCatalog.INSTANCE.getReason(code, null)}")
