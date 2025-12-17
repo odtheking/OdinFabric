@@ -37,12 +37,12 @@ object SimonSays : Module(
         clickInOrder.clear()
         clickNeeded = 0
         lastLanternTick = -1
-        firstPhase = true
     }
 
     init {
         on<WorldLoadEvent> {
             resetSolution()
+            firstPhase = true
         }
 
         on<BlockUpdateEvent> {
@@ -50,6 +50,7 @@ object SimonSays : Module(
 
             if (pos == startButton && updated.block == Blocks.STONE_BUTTON && updated.getValue(BlockStateProperties.POWERED)) {
                 resetSolution()
+                firstPhase = true
                 return@on
             }
 
@@ -59,7 +60,13 @@ object SimonSays : Module(
                 111 ->
                     if (updated.block == Blocks.OBSIDIAN && old.block == Blocks.SEA_LANTERN && pos !in clickInOrder) {
                         clickInOrder.add(pos.immutable())
-                        if (clickInOrder.size >= 3) clickNeeded = 1
+                        lastLanternTick = 0
+                        if (!firstPhase) return@on
+                        devMessage(if (clickInOrder.size == 2) "size == 2 reverse." else if (clickInOrder.size == 3) "size == 3 reverse again + skip first" else return@on)
+                        when (clickInOrder.size) {
+                            2 -> clickInOrder.reverse()
+                            3 -> clickInOrder.removeAt(clickInOrder.lastIndex - 1)
+                        }
                     }
 
                 110 ->
@@ -67,7 +74,7 @@ object SimonSays : Module(
                     else if (old.block == Blocks.STONE_BUTTON && updated.getValue(BlockStateProperties.POWERED)) {
                         clickNeeded = clickInOrder.indexOf(pos.east()) + 1
                         if (clickNeeded >= clickInOrder.size) {
-                            clickNeeded = 0
+                            resetSolution()
                             firstPhase = false
                         }
                     }
@@ -77,9 +84,8 @@ object SimonSays : Module(
         on<TickEvent.Server> {
             if (DungeonUtils.getF7Phase() != M7Phases.P3 || !firstPhase) return@on
 
-            if (grid.count { mc.level?.getBlockState(it)?.block == Blocks.STONE_BUTTON } > 8) {
+            if (lastLanternTick++ > 10 && grid.count { mc.level?.getBlockState(it)?.block == Blocks.STONE_BUTTON } > 8) {
                 devMessage("Grid reset detected. (${clickInOrder.size})")
-                if (clickInOrder.size == 2) clickInOrder.reverse()
                 firstPhase = false
             }
         }
@@ -94,7 +100,7 @@ object SimonSays : Module(
             ) cancel()
         }
 
-        on<RenderEvent.Last> {
+        on<RenderEvent.Extract> {
             if (DungeonUtils.getF7Phase() != M7Phases.P3 || clickNeeded >= clickInOrder.size) return@on
 
             for (index in clickNeeded until clickInOrder.size) {
@@ -105,7 +111,7 @@ object SimonSays : Module(
                         else -> thirdColor
                     }
 
-                    context.drawStyledBox(AABB(x + 0.05, y + 0.37, z + 0.3, x - 0.15, y + 0.63, z + 0.7), color, style, true)
+                    drawStyledBox(AABB(x + 0.05, y + 0.37, z + 0.3, x - 0.15, y + 0.63, z + 0.7), color, style, true)
                 }
             }
         }
