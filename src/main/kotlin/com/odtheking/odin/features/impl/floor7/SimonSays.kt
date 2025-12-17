@@ -59,6 +59,8 @@ object SimonSays : Module(
                 111 ->
                     if (updated.block == Blocks.OBSIDIAN && old.block == Blocks.SEA_LANTERN && pos !in clickInOrder) {
                         clickInOrder.add(pos.immutable())
+                        if (lastLanternTick != -1) devMessage("§eLantern spawned after §a${lastLanternTick} §eserver ticks")
+                        lastLanternTick = 0
                         if (!firstPhase) return@on
                         devMessage(if (clickInOrder.size == 2) "size == 2 reverse." else if (clickInOrder.size == 3) "size == 3 reverse again + skip first" else "No Skip?")
                         when (clickInOrder.size) {
@@ -85,7 +87,7 @@ object SimonSays : Module(
         on<TickEvent.Server> {
             if (DungeonUtils.getF7Phase() != M7Phases.P3 || !firstPhase) return@on
 
-            if (grid.count { mc.level?.getBlockState(it)?.block == Blocks.STONE_BUTTON } > 8) {
+            if (lastLanternTick++ > 10 && grid.count { mc.level?.getBlockState(it)?.block == Blocks.STONE_BUTTON } > 8) {
                 devMessage("Grid reset detected. (${clickInOrder.size})")
                 firstPhase = false
             }
