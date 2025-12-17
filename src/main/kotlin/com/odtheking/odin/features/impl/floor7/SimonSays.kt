@@ -37,12 +37,12 @@ object SimonSays : Module(
         clickInOrder.clear()
         clickNeeded = 0
         lastLanternTick = -1
-        firstPhase = true
     }
 
     init {
         on<WorldLoadEvent> {
             resetSolution()
+            firstPhase = true
         }
 
         on<BlockUpdateEvent> {
@@ -50,6 +50,7 @@ object SimonSays : Module(
 
             if (pos == startButton && updated.block == Blocks.STONE_BUTTON && updated.getValue(BlockStateProperties.POWERED)) {
                 resetSolution()
+                firstPhase = true
                 return@on
             }
 
@@ -62,12 +63,12 @@ object SimonSays : Module(
                         if (lastLanternTick != -1) devMessage("§eLantern spawned after §a${lastLanternTick} §eserver ticks")
                         lastLanternTick = 0
                         if (!firstPhase) return@on
-                        devMessage(if (clickInOrder.size == 2) "size == 2 reverse." else if (clickInOrder.size == 3) "size == 3 reverse again + skip first" else "No Skip?")
+                        devMessage(if (clickInOrder.size == 2) "size == 2 reverse." else if (clickInOrder.size == 3) "size == 3 reverse again + skip first" else return@on)
                         when (clickInOrder.size) {
                             2 -> clickInOrder.reverse()
                             3 -> {
                                 clickInOrder.reverse()
-                                clickNeeded = 1
+                                clickInOrder.removeFirst()
                             }
                         }
                     }
