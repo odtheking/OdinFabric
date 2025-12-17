@@ -85,28 +85,24 @@ private fun PoseStack.renderBatchedLinesAndWireBoxes(
         if (lines[depthState].isEmpty() && wireBoxes[depthState].isEmpty()) continue
         val buffer = bufferSource.getBuffer(lineRenderLayers[depthState])
 
-        for (lineType in lines) {
-            for (line in lineType) {
-                val dirX = (line.to.x - line.from.x).toFloat()
-                val dirY = (line.to.y - line.from.y).toFloat()
-                val dirZ = (line.to.z - line.from.z).toFloat()
+        for (line in lines[depthState]) {
+            val dirX = line.to.x - line.from.x
+            val dirY = line.to.y - line.from.y
+            val dirZ = line.to.z - line.from.z
 
-                ShapeRenderer.renderVector(
-                    this, buffer,
-                    Vector3f(line.from.x.toFloat(), line.from.y.toFloat(), line.from.z.toFloat()),
-                    Vec3(dirX.toDouble(), dirY.toDouble(), dirZ.toDouble()),
-                    line.color
-                )
-            }
+            ShapeRenderer.renderVector(
+                this, buffer,
+                Vector3f(line.from.x.toFloat(), line.from.y.toFloat(), line.from.z.toFloat()),
+                Vec3(dirX, dirY, dirZ),
+                line.color
+            )
         }
 
-        for (boxes in wireBoxes) {
-            for (box in boxes) {
-                ShapeRenderer.renderLineBox(
-                    last(), buffer, box.aabb,
-                    box.r, box.g, box.b, box.a
-                )
-            }
+        for (box in wireBoxes[depthState]) {
+            ShapeRenderer.renderLineBox(
+                last(), buffer, box.aabb,
+                box.r, box.g, box.b, box.a
+            )
         }
 
         bufferSource.endBatch(lineRenderLayers[depthState])
