@@ -8,8 +8,11 @@ class MelodyHandler: TerminalHandler(TerminalTypes.MELODY) {
 
     override fun handleSlotUpdate(packet: ClientboundContainerSetSlotPacket): Boolean {
         return packet.item?.let {
-            solution.clear()
-            solution.addAll(solveMelody(items))
+            val newSolution = solveMelody(items)
+            if (newSolution.isNotEmpty()) {
+                solution.clear()
+                solution.addAll(newSolution)
+            }
         } != null
     }
 

@@ -1,5 +1,6 @@
 package com.odtheking.odin.features.impl.dungeon
 
+import com.odtheking.odin.OdinMod
 import com.odtheking.odin.OdinMod.scope
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
@@ -77,7 +78,7 @@ object Croesus : Module(
 
     init {
         scope.launch {
-            cachedPrices = fetchJson<Map<String, Double>>("https://api.odtheking.com/lb/lowestbins").getOrNull() ?: return@launch
+            cachedPrices = fetchJson<Map<String, Double>>("https://api.odtheking.com/lb/lowestbins").getOrElse { OdinMod.logger.error("Failed to fetch lowest bin prices for Croesus module.", it); emptyMap() }
         }
 
         on<GuiEvent.DrawTooltip> {
