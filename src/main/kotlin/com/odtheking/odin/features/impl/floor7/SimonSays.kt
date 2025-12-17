@@ -66,10 +66,7 @@ object SimonSays : Module(
                         devMessage(if (clickInOrder.size == 2) "size == 2 reverse." else if (clickInOrder.size == 3) "size == 3 reverse again + skip first" else return@on)
                         when (clickInOrder.size) {
                             2 -> clickInOrder.reverse()
-                            3 -> {
-                                clickInOrder.reverse()
-                                clickInOrder.removeFirst()
-                            }
+                            3 -> clickInOrder.removeAt(1)
                         }
                     }
 
@@ -78,7 +75,7 @@ object SimonSays : Module(
                     else if (old.block == Blocks.STONE_BUTTON && updated.getValue(BlockStateProperties.POWERED)) {
                         clickNeeded = clickInOrder.indexOf(pos.east()) + 1
                         if (clickNeeded >= clickInOrder.size) {
-                            clickNeeded = 0
+                            resetSolution()
                             firstPhase = false
                         }
                     }
