@@ -167,7 +167,7 @@ object PuzzleSolvers : Module(
        }
 
         on<RenderEvent.Last> {
-            if (!isInPuzzle) return@on
+            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
             if (iceFillSolver) IceFillSolver.onRenderWorld(context, iceFillColor)
             if (weirdosSolver) WeirdosSolver.onRenderWorld(context, weirdosColor, weirdosWrongColor, weirdosStyle)
             if (boulderSolver) BoulderSolver.onRenderWorld(context, showAllBoulderClicks, boulderStyle, boulderColor)

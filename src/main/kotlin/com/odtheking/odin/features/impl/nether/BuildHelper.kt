@@ -55,7 +55,7 @@ object BuildHelper : Module(
             if (unfinishedWaypoints)
                 KuudraUtils.buildingPiles.forEach {
                     context.drawCustomBeacon(
-                        it.name.visualOrderText.toString(),
+                        it.name.string,
                         it.blockPosition(),
                         Colors.MINECRAFT_DARK_RED,
                         increase = false,

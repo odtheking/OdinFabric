@@ -12,7 +12,6 @@ import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonClass
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonPlayer
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
-import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.leapTeammates
 import com.odtheking.odin.utils.ui.HoverHandler
 import com.odtheking.odin.utils.ui.getQuadrant
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
@@ -30,11 +29,11 @@ object LeapMenu : Module(
     private val colorStyle by BooleanSetting("Color Style", false, desc = "Which color style to use.")
     private val backgroundColor by ColorSetting("Background Color", Colors.gray38.withAlpha(0.75f), true, desc = "Color of the background of the leap menu.").withDependency { !colorStyle }
     private val scale by NumberSetting("Scale", 0.5f, 0.1f, 2f, 0.1f, desc = "Scale of the leap menu.", unit = "x")
-    private val archerKeybind by KeybindSetting("Archer", GLFW.GLFW_KEY_UNKNOWN, "Used to click on the first person in the leap menu.")
-    private val berserkerKeybind by KeybindSetting("Berserker", GLFW.GLFW_KEY_UNKNOWN, "Used to click on the second person in the leap menu.")
-    private val mageKeybind by KeybindSetting("Healer", GLFW.GLFW_KEY_UNKNOWN, "Used to click on the third person in the leap menu.")
-    private val tankKeybind by KeybindSetting("Mage", GLFW.GLFW_KEY_UNKNOWN, "Used to click on the fourth person in the leap menu.")
-    private val healerKeybind by KeybindSetting("Tank", GLFW.GLFW_KEY_UNKNOWN, "Used to click on the fourth person in the leap menu.")
+    private val archerKeybind by KeybindSetting("Archer", GLFW.GLFW_KEY_UNKNOWN, "Used to leap to the Archer in the leap menu.")
+    private val berserkerKeybind by KeybindSetting("Berserker", GLFW.GLFW_KEY_UNKNOWN, "Used to leap to the Berserker in the leap menu.")
+    private val healerKeybind by KeybindSetting("Healer", GLFW.GLFW_KEY_UNKNOWN, "Used to leap to the Healer in the leap menu.")
+    private val mageKeybind by KeybindSetting("Mage", GLFW.GLFW_KEY_UNKNOWN, "Used to leap to the Mage in the leap menu.")
+    private val tankKeybind by KeybindSetting("Tank", GLFW.GLFW_KEY_UNKNOWN, "Used to leap to the Tank in the leap menu.")
 
     private val leapAnnounce by BooleanSetting("Leap Announce", false, desc = "Announces when you leap to a player.")
     private val hoverHandler = List(4) { HoverHandler(200L) }
@@ -139,12 +138,12 @@ object LeapMenu : Module(
         modMessage("Teleporting to $name.")
     }
 
-    /*private val leapTeammates: MutableList<DungeonPlayer> = mutableListOf(
+    private val leapTeammates: MutableList<DungeonPlayer> = mutableListOf(
         DungeonPlayer("Stiviaisd", DungeonClass.Healer, 50, null),
         DungeonPlayer("Odtheking", DungeonClass.Archer, 50, null),
         DungeonPlayer("Bonzi", DungeonClass.Mage, 47, null),
         DungeonPlayer("Cezar", DungeonClass.Tank, 38, null)
-    )*/
+    )
 
     /**
      * Sorts the list of players based on their default quadrant and class priority.
