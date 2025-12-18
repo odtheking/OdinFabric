@@ -47,10 +47,9 @@ object TerminalTimes : Module(
 
         on<ChatPacketEvent> {
             if (!terminalSplits) return@on
-            terminalCompleteRegex.find(value)?.let {
+            terminalCompleteRegex.find(value)?.destructured?.let { (name, activated, type, current, total) ->
                 hideMessage()
 
-                val (name, activated, type, current, total) = it.destructured
                 modMessage("§6$name §a$activated a $type! (§c${current}§a/${total}) §8(§7${sectionTimer.seconds}s §8| §7${phaseTimer.seconds}s§8)", "")
 
                 if ((current == total && gateBlown) || (current.toIntOrNull() ?: return@on) < completed.first) resetSection()
@@ -64,14 +63,14 @@ object TerminalTimes : Module(
                 goldorRegex.matches(value) -> resetSection(true)
 
                 coreOpeningRegex.matches(value) -> {
-                    modMessage("§bTimes: §a${times.joinToString(" §8| ") { "§a${it}s" }}§8, §bTotal: §a${phaseTimer.seconds}s")
                     resetSection()
+                    modMessage("§bTimes: §a${times.joinToString(" §8| ") { "§a${it}s" }}§8, §bTotal: §a${phaseTimer.seconds}s")
                 }
             }
         }
 
         on<TickEvent.Server> {
-            if (!useRealTime) currentTick += 50
+            if (terminalSplits && !useRealTime) currentTick += 50
         }
 
         on<WorldLoadEvent> {
