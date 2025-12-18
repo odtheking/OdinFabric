@@ -22,7 +22,8 @@ import org.lwjgl.glfw.GLFW
 
 object LeapMenu : Module(
     name = "Leap Menu",
-    description = "Renders a custom leap menu when in the Spirit Leap gui."
+    description = "Renders a custom leap menu when in the Spirit Leap gui.",
+    key = GLFW.GLFW_KEY_UNKNOWN
 ) {
     val type by SelectorSetting("Sorting", "Odin Sorting", arrayListOf("Odin Sorting", "A-Z Class", "A-Z Name", "Custom sorting", "No Sorting"), desc = "How to sort the leap menu. /od leaporder to configure custom sorting.")
     private val onlyClass by BooleanSetting("Only Classes", false, desc = "Renders classes instead of names.")
@@ -112,9 +113,9 @@ object LeapMenu : Module(
         on<GuiEvent.KeyPress> {
             val chest = (screen as? AbstractContainerScreen<*>) ?: return@on
             val keybindList = listOf(archerKeybind, berserkerKeybind, healerKeybind, mageKeybind, tankKeybind)
-            if (chest.title?.string?.equalsOneOf("Spirit Leap", "Teleport to Player") == false || keybindList.none { it.value == key } || leapTeammates.isEmpty()) return@on
+            if (chest.title?.string?.equalsOneOf("Spirit Leap", "Teleport to Player") == false || keybindList.none { it.value == input.key() } || leapTeammates.isEmpty()) return@on
 
-            val index = DungeonClass.entries.find { clazz -> clazz.ordinal == keybindList.indexOfFirst { it.value == key } }?.let { clazz -> leapTeammates.indexOfFirst { it.clazz == clazz } } ?: return@on
+            val index = DungeonClass.entries.find { clazz -> clazz.ordinal == keybindList.indexOfFirst { it.value == input.key() } }?.let { clazz -> leapTeammates.indexOfFirst { it.clazz == clazz } } ?: return@on
             if (index == -1) return@on
             val playerToLeap = leapTeammates[index]
             if (playerToLeap == EMPTY) return@on

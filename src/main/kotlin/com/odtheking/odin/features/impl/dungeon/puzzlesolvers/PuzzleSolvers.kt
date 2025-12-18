@@ -168,14 +168,14 @@ object PuzzleSolvers : Module(
 
         on<RenderEvent.Extract> {
             if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
-            if (iceFillSolver) IceFillSolver.onRenderWorld(context, iceFillColor)
-            if (weirdosSolver) WeirdosSolver.onRenderWorld(context, weirdosColor, weirdosWrongColor, weirdosStyle)
-            if (boulderSolver) BoulderSolver.onRenderWorld(context, showAllBoulderClicks, boulderStyle, boulderColor)
-            if (blazeSolver)   BlazeSolver.onRenderWorld(context, blazeLineNext, blazeLineAmount, blazeStyle, blazeFirstColor, blazeSecondColor, blazeAllColor, blazeSendComplete, blazeLineWidth)
-            if (beamsSolver)   BeamsSolver.onRenderWorld(context, beamStyle, beamsTracer, beamsAlpha)
-            if (waterSolver)   WaterSolver.onRenderWorld(context, showTracer, tracerColorFirst, tracerColorSecond)
-            if (quizSolver)    QuizSolver.onRenderWorld(context, quizColor, quizDepth)
-            if (tpMaze)        TPMazeSolver.onRenderWorld(context, mazeColorOne, mazeColorMultiple, mazeColorVisited)
+            if (iceFillSolver) IceFillSolver.onRenderWorld(this, iceFillColor)
+            if (weirdosSolver) WeirdosSolver.onRenderWorld(this, weirdosColor, weirdosWrongColor, weirdosStyle)
+            if (boulderSolver) BoulderSolver.onRenderWorld(this, showAllBoulderClicks, boulderStyle, boulderColor)
+            if (blazeSolver)   BlazeSolver.onRenderWorld(this, blazeLineNext, blazeLineAmount, blazeStyle, blazeFirstColor, blazeSecondColor, blazeAllColor, blazeSendComplete, blazeLineWidth)
+            if (beamsSolver)   BeamsSolver.onRenderWorld(this, beamStyle, beamsTracer, beamsAlpha)
+            if (waterSolver)   WaterSolver.onRenderWorld(this, showTracer, tracerColorFirst, tracerColorSecond)
+            if (quizSolver)    QuizSolver.onRenderWorld(this, quizColor, quizDepth)
+            if (tpMaze)        TPMazeSolver.onRenderWorld(this, mazeColorOne, mazeColorMultiple, mazeColorVisited)
         }
     }
 
