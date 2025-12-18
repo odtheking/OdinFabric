@@ -124,7 +124,7 @@ val devCommand = Commodore("oddev") {
                         """.trimIndent()
 
                         "party" -> """
-                            |Party > ${PartyUtils.isInParty}, ${PartyUtils.partyLeader}, ${PartyUtils.members}}
+                            |Party > ${PartyUtils.isInParty}, ${PartyUtils.partyLeader}, ${PartyUtils.members}
                         """.trimIndent()
                         
                         else -> """

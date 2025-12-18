@@ -16,6 +16,7 @@ import com.odtheking.odin.utils.render.drawLine
 import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
+import com.odtheking.odin.utils.skyblock.dungeon.tiles.Room
 import net.minecraft.core.BlockPos
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.phys.AABB
@@ -44,13 +45,16 @@ object BeamsSolver {
 
     fun onRoomEnter(event: RoomEnterEvent) = with(event.room) {
         if (this?.data?.name != "Creeper Beams") return reset()
+        recalculateLanternPairs(this)
+    }
 
+    private fun recalculateLanternPairs(room: Room) {
         currentLanternPairs.clear()
-        lanternPairs.forEach { list ->
-            val pos = getRealCoords(BlockPos(list[0], list[1], list[2])).takeIf { mc.level?.getBlockState(it)?.block == Blocks.SEA_LANTERN } ?: return@forEach
-            val pos2 = getRealCoords(BlockPos(list[3], list[4], list[5])).takeIf { mc.level?.getBlockState(it)?.block == Blocks.SEA_LANTERN } ?: return@forEach
+        lanternPairs.forEachIndexed { index, list ->
+            val pos = room.getRealCoords(BlockPos(list[0], list[1], list[2]))?.takeIf { mc.level?.getBlockState(it)?.block == Blocks.SEA_LANTERN } ?: return@forEachIndexed
+            val pos2 = room.getRealCoords(BlockPos(list[3], list[4], list[5]))?.takeIf { mc.level?.getBlockState(it)?.block == Blocks.SEA_LANTERN } ?: return@forEachIndexed
 
-            currentLanternPairs[pos] = pos2 to colors[currentLanternPairs.size]
+            currentLanternPairs[pos] = pos2 to colors[index % colors.size]
         }
     }
 
@@ -71,10 +75,14 @@ object BeamsSolver {
     fun onBlockChange(event: BlockUpdateEvent) {
         if (DungeonUtils.currentRoomName != "Creeper Beams") return
         if (event.pos == DungeonUtils.currentRoom?.getRealCoords(BlockPos(15, 69, 15)) && event.old.isAir && event.updated.block == Blocks.CHEST) onPuzzleComplete("Creeper Beams")
-        currentLanternPairs.forEach { (key, value) ->
-            if (event.pos.equalsOneOf(key, value.first) &&
-                event.updated.block != Blocks.SEA_LANTERN &&
-                event.old.block == Blocks.SEA_LANTERN) currentLanternPairs.remove(key)
+        if (
+            event.old.block.equalsOneOf(Blocks.PRISMARINE, Blocks.SEA_LANTERN) &&
+            event.updated.block.equalsOneOf(Blocks.PRISMARINE, Blocks.SEA_LANTERN)
+        ) {
+            mc.execute {
+                recalculateLanternPairs(DungeonUtils.currentRoom ?: return@execute)
+            }
+            return
         }
     }
 

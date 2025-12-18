@@ -159,7 +159,7 @@ object DungeonListener {
         }
     }
 
-    private fun updateDungeonTeammates(tabList: List<String>) {
+    private fun updateDungeonTeammates(tabList: List<String>) = mc.execute {
         dungeonTeammates = getDungeonTeammates(dungeonTeammates, tabList)
         dungeonTeammatesNoSelf = dungeonTeammates.filter { it.name != mc.player?.name?.string }
 
