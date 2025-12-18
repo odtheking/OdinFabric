@@ -2,6 +2,7 @@ package com.odtheking.odin.features.impl.dungeon
 
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.*
+import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.events.core.on
@@ -13,19 +14,24 @@ import com.odtheking.odin.utils.alert
 import com.odtheking.odin.utils.handlers.TickTask
 import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.noControlCodes
+import com.odtheking.odin.utils.render.drawFilledBox
 import com.odtheking.odin.utils.render.getStringWidth
 import com.odtheking.odin.utils.render.text
 import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
+import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
+import com.odtheking.odin.utils.skyblock.dungeon.tiles.RoomType
+import net.minecraft.core.BlockPos
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
+import net.minecraft.world.phys.AABB
 
 object MapInfo : Module(
     name = "Map Info",
     description = "Displays stats about the dungeon such as score, secrets, and deaths. \nRequires \"Mimic\" enabled to be accurate"
 ) {
+    private val highlightPortal by BooleanSetting("Highlight Portal", true, desc = "Highlights the blood room portal when 300 score is reached.")
     private val disableInBoss by BooleanSetting("Disable in boss", true, desc = "Disables the information display when you're in boss.")
     private val scoreTitle by BooleanSetting("300 Score Title", true, desc = "Displays a title on 300 score.")
-    private val scoreText by StringSetting("Title Text", "&c300 Score!", desc = "Text to be displayed on 300 score.").withDependency { scoreTitle }
     private val printWhenScore by BooleanSetting("Print Score Time", true, desc = "Sends elapsed time in chat when 300 score is reached.")
     val togglePaul by SelectorSetting("Paul Settings", "Automatic", arrayListOf("Automatic", "Force Disable", "Force Enable"), desc = "Toggle Paul's settings.")
 
@@ -216,6 +222,7 @@ object MapInfo : Module(
         width to 9
     }
 
+    private var portalAABB: AABB? = null
     private var currentRoomSecrets: Pair<Int, Int>? = null
     private val secretRegex = Regex("(\\d+)/(\\d+) Secrets")
     var shownTitle = false
@@ -236,7 +243,7 @@ object MapInfo : Module(
 
         TickTask(10) {
             if (!enabled || !DungeonUtils.inDungeons || shownTitle || (!scoreTitle && !printWhenScore) || DungeonUtils.score < 300) return@TickTask
-            if (scoreTitle) alert(scoreText.replace("&", "§"))
+            if (scoreTitle) alert("§c300 Score!")
             if (printWhenScore) modMessage("§b${DungeonUtils.score} §ascore reached in §6${DungeonUtils.dungeonTime} || ${DungeonUtils.floor?.name}.")
             shownTitle = true
         }
@@ -251,6 +258,16 @@ object MapInfo : Module(
 
         on<RoomEnterEvent> {
             currentRoomSecrets = null
+            if (room?.data?.type == RoomType.BLOOD) {
+                portalAABB = AABB.encapsulatingFullBlocks(room.getRealCoords(BlockPos(16, 69, 29)), room.getRealCoords(BlockPos(14, 69, 29))).inflate(0.0, 4.0, 0.0)
+            }
+        }
+
+        on<RenderEvent.Last> {
+            if (!highlightPortal || !DungeonUtils.inDungeons || DungeonUtils.inBoss || DungeonUtils.score < 300) return@on
+            portalAABB?.let{ pos ->
+                context.drawFilledBox(pos, Colors.MINECRAFT_GREEN.withAlpha(0.5f), depth = true)
+            }
         }
 
         on<WorldLoadEvent> {
