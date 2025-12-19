@@ -2,6 +2,7 @@ package com.odtheking.odin.features.impl.floor7
 
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.ColorSetting
+import com.odtheking.odin.clickgui.settings.impl.NumberSetting
 import com.odtheking.odin.clickgui.settings.impl.SelectorSetting
 import com.odtheking.odin.events.*
 import com.odtheking.odin.events.core.on
@@ -28,6 +29,7 @@ object SimonSays : Module(
     private val thirdColor by ColorSetting("Third Color", Colors.MINECRAFT_RED.withAlpha(0.5f), true, desc = "The color of the buttons after the second.")
     private val style by SelectorSetting("Style", "Filled Outline", arrayListOf("Filled", "Outline", "Filled Outline"), desc = "The style of the box rendering.")
     private val blockWrong by BooleanSetting("Block Wrong Clicks", false, desc = "Blocks wrong clicks, shift will override this.")
+    private val maxStartClicks by NumberSetting("Max Start Clicks", 4, 1, 10, 1, desc = "Maximum number of start button clicks allowed during first phase.")
     private val customClickSounds by BooleanSetting("Custom Click Sounds", false, desc = "Custom Click Sounds for blocked and unblocked clicks.")
     private val correctClick = createSoundSettings("Correct Sound", "entity.experience_orb.pickup") { customClickSounds }
     private val blockedClick = createSoundSettings("Wrong Sound", "entity.blaze.hurt") { customClickSounds && blockWrong }
@@ -37,6 +39,7 @@ object SimonSays : Module(
     private var lastLanternTick = -1
     private var clickNeeded = 0
     private var firstPhase = true
+    private var startClickCounter = 0
 
     private fun resetSolution() {
         clickInOrder.clear()
@@ -48,6 +51,7 @@ object SimonSays : Module(
         on<WorldLoadEvent> {
             resetSolution()
             firstPhase = true
+            startClickCounter = 0
         }
 
         on<BlockUpdateEvent> {
@@ -92,20 +96,26 @@ object SimonSays : Module(
             if (lastLanternTick++ > 10 && grid.count { mc.level?.getBlockState(it)?.block == Blocks.STONE_BUTTON } > 8) {
                 devMessage("Grid reset detected. (${clickInOrder.size})")
                 firstPhase = false
+                startClickCounter = 0
             }
         }
 
         on<BlockInteractEvent> {
             if (DungeonUtils.getF7Phase() != M7Phases.P3) return@on
 
-            if (
-                blockWrong && mc.player?.isShiftKeyDown == false &&
-                pos.x == 110 && pos.y in 120..123 && pos.z in 92..95 &&
-                pos.east() != clickInOrder.getOrNull(clickNeeded)
-            ) {
-                playSoundSettings(blockedClick())
-                cancel()
-            } else if (customClickSounds) playSoundSettings(correctClick())
+            if (pos == startButton && firstPhase) {
+                if (startClickCounter++ >= maxStartClicks) {
+                    cancel()
+                    return@on
+                }
+            }
+
+            if (pos.x == 110 && pos.y in 120..123 && pos.z in 92..95) {
+                if (blockWrong && mc.player?.isShiftKeyDown == false && pos.east() != clickInOrder.getOrNull(clickNeeded)) {
+                    if (customClickSounds) playSoundSettings(blockedClick())
+                    cancel()
+                } else if (customClickSounds) playSoundSettings(correctClick())
+            }
         }
 
         on<RenderEvent.Last> {
