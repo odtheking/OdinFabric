@@ -105,9 +105,10 @@ object SimonSays : Module(
 
             if (pos == startButton && firstPhase) {
                 if (startClickCounter++ >= maxStartClicks) {
+                    if (customClickSounds) playSoundSettings(blockedClick())
                     cancel()
                     return@on
-                }
+                } else if (customClickSounds) playSoundSettings(correctClick())
             }
 
             if (pos.x == 110 && pos.y in 120..123 && pos.z in 92..95) {
