@@ -675,9 +675,10 @@
     "secrets": 10
   },
   {
-    "name": "Mini Rails",
+    "name": "Trinity",
     "type": "RARE",
     "cores": [
+      302128578
     ],
     "crypts": 3,
     "secrets": 4
@@ -1007,6 +1008,7 @@
     "name": "Sand Dragon",
     "type": "RARE",
     "cores": [
+      1781758146
     ],
     "crypts": 1,
     "secrets": 1
@@ -1231,7 +1233,7 @@
     "name": "Vinny 8 Ball",
     "type": "RARE",
     "cores": [
-      8728155555
+      872815555
     ],
     "secrets": 1
   },

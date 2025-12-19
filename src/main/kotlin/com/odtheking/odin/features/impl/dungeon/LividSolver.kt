@@ -1,8 +1,6 @@
 package com.odtheking.odin.features.impl.dungeon
 
-import com.odtheking.odin.events.BlockUpdateEvent
-import com.odtheking.odin.events.RenderEvent
-import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.*
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
@@ -11,6 +9,7 @@ import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.handlers.schedule
 import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.render.drawWireFrameBox
+import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import net.minecraft.core.BlockPos
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
@@ -26,7 +25,26 @@ object LividSolver : Module(
     private val woolLocation = BlockPos(5, 108, 43)
     private var currentLivid = Livid.HOCKEY
 
+    private val hud by HUD("Invulnerability Timer", "Shows time remaining on Livid's invulnerability.") { example ->
+        if (!example && (!DungeonUtils.inBoss || !DungeonUtils.isFloor(5) || invulnTime <= 0)) return@HUD 0 to 0
+        val time = if (example) 390 else invulnTime
+        val color = when {
+            time > 260 -> "§a"
+            time > 130 -> "§e"
+            else -> "§c"
+        }
+        textDim("${color}Livid: ${time}t ", 0, 0)
+    }
+
+    private var invulnTime = 0
+    private val lividStartRegex = Regex("^\\[BOSS] Livid: Welcome, you've arrived right on time\\. I am Livid, the Master of Shadows\\.$")
+
     init {
+        on<ChatPacketEvent> {
+            if (!DungeonUtils.inDungeons || !DungeonUtils.isFloor(5)) return@on
+            if (value.matches(lividStartRegex)) invulnTime = 390
+        }
+
         on<BlockUpdateEvent> {
             if (!DungeonUtils.inBoss || !DungeonUtils.isFloor(5) || pos != woolLocation) return@on
             currentLivid = Livid.entries.find { livid -> livid.wool.defaultBlockState() == updated.block.defaultBlockState() } ?: return@on
@@ -49,9 +67,15 @@ object LividSolver : Module(
             }
         }
 
+        on<TickEvent.Server> {
+            if (!DungeonUtils.inBoss || !DungeonUtils.isFloor(5)) return@on
+            if (invulnTime > 0) invulnTime--
+        }
+
         on<WorldLoadEvent> {
             currentLivid = Livid.HOCKEY
             currentLivid.entity = null
+            invulnTime = 0
         }
     }
 
