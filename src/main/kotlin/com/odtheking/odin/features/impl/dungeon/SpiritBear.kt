@@ -1,21 +1,33 @@
 package com.odtheking.odin.features.impl.dungeon
 
+import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
+import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
+import com.odtheking.odin.clickgui.settings.impl.ColorSetting
+import com.odtheking.odin.clickgui.settings.impl.SelectorSetting
 import com.odtheking.odin.events.BlockUpdateEvent
+import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Colors
+import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.render.textDim
+import com.odtheking.odin.utils.renderBoundingBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.toFixed
 import net.minecraft.core.BlockPos
+import net.minecraft.world.entity.Entity
 import net.minecraft.world.level.block.Blocks
 
 object SpiritBear : Module(
     name = "Spirit Bear",
     description = "Displays the current state of Spirit Bear."
 ) {
+    private val highlightSpirit by BooleanSetting("Highlight Bear", false, desc = "Highlights the spirit bear")
+    private val color by ColorSetting("Highlight Color", Colors.WHITE, true, desc = "The color of the highlight.").withDependency { highlightSpirit }
+    private val renderStyle by SelectorSetting("Render Style", "Outline", listOf("Filled", "Outline", "Filled Outline"), desc = "Style of the box.").withDependency { highlightSpirit }
+
     private val hud by HUD(name, "Displays the current state of Spirit Bear in the HUD.", false) { example ->
         when {
             example -> "§e1.45s"
@@ -33,6 +45,7 @@ object SpiritBear : Module(
     private val lastBlockLocation = BlockPos(7, 77, 34)
     private var timer = -1 // state: -1=NotSpawned, 0=Alive, 1+=Spawning
     private var kills = 0
+    private var entity: Entity? = null
 
     init {
         on<BlockUpdateEvent> {
@@ -48,6 +61,27 @@ object SpiritBear : Module(
                     if (pos == lastBlockLocation) timer = -1
                 }
             }
+        }
+
+        on<TickEvent.End> {
+            if (!DungeonUtils.isFloor(4) || !DungeonUtils.inBoss || !highlightSpirit) return@on
+
+            mc.level?.entitiesForRendering()?.forEach { e ->
+                val entity = e ?: return@forEach
+                if (entity.isInvisible) return@forEach
+                val entityName = entity.name?.string ?: return@forEach
+                if (!entityName.startsWith("spirit bear", true)) return@forEach
+
+                this@SpiritBear.entity = entity
+            }
+
+            if (entity?.isAlive == false) entity = null
+        }
+
+        on<RenderEvent.Last> {
+            if (!DungeonUtils.isFloor(4) || !DungeonUtils.inBoss || !highlightSpirit) return@on
+            val ent = entity ?: return@on
+            context.drawStyledBox(ent.renderBoundingBox, color, renderStyle, true)
         }
 
         on<TickEvent.Server> {
