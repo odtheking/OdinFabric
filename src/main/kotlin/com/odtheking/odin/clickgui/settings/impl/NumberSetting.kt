@@ -25,8 +25,8 @@ import kotlin.math.roundToInt
 class NumberSetting<E>(
     name: String,
     override val default: E = 1.0 as E,
-    min: Number = -10000,
-    max: Number = 10000,
+    min: Number,
+    max: Number,
     increment: Number = 1,
     desc: String,
     private val unit: String = ""

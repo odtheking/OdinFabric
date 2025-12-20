@@ -97,7 +97,7 @@ object TerminalSolver : Module(
                 devMessage("§aNew terminal: §6${it.type.name}")
                 TerminalEvent.Opened(it).postAndCatch()
                 lastTermOpened = it
-                mc.resizeDisplay()
+                if (renderType == 0) mc.execute { mc.resizeDisplay() }
             }
         }
 
@@ -145,9 +145,9 @@ object TerminalSolver : Module(
             if (!enabled) return@on
             val term = currentTerm ?: return@on
             if (
-                System.currentTimeMillis() - term.timeOpened >= 350 ||
+                System.currentTimeMillis() - term.timeOpened < 350 ||
                 (renderType == 1 && !(term.type == TerminalTypes.MELODY && cancelMelodySolver)) ||
-                (blockIncorrectClicks && term.canClick(slotId, button))
+                (blockIncorrectClicks && !term.canClick(slotId, button))
             ) return@on cancel()
 
             if (middleClickGUI) {
@@ -248,7 +248,7 @@ object TerminalSolver : Module(
             TerminalEvent.Closed(it).postAndCatch()
             EventBus.unsubscribe(it)
             currentTerm = null
-            mc.resizeDisplay()
+            if (renderType == 0) mc.execute { mc.resizeDisplay() }
         }
     }
 }

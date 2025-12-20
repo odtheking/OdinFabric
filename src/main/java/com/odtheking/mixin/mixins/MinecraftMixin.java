@@ -20,7 +20,7 @@ public abstract class MinecraftMixin {
     @Nullable
     public HitResult hitResult;
 
-    @Inject(method = "startUseItem", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/world/item/ItemStack;getCount()I"), cancellable = true)
+    @Inject(method = "startUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;useItemOn(Lnet/minecraft/client/player/LocalPlayer;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult;"), cancellable = true)
     private void cancelBlockUse(CallbackInfo ci) {
         BlockHitResult blockHitResult = (BlockHitResult) this.hitResult;
         if (blockHitResult != null && (new BlockInteractEvent(blockHitResult.getBlockPos()).postAndCatch()))

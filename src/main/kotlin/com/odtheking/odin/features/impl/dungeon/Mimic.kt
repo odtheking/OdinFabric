@@ -11,9 +11,7 @@ import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.sendCommand
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonListener
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
-import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket
-import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
-import net.minecraft.world.entity.EquipmentSlot
+import net.minecraft.network.protocol.game.ClientboundEntityEventPacket
 import net.minecraft.world.entity.monster.Zombie
 
 object Mimic : Module(
@@ -31,21 +29,12 @@ object Mimic : Module(
     private val princeRegex = Regex("^A Prince falls\\. \\+1 Bonus Score$")
 
     init {
-        onReceive<ClientboundRemoveEntitiesPacket> {
+        onReceive<ClientboundEntityEventPacket> {
             if (!DungeonUtils.isFloor(6, 7) || DungeonUtils.inBoss || DungeonUtils.mimicKilled) return@onReceive
-            entityIds.forEach { id ->
-                val entity = mc.level?.getEntity(id) as? Zombie ?: return@forEach
-                if (!entity.isBaby || entity.hasItemInSlot(EquipmentSlot.HEAD)) return@forEach
+            if (eventId != (3).toByte()) return@onReceive
 
-                mimicKilled()
-            }
-        }
-
-        onReceive<ClientboundSetEntityDataPacket> {
-            if (!DungeonUtils.isFloor(6, 7) || DungeonUtils.inBoss || DungeonUtils.mimicKilled) return@onReceive
-            val entity = runCatching { mc.level?.getEntity(id) }.getOrNull() as? Zombie ?: return@onReceive
-            val health = (packedItems.find { it.id == 9 }?.value as? Float) ?: return@onReceive
-            if (!entity.isBaby || entity.hasItemInSlot(EquipmentSlot.HEAD) || health > 0f) return@onReceive
+            val entity = getEntity(mc.level) as? Zombie ?: return@onReceive
+            if (!entity.isBaby) return@onReceive
 
             mimicKilled()
         }
