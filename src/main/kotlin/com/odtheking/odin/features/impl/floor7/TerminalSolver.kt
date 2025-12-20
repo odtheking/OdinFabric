@@ -36,6 +36,7 @@ object TerminalSolver : Module(
     val showNumbers by BooleanSetting("Show Numbers", true, desc = "Shows numbers in the order terminal.")
     private val terminalReloadThreshold by NumberSetting("Reload Threshold", 600, 300, 1000, 10, unit = "ms", desc = "The amount of time in seconds before the terminal reloads.")
     val customTermSize by NumberSetting("Custom Term Size", 1f, 0.5f, 3f, 0.1f, desc = "The size of the custom terminal GUI.").withDependency { renderType == 1 }
+    val normalTermSize by NumberSetting("Normal Term Size", 3, 1, 5, 1, desc = "The GUI scale increase for normal terminal GUI.").withDependency { renderType != 1 }
     val roundness by NumberSetting("Roundness", 9f, 0f, 15f, 1f, desc = "The roundness of the custom terminal gui.").withDependency { renderType == 1 }
     val gap by NumberSetting("Gap", 5f, 0f, 15f, 1f, desc = "The gap between the slots in the custom terminal gui.").withDependency { renderType == 1 }
 
@@ -96,6 +97,7 @@ object TerminalSolver : Module(
                 devMessage("§aNew terminal: §6${it.type.name}")
                 TerminalEvent.Opened(it).postAndCatch()
                 lastTermOpened = it
+                mc.resizeDisplay()
             }
         }
 
@@ -244,6 +246,7 @@ object TerminalSolver : Module(
             TerminalEvent.Closed(it).postAndCatch()
             EventBus.unsubscribe(it)
             currentTerm = null
+            mc.resizeDisplay()
         }
     }
 }
