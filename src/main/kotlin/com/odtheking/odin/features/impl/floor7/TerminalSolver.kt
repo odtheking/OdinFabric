@@ -142,20 +142,22 @@ object TerminalSolver : Module(
         }
 
         on<GuiEvent.SlotClick> (EventPriority.HIGH) {
-            if (!enabled || currentTerm == null) return@on
+            if (!enabled) return@on
+            val term = currentTerm ?: return@on
             if (
-                (renderType == 1 && !(currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver)) ||
-                (blockIncorrectClicks && currentTerm?.canClick(slotId, button) == false)
+                System.currentTimeMillis() - term.timeOpened >= 350 ||
+                (renderType == 1 && !(term.type == TerminalTypes.MELODY && cancelMelodySolver)) ||
+                (blockIncorrectClicks && term.canClick(slotId, button))
             ) return@on cancel()
 
             if (middleClickGUI) {
-                currentTerm?.click(slotId, if (button == 0) GLFW.GLFW_MOUSE_BUTTON_3 else button, hideClicked && currentTerm?.isClicked == false)
+                term.click(slotId, if (button == 0) GLFW.GLFW_MOUSE_BUTTON_3 else button, hideClicked && term.isClicked)
                 cancel()
                 return@on
             }
 
-            if (hideClicked && currentTerm?.isClicked == false) currentTerm?.simulateClick(slotId, button)
-            currentTerm?.isClicked = true
+            if (hideClicked && term.isClicked) term.simulateClick(slotId, button)
+            term.isClicked = true
         }
 
         on<GuiEvent.DrawBackground> {
