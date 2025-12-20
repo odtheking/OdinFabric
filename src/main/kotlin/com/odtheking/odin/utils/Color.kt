@@ -88,7 +88,7 @@ class Color(hue: Float, saturation: Float, brightness: Float, alpha: Float = 1f)
      * Main use is to prevent rendering when the color is invisible.
      */
     inline val isTransparent: Boolean
-        get() = this.alphaFloat == 0f
+        get() = this.alpha == 0
 
     override fun toString(): String = "Color(red=$red,green=$green,blue=$blue,alpha=$alpha)"
 

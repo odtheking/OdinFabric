@@ -42,14 +42,17 @@ class NumberSetting<E>(
     private var displayValue = ""
     private var prevLocation = 0f
     private var valueWidth = -1f
+    private var isDragging = false
 
     private var sliderPercentage = 0f
         set(value) {
             if (sliderPercentage != value) {
-                prevLocation = sliderAnim.get(prevLocation, sliderPercentage, false)
-                sliderAnim.start()
+                if (!isDragging) {
+                    prevLocation = sliderAnim.get(prevLocation, sliderPercentage, false)
+                    sliderAnim.start()
+                }
                 displayValue = getDisplay()
-                if (valueWidth >= 0) valueWidth = NVGRenderer.textWidth(displayValue, 16f, NVGRenderer.defaultFont)
+                valueWidth = -1f
             }
             field = value
         }
@@ -62,6 +65,7 @@ class NumberSetting<E>(
 
     init {
         value = default
+        displayValue = getDisplay()
     }
 
     private var valueDouble
@@ -78,9 +82,6 @@ class NumberSetting<E>(
 
     override fun render(x: Float, y: Float, mouseX: Float, mouseY: Float): Float {
         super.render(x, y, mouseX, mouseY)
-        if (valueWidth < 0) {
-            valueWidth = NVGRenderer.textWidth(displayValue, 16f, NVGRenderer.defaultFont)
-        }
         val height = getHeight()
 
         handler.handle(x, y + height / 2, width, height / 2)
@@ -89,6 +90,10 @@ class NumberSetting<E>(
             val newPercentage = ((mouseX - (x + 6f)) / (width - 12f)).coerceIn(0f, 1f)
             valueDouble = minDouble + newPercentage * (maxDouble - minDouble)
             sliderPercentage = newPercentage
+        }
+
+        if (valueWidth < 0) {
+            valueWidth = NVGRenderer.textWidth(displayValue, 16f, NVGRenderer.defaultFont)
         }
 
         NVGRenderer.text(name, x + 6f, y + height / 2f - 15f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
@@ -108,12 +113,20 @@ class NumberSetting<E>(
         return if (mouseButton != 0 || !isHovered) false
         else {
             listening = true
+            isDragging = true
+            prevLocation = sliderPercentage
+            sliderAnim.start()
             true
         }
     }
 
     override fun mouseReleased(state: Int) {
         listening = false
+        if (isDragging) {
+            isDragging = false
+            prevLocation = sliderAnim.get(prevLocation, sliderPercentage, false)
+            sliderAnim.start()
+        }
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int): Boolean {
