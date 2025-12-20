@@ -3,12 +3,15 @@ package com.odtheking.odin.commands
 import com.github.stivais.commodore.Commodore
 import com.github.stivais.commodore.parsers.CommandParsable
 import com.github.stivais.commodore.utils.GreedyString
+import com.github.stivais.commodore.utils.SyntaxException
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.clickgui.ClickGUI
 import com.odtheking.odin.clickgui.HudManager
+import com.odtheking.odin.features.ModuleManager
 import com.odtheking.odin.features.impl.render.ClickGUIModule
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.handlers.schedule
+import com.odtheking.odin.utils.skyblock.PartyUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 
 val mainCommand = Commodore("odin", "od") {
@@ -21,6 +24,19 @@ val mainCommand = Commodore("odin", "od") {
     }
 
     literal("reset") {
+        literal("module").executable {
+            param("moduleName") {
+                suggests { ModuleManager.modules.map { it.name.lowercase().replace(" ", "_") } }
+            }
+
+            runs { moduleName: String ->
+                val module = ModuleManager.getModuleByName(moduleName.replace("_", " ")) ?: throw SyntaxException("Module not found.")
+
+                module.settings.forEach { setting -> setting.reset() }
+                modMessage("§aSettings for module §f${module.name} §ahas been reset to default values.")
+            }
+        }
+
         literal("clickgui").runs {
             ClickGUIModule.resetPositions()
             modMessage("Reset click gui positions.")
@@ -55,10 +71,40 @@ val mainCommand = Commodore("odin", "od") {
         sendChatMessage(getPositionString() + if (message == null) "" else " ${message.string}")
     }
 
-    literal("leaporder").runs { player1: String?, player2: String?, player3: String?, player4: String? ->
-        val players = listOf(player1, player2, player3, player4).mapNotNull { it?.lowercase() }
-        DungeonUtils.customLeapOrder = players
-        modMessage("§aCustom leap order set to: §f${player1}, ${player2}, ${player3}, $player4")
+    literal("leaporder").executable {
+        param("player1") {
+            parser { string: String ->
+                if (!PartyUtils.members.contains(string)) throw SyntaxException("Player not in your party.")
+                string
+            }
+            suggests { PartyUtils.members }
+        }
+        param("player2") {
+            parser { string: String ->
+                if (!PartyUtils.members.contains(string)) throw SyntaxException("Player not in your party.")
+                string
+            }
+            suggests { PartyUtils.members }
+        }
+        param("player3") {
+            parser { string: String ->
+                if (!PartyUtils.members.contains(string)) throw SyntaxException("Player not in your party.")
+                string
+            }
+            suggests { PartyUtils.members }
+        }
+        param("player4") {
+            parser { string: String ->
+                if (!PartyUtils.members.contains(string)) throw SyntaxException("Player not in your party.")
+                string
+            }
+            suggests { PartyUtils.members }
+        }
+        runs { player1: String?, player2: String?, player3: String?, player4: String? ->
+            val players = listOf(player1, player2, player3, player4).mapNotNull { it?.lowercase() }
+            DungeonUtils.customLeapOrder = players
+            modMessage("§aCustom leap order set to: §f${player1}, ${player2}, ${player3}, $player4")
+        }
     }
 
     runs { floor: Floors -> sendCommand("joininstance ${floor.instance()}") }

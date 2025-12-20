@@ -32,14 +32,37 @@ class NumberSetting<E>(
     private val unit: String = ""
 ) : RenderableSetting<E>(name, desc), Saving where E : Number, E : Comparable<E> {
 
-    override var value: E = default
-        set(value) {
-            field = roundToIncrement(value).coerceIn(minDouble, maxDouble) as E
-        }
-
     private val incrementDouble = increment.toDouble()
     private val minDouble = min.toDouble()
     private var maxDouble = max.toDouble()
+
+    private val sliderAnim = LinearAnimation<Float>(100)
+    private val handler = HoverHandler(150)
+
+    private var displayValue = ""
+    private var prevLocation = 0f
+    private var valueWidth = -1f
+
+    private var sliderPercentage = 0f
+        set(value) {
+            if (sliderPercentage != value) {
+                prevLocation = sliderAnim.get(prevLocation, sliderPercentage, false)
+                sliderAnim.start()
+                displayValue = getDisplay()
+                if (valueWidth >= 0) valueWidth = NVGRenderer.textWidth(displayValue, 16f, NVGRenderer.defaultFont)
+            }
+            field = value
+        }
+
+    override var value: E = default
+        set(value) {
+            field = roundToIncrement(value).coerceIn(minDouble, maxDouble) as E
+            sliderPercentage = ((field.toDouble() - minDouble) / (maxDouble - minDouble)).toFloat()
+        }
+
+    init {
+        value = default
+    }
 
     private var valueDouble
         get() = value.toDouble()
@@ -53,28 +76,9 @@ class NumberSetting<E>(
             this.value = value as E
         }
 
-    private val sliderAnim = LinearAnimation<Float>(100)
-    private val handler = HoverHandler(150)
-
-    private var displayValue = getDisplay()
-    private var prevLocation = 0f
-    private var valueWidth = -1f
-
-    private var sliderPercentage = ((valueDouble - minDouble) / (maxDouble - minDouble)).toFloat()
-        set(value) {
-            if (sliderPercentage != value) {
-                prevLocation = sliderAnim.get(prevLocation, sliderPercentage, false)
-                sliderAnim.start()
-                displayValue = getDisplay()
-                valueWidth = NVGRenderer.textWidth(displayValue, 16f, NVGRenderer.defaultFont)
-            }
-            field = value
-        }
-
     override fun render(x: Float, y: Float, mouseX: Float, mouseY: Float): Float {
         super.render(x, y, mouseX, mouseY)
         if (valueWidth < 0) {
-            sliderPercentage = ((valueDouble - minDouble) / (maxDouble - minDouble)).toFloat()
             valueWidth = NVGRenderer.textWidth(displayValue, 16f, NVGRenderer.defaultFont)
         }
         val height = getHeight()

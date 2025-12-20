@@ -35,7 +35,8 @@ object BuildHelper : Module(
     init {
         on<RenderEvent.Last> {
             if (!KuudraUtils.inKuudra || KuudraUtils.phase != 2) return@on
-            if (stunNotificationNumber != 0f && KuudraUtils.buildDonePercentage >= stunNotificationNumber) alert("§l§3Go to stun", false)
+            if (stunNotificationNumber != 0f && KuudraUtils.kuudraTier >= 3 && KuudraUtils.buildDonePercentage >= stunNotificationNumber)
+                alert("§l§3Go to stun", false)
             if (buildHelperDraw)
                 context.drawText(
                     "§bBuild §c${colorBuild(KuudraUtils.buildDonePercentage)}%",

@@ -36,6 +36,7 @@ object TerminalSolver : Module(
     val showNumbers by BooleanSetting("Show Numbers", true, desc = "Shows numbers in the order terminal.")
     private val terminalReloadThreshold by NumberSetting("Reload Threshold", 600, 300, 1000, 10, unit = "ms", desc = "The amount of time in seconds before the terminal reloads.")
     val customTermSize by NumberSetting("Custom Term Size", 1f, 0.5f, 3f, 0.1f, desc = "The size of the custom terminal GUI.").withDependency { renderType == 1 }
+    val normalTermSize by NumberSetting("Normal Term Size", 3, 1, 5, 1, desc = "The GUI scale increase for normal terminal GUI.").withDependency { renderType != 1 }
     val roundness by NumberSetting("Roundness", 9f, 0f, 15f, 1f, desc = "The roundness of the custom terminal gui.").withDependency { renderType == 1 }
     val gap by NumberSetting("Gap", 5f, 0f, 15f, 1f, desc = "The gap between the slots in the custom terminal gui.").withDependency { renderType == 1 }
 
@@ -96,6 +97,7 @@ object TerminalSolver : Module(
                 devMessage("§aNew terminal: §6${it.type.name}")
                 TerminalEvent.Opened(it).postAndCatch()
                 lastTermOpened = it
+                mc.resizeDisplay()
             }
         }
 
@@ -140,20 +142,22 @@ object TerminalSolver : Module(
         }
 
         on<GuiEvent.SlotClick> (EventPriority.HIGH) {
-            if (!enabled || currentTerm == null) return@on
+            if (!enabled) return@on
+            val term = currentTerm ?: return@on
             if (
-                (renderType == 1 && !(currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver)) ||
-                (blockIncorrectClicks && currentTerm?.canClick(slotId, button) == false)
+                System.currentTimeMillis() - term.timeOpened >= 350 ||
+                (renderType == 1 && !(term.type == TerminalTypes.MELODY && cancelMelodySolver)) ||
+                (blockIncorrectClicks && term.canClick(slotId, button))
             ) return@on cancel()
 
             if (middleClickGUI) {
-                currentTerm?.click(slotId, if (button == 0) GLFW.GLFW_MOUSE_BUTTON_3 else button, hideClicked && currentTerm?.isClicked == false)
+                term.click(slotId, if (button == 0) GLFW.GLFW_MOUSE_BUTTON_3 else button, hideClicked && term.isClicked)
                 cancel()
                 return@on
             }
 
-            if (hideClicked && currentTerm?.isClicked == false) currentTerm?.simulateClick(slotId, button)
-            currentTerm?.isClicked = true
+            if (hideClicked && term.isClicked) term.simulateClick(slotId, button)
+            term.isClicked = true
         }
 
         on<GuiEvent.DrawBackground> {
@@ -244,6 +248,7 @@ object TerminalSolver : Module(
             TerminalEvent.Closed(it).postAndCatch()
             EventBus.unsubscribe(it)
             currentTerm = null
+            mc.resizeDisplay()
         }
     }
 }
