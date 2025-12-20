@@ -33,7 +33,7 @@ object BetterPartyFinder : Module(
     private val floor by SelectorSetting("Floor", "F7", Floor.entries.mapNotNull { if (!it.isMM) it.name else null }, desc = "Determines which floor to check pb.").withDependency { autoKickToggle }
     private val mmToggle by BooleanSetting("Master Mode", true, desc = "Use master mode times").withDependency { autoKickToggle }
     private val informKicked by BooleanSetting("Inform Kicked", desc = "Informs the player why they were kicked.").withDependency { autoKickToggle }
-    private val maximumSeconds by NumberSetting("Maximum Seconds", 0, 0, 600, desc = "Minimum of seconds for kicking.", unit = "s").withDependency { autoKickToggle }
+    private val maximumSeconds by NumberSetting("Maximum Seconds", 400, 120, 480, 5, desc = "Maximum of seconds for kicking.", unit = "s").withDependency { autoKickToggle }
     private val secretsMin by NumberSetting("Minimum Secrets", 0, 0, 200, desc = "Secret minimum in thousands for kicking.", unit = "k").withDependency { autoKickToggle }
     private val apiOffKick by BooleanSetting("Api Off Kick", true, desc = "Kicks if the player's api is off. If this setting is disabled, it will ignore the item check when players have api disabled.").withDependency { autoKickToggle }
     private val magicalPowerReq by NumberSetting("Magical Power", 1300, 0, 2000, 20, desc = "Magical power minimum for kicking.").withDependency { autoKickToggle  }

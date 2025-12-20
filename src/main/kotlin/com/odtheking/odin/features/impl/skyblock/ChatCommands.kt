@@ -209,8 +209,8 @@ object ChatCommands : Module(
 
     private fun channelMessage(message: Any, name: String, channel: ChatChannel) {
         when (channel) {
-            ChatChannel.GUILD -> sendCommand("g chat $message")
-            ChatChannel.PARTY -> sendCommand("p chat $message")
+            ChatChannel.GUILD -> sendCommand("gc $message")
+            ChatChannel.PARTY -> sendCommand("pc $message")
             ChatChannel.PRIVATE -> sendCommand("msg $name $message")
         }
     }

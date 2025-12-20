@@ -19,6 +19,7 @@ object InvincibilityTimer : Module(
     name = "Invincibility Timer",
     description = "Provides visual information about your invincibility items."
 ) {
+    private val invincibilityAlert by BooleanSetting("Invincibility Alert", true, desc = "Plays a sound when you get invincibility.")
     private val invincibilityAnnounce by BooleanSetting("Announce Invincibility", true, desc = "Announces when you get invincibility.")
     private val showWhen by SelectorSetting("Show", "Always", listOf("Always", "Any", "When Active", "On Cooldown"), "Controls when invincibility items are shown.")
     private val equippedMaskColor by ColorSetting("Equipped Mask", Colors.MINECRAFT_DARK_PURPLE, desc = "Color of the equipped mask in the HUD. (Bonzo/Spirit)")
@@ -79,6 +80,7 @@ object InvincibilityTimer : Module(
             if (!DungeonUtils.inDungeons) return@on
             InvincibilityType.entries.firstOrNull { type -> value.matches(type.regex) }?.let { type ->
                 if (invincibilityAnnounce) sendCommand("pc ${type.name.lowercase().capitalizeFirst()} Procced!")
+                if (invincibilityAlert) alert(type.name.lowercase().capitalizeFirst())
                 type.proc()
             }
         }

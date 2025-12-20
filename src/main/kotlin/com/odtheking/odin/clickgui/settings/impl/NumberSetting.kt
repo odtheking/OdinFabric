@@ -27,21 +27,48 @@ import kotlin.math.roundToInt
 class NumberSetting<E>(
     name: String,
     override val default: E = 1.0 as E,
-    min: Number = -10000,
-    max: Number = 10000,
+    min: Number,
+    max: Number,
     increment: Number = 1,
     desc: String,
     private val unit: String = ""
 ) : RenderableSetting<E>(name, desc), Saving where E : Number, E : Comparable<E> {
 
-    override var value: E = default
-        set(value) {
-            field = roundToIncrement(value).coerceIn(minDouble, maxDouble) as E
-        }
-
     private val incrementDouble = increment.toDouble()
     private val minDouble = min.toDouble()
     private var maxDouble = max.toDouble()
+
+    private val sliderAnim = LinearAnimation<Float>(100)
+    private val handler = HoverHandler(150)
+
+    private var displayValue = ""
+    private var prevLocation = 0f
+    private var valueWidth = -1f
+    private var isDragging = false
+
+    private var sliderPercentage = 0f
+        set(value) {
+            if (sliderPercentage != value) {
+                if (!isDragging) {
+                    prevLocation = sliderAnim.get(prevLocation, sliderPercentage, false)
+                    sliderAnim.start()
+                }
+                displayValue = getDisplay()
+                valueWidth = -1f
+            }
+            field = value
+        }
+
+    override var value: E = default
+        set(value) {
+            field = roundToIncrement(value).coerceIn(minDouble, maxDouble) as E
+            sliderPercentage = ((field.toDouble() - minDouble) / (maxDouble - minDouble)).toFloat()
+        }
+
+    init {
+        value = default
+        displayValue = getDisplay()
+    }
 
     private var valueDouble
         get() = value.toDouble()
@@ -55,30 +82,8 @@ class NumberSetting<E>(
             this.value = value as E
         }
 
-    private val sliderAnim = LinearAnimation<Float>(100)
-    private val handler = HoverHandler(150)
-
-    private var displayValue = getDisplay()
-    private var prevLocation = 0f
-    private var valueWidth = -1f
-
-    private var sliderPercentage = ((valueDouble - minDouble) / (maxDouble - minDouble)).toFloat()
-        set(value) {
-            if (sliderPercentage != value) {
-                prevLocation = sliderAnim.get(prevLocation, sliderPercentage, false)
-                sliderAnim.start()
-                displayValue = getDisplay()
-                valueWidth = NVGRenderer.textWidth(displayValue, 16f, NVGRenderer.defaultFont)
-            }
-            field = value
-        }
-
     override fun render(x: Float, y: Float, mouseX: Float, mouseY: Float): Float {
         super.render(x, y, mouseX, mouseY)
-        if (valueWidth < 0) {
-            sliderPercentage = ((valueDouble - minDouble) / (maxDouble - minDouble)).toFloat()
-            valueWidth = NVGRenderer.textWidth(displayValue, 16f, NVGRenderer.defaultFont)
-        }
         val height = getHeight()
 
         handler.handle(x, y + height / 2, width, height / 2)
@@ -87,6 +92,10 @@ class NumberSetting<E>(
             val newPercentage = ((mouseX - (x + 6f)) / (width - 12f)).coerceIn(0f, 1f)
             valueDouble = minDouble + newPercentage * (maxDouble - minDouble)
             sliderPercentage = newPercentage
+        }
+
+        if (valueWidth < 0) {
+            valueWidth = NVGRenderer.textWidth(displayValue, 16f, NVGRenderer.defaultFont)
         }
 
         NVGRenderer.text(name, x + 6f, y + height / 2f - 15f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
@@ -106,12 +115,20 @@ class NumberSetting<E>(
         return if (click.button() != 0 || !isHovered) false
         else {
             listening = true
+            isDragging = true
+            prevLocation = sliderPercentage
+            sliderAnim.start()
             true
         }
     }
 
     override fun mouseReleased(click: MouseButtonEvent) {
         listening = false
+        if (isDragging) {
+            isDragging = false
+            prevLocation = sliderAnim.get(prevLocation, sliderPercentage, false)
+            sliderAnim.start()
+        }
     }
 
     override fun keyPressed(input: KeyEvent): Boolean {

@@ -17,9 +17,9 @@ class MelodyHandler: TerminalHandler(TerminalTypes.MELODY) {
     }
 
     private fun solveMelody(items: Array<ItemStack?>): List<Int> {
-        val greenPane = items.indexOfLast { it?.item == Items.LIME_STAINED_GLASS_PANE }.takeIf { it != -1 } ?: return emptyList()
-        val magentaPane = items.indexOfFirst { it?.item == Items.MAGENTA_STAINED_GLASS_PANE }.takeIf { it != -1 } ?: return emptyList()
-        val greenClay = items.indexOfLast { it?.item == Items.LIME_TERRACOTTA }.takeIf { it != -1 } ?: return emptyList()
+        val greenPane = items.indexOfLast { it?.item == Items.LIME_STAINED_GLASS_PANE }
+        val magentaPane = items.indexOfFirst { it?.item == Items.MAGENTA_STAINED_GLASS_PANE }
+        val greenClay = items.indexOfLast { it?.item == Items.LIME_TERRACOTTA }
         return items.mapIndexedNotNull { index, item ->
             when {
                 index == greenPane || item?.item == Items.MAGENTA_STAINED_GLASS_PANE -> index
