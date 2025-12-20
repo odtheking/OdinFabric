@@ -25,7 +25,7 @@ import kotlin.math.max
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-class RenderBatch {
+private class RenderBatch {
     val lines = listOf(mutableListOf<LineData>(), mutableListOf<LineData>())
     val filledBoxes = listOf(mutableListOf<BoxData>(), mutableListOf<BoxData>())
     val wireBoxes = listOf(mutableListOf<BoxData>(), mutableListOf<BoxData>())
@@ -47,11 +47,11 @@ class RenderBatch {
     data class TextData(val text: String, val pos: Vec3, val scale: Float, val depth: Boolean)
 }
 
-const val DEPTH = 0
-const val NO_DEPTH = 1
+private const val DEPTH = 0
+private const val NO_DEPTH = 1
 
-val currentBatch = RenderBatch()
-var isRendering = false
+private val currentBatch = RenderBatch()
+private var isRendering = false
 
 object RenderBatchManager {
     init {
@@ -73,7 +73,7 @@ object RenderBatchManager {
     }
 }
 
-fun flushBatch(ctx: WorldRenderContext) {
+private fun flushBatch(ctx: WorldRenderContext) {
     val matrix = ctx.matrixStack() ?: return
     val bufferSource = ctx.consumers() as? MultiBufferSource.BufferSource ?: return
     val camera = ctx.camera()?.position ?: return
@@ -146,7 +146,7 @@ fun flushBatch(ctx: WorldRenderContext) {
     currentBatch.clear()
 }
 
-fun renderBeaconBeams(matrix: PoseStack, bufferSource: MultiBufferSource.BufferSource, camera: Vec3) {
+private fun renderBeaconBeams(matrix: PoseStack, bufferSource: MultiBufferSource.BufferSource, camera: Vec3) {
     val gameTime = mc.level?.gameTime ?: 0L
     val gameTimeFloat = gameTime.toFloat()
     val isScoping = mc.player?.isScoping == true
@@ -172,7 +172,7 @@ fun renderBeaconBeams(matrix: PoseStack, bufferSource: MultiBufferSource.BufferS
     }
 }
 
-fun renderTexts(matrix: PoseStack, bufferSource: MultiBufferSource.BufferSource, camera: Vec3) {
+private fun renderTexts(matrix: PoseStack, bufferSource: MultiBufferSource.BufferSource, camera: Vec3) {
     if (currentBatch.texts.isEmpty()) return
 
     val cameraRotation = mc.gameRenderer.mainCamera.rotation()
