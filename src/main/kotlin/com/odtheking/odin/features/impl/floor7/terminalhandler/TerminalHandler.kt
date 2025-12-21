@@ -34,7 +34,7 @@ open class TerminalHandler(val type: TerminalTypes) {
         EventBus.subscribe(this)
 
         onReceive<ClientboundContainerSetSlotPacket> {
-            if (slot !in 0 until type.windowSize) return@onReceive
+            if (slot !in 0 until type.windowSize || (mc.screen is TermSimGUI && containerId != -2)) return@onReceive
             items[slot] = item
             if (handleSlotUpdate(this)) TerminalEvent.Updated(this@TerminalHandler).postAndCatch()
         }
@@ -46,7 +46,8 @@ open class TerminalHandler(val type: TerminalTypes) {
         }
 
         onReceive<ClientboundContainerSetContentPacket> {
-            this.items.forEachIndexed { index, stack ->
+            if ((mc.screen is TermSimGUI && containerId != -2)) return@onReceive
+            items.forEachIndexed { index, stack ->
                 if (stack == null || stack.isEmpty) return@forEachIndexed
                 if (index !in 0 until type.windowSize) return@forEachIndexed
 

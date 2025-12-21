@@ -8,7 +8,6 @@ import com.odtheking.odin.features.ModuleManager
 import com.odtheking.odin.utils.IrisCompatability
 import com.odtheking.odin.utils.ServerUtils
 import com.odtheking.odin.utils.handlers.TickTasks
-import com.odtheking.odin.utils.network.WebUtils.createClient
 import com.odtheking.odin.utils.network.WebUtils.postData
 import com.odtheking.odin.utils.render.ItemStateRenderer
 import com.odtheking.odin.utils.render.RenderBatchManager
@@ -43,7 +42,6 @@ object OdinMod : ClientModInitializer {
     val version: Version by lazy { metadata.version }
     val logger: Logger = LogManager.getLogger("Odin")
 
-    val okClient = createClient()
     val scope = CoroutineScope(SupervisorJob() + EmptyCoroutineContext)
 
     override fun onInitializeClient() {

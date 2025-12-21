@@ -27,7 +27,7 @@ class StartsWithSim(private val letter: String = listOf("A", "B", "C", "G", "D",
     }
 
     override fun slotClick(slot: Slot, button: Int) = with(slot.item) {
-        if (hoverName.string?.startsWith(letter, true) == false || hasGlint()) return modMessage("§cThat item does not start with: \'$letter\'!")
+        if (hoverName.string?.startsWith(letter, true) == false || hasGlint()) return@with modMessage("§cThat item does not start with: \'$letter\'!")
 
         createNewGui { if (it == slot) apply { set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, false) } else it.item }
         playTermSimSound()
@@ -40,7 +40,7 @@ class StartsWithSim(private val letter: String = listOf("A", "B", "C", "G", "D",
             .filter { item ->
                 val id = item?.name?.string ?: return@filter false
                 id.startsWith(letter, true) != filterNot && !id.contains("pane", true)
-            }.random()
+            }.randomOrNull() ?: return ItemStack.EMPTY
 
         return ItemStack(matchingItem)
     }

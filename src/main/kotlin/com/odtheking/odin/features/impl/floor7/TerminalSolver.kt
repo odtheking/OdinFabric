@@ -8,6 +8,7 @@ import com.odtheking.odin.events.*
 import com.odtheking.odin.events.core.*
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.features.impl.floor7.terminalhandler.*
+import com.odtheking.odin.features.impl.floor7.termsim.TermSimGUI
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.Color.Companion.darker
 import com.odtheking.odin.utils.ui.rendering.NVGSpecialRenderer
@@ -97,7 +98,7 @@ object TerminalSolver : Module(
                 devMessage("§aNew terminal: §6${it.type.name}")
                 TerminalEvent.Opened(it).postAndCatch()
                 lastTermOpened = it
-                if (renderType == 0) mc.execute { mc.resizeDisplay() }
+                if (renderType == 0 && enabled) mc.execute { mc.resizeDisplay() }
             }
         }
 
@@ -124,8 +125,8 @@ object TerminalSolver : Module(
             leftTerm()
         }
 
-        on<TickEvent.Server> {
-            if (System.currentTimeMillis() - lastClickTime >= terminalReloadThreshold && currentTerm?.isClicked == true) currentTerm?.let {
+        on<TickEvent.End> {
+            if (mc.screen is TermSimGUI && System.currentTimeMillis() - lastClickTime >= terminalReloadThreshold && currentTerm?.isClicked == true) currentTerm?.let {
                 PacketEvent.Send(ServerboundContainerClickPacket(mc.player?.containerMenu?.containerId ?: -1, 0, 0, 0, ClickType.PICKUP, Int2ObjectMaps.emptyMap(), HashedStack.EMPTY)).postAndCatch()
                 it.isClicked = false
             }
@@ -142,8 +143,12 @@ object TerminalSolver : Module(
         }
 
         on<GuiEvent.SlotClick> (EventPriority.HIGH) {
-            if (!enabled) return@on
             val term = currentTerm ?: return@on
+            if (!enabled) {
+                term.isClicked = true
+                return@on
+            }
+
             if (
                 System.currentTimeMillis() - term.timeOpened < 350 ||
                 (renderType == 1 && !(term.type == TerminalTypes.MELODY && cancelMelodySolver)) ||
@@ -248,7 +253,7 @@ object TerminalSolver : Module(
             TerminalEvent.Closed(it).postAndCatch()
             EventBus.unsubscribe(it)
             currentTerm = null
-            if (renderType == 0) mc.execute { mc.resizeDisplay() }
+            if (renderType == 0 && enabled) mc.execute { mc.resizeDisplay() }
         }
     }
 }
