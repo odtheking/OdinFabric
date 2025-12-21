@@ -4,10 +4,7 @@ import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.GuiEvent
 import com.odtheking.odin.events.PacketEvent
 import com.odtheking.odin.events.TerminalEvent
-import com.odtheking.odin.events.core.EventBus
-import com.odtheking.odin.events.core.EventPriority
-import com.odtheking.odin.events.core.on
-import com.odtheking.odin.events.core.onSend
+import com.odtheking.odin.events.core.*
 import com.odtheking.odin.features.impl.floor7.TerminalSounds
 import com.odtheking.odin.utils.handlers.schedule
 import com.odtheking.odin.utils.playSoundAtPlayer
@@ -99,15 +96,13 @@ open class TermSimGUI(
             delaySlotClick(guiInventorySlots.getOrNull(slotNum.toInt()) ?: return@onSend, buttonNum.toInt())
             it.cancel()
         }
-    }
 
-//    @EventHandler(priority = EventPriority.LOWEST)
-//    fun onPacketReceive(event: PacketEvent.Receive) {
-//        val packet = event.packet as? ClientboundContainerSetSlotPacket ?: return
-//        if (OdinMain.mc.screen !== this || packet.func_149175_c() == -2 || event.packet.func_149173_d() !in 0 until size) return
-//        packet.func_149174_e()?.let { mc.thePlayer?.inventoryContainer?.putStackInSlot(packet.func_149173_d(), it) }
-//        event.isCanceled = true
-//     }
+        onReceive<ClientboundContainerSetSlotPacket> (EventPriority.HIGH) {
+            if (mc.screen !== this@TermSimGUI || containerId == -2 || slot !in 0 until size) return@onReceive
+            item?.let { item -> mc.player?.inventoryMenu?.setItem(slot, stateId, item) }
+            it.cancel()
+        }
+    }
 
     private fun delaySlotClick(slot: Slot, button: Int) {
         if (mc.screen == StartGUI) return slotClick(slot, button)
