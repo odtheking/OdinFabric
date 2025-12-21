@@ -930,6 +930,14 @@
     "secrets": 9
   },
   {
+    "name": "Rare Carpets",
+    "type": "RARE",
+    "cores": [
+      1613728006
+    ],
+    "secrets": 1
+  },
+  {
     "name": "Rare Overgrown",
     "type": "RARE",
     "cores": [
@@ -941,6 +949,7 @@
     "name": "Rare Pillars",
     "type": "RARE",
     "cores": [
+      -609209015
     ],
     "secrets": 1
   },
@@ -1160,6 +1169,7 @@
     "name": "Stone Window",
     "type": "RARE",
     "cores": [
+      -1740718028
     ],
     "crypts": 1,
     "secrets": 2
