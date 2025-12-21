@@ -31,25 +31,14 @@ dependencies {
         include("com.github.stivais:Commodore:$it")
     }
 
-    property("okhttp_version").let {
-        implementation("com.squareup.okhttp3:okhttp-jvm:$it")
-        include("com.squareup.okhttp3:okhttp-jvm:$it")
-    }
-
-    property("okio_version").let {
-        implementation("com.squareup.okio:okio-jvm:$it")
-        include("com.squareup.okio:okio-jvm:$it")
-    }
-
     modCompileOnly("com.terraformersmc:modmenu:${property("modmenu_version")}")
 
-    property("minecraft_lwjgl_version").let {
-        modImplementation("org.lwjgl:lwjgl-nanovg:$it")
-        include("org.lwjgl:lwjgl-nanovg:$it")
+    property("minecraft_lwjgl_version").let { lwjglVersion ->
+        modImplementation("org.lwjgl:lwjgl-nanovg:$lwjglVersion")
+        include("org.lwjgl:lwjgl-nanovg:$lwjglVersion")
 
-        listOf("windows", "linux", "macos", "macos-arm64").forEach { v ->
-            modImplementation("org.lwjgl:lwjgl-nanovg:$it:natives-$v")
-            include("org.lwjgl:lwjgl-nanovg:$it:natives-$v")
+        listOf("windows", "linux", "macos", "macos-arm64").forEach { os ->
+            runtimeOnly("org.lwjgl:lwjgl-nanovg:$lwjglVersion:natives-$os")
         }
     }
 
