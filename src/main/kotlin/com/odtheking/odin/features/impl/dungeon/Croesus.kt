@@ -3,6 +3,7 @@ package com.odtheking.odin.features.impl.dungeon
 import com.odtheking.odin.OdinMod
 import com.odtheking.odin.OdinMod.scope
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
+import com.odtheking.odin.clickgui.settings.impl.ActionSetting
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.NumberSetting
 import com.odtheking.odin.events.ChatPacketEvent
@@ -47,6 +48,12 @@ object Croesus : Module(
     }
 
     private val chestWarning by NumberSetting("Chest Warning Threshold", 55, 0, 60, desc = "Displays a warning in the chest profit HUD if the profit is below this amount.")
+    private val refresh by ActionSetting("Refresh Prices", desc = "Manually refresh the cached prices used for profit calculations.") {
+        scope.launch {
+            cachedPrices = fetchJson<Map<String, Double>>("https://api.odtheking.com/lb/lowestbins").getOrElse { OdinMod.logger.error("Failed to fetch lowest bin prices for Croesus module.", it); emptyMap() }
+            modMessage("§aCroesus prices refreshed.")
+        }
+    }
 
     private var cachedPrices = emptyMap<String, Double>()
     private var currentChestCount = 0
@@ -59,7 +66,7 @@ object Croesus : Module(
     private val unclaimedChestsRegex = Regex("^ Unclaimed chests: (\\d+)$")
     private val chestEnchantsRegex = Regex("^\\{([a-zA-Z0-9_]+):(\\d+)}$")
     private val previewEssenceRegex = Regex("^(\\w+) Essence x(\\d+)$")
-    private val previewShardRegex = Regex("^(\\w+) Shard$")
+    private val previewShardRegex = Regex("^(\\w+) Shard x1$")
     private val extraStatsRegex = Regex(" {29}> EXTRA STATS <")
     private val chestCostRegex = Regex("^([\\d,]+) Coins$")
     private val shardRegex = Regex("^([A-Za-z ]+) Shard$")
@@ -235,7 +242,7 @@ object Croesus : Module(
                         chestItems += ChestItem(stack.hoverName.string, price * quantity.toDouble())
                         profit += price * quantity.toDouble()
                     } ?: previewShardRegex.find(stack.hoverName.string)?.destructured?.let { (shardName) ->
-                        cachedPrices["SHARD_${shardName.uppercase().replace(" ", "_")}"]?.let {
+                        cachedPrices["SHARD_${shardName.uppercase().replace(" ", "_").replace("'s", "")}"]?.let {
                             chestItems += ChestItem(stack.hoverName.string, it)
                             profit += it
                         }

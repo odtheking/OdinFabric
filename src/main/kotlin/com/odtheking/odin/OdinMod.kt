@@ -31,8 +31,7 @@ import org.apache.logging.log4j.Logger
 import kotlin.coroutines.EmptyCoroutineContext
 
 object OdinMod : ClientModInitializer {
-    val mc: Minecraft
-        get() = Minecraft.getInstance()
+    @JvmStatic val mc: Minecraft = Minecraft.getInstance()
 
     const val MOD_ID = "odin"
 

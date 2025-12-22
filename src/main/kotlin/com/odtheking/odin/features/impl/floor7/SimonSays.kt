@@ -1,9 +1,7 @@
 package com.odtheking.odin.features.impl.floor7
 
-import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
-import com.odtheking.odin.clickgui.settings.impl.ColorSetting
-import com.odtheking.odin.clickgui.settings.impl.NumberSetting
-import com.odtheking.odin.clickgui.settings.impl.SelectorSetting
+import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
+import com.odtheking.odin.clickgui.settings.impl.*
 import com.odtheking.odin.events.*
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
@@ -13,6 +11,7 @@ import com.odtheking.odin.utils.createSoundSettings
 import com.odtheking.odin.utils.devMessage
 import com.odtheking.odin.utils.playSoundSettings
 import com.odtheking.odin.utils.render.drawStyledBox
+import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
 import net.minecraft.core.BlockPos
@@ -29,10 +28,12 @@ object SimonSays : Module(
     private val thirdColor by ColorSetting("Third Color", Colors.MINECRAFT_RED.withAlpha(0.5f), true, desc = "The color of the buttons after the second.")
     private val style by SelectorSetting("Style", "Filled Outline", arrayListOf("Filled", "Outline", "Filled Outline"), desc = "The style of the box rendering.")
     private val blockWrong by BooleanSetting("Block Wrong Clicks", false, desc = "Blocks wrong clicks, shift will override this.")
-    private val maxStartClicks by NumberSetting("Max Start Clicks", 4, 1, 10, 1, desc = "Maximum number of start button clicks allowed during first phase.")
+    private val blockWrongStart by BooleanSetting("Block Wrong on Start", false, desc = "Blocks wrong clicks on the start button during first phase.")
+    private val maxStartClicks by NumberSetting("Max Start Clicks", 4, 1, 10, 1, desc = "Maximum number of start button clicks allowed during first phase.").withDependency { blockWrongStart }
     private val customClickSounds by BooleanSetting("Custom Click Sounds", false, desc = "Custom Click Sounds for blocked and unblocked clicks.")
-    private val correctClick = createSoundSettings("Correct Sound", "entity.experience_orb.pickup") { customClickSounds }
-    private val blockedClick = createSoundSettings("Wrong Sound", "entity.blaze.hurt") { customClickSounds && blockWrong }
+    private val soundsDropdown by DropdownSetting("Custom Sounds Dropdown")
+    private val correctClick = createSoundSettings("Correct Sound", "entity.experience_orb.pickup") { soundsDropdown && customClickSounds }
+    private val blockedClick = createSoundSettings("Wrong Sound", "entity.blaze.hurt") { soundsDropdown && customClickSounds && blockWrong }
 
     private val startButton = BlockPos(110, 121, 91)
     private val clickInOrder = ArrayList<BlockPos>()
@@ -52,6 +53,14 @@ object SimonSays : Module(
             resetSolution()
             firstPhase = true
             startClickCounter = 0
+        }
+
+        on<ChatPacketEvent> {
+            if (value == "[BOSS] Goldor: Who dares trespass into my domain?") {
+                resetSolution()
+                firstPhase = true
+                startClickCounter = 0
+            }
         }
 
         on<BlockUpdateEvent> {
@@ -104,7 +113,7 @@ object SimonSays : Module(
             if (DungeonUtils.getF7Phase() != M7Phases.P3) return@on
 
             if (pos == startButton && firstPhase) {
-                if (startClickCounter++ >= maxStartClicks) {
+                if (startClickCounter++ >= maxStartClicks && mc.player?.isShiftKeyDown == false) {
                     if (customClickSounds) playSoundSettings(blockedClick())
                     cancel()
                     return@on
@@ -133,6 +142,8 @@ object SimonSays : Module(
                     drawStyledBox(AABB(x + 0.05, y + 0.37, z + 0.3, x - 0.15, y + 0.63, z + 0.7), color, style, true)
                 }
             }
+
+            context.drawText("$startClickCounter", startButton.center.add(0.0, 1.0, 0.0), 1f, true)
         }
     }
 

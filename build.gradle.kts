@@ -38,7 +38,8 @@ dependencies {
         include("org.lwjgl:lwjgl-nanovg:$lwjglVersion")
 
         listOf("windows", "linux", "macos", "macos-arm64").forEach { os ->
-            runtimeOnly("org.lwjgl:lwjgl-nanovg:$lwjglVersion:natives-$os")
+            modImplementation("org.lwjgl:lwjgl-nanovg:$lwjglVersion:natives-$os")
+            include("org.lwjgl:lwjgl-nanovg:$lwjglVersion:natives-$os")
         }
     }
 

@@ -77,7 +77,7 @@ object Etherwarp : Module(
 
             etherPos = getEtherPos(
                 if (useServerPosition) mc.player?.oldPosition() else mc.player?.position(),
-                56.0 + (cachedEtherData?.getInt("tuned_transmission")?.orElse(0) ?: 0),
+                57.0 + (cachedEtherData?.getInt("tuned_transmission")?.orElse(0) ?: 0),
                 etherWarp = true
             )
             if (etherPos?.succeeded != true && !renderFail) return@on
