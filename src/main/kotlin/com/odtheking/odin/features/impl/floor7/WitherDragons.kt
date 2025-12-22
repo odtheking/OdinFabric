@@ -43,8 +43,7 @@ object WitherDragons : Module(
         }
     }.withDependency { dragonTimerDropDown }
 
-    private val dragonBoxesDropDown by DropdownSetting("Dragon Boxes Dropdown")
-    private val dragonBoxes by BooleanSetting("Dragon Boxes", true, desc = "Displays boxes for where M7 dragons spawn.").withDependency { dragonBoxesDropDown }
+    private val dragonBoxes by BooleanSetting("Dragon Boxes", true, desc = "Displays boxes for where M7 dragons spawn.")
 
     private val dragonTitleDropDown by DropdownSetting("Dragon Spawn Dropdown")
     val dragonTitle by BooleanSetting("Dragon Title", true, desc = "Displays a title for spawning dragons.").withDependency { dragonTitleDropDown }
