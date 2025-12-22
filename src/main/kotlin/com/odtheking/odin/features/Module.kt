@@ -25,24 +25,27 @@ abstract class Module(
 ) {
 
     /**
+     * Map containing all settings for the module,
+     * where the key is the name of the module.
+     *
+     * Since it is a linked hashmap, order is preserved.
+     */
+    val settings: LinkedHashMap<String, Setting<*>> = linkedMapOf()
+
+    /**
      * Category for this module.
      */
     @Transient
     val category: Category = category ?: getCategoryFromPackage(this::class.java)
 
     /**
-     * Reference for if the module is enabled
+     * Flag for if the module is enabled/disabled.
      *
-     * When it is enabled, it is registered to the Forge Eventbus,
-     * otherwise it's unregistered unless it has the annotation [@AlwaysActive][AlwaysActive]
+     * When true, it is registered to the [EventBus].
+     * When false, it is unregistered, unless the module has the [AlwaysActive] annotation.
      */
     var enabled: Boolean = toggled
         private set
-
-    /**
-     * List of settings for the module
-     */
-    val settings: ArrayList<Setting<*>> = ArrayList()
 
     protected inline val mc get() = OdinMod.mc
 
@@ -64,24 +67,36 @@ abstract class Module(
     }
 
     /**
-     * Gets toggled when module is enabled
+     * Invoked when module is enabled.
+     *
+     * It is recommended to call super so it can properly subscribe to the eventbus
      */
     open fun onEnable() {
         if (!alwaysActive) EventBus.subscribe(this)
     }
 
     /**
-     * Gets toggled when module is disabled
+     * Invoked when module is disabled.
+     *
+     * It is recommended to call super so it can properly subscribe to the eventbus
      */
     open fun onDisable() {
         if (!alwaysActive) EventBus.unsubscribe(this)
     }
 
+    /**
+     * Invoked when the main keybind is pressed.
+     *
+     * By default, it toggles the module.
+     */
     open fun onKeybind() {
         toggle()
         if (ClickGUIModule.enableNotification) modMessage("$name ${if (enabled) "§aenabled" else "§cdisabled"}.")
     }
 
+    /**
+     * Toggles the module and invokes [onEnable]/[onDisable].
+     */
     fun toggle() {
         enabled = !enabled
         if (enabled) onEnable()
@@ -89,14 +104,11 @@ abstract class Module(
     }
 
     fun <K : Setting<*>> registerSetting(setting: K): K {
-        settings.add(setting)
+        settings[setting.name] = setting
         return setting
     }
 
     operator fun <K : Setting<*>> K.unaryPlus(): K = registerSetting(this)
-
-    fun getSettingByName(name: String?): Setting<*>? =
-        settings.find { it.name.equals(name, ignoreCase = true) }
 
     @Suppress("FunctionName")
     fun HUD(

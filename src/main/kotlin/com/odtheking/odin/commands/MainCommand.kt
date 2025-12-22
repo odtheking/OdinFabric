@@ -32,7 +32,7 @@ val mainCommand = Commodore("odin", "od") {
             runs { moduleName: String ->
                 val module = ModuleManager.getModuleByName(moduleName.replace("_", " ")) ?: throw SyntaxException("Module not found.")
 
-                module.settings.forEach { setting -> setting.reset() }
+                module.settings.forEach { (_, setting) -> setting.reset() }
                 modMessage("§aSettings for module §f${module.name} §ahas been reset to default values.")
             }
         }

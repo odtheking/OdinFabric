@@ -84,7 +84,7 @@ object ModuleManager {
                 module.registerSetting(setting)
             }
 
-            for (setting in module.settings) {
+            for ((_, setting) in module.settings) {
                 when (setting) {
                     is KeybindSetting -> keybindSettingsCache.add(setting)
                     is HUDSetting -> hudSettingsCache.add(setting)
