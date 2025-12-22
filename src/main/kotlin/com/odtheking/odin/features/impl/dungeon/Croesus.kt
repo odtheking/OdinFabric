@@ -242,7 +242,7 @@ object Croesus : Module(
                         chestItems += ChestItem(stack.hoverName.string, price * quantity.toDouble())
                         profit += price * quantity.toDouble()
                     } ?: previewShardRegex.find(stack.hoverName.string)?.destructured?.let { (shardName) ->
-                        cachedPrices["SHARD_${shardName.uppercase().replace(" ", "_")}"]?.let {
+                        cachedPrices["SHARD_${shardName.uppercase().replace(" ", "_").replace("'s", "")}"]?.let {
                             chestItems += ChestItem(stack.hoverName.string, it)
                             profit += it
                         }
