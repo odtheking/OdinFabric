@@ -17,6 +17,7 @@ import com.odtheking.odin.features.impl.skyblock.*
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements
+import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.DeltaTracker
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.resources.ResourceLocation
@@ -28,45 +29,37 @@ import net.minecraft.resources.ResourceLocation
  */
 object ModuleManager {
 
-    private val HUD_LAYER: ResourceLocation = ResourceLocation.fromNamespaceAndPath(OdinMod.MOD_ID, "odin_hud")
+    val modules: ArrayList<Module> = arrayListOf()
+
     val keybindSettingsCache = mutableListOf<KeybindSetting>()
     val hudSettingsCache = mutableListOf<HUDSetting>()
 
-    val modules: ArrayList<Module> = arrayListOf(
-        // dungeon
-        PuzzleSolvers, BlessingDisplay, LeapMenu, SecretClicked, MapInfo, Mimic, DungeonQueue, KeyHighlight, BloodCamp,
-        PositionalMessages, TerracottaTimer, BreakerDisplay, LividSolver, InvincibilityTimer, SpiritBear,
-        DungeonWaypoints, ExtraStats, BetterPartyFinder, Croesus, MageBeam,
-
-        // floor 7
-        TerminalSimulator, TerminalSolver, TerminalTimes, TerminalSounds, TickTimers, ArrowAlign, InactiveWaypoints,
-        MelodyMessage, WitherDragons, SimonSays, KingRelics, ArrowsDevice,
-
-        // render
-        ClickGUIModule, Camera, Etherwarp, PlayerSize, PerformanceHUD, RenderOptimizer,
-        PlayerDisplay, Waypoints, HidePlayers, Highlight, GyroWand,
-
-        //skyblock
-        ChatCommands, NoCursorReset, Ragnarock, SpringBoots, WardrobeKeybinds, PetKeybinds, AutoSprint,
-        CommandKeybinds, SlotBinds, Splits,
-
-        // nether
-        SupplyHelper, BuildHelper, RemovePerks, NoPre, PearlWaypoints, FreshTools, KuudraInfo, Misc
-    )
+    private val HUD_LAYER: ResourceLocation = ResourceLocation.fromNamespaceAndPath(OdinMod.MOD_ID, "odin_hud")
 
     init {
-        for (module in modules) {
-            module.key?.let {
-                module.register(KeybindSetting("Keybind", it, "Toggles the module").apply {
-                    onPress = { module.onKeybind() }
-                })
-            }
-            for (setting in module.settings) {
-                if (setting is KeybindSetting) keybindSettingsCache.add(setting)
-                if (setting is HUDSetting) hudSettingsCache.add(setting)
-            }
-        }
+        registerModules(
+            // dungeon
+            PuzzleSolvers, BlessingDisplay, LeapMenu, SecretClicked, MapInfo, Mimic, DungeonQueue,
+            KeyHighlight, BloodCamp, PositionalMessages, TerracottaTimer, BreakerDisplay, LividSolver,
+            InvincibilityTimer, SpiritBear, DungeonWaypoints, ExtraStats, BetterPartyFinder, Croesus, MageBeam,
 
+            // floor 7
+            TerminalSimulator, TerminalSolver, TerminalTimes, TerminalSounds, TickTimers, ArrowAlign,
+            InactiveWaypoints, MelodyMessage, WitherDragons, SimonSays, KingRelics, ArrowsDevice,
+
+            // render
+            ClickGUIModule, Camera, Etherwarp, PlayerSize, PerformanceHUD, RenderOptimizer,
+            PlayerDisplay, Waypoints, HidePlayers, Highlight, GyroWand,
+
+            //skyblock
+            ChatCommands, NoCursorReset, Ragnarock, SpringBoots, WardrobeKeybinds, PetKeybinds, AutoSprint,
+            CommandKeybinds, SlotBinds, Splits,
+
+            // nether
+            SupplyHelper, BuildHelper, RemovePerks, NoPre, PearlWaypoints, FreshTools, KuudraInfo, Misc
+        )
+
+        // hashmap, but would need to keep track when setting values change
         on<InputEvent> {
             for (setting in keybindSettingsCache) {
                 if (setting.value.value == key.value) setting.onPress?.invoke()
@@ -74,6 +67,30 @@ object ModuleManager {
         }
 
         HudElementRegistry.attachElementBefore(VanillaHudElements.SLEEP, HUD_LAYER, ModuleManager::render)
+    }
+
+    private fun registerModules(vararg modules: Module) {
+        for (module in modules) {
+            // dev module shouldn't be registered while not in dev env
+            if (module.isDevModule && !FabricLoader.getInstance().isDevelopmentEnvironment) {
+                continue
+            }
+
+            this.modules.add(module)
+
+            module.key?.let { keybind ->
+                val setting = KeybindSetting("Keybind", keybind, "Toggles this module.")
+                setting.onPress = module::onKeybind
+                module.registerSetting(setting)
+            }
+
+            for (setting in module.settings) {
+                when (setting) {
+                    is KeybindSetting -> keybindSettingsCache.add(setting)
+                    is HUDSetting -> hudSettingsCache.add(setting)
+                }
+            }
+        }
     }
 
     fun render(context: GuiGraphics, tickCounter: DeltaTracker) {
@@ -93,7 +110,7 @@ object ModuleManager {
         val featureList = StringBuilder()
 
         for ((category, modulesInCategory) in modules.groupBy { it.category }.entries) {
-            featureList.appendLine("Category: ${category.displayName}")
+            featureList.appendLine("Category: ${category.name}")
             for (module in modulesInCategory.sortedByDescending {
                 NVGRenderer.textWidth(it.name, 16f, NVGRenderer.defaultFont)
             }) featureList.appendLine("- ${module.name}: ${module.description}")

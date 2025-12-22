@@ -19,18 +19,16 @@ import kotlin.reflect.full.hasAnnotation
 abstract class Module(
     val name: String,
     val key: Int? = GLFW.GLFW_KEY_UNKNOWN,
+    category: Category? = null,
     @Transient var description: String,
     toggled: Boolean = false,
 ) {
 
     /**
      * Category for this module.
-     *
-     * It is defined by the package of the module. (For example: me.odin.features.impl.render == [Category.RENDER]).
-     * If it is in an invalid package, it will use [Category.RENDER] as a default
      */
     @Transient
-    val category: Category = getCategory(this::class.java) ?: Category.RENDER
+    val category: Category = category ?: getCategoryFromPackage(this::class.java)
 
     /**
      * Reference for if the module is enabled
@@ -90,9 +88,12 @@ abstract class Module(
         else onDisable()
     }
 
-    fun <K : Setting<*>> register(setting: K): K = setting.also { settings.add(it) }
+    fun <K : Setting<*>> registerSetting(setting: K): K {
+        settings.add(setting)
+        return setting
+    }
 
-    operator fun <K : Setting<*>> K.unaryPlus(): K = register(this)
+    operator fun <K : Setting<*>> K.unaryPlus(): K = registerSetting(this)
 
     fun getSettingByName(name: String?): Setting<*>? =
         settings.find { it.name.equals(name, ignoreCase = true) }
@@ -109,7 +110,20 @@ abstract class Module(
     ): HUDSetting = HUDSetting(name, x, y, scale, toggleable, desc, this, block)
 
     private companion object {
-        private fun getCategory(clazz: Class<out Module>): Category? =
-            Category.entries.find { clazz.`package`.name.contains(it.name, true) }
+        private fun getCategoryFromPackage(clazz: Class<out Module>): Category {
+            val packageName = clazz.packageName
+            return when {
+                packageName.contains("dungeon") -> Category.DUNGEON
+                packageName.contains("floor7") -> Category.FLOOR7
+                packageName.contains("nether") -> Category.NETHER
+                packageName.contains("render") -> Category.RENDER
+                packageName.contains("skyblock") -> Category.SKYBLOCK
+                else -> throw IllegalStateException(
+                    "Module ${clazz.name} failed to get category from the package it is in." +
+                            "Either manually assign a category," +
+                            " or put it under any valid package (dungeon, floor7, nether, render, skyblock))"
+                )
+            }
+        }
     }
 }

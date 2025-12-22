@@ -6,7 +6,7 @@ import com.odtheking.odin.features.Module
 
 class PersonalBest(module: Module, name: String) {
 
-    private val mapSetting = module.register(MapSetting(name, mutableMapOf<String, Float>()))
+    private val mapSetting = module.registerSetting(MapSetting(name, mutableMapOf<String, Float>()))
     /**
      * Updates the personal best for a specific puzzle
      * 

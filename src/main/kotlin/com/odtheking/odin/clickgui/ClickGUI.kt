@@ -20,18 +20,14 @@ import com.odtheking.odin.utils.ui.mouseY as odinMouseY
 
 /**
  * Renders all the modules.
- *
- * Backend made by Aton, with some changes
- * Design mostly made by Stivais
- *
- * @author Stivais, Aton
- * @see [Panel]
  */
 object ClickGUI : Screen(Component.literal("Click GUI")) {
 
     private val panels: ArrayList<Panel> = arrayListOf<Panel>().apply {
-        if (Category.entries.any { ClickGUIModule.panelSetting[it] == null }) ClickGUIModule.resetPositions()
-        for (category in Category.entries) add(Panel(category))
+        if (Category.categories.any { (category, _) -> ClickGUIModule.panelSetting[category] == null }) {
+            ClickGUIModule.resetPositions()
+        }
+        for ((_, category) in Category.categories) add(Panel(category))
     }
 
     private var openAnim = LinearAnimation<Float>(400)
