@@ -143,7 +143,7 @@ object SimonSays : Module(
                 }
             }
 
-            context.drawText("$startClickCounter", startButton.center.add(0.0, 1.0, 0.0), 1f, true)
+            drawText("$startClickCounter", startButton.center.add(0.0, 1.0, 0.0), 1f, true)
         }
     }
 
