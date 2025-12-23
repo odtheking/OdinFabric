@@ -8,7 +8,6 @@ import com.odtheking.odin.features.impl.render.ClickGUIModule
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.ui.isAreaHovered
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
-import net.fabricmc.loader.api.FabricLoader
 import kotlin.math.floor
 
 /**
@@ -23,13 +22,12 @@ import kotlin.math.floor
 class Panel(private val category: Category) {
 
     val moduleButtons: ArrayList<ModuleButton> = ArrayList<ModuleButton>().apply {
-        ModuleManager.modules
-            .filter { it.category === category && (!it.isDevModule || FabricLoader.getInstance().isDevelopmentEnvironment) }
-            .sortedByDescending { NVGRenderer.textWidth(it.name, 16f, NVGRenderer.defaultFont) }
-            .forEach {
-                add(ModuleButton(it, this@Panel))
-            }
+        ModuleManager.modulesByCategory[category]?.forEach {
+            // dev modules shouldn't be included in the module manager
+            add(ModuleButton(it, this@Panel))
+        }
     }
+
     private val lastModuleButton by lazy { moduleButtons.lastOrNull() }
 
     val panelSetting = ClickGUIModule.panelSetting[category.name] ?: throw IllegalStateException("Panel setting for category $category is not initialized")

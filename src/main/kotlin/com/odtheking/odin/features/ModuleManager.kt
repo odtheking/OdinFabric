@@ -14,13 +14,13 @@ import com.odtheking.odin.features.impl.floor7.*
 import com.odtheking.odin.features.impl.nether.*
 import com.odtheking.odin.features.impl.render.*
 import com.odtheking.odin.features.impl.skyblock.*
-import com.odtheking.odin.utils.ui.rendering.NVGRenderer
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.DeltaTracker
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.resources.ResourceLocation
+import net.minecraft.resources.ResourceLocation.fromNamespaceAndPath
 
 /**
  * # Module Manager
@@ -29,12 +29,21 @@ import net.minecraft.resources.ResourceLocation
  */
 object ModuleManager {
 
-    val modules: ArrayList<Module> = arrayListOf()
+    /**
+     * Map containing all modules in Odin,
+     * where the key is the modules name in lowercase.
+     */
+    val modules: HashMap<String, Module> = linkedMapOf()
 
-    val keybindSettingsCache = mutableListOf<KeybindSetting>()
-    val hudSettingsCache = mutableListOf<HUDSetting>()
+    /**
+     * Map containing all modules under their category.
+     */
+    val modulesByCategory: HashMap<Category, ArrayList<Module>> = hashMapOf()
 
-    private val HUD_LAYER: ResourceLocation = ResourceLocation.fromNamespaceAndPath(OdinMod.MOD_ID, "odin_hud")
+    val keybindSettingsCache: ArrayList<KeybindSetting> = arrayListOf<KeybindSetting>()
+    val hudSettingsCache: ArrayList<HUDSetting> = arrayListOf<HUDSetting>()
+
+    private val HUD_LAYER: ResourceLocation = fromNamespaceAndPath(OdinMod.MOD_ID, "odin_hud")
 
     init {
         registerModules(
@@ -76,7 +85,8 @@ object ModuleManager {
                 continue
             }
 
-            this.modules.add(module)
+            this.modules[module.name.lowercase()] = module
+            this.modulesByCategory.getOrPut(module.category) { arrayListOf() }.add(module)
 
             module.key?.let { keybind ->
                 val setting = KeybindSetting("Keybind", keybind, "Toggles this module.")
@@ -102,20 +112,5 @@ object ModuleManager {
             if (hudSettings.isEnabled) hudSettings.value.draw(context, false)
         }
         context.pose().popMatrix()
-    }
-
-    fun getModuleByName(name: String?): Module? = modules.firstOrNull { it.name.equals(name, true) }
-
-    fun generateFeatureList(): String {
-        val featureList = StringBuilder()
-
-        for ((category, modulesInCategory) in modules.groupBy { it.category }.entries) {
-            featureList.appendLine("Category: ${category.name}")
-            for (module in modulesInCategory.sortedByDescending {
-                NVGRenderer.textWidth(it.name, 16f, NVGRenderer.defaultFont)
-            }) featureList.appendLine("- ${module.name}: ${module.description}")
-            featureList.appendLine()
-        }
-        return featureList.toString()
     }
 }

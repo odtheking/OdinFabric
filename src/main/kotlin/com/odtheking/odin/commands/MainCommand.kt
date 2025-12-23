@@ -26,11 +26,13 @@ val mainCommand = Commodore("odin", "od") {
     literal("reset") {
         literal("module").executable {
             param("moduleName") {
-                suggests { ModuleManager.modules.map { it.name.lowercase().replace(" ", "_") } }
+                // keys for modules are already lowercase
+                suggests { ModuleManager.modules.keys.map { it.replace(" ", "_") } }
             }
 
             runs { moduleName: String ->
-                val module = ModuleManager.getModuleByName(moduleName.replace("_", " ")) ?: throw SyntaxException("Module not found.")
+                val module = ModuleManager.modules[moduleName.replace("_", " ")]
+                    ?: throw SyntaxException("Module not found.")
 
                 module.settings.forEach { (_, setting) -> setting.reset() }
                 modMessage("§aSettings for module §f${module.name} §ahas been reset to default values.")

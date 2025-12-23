@@ -26,9 +26,9 @@ abstract class Module(
 
     /**
      * Map containing all settings for the module,
-     * where the key is the name of the module.
+     * where the key is the name of the setting.
      *
-     * Since it is a linked hashmap, order is preserved.
+     * Since the map is a [LinkedHashMap], order is preserved.
      */
     val settings: LinkedHashMap<String, Setting<*>> = linkedMapOf()
 
@@ -103,6 +103,9 @@ abstract class Module(
         else onDisable()
     }
 
+    /**
+     * Registers a [Setting] to this module and returns itself.
+     */
     fun <K : Setting<*>> registerSetting(setting: K): K {
         settings[setting.name] = setting
         return setting

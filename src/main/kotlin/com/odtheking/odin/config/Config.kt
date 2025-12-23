@@ -6,6 +6,7 @@ import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.clickgui.settings.Saving
 import com.odtheking.odin.features.ModuleManager
 import java.io.File
+import kotlin.system.measureTimeMillis
 
 /**
  * This class handles loading and saving Modules and their settings.
@@ -34,11 +35,11 @@ object Config {
                 val jsonArray = JsonParser.parseString(this).asJsonArray ?: return
                 for (modules in jsonArray) {
                     val moduleObj = modules?.asJsonObject ?: continue
-                    val module = ModuleManager.getModuleByName(moduleObj.get("name").asString) ?: continue
+                    val module = ModuleManager.modules[moduleObj.get("name").asString] ?: continue
                     if (moduleObj.get("enabled").asBoolean != module.enabled) module.toggle()
                     val settingObj = moduleObj.get("settings")?.takeIf { it.isJsonObject }?.asJsonObject?.entrySet() ?: continue
                     for ((key, value) in settingObj) {
-                        ((module.getSettingByName(key)) as? Saving)?.apply { read(value ?: continue) }
+                        (module.settings[key] as? Saving)?.apply { read(value ?: continue) }
                     }
                 }
             }
@@ -54,13 +55,13 @@ object Config {
             // using like a custom serializer leaves 'null' in settings that don't save
             // code looks hideous tho, but it fully works
             val jsonArray = JsonArray().apply {
-                for (module in ModuleManager.modules) {
+                for ((_, module) in ModuleManager.modules) {
                     add(JsonObject().apply {
                         add("name", JsonPrimitive(module.name))
                         add("enabled", JsonPrimitive(module.enabled))
                         add("settings", JsonObject().apply {
-                            for (setting in module.settings) {
-                                if (setting is Saving) add(setting.name, setting.write())
+                            for ((name, setting) in module.settings) {
+                                if (setting is Saving) add(name, setting.write())
                             }
                         })
                     })
