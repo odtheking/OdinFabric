@@ -43,8 +43,7 @@ object ArrowsDevice : Module(
 
     init {
         on<BlockUpdateEvent> {
-            if (!DungeonUtils.inBoss || DungeonUtils.getF7Phase() != M7Phases.P3 || !devicePositions.contains(pos)) return@on
-            val (yaw, pitch) = mc.player?.let { it.xRot to it.yRot } ?: return@on
+            if (DungeonUtils.getF7Phase() != M7Phases.P3 || !devicePositions.contains(pos)) return@on
 
             if (old.block == Blocks.EMERALD_BLOCK && updated.block == Blocks.BLUE_TERRACOTTA) {
                 markedPositions.add(AABB(pos))
@@ -56,7 +55,7 @@ object ArrowsDevice : Module(
         }
 
         on<RenderEvent.Last> {
-            if (!DungeonUtils.inBoss || DungeonUtils.getF7Phase() != M7Phases.P3) return@on
+            if (DungeonUtils.getF7Phase() != M7Phases.P3) return@on
 
             markedPositions.forEach { position ->
                 context.drawFilledBox(position, markedPositionColor, depth = depthCheck)
@@ -70,23 +69,21 @@ object ArrowsDevice : Module(
         on<WorldLoadEvent> {
             markedPositions.clear()
             targetPosition = null
+            isDeviceComplete = false
         }
 
         on<ChatPacketEvent> {
-            val (name) = deviceCompleteRegex.find(value)?.destructured ?: return@on
-            if (name == mc.player?.name?.string) onComplete("Chat")
+            if (DungeonUtils.getF7Phase() != M7Phases.P3 || !isPlayerInRoom || isDeviceComplete) return@on
+            if (deviceCompleteRegex.find(value)?.groupValues?.get(1) == mc.player?.name?.string) onComplete("Chat")
         }
 
         onReceive<ClientboundSetEntityDataPacket> {
-            if (!DungeonUtils.inBoss || !isPlayerInRoom || isDeviceComplete) return@onReceive
-            val entity = mc.level?.getEntity(id) ?: return@onReceive
-            if (entity.name?.string == "Active") onComplete("Entity")
+            if (DungeonUtils.getF7Phase() != M7Phases.P3 || !isPlayerInRoom || isDeviceComplete) return@onReceive
+            if (mc.level?.getEntity(id)?.name?.string == "Active") onComplete("Entity")
         }
     }
 
     private fun onComplete(method: String) {
-        if (isDeviceComplete || !DungeonUtils.inBoss || !isPlayerInRoom) return
-
         isDeviceComplete = true
 
         if (alertOnDeviceComplete) {
