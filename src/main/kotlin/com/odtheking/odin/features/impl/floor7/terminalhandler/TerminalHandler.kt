@@ -52,7 +52,7 @@ open class TerminalHandler(val type: TerminalTypes) {
                 if (index !in 0 until type.windowSize) return@forEachIndexed
 
                 items[index] = stack
-                if (handleSlotUpdate(ClientboundContainerSetSlotPacket(this.containerId, this.stateId, index, stack)))
+                if (handleSlotUpdate(ClientboundContainerSetSlotPacket(containerId, stateId, index, stack)))
                     TerminalEvent.Updated(this@TerminalHandler).postAndCatch()
             }
         }

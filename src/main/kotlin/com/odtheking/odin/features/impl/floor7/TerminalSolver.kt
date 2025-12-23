@@ -8,7 +8,6 @@ import com.odtheking.odin.events.*
 import com.odtheking.odin.events.core.*
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.features.impl.floor7.terminalhandler.*
-import com.odtheking.odin.features.impl.floor7.termsim.TermSimGUI
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.Color.Companion.darker
 import com.odtheking.odin.utils.ui.rendering.NVGSpecialRenderer
@@ -118,7 +117,7 @@ object TerminalSolver : Module(
         }
 
         on<TickEvent.End> {
-            if (mc.screen is TermSimGUI && System.currentTimeMillis() - lastClickTime >= terminalReloadThreshold && currentTerm?.isClicked == true) currentTerm?.let {
+            if (System.currentTimeMillis() - lastClickTime >= terminalReloadThreshold && currentTerm?.isClicked == true) currentTerm?.let {
                 PacketEvent.Send(ClientboundContainerSetSlotPacket(mc.player?.containerMenu?.containerId ?: -1, 0, it.type.windowSize - 1, ItemStack.EMPTY)).postAndCatch()
                 it.isClicked = false
             }
