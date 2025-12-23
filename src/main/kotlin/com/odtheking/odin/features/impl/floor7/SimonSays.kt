@@ -11,7 +11,6 @@ import com.odtheking.odin.utils.createSoundSettings
 import com.odtheking.odin.utils.devMessage
 import com.odtheking.odin.utils.playSoundSettings
 import com.odtheking.odin.utils.render.drawStyledBox
-import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
 import net.minecraft.core.BlockPos
@@ -112,7 +111,7 @@ object SimonSays : Module(
         on<BlockInteractEvent> {
             if (DungeonUtils.getF7Phase() != M7Phases.P3) return@on
 
-            if (pos == startButton && firstPhase) {
+            if (pos == startButton && firstPhase && blockWrongStart) {
                 if (startClickCounter++ >= maxStartClicks && mc.player?.isShiftKeyDown == false) {
                     if (customClickSounds) playSoundSettings(blockedClick())
                     cancel()
@@ -143,7 +142,6 @@ object SimonSays : Module(
                 }
             }
 
-            context.drawText("$startClickCounter", startButton.center.add(0.0, 1.0, 0.0), 1f, true)
         }
     }
 

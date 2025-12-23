@@ -12,15 +12,10 @@ import com.odtheking.odin.features.impl.floor7.termsim.TermSimGUI
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.Color.Companion.darker
 import com.odtheking.odin.utils.ui.rendering.NVGSpecialRenderer
-import it.unimi.dsi.fastutil.ints.Int2ObjectMaps
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
-import net.minecraft.network.HashedStack
-import net.minecraft.network.protocol.game.ClientboundContainerClosePacket
-import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket
-import net.minecraft.network.protocol.game.ServerboundContainerClickPacket
-import net.minecraft.network.protocol.game.ServerboundContainerClosePacket
-import net.minecraft.world.inventory.ClickType
+import net.minecraft.network.protocol.game.*
 import net.minecraft.world.item.DyeColor
+import net.minecraft.world.item.ItemStack
 import org.lwjgl.glfw.GLFW
 
 @AlwaysActive // So it can be used in other modules
@@ -106,14 +101,15 @@ object TerminalSolver : Module(
             leftTerm()
         }
 
+        onSend<ServerboundContainerClosePacket> {
+            leftTerm()
+        }
+
+
         on<ChatPacketEvent> {
             termSolverRegex.find(value)?.let { message ->
                 if (message.groupValues[1] == mc.player?.name?.string) lastTermOpened?.let { TerminalEvent.Solved(it).postAndCatch() }
             }
-        }
-
-        onSend<ServerboundContainerClosePacket> {
-            leftTerm()
         }
 
         onSend<ServerboundContainerClickPacket> {
@@ -121,13 +117,9 @@ object TerminalSolver : Module(
             currentTerm?.isClicked = true
         }
 
-        onSend<ServerboundContainerClosePacket> {
-            leftTerm()
-        }
-
         on<TickEvent.End> {
             if (mc.screen is TermSimGUI && System.currentTimeMillis() - lastClickTime >= terminalReloadThreshold && currentTerm?.isClicked == true) currentTerm?.let {
-                PacketEvent.Send(ServerboundContainerClickPacket(mc.player?.containerMenu?.containerId ?: -1, 0, 0, 0, ClickType.PICKUP, Int2ObjectMaps.emptyMap(), HashedStack.EMPTY)).postAndCatch()
+                PacketEvent.Send(ClientboundContainerSetSlotPacket(mc.player?.containerMenu?.containerId ?: -1, 0, it.type.windowSize - 1, ItemStack.EMPTY)).postAndCatch()
                 it.isClicked = false
             }
         }
@@ -136,7 +128,7 @@ object TerminalSolver : Module(
             if (!enabled || currentTerm == null) return@on
 
             if (renderType == 1 && !(currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver)) {
-                currentTerm?.type?.getGUI()?.mouseClicked(screen, button)
+                currentTerm?.type?.getGUI()?.mouseClicked(screen, if (button == 0) GLFW.GLFW_MOUSE_BUTTON_3 else button)
                 cancel()
                 return@on
             }
