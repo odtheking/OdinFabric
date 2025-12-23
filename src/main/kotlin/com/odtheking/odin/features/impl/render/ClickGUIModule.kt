@@ -65,8 +65,6 @@ object ClickGUIModule : Module(
     private var hasSentUpdateMessage = false
 
     init {
-        resetPositions()
-
         OdinMod.scope.launch {
             latestVersionNumber = checkNewerVersion(OdinMod.version.toString())
         }

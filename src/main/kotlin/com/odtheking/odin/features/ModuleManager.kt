@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.odtheking.odin.features
 
 import com.odtheking.odin.OdinMod
@@ -5,8 +7,10 @@ import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.clickgui.HudManager
 import com.odtheking.odin.clickgui.settings.impl.HUDSetting
 import com.odtheking.odin.clickgui.settings.impl.KeybindSetting
+import com.odtheking.odin.config.ModuleConfig
 import com.odtheking.odin.events.InputEvent
 import com.odtheking.odin.events.core.on
+import com.odtheking.odin.features.ModuleManager.configs
 import com.odtheking.odin.features.impl.dungeon.*
 import com.odtheking.odin.features.impl.dungeon.dungeonwaypoints.DungeonWaypoints
 import com.odtheking.odin.features.impl.dungeon.puzzlesolvers.PuzzleSolvers
@@ -21,6 +25,7 @@ import net.minecraft.client.DeltaTracker
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.resources.ResourceLocation.fromNamespaceAndPath
+import java.io.File
 
 /**
  * # Module Manager
@@ -40,6 +45,11 @@ object ModuleManager {
      */
     val modulesByCategory: HashMap<Category, ArrayList<Module>> = hashMapOf()
 
+    /**
+     * List of all configurations handled by Odin.
+     */
+    val configs: ArrayList<ModuleConfig> = arrayListOf()
+
     val keybindSettingsCache: ArrayList<KeybindSetting> = arrayListOf<KeybindSetting>()
     val hudSettingsCache: ArrayList<HUDSetting> = arrayListOf<HUDSetting>()
 
@@ -47,6 +57,7 @@ object ModuleManager {
 
     init {
         registerModules(
+            config = ModuleConfig(file = File(OdinMod.configFile, "odin-config.json")),
             // dungeon
             PuzzleSolvers, BlessingDisplay, LeapMenu, SecretClicked, MapInfo, Mimic, DungeonQueue,
             KeyHighlight, BloodCamp, PositionalMessages, TerracottaTimer, BreakerDisplay, LividSolver,
@@ -78,14 +89,22 @@ object ModuleManager {
         HudElementRegistry.attachElementBefore(VanillaHudElements.SLEEP, HUD_LAYER, ModuleManager::render)
     }
 
-    private fun registerModules(vararg modules: Module) {
+    /**
+     * Registers modules to the [ModuleManager] and initializes them.
+     *
+     * @param config the config the [Module] is saved to,
+     * it is recommended that each unique mod that uses this has its own config
+     */
+    fun registerModules(config: ModuleConfig, vararg modules: Module) {
         for (module in modules) {
             // dev module shouldn't be registered while not in dev env
             if (module.isDevModule && !FabricLoader.getInstance().isDevelopmentEnvironment) {
                 continue
             }
 
-            this.modules[module.name.lowercase()] = module
+            val lowercase = module.name.lowercase()
+            config.modules[lowercase] = module
+            this.modules[lowercase] = module
             this.modulesByCategory.getOrPut(module.category) { arrayListOf() }.add(module)
 
             module.key?.let { keybind ->
@@ -100,6 +119,26 @@ object ModuleManager {
                     is HUDSetting -> hudSettingsCache.add(setting)
                 }
             }
+        }
+        configs.add(config)
+        config.load()
+    }
+
+    /**
+     * Loads all [configs] from disk, into the respective modules.
+     */
+    fun loadConfigurations() {
+        for (config in configs) {
+            config.load()
+        }
+    }
+
+    /**
+     * Saves all [configs] to disk, from the respective modules.
+     */
+    fun saveConfigurations() {
+        for (config in configs) {
+            config.save()
         }
     }
 

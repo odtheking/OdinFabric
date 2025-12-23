@@ -1,5 +1,8 @@
 package com.odtheking.odin.features
 
+import com.odtheking.odin.features.Category.Companion.categories
+
+
 @ConsistentCopyVisibility
 data class Category private constructor(val name: String) {
     companion object {
@@ -27,6 +30,7 @@ data class Category private constructor(val name: String) {
          * Otherwise, it will be added to [categories].
          */
         fun custom(name: String): Category {
+            println("CATEGORY ADDED!!!")
             return categories.getOrPut(name) { Category(name) }
         }
     }

@@ -2,8 +2,8 @@ package com.odtheking.odin.clickgui
 
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.clickgui.settings.impl.ColorSetting
-import com.odtheking.odin.config.Config
 import com.odtheking.odin.features.Category
+import com.odtheking.odin.features.ModuleManager
 import com.odtheking.odin.features.impl.render.ClickGUIModule
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Colors
@@ -113,8 +113,8 @@ object ClickGUI : Screen(Component.literal("Click GUI")) {
                 }
             }
         }
-        Config.save()
 
+        ModuleManager.saveConfigurations()
         super.onClose()
     }
 

@@ -1,7 +1,6 @@
 package com.odtheking.odin
 
 import com.odtheking.odin.commands.*
-import com.odtheking.odin.config.Config
 import com.odtheking.odin.events.EventDispatcher
 import com.odtheking.odin.events.core.EventBus
 import com.odtheking.odin.features.ModuleManager
@@ -28,20 +27,38 @@ import net.fabricmc.loader.api.metadata.ModMetadata
 import net.minecraft.client.Minecraft
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import java.io.File
 import kotlin.coroutines.EmptyCoroutineContext
 
 object OdinMod : ClientModInitializer {
 
+    val logger: Logger = LogManager.getLogger("Odin")
+
     @JvmStatic
     val mc: Minecraft = Minecraft.getInstance()
+
+    /**
+     * Main config file location.
+     * @see com.odtheking.odin.config.ModuleConfig
+     * @see com.odtheking.odin.config.DungeonWaypointConfig
+     */
+    val configFile: File = File(mc.gameDirectory, "config/odin/").apply {
+        try {
+            parentFile.mkdirs()
+            createNewFile()
+        } catch (e: Exception) {
+            println("Error initializing module config\n${e.message}")
+            logger.error("Error initializing module config", e)
+        }
+    }
 
     const val MOD_ID = "odin"
 
     private val metadata: ModMetadata by lazy {
         FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow().metadata
     }
+
     val version: Version by lazy { metadata.version }
-    val logger: Logger = LogManager.getLogger("Odin")
 
     val scope = CoroutineScope(SupervisorJob() + EmptyCoroutineContext)
 
@@ -57,9 +74,10 @@ object OdinMod : ClientModInitializer {
         listOf(
             this, LocationUtils, TickTasks, KuudraUtils,
             SkyblockPlayer, ServerUtils, EventDispatcher,
-            ModuleManager, DungeonListener, PartyUtils,
+            DungeonListener, PartyUtils,
             ScanUtils, DungeonUtils, SplitsManager,
-            IrisCompatability, RenderBatchManager
+            IrisCompatability, RenderBatchManager,
+            ModuleManager
         ).forEach { EventBus.subscribe(it) }
 
         SpecialGuiElementRegistry.register { context ->
@@ -69,8 +87,6 @@ object OdinMod : ClientModInitializer {
         SpecialGuiElementRegistry.register { context ->
             ItemStateRenderer(context.vertexConsumers())
         }
-
-        Config.load()
 
         val name = mc.user?.name?.takeIf { !it.matches(Regex("Player\\d{2,3}")) } ?: return
         scope.launch {

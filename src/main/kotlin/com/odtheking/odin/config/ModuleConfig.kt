@@ -1,41 +1,50 @@
+@file:Suppress("unused")
+
 package com.odtheking.odin.config
 
 import com.google.gson.*
+import com.odtheking.odin.OdinMod
 import com.odtheking.odin.OdinMod.logger
-import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.clickgui.settings.Saving
-import com.odtheking.odin.features.ModuleManager
+import com.odtheking.odin.features.Module
 import java.io.File
-import kotlin.system.measureTimeMillis
 
 /**
- * This class handles loading and saving Modules and their settings.
+ * # ModuleConfig
  *
- * @author Stivais
+ * This class handles saving Modules, and their settings, into a JSON format.
  */
-object Config {
+class ModuleConfig internal constructor(file: File) {
 
-    private val gson = GsonBuilder().setPrettyPrinting().create()
+    /**
+     * Main constructor for Addons. (config/odin/addons/{fileName})
+     */
+    constructor(fileName: String) : this(File(OdinMod.configFile, "addons/$fileName"))
 
-    private val configFile = File(mc.gameDirectory, "config/odin/odin-config.json").apply {
+    // key is module name in lowercase
+    internal val modules: HashMap<String, Module> = hashMapOf()
+
+    private val file: File = file.apply {
         try {
             parentFile.mkdirs()
             createNewFile()
         } catch (e: Exception) {
-            println("Error initializing module config\n${e.message}")
             logger.error("Error initializing module config", e)
         }
     }
 
+    /**
+     * Loads configuration from file, into [modules].
+     */
     fun load() {
         try {
-            with(configFile.bufferedReader().use { it.readText() }) {
+            with(file.bufferedReader().use { it.readText() }) {
                 if (isEmpty()) return
 
                 val jsonArray = JsonParser.parseString(this).asJsonArray ?: return
                 for (modules in jsonArray) {
                     val moduleObj = modules?.asJsonObject ?: continue
-                    val module = ModuleManager.modules[moduleObj.get("name").asString] ?: continue
+                    val module = this@ModuleConfig.modules[moduleObj.get("name").asString.lowercase()] ?: continue
                     if (moduleObj.get("enabled").asBoolean != module.enabled) module.toggle()
                     val settingObj = moduleObj.get("settings")?.takeIf { it.isJsonObject }?.asJsonObject?.entrySet() ?: continue
                     for ((key, value) in settingObj) {
@@ -49,13 +58,16 @@ object Config {
         }
     }
 
+    /**
+     * Saves configuration to files, from [modules].
+     */
     fun save() {
         try {
             // reason doing this is better is that
             // using like a custom serializer leaves 'null' in settings that don't save
             // code looks hideous tho, but it fully works
             val jsonArray = JsonArray().apply {
-                for ((_, module) in ModuleManager.modules) {
+                for ((_, module) in modules) {
                     add(JsonObject().apply {
                         add("name", JsonPrimitive(module.name))
                         add("enabled", JsonPrimitive(module.enabled))
@@ -67,10 +79,18 @@ object Config {
                     })
                 }
             }
-            configFile.bufferedWriter().use { it.write(gson.toJson(jsonArray)) }
+            file.bufferedWriter().use { it.write(gson.toJson(jsonArray)) }
         } catch (e: Exception) {
             println("Error saving config.\n${e.message}")
             logger.error("Error saving config.", e)
         }
+    }
+
+    private companion object {
+        private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
+    }
+
+    override fun toString(): String {
+        return "ModuleConfig(file=$file)"
     }
 }
