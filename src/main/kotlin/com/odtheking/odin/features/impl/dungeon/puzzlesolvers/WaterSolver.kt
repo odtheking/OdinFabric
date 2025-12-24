@@ -36,7 +36,7 @@ object WaterSolver {
 
     fun scan(optimized: Boolean) = with (DungeonUtils.currentRoom) {
         if (this?.data?.name != "Water Board" || patternIdentifier != -1) return@with
-        val extendedSlots = WoolColor.entries.joinToString("") { if (it.isExtended) it.ordinal.toString() else "" }.takeIf { it.length == 3 } ?: return
+        val extendedSlots = WoolColor.entries.joinToString("") { if (it.isExtended) it.ordinal.toString() else "" }.takeIf { it.length == 3 } ?: return@with
 
         patternIdentifier = when {
             mc.level?.getBlockState(getRealCoords(BlockPos(14, 77, 27)))?.block == Blocks.TERRACOTTA -> 0 // right block == clay

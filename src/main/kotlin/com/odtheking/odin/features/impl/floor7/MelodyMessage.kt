@@ -3,6 +3,7 @@ package com.odtheking.odin.features.impl.floor7
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.StringSetting
+import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.TerminalEvent
 import com.odtheking.odin.events.WorldLoadEvent
 import com.odtheking.odin.events.core.on
@@ -22,7 +23,6 @@ import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
-import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
 import net.minecraft.world.item.Items
 import java.util.concurrent.ConcurrentHashMap
 
@@ -73,9 +73,10 @@ object MelodyMessage : Module(
             if (melodySendCoords) sendCommand("od sendcoords")
         }
 
-        onReceive<ClientboundSystemChatPacket> {
-            if (broadcast || melodyProgress) onChatMessage(this)
+        on<ChatPacketEvent> {
+            if (broadcast || melodyProgress) onChatMessage(value)
         }
+
         onReceive<ClientboundContainerSetSlotPacket> {
             if (broadcast || melodyProgress) onSlotUpdate(this)
         }
@@ -94,17 +95,13 @@ object MelodyMessage : Module(
     private val coreRegex = Regex("^The Core entrance is opening!$")
     private val p3StartRegex = Regex("^\\[BOSS] Goldor: Who dares trespass into my domain\\?$")
 
-    private fun onChatMessage(packet: ClientboundSystemChatPacket) {
-        val text = packet.content?.string ?: return
-
-        if (coreRegex.matches(text)) {
+    private fun onChatMessage(value: String) {
+        if (coreRegex.matches(value)) {
             melodyWebSocket.shutdown()
             melodies.clear()
         }
 
-        if (p3StartRegex.matches(text)) {
-            melodyWebSocket.connect("${ClickGUIModule.webSocketUrl}${LocationUtils.lobbyId}")
-        }
+        if (p3StartRegex.matches(value)) melodyWebSocket.connect("${ClickGUIModule.webSocketUrl}${LocationUtils.lobbyId}")
     }
 
     private fun onSlotUpdate(packet: ClientboundContainerSetSlotPacket) {

@@ -4,23 +4,22 @@ import com.odtheking.mixin.accessors.AbstractContainerScreenAccessor
 import com.odtheking.odin.clickgui.settings.AlwaysActive
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.*
-import com.odtheking.odin.events.*
+import com.odtheking.odin.events.ChatPacketEvent
+import com.odtheking.odin.events.GuiEvent
+import com.odtheking.odin.events.TerminalEvent
+import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.core.*
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.features.impl.floor7.terminalhandler.*
-import com.odtheking.odin.features.impl.floor7.termsim.TermSimGUI
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.Color.Companion.darker
 import com.odtheking.odin.utils.ui.rendering.NVGSpecialRenderer
-import it.unimi.dsi.fastutil.ints.Int2ObjectMaps
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
-import net.minecraft.network.HashedStack
-import net.minecraft.network.protocol.game.ClientboundContainerClosePacket
-import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket
-import net.minecraft.network.protocol.game.ServerboundContainerClickPacket
-import net.minecraft.network.protocol.game.ServerboundContainerClosePacket
-import net.minecraft.world.inventory.ClickType
+import net.minecraft.network.chat.Component
+import net.minecraft.network.protocol.game.*
 import net.minecraft.world.item.DyeColor
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
 import org.lwjgl.glfw.GLFW
 
 @AlwaysActive // So it can be used in other modules
@@ -29,17 +28,20 @@ object TerminalSolver : Module(
     description = "Renders solution for terminals in floor 7."
 ) {
     val renderType by SelectorSetting("Mode", "Normal", arrayListOf("Normal", "Custom GUI"), desc = "How the terminal solver should render.")
-    private val cancelToolTip by BooleanSetting("Stop Tooltips", true, desc = "Stops rendering tooltips in terminals.").withDependency { renderType != 1 }
-    val hideClicked by BooleanSetting("Hide Clicked", false, desc = "Visually hides your first click before a gui updates instantly to improve perceived response time. Does not affect actual click time.")
-    private val middleClickGUI by BooleanSetting("Middle Click GUI", true, desc = "Replaces right click with middle click in terminals.").withDependency { renderType != 1 }
-    private val blockIncorrectClicks by BooleanSetting("Block Incorrect Clicks", true, desc = "Blocks incorrect clicks in terminals.").withDependency { renderType != 1 }
-    private val cancelMelodySolver by BooleanSetting("Stop Melody Solver", false, desc = "Stops rendering the melody solver.")
-    val showNumbers by BooleanSetting("Show Numbers", true, desc = "Shows numbers in the order terminal.")
-    private val terminalReloadThreshold by NumberSetting("Reload Threshold", 600, 300, 1000, 10, unit = "ms", desc = "The amount of time in seconds before the terminal reloads.")
-    val customTermSize by NumberSetting("Custom Term Size", 1f, 0.5f, 3f, 0.1f, desc = "The size of the custom terminal GUI.").withDependency { renderType == 1 }
-    val normalTermSize by NumberSetting("Normal Term Size", 3, 1, 5, 1, desc = "The GUI scale increase for normal terminal GUI.").withDependency { renderType != 1 }
+    val customTermSize by NumberSetting("Term Size", 1f, 1f, 3f, 0.1f, desc = "The size of the custom terminal GUI.").withDependency { renderType == 1 }
+    private val normalTermSize by NumberSetting("Normal Term Size", 3, 1, 5, 1, desc = "The GUI scale increase for normal terminal GUI.").withDependency { renderType != 1 }
     val roundness by NumberSetting("Roundness", 9f, 0f, 15f, 1f, desc = "The roundness of the custom terminal gui.").withDependency { renderType == 1 }
     val gap by NumberSetting("Gap", 5f, 0f, 15f, 1f, desc = "The gap between the slots in the custom terminal gui.").withDependency { renderType == 1 }
+
+    private val solverSettings by DropdownSetting("Solver Functionality")
+    private val cancelToolTip by BooleanSetting("Stop Tooltips", true, desc = "Stops rendering tooltips in terminals.").withDependency { renderType == 0 && solverSettings }
+    private val middleClickGUI by BooleanSetting("Middle Click GUI", true, desc = "Replaces right click with middle click in terminals.").withDependency { renderType == 0 && solverSettings }
+    private val blockIncorrectClicks by BooleanSetting("Block Incorrect Clicks", true, desc = "Blocks incorrect clicks in terminals.").withDependency { renderType == 0 && solverSettings }
+    private val cancelMelodySolver by BooleanSetting("Stop Melody Solver", false, desc = "Stops rendering the melody solver.").withDependency { solverSettings }
+    val showNumbers by BooleanSetting("Show Numbers", true, desc = "Shows numbers in the order terminal.").withDependency { solverSettings }
+    val hideClicked by BooleanSetting("Hide Clicked", false, desc = "Visually hides your first click before a gui updates instantly to improve perceived response time. Does not affect actual click time.").withDependency { solverSettings }
+    private val terminalReloadThreshold by NumberSetting("Solution resolve timeout", 600, 300, 1000, 10, unit = "ms", desc = "The amount of time in seconds before the terminal reloads after a click wasn't registered while using hide clicked.").withDependency { hideClicked && solverSettings }
+    private val debug by BooleanSetting("Debug", false, desc = "Shows debug terminals.")
 
     private val showColors by DropdownSetting("Color Settings")
     val backgroundColor by ColorSetting("Background", Colors.gray26, true, desc = "Background color of the terminal solver.").withDependency { showColors }
@@ -71,6 +73,7 @@ object TerminalSolver : Module(
     private val startsWithRegex = Regex("What starts with: '(\\w+)'?")
     private val selectAllRegex = Regex("Select all the (.+) items!")
     private var lastClickTime = 0L
+    @JvmStatic val termSize get() = if (enabled && renderType == 0 && currentTerm != null) normalTermSize else 1
 
     init {
         onReceive<ClientboundOpenScreenPacket> {
@@ -106,14 +109,14 @@ object TerminalSolver : Module(
             leftTerm()
         }
 
+        onSend<ServerboundContainerClosePacket> {
+            leftTerm()
+        }
+
         on<ChatPacketEvent> {
             termSolverRegex.find(value)?.let { message ->
                 if (message.groupValues[1] == mc.player?.name?.string) lastTermOpened?.let { TerminalEvent.Solved(it).postAndCatch() }
             }
-        }
-
-        onSend<ServerboundContainerClosePacket> {
-            leftTerm()
         }
 
         onSend<ServerboundContainerClickPacket> {
@@ -121,13 +124,10 @@ object TerminalSolver : Module(
             currentTerm?.isClicked = true
         }
 
-        onSend<ServerboundContainerClosePacket> {
-            leftTerm()
-        }
-
         on<TickEvent.End> {
-            if (mc.screen is TermSimGUI && System.currentTimeMillis() - lastClickTime >= terminalReloadThreshold && currentTerm?.isClicked == true) currentTerm?.let {
-                PacketEvent.Send(ServerboundContainerClickPacket(mc.player?.containerMenu?.containerId ?: -1, 0, 0, 0, ClickType.PICKUP, Int2ObjectMaps.emptyMap(), HashedStack.EMPTY)).postAndCatch()
+            if (System.currentTimeMillis() - lastClickTime >= terminalReloadThreshold && currentTerm?.isClicked == true) currentTerm?.let {
+                val menu = (mc.screen as? AbstractContainerScreen<*>)?.menu ?: return@let
+                GuiEvent.SlotUpdate(mc.screen ?: return@on, ClientboundContainerSetSlotPacket(menu.containerId, 0, it.type.windowSize - 1, ItemStack.EMPTY), menu).postAndCatch()
                 it.isClicked = false
             }
         }
@@ -136,7 +136,7 @@ object TerminalSolver : Module(
             if (!enabled || currentTerm == null) return@on
 
             if (renderType == 1 && !(currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver)) {
-                currentTerm?.type?.getGUI()?.mouseClicked(screen, click.button())
+                currentTerm?.type?.getGUI()?.mouseClicked(screen, if (click.button() == 0) GLFW.GLFW_MOUSE_BUTTON_3 else button)
                 cancel()
                 return@on
             }
@@ -176,6 +176,27 @@ object TerminalSolver : Module(
         }
 
         on<GuiEvent.Draw> {
+            if (debug) currentTerm?.let { term ->
+                val debugInfo = listOf(
+                    "§6Terminal Debug Info:",
+                    "§7Type: §f${term.type.name}",
+                    "§7Window Name: §f${term.type.windowName}",
+                    "§7Time Open: §f${System.currentTimeMillis() - term.timeOpened}ms",
+                    "§7Is Clicked: §f${term.isClicked}",
+                    "§7Window Count: §f${term.windowCount}",
+                    "§7Solution Size: §f${term.solution.size}",
+                    "§7Solution: §f${term.solution.joinToString(", ")}",
+                    "§7Items: §f${(mc.screen as? AbstractContainerScreen<*>)?.menu?.items?.filter { !it.isEmpty && it.item != Items.BLACK_STAINED_GLASS_PANE }?.joinToString(" §8| §f") { it.itemName?.string ?: "Unknown" } ?: "N/A"}"
+                )
+
+                debugInfo.forEachIndexed { index, line ->
+                    guiGraphics.drawWordWrap(mc.font, Component.literal(line), 5, 20 + (index * 10), 300, Colors.WHITE.rgba)
+                }
+
+                (mc.screen as? AbstractContainerScreen<*>)?.menu?.items?.forEachIndexed { index, stack ->
+                    guiGraphics.renderItem(stack, 5 + (index % 9) * 18, 250 + (index / 9) * 18)
+                }
+            }
             if (!enabled || currentTerm == null || (currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver)) return@on
             if (renderType == 1) {
                 cancel()

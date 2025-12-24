@@ -35,7 +35,7 @@ public abstract class MinecraftMixin {
             )
     )
     private Object modifyGuiScaleValue(Object original) {
-        if (TerminalSolver.INSTANCE.getCurrentTerm() != null && TerminalSolver.INSTANCE.getNormalTermSize() != (Integer) original) return TerminalSolver.INSTANCE.getNormalTermSize();
+        if (TerminalSolver.INSTANCE.getCurrentTerm() != null && TerminalSolver.getTermSize() != (Integer) original) return TerminalSolver.getTermSize();
         return original;
     }
 }

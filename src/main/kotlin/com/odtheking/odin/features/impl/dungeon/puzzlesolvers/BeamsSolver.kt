@@ -44,7 +44,7 @@ object BeamsSolver {
     private var currentLanternPairs = ConcurrentHashMap<BlockPos, Pair<BlockPos, Color>>()
 
     fun onRoomEnter(event: RoomEnterEvent) = with(event.room) {
-        if (this?.data?.name != "Creeper Beams") return reset()
+        if (this?.data?.name != "Creeper Beams") return@with reset()
         recalculateLanternPairs(this)
     }
 

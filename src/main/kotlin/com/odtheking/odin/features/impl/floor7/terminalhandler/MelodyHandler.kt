@@ -6,7 +6,7 @@ import net.minecraft.world.item.Items
 
 class MelodyHandler: TerminalHandler(TerminalTypes.MELODY) {
 
-    override fun handleSlotUpdate(packet: ClientboundContainerSetSlotPacket): Boolean {
+    override fun handleSlotUpdate(packet: ClientboundContainerSetSlotPacket, items: List<ItemStack>): Boolean {
         return packet.item?.let {
             val newSolution = solveMelody(items)
             if (newSolution.isNotEmpty()) {
@@ -16,13 +16,13 @@ class MelodyHandler: TerminalHandler(TerminalTypes.MELODY) {
         } != null
     }
 
-    private fun solveMelody(items: Array<ItemStack?>): List<Int> {
-        val greenPane = items.indexOfLast { it?.item == Items.LIME_STAINED_GLASS_PANE }
-        val magentaPane = items.indexOfFirst { it?.item == Items.MAGENTA_STAINED_GLASS_PANE }
-        val greenClay = items.indexOfLast { it?.item == Items.LIME_TERRACOTTA }
+    private fun solveMelody(items: List<ItemStack>): List<Int> {
+        val greenPane = items.indexOfLast { it.item == Items.LIME_STAINED_GLASS_PANE }
+        val magentaPane = items.indexOfFirst { it.item == Items.MAGENTA_STAINED_GLASS_PANE }
+        val greenClay = items.indexOfLast { it.item == Items.LIME_TERRACOTTA }
         return items.mapIndexedNotNull { index, item ->
             when {
-                index == greenPane || item?.item == Items.MAGENTA_STAINED_GLASS_PANE -> index
+                index == greenPane || item.item == Items.MAGENTA_STAINED_GLASS_PANE -> index
                 index == greenClay && greenPane % 9 == magentaPane % 9 -> index
                 else -> null
             }

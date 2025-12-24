@@ -4,7 +4,7 @@ import com.odtheking.odin.features.impl.floor7.TerminalSolver
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.equalsOneOf
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
-
+import kotlin.math.abs
 
 object NumbersGui : TermGui() {
 
@@ -14,8 +14,8 @@ object NumbersGui : TermGui() {
         for (index in 9..slotCount) {
             if ((index % 9).equalsOneOf(0, 8)) continue
 
-            val amount = TerminalSolver.currentTerm?.items?.get(index)?.count?.takeIf { it > 0 } ?: continue
             val solutionIndex = currentSolution.indexOf(index)
+            val amount = abs((currentSolution.size - 14) - solutionIndex) + 1
 
             val color = when (solutionIndex) {
                 0 -> TerminalSolver.orderColor

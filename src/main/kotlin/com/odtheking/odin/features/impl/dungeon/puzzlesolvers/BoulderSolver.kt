@@ -34,7 +34,7 @@ object BoulderSolver {
     }
 
     fun onRoomEnter(event: RoomEnterEvent) = with(event.room) {
-        if (this?.data?.name != "Boulder") return reset()
+        if (this?.data?.name != "Boulder") return@with reset()
         var str = ""
         for (z in 24 downTo 9 step 3) {
             for (x in 24 downTo 6 step 3) {

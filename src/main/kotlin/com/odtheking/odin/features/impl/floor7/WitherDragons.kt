@@ -9,16 +9,13 @@ import com.odtheking.odin.events.*
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
-import com.odtheking.odin.utils.Colors
-import com.odtheking.odin.utils.PersonalBest
-import com.odtheking.odin.utils.modMessage
+import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.render.drawLine
 import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
-import com.odtheking.odin.utils.toFixed
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
@@ -138,9 +135,9 @@ object WitherDragons : Module(
                     drawWireFrameBox(dragon.aabbDimensions, dragon.color, depth = true)
             }
 
-            priorityDragon?.let { drag ->
-                if (dragonTracers && drag.state == WitherDragonState.SPAWNING)
-                    mc.player?.let { drawLine(listOf(it.eyePosition, Vec3(drag.spawnPos)), color = drag.color, true) }
+            priorityDragon?.let { dragon ->
+                if (dragonTracers && dragon.state == WitherDragonState.SPAWNING)
+                    mc.player?.let { drawLine(listOf(it.renderPos.add(it.forward).addVec(y = it.eyeHeight), Vec3(dragon.spawnPos)), dragon.color, true) }
             }
         }
 

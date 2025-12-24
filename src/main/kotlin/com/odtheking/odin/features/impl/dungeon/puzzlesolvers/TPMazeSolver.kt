@@ -27,7 +27,7 @@ object TPMazeSolver {
     }
 
     fun tpPacket(event: ClientboundPlayerPositionPacket) = with (event.change.position) {
-        if (DungeonUtils.currentRoomName != "Teleport Maze" || x % 0.5 != 0.0 || y != 69.5 || z % 0.5 != 0.0 || tpPads.isEmpty()) return
+        if (DungeonUtils.currentRoomName != "Teleport Maze" || x % 0.5 != 0.0 || y != 69.5 || z % 0.5 != 0.0 || tpPads.isEmpty()) return@with
         visited.addAll(tpPads.filter { AABB.unitCubeFromLowerCorner(Vec3(x, y, z)).inflate(1.0, 0.0, 1.0).intersects(AABB(it)) ||
                 mc.player?.boundingBox?.inflate(1.0, 0.0, 1.0)?.intersects(AABB(it)) == true })
         getCorrectPortals(Vec3(x, y, z), event.change.yRot, event.change.xRot)
@@ -59,7 +59,7 @@ object TPMazeSolver {
 
     fun reset() {
         correctPortals = listOf()
-        visited = CopyOnWriteArraySet<BlockPos>()
+        visited = CopyOnWriteArraySet()
     }
 
     private val endPortalFrameLocations = setOf(

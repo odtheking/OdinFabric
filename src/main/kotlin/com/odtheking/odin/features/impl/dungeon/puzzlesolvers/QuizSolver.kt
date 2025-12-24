@@ -61,7 +61,7 @@ object QuizSolver {
     }
 
     fun onRoomEnter(event: RoomEnterEvent) = with(event.room) {
-        if (this?.data?.name != "Quiz") return
+        if (this?.data?.name != "Quiz") return@with
 
         triviaOptions[0].blockPos = getRealCoords(BlockPos(20, 70, 6))
         triviaOptions[1].blockPos = getRealCoords(BlockPos(15, 70, 9))

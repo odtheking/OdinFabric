@@ -70,7 +70,7 @@ val dungeonWaypointsCommand = Commodore("dwp", "dungeonwaypoints") {
 
     literal("import").runs {
         scope.launch {
-            val base64Data = mc.keyboardHandler?.clipboard?.trimEnd { it == '\n' } ?: return@launch modMessage("§cFailed to read a string from clipboard. §fDid you copy it correctly?")
+            val base64Data = mc.keyboardHandler?.clipboard?.trim()?.trim { it == '\n' } ?: return@launch modMessage("§cFailed to read a string from clipboard. §fDid you copy it correctly?")
             if (base64Data.startsWith("{")) return@launch modMessage("§eIt looks like you copied json data instead of base64. §f§lEnsure you copied the correct text!")
             val waypoints = DungeonWaypointConfig.decodeWaypoints(base64Data) ?: return@launch
             DungeonWaypointConfig.waypoints = waypoints
