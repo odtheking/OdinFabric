@@ -55,11 +55,7 @@ object SimonSays : Module(
         }
 
         on<ChatPacketEvent> {
-            if (value == "[BOSS] Goldor: Who dares trespass into my domain?") {
-                resetSolution()
-                firstPhase = true
-                startClickCounter = 0
-            }
+            if (value == "[BOSS] Goldor: Who dares trespass into my domain?") startClickCounter = 0
         }
 
         on<BlockUpdateEvent> {
@@ -141,7 +137,6 @@ object SimonSays : Module(
                     context.drawStyledBox(AABB(x + 0.05, y + 0.37, z + 0.3, x - 0.15, y + 0.63, z + 0.7), color, style, true)
                 }
             }
-
         }
     }
 

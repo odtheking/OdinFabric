@@ -47,7 +47,7 @@ object IceFillSolver {
     }
 
     fun onRoomEnter(event: RoomEnterEvent, optimizePatterns: Boolean) = with (event.room) {
-        if (this?.data?.name != "Ice Fill" || currentPatterns.isNotEmpty()) return
+        if (this?.data?.name != "Ice Fill" || currentPatterns.isNotEmpty()) return@with
         val patterns = if (optimizePatterns) iceFillFloors.hard else iceFillFloors.easy
 
         repeat(3) { index ->
