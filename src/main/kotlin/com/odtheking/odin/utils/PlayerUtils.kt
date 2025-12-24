@@ -1,6 +1,7 @@
 package com.odtheking.odin.utils
 
 import com.odtheking.odin.OdinMod.mc
+import net.minecraft.client.resources.sounds.SimpleSoundInstance
 import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
@@ -13,8 +14,8 @@ fun playSoundSettings(soundSettings: Triple<String, Float, Float>) {
     playSoundAtPlayer(soundEvent, volume, pitch)
 }
 
-fun playSoundAtPlayer(event: SoundEvent, volume: Float = 1f, pitch: Float = 1f) = mc.execute {
-    mc.player?.playSound(event, volume, pitch)
+fun playSoundAtPlayer(event: SoundEvent, volume: Float = 1f, pitch: Float = 1f) {
+    mc.soundManager.playDelayed(SimpleSoundInstance.forUI(event, volume, pitch), 0)
 }
 
 fun setTitle(title: String) {
@@ -24,7 +25,7 @@ fun setTitle(title: String) {
 
 fun alert(title: String, playSound: Boolean = true) {
     setTitle(title)
-    if (playSound) playSoundAtPlayer(SoundEvents.FIREWORK_ROCKET_LAUNCH)
+    if (playSound) playSoundAtPlayer(SoundEvents.NOTE_BLOCK_PLING.value())
 }
 
 fun getPositionString(): String {

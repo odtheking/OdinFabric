@@ -207,4 +207,9 @@ val devCommand = Commodore("oddev") {
             }
         }
     }
+
+    literal("copy").runs { greedyString: GreedyString ->
+        setClipboardContent(greedyString.string)
+        modMessage("§aCopied to clipboard!")
+    }
 }

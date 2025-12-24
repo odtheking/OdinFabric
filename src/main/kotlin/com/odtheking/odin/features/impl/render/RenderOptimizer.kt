@@ -43,14 +43,10 @@ object RenderOptimizer : Module(
         }
 
         onReceive<ClientboundSetEntityDataPacket> {
-            mc.execute {
-                if (hideDyingMobs) (packedItems.find { it.id == 9 }?.value as? Float)?.let {
-                    if (it <= 0f) mc.level?.removeEntity(id, Entity.RemovalReason.DISCARDED)
-                }
-                if (hideArcher) (packedItems.find { it.id == 8 }?.value as? ItemStack)?.let {
-                    if (!it.isEmpty && it.item == Items.BONE_MEAL) mc.level?.removeEntity(id, Entity.RemovalReason.DISCARDED)
-                }
-            }
+            if (
+                (hideDyingMobs && (packedItems.find { it.id == 9 }?.value as? Float ?: 1f) <= 0f) ||
+                (hideArcher && (packedItems.find { it.id == 8 }?.value as? ItemStack)?.let { !it.isEmpty && it.item == Items.BONE_MEAL } == true)
+             ) mc.execute { mc.level?.removeEntity(id, Entity.RemovalReason.DISCARDED) }
         }
 
         onReceive<ClientboundSetEquipmentPacket> {

@@ -23,32 +23,12 @@ val mainCommand = Commodore("odin", "od") {
         schedule(0) { mc.setScreen(HudManager) }
     }
 
-    literal("reset") {
-        literal("module").executable {
-            param("moduleName") {
-                suggests { ModuleManager.modules.map { it.name.lowercase().replace(" ", "_") } }
-            }
-
-            runs { moduleName: String ->
-                val module = ModuleManager.getModuleByName(moduleName.replace("_", " ")) ?: throw SyntaxException("Module not found.")
-
-                module.settings.forEach { setting -> setting.reset() }
-                modMessage("§aSettings for module §f${module.name} §ahas been reset to default values.")
-            }
-        }
-
-        literal("clickgui").runs {
-            ClickGUIModule.resetPositions()
-            modMessage("Reset click gui positions.")
-        }
-        literal("hud").runs {
-            HudManager.resetHUDS()
-            modMessage("Reset HUD positions.")
-        }
+    literal("tps").runs {
+        modMessage("§aTPS: §f${ServerUtils.averageTps}")
     }
 
-    literal("copy").runs { greedyString: GreedyString ->
-        setClipboardContent(greedyString.string)
+    literal("ping").runs {
+        modMessage("§aPing: §f${ServerUtils.averagePing}ms")
     }
 
     literal("ep").runs {
@@ -109,6 +89,30 @@ val mainCommand = Commodore("odin", "od") {
 
     runs { floor: Floors -> sendCommand("joininstance ${floor.instance()}") }
     runs { tier: KuudraTier -> sendCommand("joininstance ${tier.instance()}") }
+
+    literal("reset") {
+        literal("module").executable {
+            param("moduleName") {
+                suggests { ModuleManager.modules.map { it.name.lowercase().replace(" ", "_") } }
+            }
+
+            runs { moduleName: String ->
+                val module = ModuleManager.getModuleByName(moduleName.replace("_", " ")) ?: throw SyntaxException("Module not found.")
+
+                module.settings.forEach { setting -> setting.reset() }
+                modMessage("§aSettings for module §f${module.name} §ahas been reset to default values.")
+            }
+        }
+
+        literal("clickgui").runs {
+            ClickGUIModule.resetPositions()
+            modMessage("Reset click gui positions.")
+        }
+        literal("hud").runs {
+            HudManager.resetHUDS()
+            modMessage("Reset HUD positions.")
+        }
+    }
 }
 
 @CommandParsable
