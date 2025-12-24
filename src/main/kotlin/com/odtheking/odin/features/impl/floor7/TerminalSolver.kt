@@ -73,7 +73,7 @@ object TerminalSolver : Module(
     private val startsWithRegex = Regex("What starts with: '(\\w+)'?")
     private val selectAllRegex = Regex("Select all the (.+) items!")
     private var lastClickTime = 0L
-    @JvmStatic val termSize get() = if (enabled && renderType == 0 && currentTerm != null) normalTermSize else 1
+    private var previousScale = -1
 
     init {
         onReceive<ClientboundOpenScreenPacket> {
@@ -101,7 +101,10 @@ object TerminalSolver : Module(
                 devMessage("§aNew terminal: §6${it.type.name}")
                 TerminalEvent.Opened(it).postAndCatch()
                 lastTermOpened = it
-                if (renderType == 0 && enabled) mc.execute { mc.resizeDisplay() }
+                if (renderType == 0 && enabled) {
+                    previousScale = mc.options.guiScale().get()
+                    mc.options.guiScale().set(normalTermSize)
+                }
             }
         }
 
@@ -177,23 +180,24 @@ object TerminalSolver : Module(
 
         on<GuiEvent.Draw> {
             if (debug) currentTerm?.let { term ->
+                val menu = (mc.screen as? AbstractContainerScreen<*>)?.menu ?: return@let
                 val debugInfo = listOf(
                     "§6Terminal Debug Info:",
                     "§7Type: §f${term.type.name}",
-                    "§7Window Name: §f${term.type.windowName}",
+                    "§7Window Name: §f${mc.screen?.title?.string}",
+                    "§7Container ID: §f${menu.containerId}",
                     "§7Time Open: §f${System.currentTimeMillis() - term.timeOpened}ms",
                     "§7Is Clicked: §f${term.isClicked}",
                     "§7Window Count: §f${term.windowCount}",
-                    "§7Solution Size: §f${term.solution.size}",
                     "§7Solution: §f${term.solution.joinToString(", ")}",
-                    "§7Items: §f${(mc.screen as? AbstractContainerScreen<*>)?.menu?.items?.filter { !it.isEmpty && it.item != Items.BLACK_STAINED_GLASS_PANE }?.joinToString(" §8| §f") { it.itemName?.string ?: "Unknown" } ?: "N/A"}"
+                    "§7Items: §f${menu.items?.filter { !it.isEmpty && it.item != Items.BLACK_STAINED_GLASS_PANE }?.joinToString(" §8| §f") { it.itemName?.string ?: "Unknown" } ?: "N/A"}"
                 )
 
                 debugInfo.forEachIndexed { index, line ->
                     guiGraphics.drawWordWrap(mc.font, Component.literal(line), 5, 20 + (index * 10), 300, Colors.WHITE.rgba)
                 }
 
-                (mc.screen as? AbstractContainerScreen<*>)?.menu?.items?.forEachIndexed { index, stack ->
+                menu.items?.forEachIndexed { index, stack ->
                     guiGraphics.renderItem(stack, 5 + (index % 9) * 18, 250 + (index / 9) * 18)
                 }
             }
@@ -273,8 +277,8 @@ object TerminalSolver : Module(
             devMessage("§cLeft terminal: §6${it.type.name}")
             TerminalEvent.Closed(it).postAndCatch()
             EventBus.unsubscribe(it)
+            if (renderType == 0 && enabled && previousScale != -1) mc.options.guiScale().set(previousScale)
             currentTerm = null
-            if (renderType == 0 && enabled) mc.execute { mc.resizeDisplay() }
         }
     }
 }
