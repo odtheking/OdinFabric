@@ -53,7 +53,6 @@ class ModuleConfig internal constructor(file: File) {
                 }
             }
         } catch (e: Exception) {
-            println("Error loading config.\n${e.message}")
             logger.error("Error initializing module config", e)
         }
     }
@@ -81,8 +80,7 @@ class ModuleConfig internal constructor(file: File) {
             }
             file.bufferedWriter().use { it.write(gson.toJson(jsonArray)) }
         } catch (e: Exception) {
-            println("Error saving config.\n${e.message}")
-            logger.error("Error saving config.", e)
+            logger.error("Error saving module config.", e)
         }
     }
 
