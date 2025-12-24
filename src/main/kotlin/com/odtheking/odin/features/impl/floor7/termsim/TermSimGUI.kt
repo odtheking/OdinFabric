@@ -121,7 +121,7 @@ open class TermSimGUI(
     }
 
     protected fun Slot.setSlot(stack: ItemStack) {
-        PacketEvent.Receive(ClientboundContainerSetSlotPacket(-2, 0, index, stack)).postAndCatch()
+        GuiEvent.SlotUpdate(mc.screen ?: return, ClientboundContainerSetSlotPacket(-2, 0, index, stack), menu).postAndCatch()
         set(stack)
     }
 

@@ -11,7 +11,6 @@ import com.odtheking.odin.utils.createSoundSettings
 import com.odtheking.odin.utils.devMessage
 import com.odtheking.odin.utils.playSoundSettings
 import com.odtheking.odin.utils.render.drawStyledBox
-import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
 import net.minecraft.core.BlockPos
@@ -56,11 +55,7 @@ object SimonSays : Module(
         }
 
         on<ChatPacketEvent> {
-            if (value == "[BOSS] Goldor: Who dares trespass into my domain?") {
-                resetSolution()
-                firstPhase = true
-                startClickCounter = 0
-            }
+            if (value == "[BOSS] Goldor: Who dares trespass into my domain?") startClickCounter = 0
         }
 
         on<BlockUpdateEvent> {
@@ -112,7 +107,7 @@ object SimonSays : Module(
         on<BlockInteractEvent> {
             if (DungeonUtils.getF7Phase() != M7Phases.P3) return@on
 
-            if (pos == startButton && firstPhase) {
+            if (pos == startButton && firstPhase && blockWrongStart) {
                 if (startClickCounter++ >= maxStartClicks && mc.player?.isShiftKeyDown == false) {
                     if (customClickSounds) playSoundSettings(blockedClick())
                     cancel()
@@ -142,8 +137,6 @@ object SimonSays : Module(
                     context.drawStyledBox(AABB(x + 0.05, y + 0.37, z + 0.3, x - 0.15, y + 0.63, z + 0.7), color, style, true)
                 }
             }
-
-            context.drawText("$startClickCounter", startButton.center.add(0.0, 1.0, 0.0), 1f, true)
         }
     }
 

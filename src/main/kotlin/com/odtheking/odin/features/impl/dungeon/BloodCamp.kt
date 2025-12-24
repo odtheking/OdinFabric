@@ -166,8 +166,8 @@ object BloodCamp : Module(
             startTime = null
         }
 
-        on<RenderBossBarEvent> { // get the actual name with color code and compare that
-            if (!watcherBar || !DungeonUtils.inDungeons || DungeonUtils.inBoss || bossBar.name.string?.endsWith("The Watcher") == false) return@on
+        on<RenderBossBarEvent> {
+            if (!watcherBar || !DungeonUtils.inDungeons || DungeonUtils.inBoss || bossBar.name == null || bossBar.name?.string != "§c§lThe Watcher") return@on
             val amount = 12 + (DungeonUtils.floor?.floorNumber ?: 0)
             bossBar.name = Component.literal(bossBar.progress.takeIf { it >= 0.05 }?.let { "${bossBar.name.string} ${(amount * it).roundToInt()}/$amount" } ?: return@on)
         }

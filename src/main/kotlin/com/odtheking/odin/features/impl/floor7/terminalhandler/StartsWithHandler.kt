@@ -11,7 +11,7 @@ class StartsWithHandler(private val letter: String): TerminalHandler(TerminalTyp
     private val clickedSlots = mutableSetOf<Int>()
     private var lastContainerId = -1
 
-    override fun handleSlotUpdate(packet: ClientboundContainerSetSlotPacket): Boolean {
+    override fun handleSlotUpdate(packet: ClientboundContainerSetSlotPacket, items: List<ItemStack>): Boolean {
         if (packet.slot != type.windowSize - 1) return false
         solution.clear()
         solution.addAll(solveStartsWith(items, letter))
@@ -31,8 +31,8 @@ class StartsWithHandler(private val letter: String): TerminalHandler(TerminalTyp
         solution.removeAt(solution.indexOf(slotIndex).takeIf { it != -1 } ?: return)
     }
 
-    private fun solveStartsWith(items: Array<ItemStack?>, letter: String): List<Int> =
+    private fun solveStartsWith(items: List<ItemStack>, letter: String): List<Int> =
         items.mapIndexedNotNull { index, item ->
-            if (item?.hoverName?.string?.startsWith(letter, true) == true && !item.hasGlint() && index !in clickedSlots) index else null
+            if (item.hoverName?.string?.startsWith(letter, true) == true && !item.hasGlint() && index !in clickedSlots) index else null
         }
 }

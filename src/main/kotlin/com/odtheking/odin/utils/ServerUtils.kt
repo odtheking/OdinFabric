@@ -31,7 +31,7 @@ object ServerUtils {
 
             val pingLog = mc.debugOverlay.pingLogger
 
-            val sampleSize = min(pingLog.size(), 5)
+            val sampleSize = min(pingLog.size(), 10)
 
             if (sampleSize == 0) {
                 averagePing = currentPing

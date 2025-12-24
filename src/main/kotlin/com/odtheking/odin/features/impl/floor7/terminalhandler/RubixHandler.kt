@@ -8,7 +8,7 @@ import net.minecraft.world.level.block.StainedGlassPaneBlock
 
 class RubixHandler : TerminalHandler(TerminalTypes.RUBIX) {
 
-    override fun handleSlotUpdate(packet: ClientboundContainerSetSlotPacket): Boolean {
+    override fun handleSlotUpdate(packet: ClientboundContainerSetSlotPacket, items: List<ItemStack>): Boolean {
         if (items.lastOrNull() == null || packet.slot != type.windowSize - 1) return false
         solution.clear()
         solution.addAll(solveRubix(items))
@@ -24,9 +24,9 @@ class RubixHandler : TerminalHandler(TerminalTypes.RUBIX) {
     private val rubixColorOrder = listOf(DyeColor.ORANGE, DyeColor.YELLOW, DyeColor.GREEN, DyeColor.BLUE, DyeColor.RED)
     private var lastRubixSolution: DyeColor? = null
 
-    private fun solveRubix(items: Array<ItemStack?>): List<Int> {
+    private fun solveRubix(items: List<ItemStack>): List<Int> {
         val panes = items.mapNotNull { item ->
-            if (((item?.item as? BlockItem)?.block as? StainedGlassPaneBlock)?.color != DyeColor.BLACK) return@mapNotNull item
+            if (((item.item as? BlockItem)?.block as? StainedGlassPaneBlock)?.color != DyeColor.BLACK) return@mapNotNull item
             null
         }
 
