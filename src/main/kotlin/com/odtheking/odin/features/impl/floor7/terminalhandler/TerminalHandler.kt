@@ -3,9 +3,10 @@ package com.odtheking.odin.features.impl.floor7.terminalhandler
 import com.google.common.primitives.Shorts
 import com.google.common.primitives.SignedBytes
 import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.events.GuiEvent
 import com.odtheking.odin.events.PacketEvent
-import com.odtheking.odin.events.TerminalEvent
 import com.odtheking.odin.events.core.EventBus
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.impl.floor7.termsim.TermSimGUI
 import com.odtheking.odin.utils.clickSlot
@@ -13,7 +14,6 @@ import com.odtheking.odin.utils.equalsOneOf
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.HashedStack
-import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket
@@ -21,10 +21,10 @@ import net.minecraft.world.inventory.ClickType
 import net.minecraft.world.item.ItemStack
 import org.lwjgl.glfw.GLFW
 import java.util.concurrent.CopyOnWriteArrayList
+import kotlin.math.min
 
 open class TerminalHandler(val type: TerminalTypes) {
     val solution: CopyOnWriteArrayList<Int> = CopyOnWriteArrayList()
-    val items: Array<ItemStack?> = arrayOfNulls(type.windowSize)
     val timeOpened = System.currentTimeMillis()
     var isClicked = false
     var windowCount = 0
@@ -33,32 +33,18 @@ open class TerminalHandler(val type: TerminalTypes) {
         @Suppress("LeakingThis")
         EventBus.subscribe(this)
 
-        onReceive<ClientboundContainerSetSlotPacket> {
-            if (slot !in 0 until type.windowSize || (mc.screen is TermSimGUI && containerId != -2)) return@onReceive
-            items[slot] = item
-            if (handleSlotUpdate(this)) TerminalEvent.Updated(this@TerminalHandler).postAndCatch()
+        on<GuiEvent.SlotUpdate> {
+            if (packet.slot !in 0 until type.windowSize) return@on
+            handleSlotUpdate(packet, menu.items.subList(0, min(menu.items.size, type.windowSize)))
         }
 
         onReceive<ClientboundOpenScreenPacket> {
             isClicked = false
-            items.fill(null)
             windowCount++
-        }
-
-        onReceive<ClientboundContainerSetContentPacket> {
-            if ((mc.screen is TermSimGUI && containerId != -2)) return@onReceive
-            items.forEachIndexed { index, stack ->
-                if (stack == null || stack.isEmpty) return@forEachIndexed
-                if (index !in 0 until type.windowSize) return@forEachIndexed
-
-                items[index] = stack
-                if (handleSlotUpdate(ClientboundContainerSetSlotPacket(containerId, stateId, index, stack)))
-                    TerminalEvent.Updated(this@TerminalHandler).postAndCatch()
-            }
         }
     }
 
-    open fun handleSlotUpdate(packet: ClientboundContainerSetSlotPacket): Boolean = false
+    open fun handleSlotUpdate(packet: ClientboundContainerSetSlotPacket, items: List<ItemStack>): Boolean = false
 
     open fun simulateClick(slotIndex: Int, clickType: Int) {}
 

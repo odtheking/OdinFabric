@@ -6,7 +6,7 @@ import net.minecraft.world.item.Items
 
 class PanesHandler: TerminalHandler(TerminalTypes.PANES) {
 
-    override fun handleSlotUpdate(packet: ClientboundContainerSetSlotPacket): Boolean {
+    override fun handleSlotUpdate(packet: ClientboundContainerSetSlotPacket, items: List<ItemStack>): Boolean {
         if (packet.slot != type.windowSize - 1) return false
         solution.clear()
         solution.addAll(solvePanes(items))
@@ -17,6 +17,6 @@ class PanesHandler: TerminalHandler(TerminalTypes.PANES) {
         solution.removeAt(solution.indexOf(slotIndex).takeIf { it != -1 } ?: return)
     }
 
-    private fun solvePanes(items: Array<ItemStack?>): List<Int> =
-        items.mapIndexedNotNull { index, item -> if (item?.item == Items.RED_STAINED_GLASS_PANE.asItem()) index else null }
+    private fun solvePanes(items: List<ItemStack>): List<Int> =
+        items.mapIndexedNotNull { index, item -> if (item.item == Items.RED_STAINED_GLASS_PANE.asItem()) index else null }
 }
