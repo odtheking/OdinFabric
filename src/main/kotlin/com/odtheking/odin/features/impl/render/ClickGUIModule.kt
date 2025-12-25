@@ -75,7 +75,7 @@ object ClickGUIModule : Module(
             modMessage("""
             ${getChatBreak()}
                 
-            §3Update available: §f$latestVersionNumber
+            §3Odin update available: §f$latestVersionNumber
             """.trimIndent(), "")
 
             modMessage(Component.literal("§b$RELEASE_LINK").withStyle {
@@ -89,7 +89,6 @@ object ClickGUIModule : Module(
             
             """.trimIndent(), "")
             alert("Odin Update Available")
-
         }
     }
 

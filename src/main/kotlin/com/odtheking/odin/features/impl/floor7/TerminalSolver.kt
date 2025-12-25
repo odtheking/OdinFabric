@@ -103,7 +103,7 @@ object TerminalSolver : Module(
                 lastTermOpened = it
                 if (renderType == 0 && enabled) {
                     previousScale = mc.options.guiScale().get()
-                    mc.options.guiScale().set(normalTermSize)
+                    mc.execute { mc.options.guiScale().set(normalTermSize) }
                 }
             }
         }
@@ -277,7 +277,7 @@ object TerminalSolver : Module(
             devMessage("§cLeft terminal: §6${it.type.name}")
             TerminalEvent.Closed(it).postAndCatch()
             EventBus.unsubscribe(it)
-            if (renderType == 0 && enabled && previousScale != -1) mc.options.guiScale().set(previousScale)
+            if (renderType == 0 && enabled && previousScale != -1) mc.execute { mc.options.guiScale().set(previousScale) }
             currentTerm = null
         }
     }
