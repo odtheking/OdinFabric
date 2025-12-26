@@ -87,7 +87,7 @@ fun logError(throwable: Throwable, context: Any) {
         it
             .withClickEvent(
                 ClickEvent.RunCommand(
-                    "odin copy $message \\n``` ${throwable.message} \\n${
+                    "oddev copy $message \\n``` ${throwable.message} \\n${
                         throwable.stackTraceToString().lineSequence().take(10).joinToString("\n")
                     }```"
                 )

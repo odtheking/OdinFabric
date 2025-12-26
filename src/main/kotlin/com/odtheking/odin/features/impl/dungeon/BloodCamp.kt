@@ -19,7 +19,7 @@ import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket
-import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
+import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket
 import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.world.entity.decoration.ArmorStand
 import net.minecraft.world.entity.monster.Zombie
@@ -139,11 +139,17 @@ object BloodCamp : Module(
             }
         }
 
-        onReceive<ClientboundSetEntityDataPacket> {
-            if (!bloodAssist || currentWatcherEntity != null) return@onReceive
-            mc.execute {
-                currentWatcherEntity = (mc.level?.getEntity(id) as? Zombie)?.takeIf { it.getItemBySlot(EquipmentSlot.HEAD)?.texture in watcherSkulls } ?: return@execute
-                devMessage("Watcher found at ${currentWatcherEntity?.position()}")
+        onReceive<ClientboundSetEquipmentPacket> {
+            if (!bloodAssist || currentWatcherEntity != null || !DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
+
+            slots.forEach { slot ->
+                if (slot.second.isEmpty) return@forEach
+                val texture = slot.second.texture ?: return@forEach
+
+                if ((slot.first == EquipmentSlot.HEAD && texture in watcherSkulls)) mc.execute {
+                    currentWatcherEntity = (mc.level?.getEntity(entity) as? Zombie)
+                    devMessage("Watcher found at ${currentWatcherEntity?.position()}")
+                }
             }
         }
 

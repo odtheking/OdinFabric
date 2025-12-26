@@ -27,7 +27,8 @@ import kotlin.math.floor
  */
 class ModuleButton(val module: Module, val panel: Panel) {
 
-    val representableSettings = module.settings.filterIsInstance<RenderableSetting<*>>()
+    // don't like this.
+    val representableSettings = module.settings.values.mapNotNull { setting -> setting as? RenderableSetting }
 
     private val colorAnim = ColorAnimation(150)
 
@@ -51,7 +52,7 @@ class ModuleButton(val module: Module, val panel: Panel) {
         NVGRenderer.rect(x, y, Panel.WIDTH, Panel.HEIGHT, color.rgba)
         NVGRenderer.text(module.name, x + Panel.WIDTH / 2 - nameWidth / 2, y + Panel.HEIGHT / 2 - 9f, 18f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
 
-        if (module.settings.isEmpty()) return Panel.HEIGHT
+        if (representableSettings.isEmpty()) return Panel.HEIGHT
 
         val totalHeight = Panel.HEIGHT + floor(extendAnim.get(0f, getSettingHeight(), !extended))
         var drawY = Panel.HEIGHT
@@ -59,8 +60,8 @@ class ModuleButton(val module: Module, val panel: Panel) {
         if (extendAnim.isAnimating()) NVGRenderer.pushScissor(x, y, Panel.WIDTH, totalHeight)
 
         if (extendAnim.isAnimating() || extended) {
-            for (setting in module.settings) {
-                if (setting is RenderableSetting<*> && setting.isVisible) drawY += setting.render(x, y + drawY, mouseX, mouseY)
+            for (setting in representableSettings) {
+                if (setting.isVisible) drawY += setting.render(x, y + drawY, mouseX, mouseY)
             }
         }
 

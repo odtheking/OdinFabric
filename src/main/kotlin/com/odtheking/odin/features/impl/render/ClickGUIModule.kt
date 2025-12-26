@@ -49,12 +49,12 @@ object ClickGUIModule : Module(
         toggle()
     }
 
-    val panelSetting by MapSetting("Panel Settings", mutableMapOf<Category, PanelData>())
+    val panelSetting by MapSetting("Panel Settings", mutableMapOf<String, PanelData>())
     data class PanelData(var x: Float = 10f, var y: Float = 10f, var extended: Boolean = true)
 
     fun resetPositions() {
-        Category.entries.forEach {
-            panelSetting[it] = PanelData(10f + 260f * it.ordinal, 10f, true)
+        Category.categories.entries.forEachIndexed { index, (categoryName, _) ->
+            panelSetting[categoryName] = PanelData(10f + 260f * index, 10f, true)
         }
     }
 
@@ -63,8 +63,6 @@ object ClickGUIModule : Module(
     private var hasSentUpdateMessage = false
 
     init {
-        resetPositions()
-
         OdinMod.scope.launch {
             latestVersionNumber = checkNewerVersion(OdinMod.version.toString())
         }
@@ -76,7 +74,7 @@ object ClickGUIModule : Module(
             modMessage("""
             ${getChatBreak()}
                 
-            §3Update available: §f$latestVersionNumber
+            §3Odin update available: §f$latestVersionNumber
             """.trimIndent(), "")
 
             modMessage(Component.literal("§b$RELEASE_LINK").withStyle {
@@ -90,7 +88,6 @@ object ClickGUIModule : Module(
             
             """.trimIndent(), "")
             alert("Odin Update Available")
-
         }
     }
 

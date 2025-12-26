@@ -8,10 +8,6 @@ import com.odtheking.odin.features.impl.render.ClickGUIModule
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.ui.isAreaHovered
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
-import net.fabricmc.loader.api.FabricLoader
-import net.minecraft.client.input.CharacterEvent
-import net.minecraft.client.input.KeyEvent
-import net.minecraft.client.input.MouseButtonEvent
 import kotlin.math.floor
 
 /**
@@ -25,18 +21,13 @@ import kotlin.math.floor
  */
 class Panel(private val category: Category) {
 
-    val moduleButtons: ArrayList<ModuleButton> = ArrayList<ModuleButton>().apply {
-        ModuleManager.modules
-            .filter { it.category == category && (!it.isDevModule || FabricLoader.getInstance().isDevelopmentEnvironment || ClickGUIModule.devModules) }
-            .sortedByDescending { NVGRenderer.textWidth(it.name, 16f, NVGRenderer.defaultFont) }
-            .forEach { add(ModuleButton(it, this@Panel)) }
-    }
+    val panelSetting = ClickGUIModule.panelSetting[category.name] ?: throw IllegalStateException("Panel setting for category $category is not initialized")
+    val moduleButtons = ModuleManager.modulesByCategory[category]
+        ?.sortedByDescending { NVGRenderer.textWidth(it.name, 16f, NVGRenderer.defaultFont) }
+        ?.map { ModuleButton(it, this@Panel) } ?: listOf()
     private val lastModuleButton by lazy { moduleButtons.lastOrNull() }
 
-    val panelSetting = ClickGUIModule.panelSetting[category]
-        ?: throw IllegalStateException("Panel setting for category $category is not initialized")
-
-    private val textWidth = NVGRenderer.textWidth(category.displayName, 22f, NVGRenderer.defaultFont)
+    private val textWidth = NVGRenderer.textWidth(category.name, 22f, NVGRenderer.defaultFont)
     private var previousHeight = 0f
     private var scrollOffset = 0f
     var dragging = false
@@ -62,7 +53,7 @@ class Panel(private val category: Category) {
 
         NVGRenderer.drawHalfRoundedRect(panelSetting.x, panelSetting.y, WIDTH, HEIGHT, gray26.rgba, 5f, true)
         NVGRenderer.text(
-            category.displayName,
+            category.name,
             panelSetting.x + WIDTH / 2f - textWidth / 2,
             panelSetting.y + HEIGHT / 2f - 11,
             22f,

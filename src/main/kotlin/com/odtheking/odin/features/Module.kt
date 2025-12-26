@@ -19,32 +19,33 @@ import kotlin.reflect.full.hasAnnotation
 abstract class Module(
     val name: String,
     val key: Int? = GLFW.GLFW_KEY_UNKNOWN,
+    category: Category? = null,
     @Transient var description: String,
     toggled: Boolean = false,
 ) {
 
     /**
-     * Category for this module.
+     * Map containing all settings for the module,
+     * where the key is the name of the setting.
      *
-     * It is defined by the package of the module. (For example: me.odin.features.impl.render == [Category.RENDER]).
-     * If it is in an invalid package, it will use [Category.RENDER] as a default
+     * Since the map is a [LinkedHashMap], order is preserved.
      */
-    @Transient
-    val category: Category = getCategory(this::class.java) ?: Category.RENDER
+    val settings: LinkedHashMap<String, Setting<*>> = linkedMapOf()
 
     /**
-     * Reference for if the module is enabled
+     * Category for this module.
+     */
+    @Transient
+    val category: Category = category ?: getCategoryFromPackage(this::class.java)
+
+    /**
+     * Flag for if the module is enabled/disabled.
      *
-     * When it is enabled, it is registered to the Forge Eventbus,
-     * otherwise it's unregistered unless it has the annotation [@AlwaysActive][AlwaysActive]
+     * When true, it is registered to the [EventBus].
+     * When false, it is unregistered, unless the module has the [AlwaysActive] annotation.
      */
     var enabled: Boolean = toggled
         private set
-
-    /**
-     * List of settings for the module
-     */
-    val settings: ArrayList<Setting<*>> = ArrayList()
 
     protected inline val mc get() = OdinMod.mc
 
@@ -66,36 +67,51 @@ abstract class Module(
     }
 
     /**
-     * Gets toggled when module is enabled
+     * Invoked when module is enabled.
+     *
+     * It is recommended to call super so it can properly subscribe to the eventbus
      */
     open fun onEnable() {
         if (!alwaysActive) EventBus.subscribe(this)
     }
 
     /**
-     * Gets toggled when module is disabled
+     * Invoked when module is disabled.
+     *
+     * It is recommended to call super so it can properly subscribe to the eventbus
      */
     open fun onDisable() {
         if (!alwaysActive) EventBus.unsubscribe(this)
     }
 
+    /**
+     * Invoked when the main keybind is pressed.
+     *
+     * By default, it toggles the module.
+     */
     open fun onKeybind() {
         toggle()
         if (ClickGUIModule.enableNotification) modMessage("$name ${if (enabled) "§aenabled" else "§cdisabled"}.")
     }
 
+    /**
+     * Toggles the module and invokes [onEnable]/[onDisable].
+     */
     fun toggle() {
         enabled = !enabled
         if (enabled) onEnable()
         else onDisable()
     }
 
-    fun <K : Setting<*>> register(setting: K): K = setting.also { settings.add(it) }
+    /**
+     * Registers a [Setting] to this module and returns itself.
+     */
+    fun <K : Setting<*>> registerSetting(setting: K): K {
+        settings[setting.name] = setting
+        return setting
+    }
 
-    operator fun <K : Setting<*>> K.unaryPlus(): K = register(this)
-
-    fun getSettingByName(name: String?): Setting<*>? =
-        settings.find { it.name.equals(name, ignoreCase = true) }
+    operator fun <K : Setting<*>> K.unaryPlus(): K = registerSetting(this)
 
     @Suppress("FunctionName")
     fun HUD(
@@ -109,7 +125,20 @@ abstract class Module(
     ): HUDSetting = HUDSetting(name, x, y, scale, toggleable, desc, this, block)
 
     private companion object {
-        private fun getCategory(clazz: Class<out Module>): Category? =
-            Category.entries.find { clazz.`package`.name.contains(it.name, true) }
+        private fun getCategoryFromPackage(clazz: Class<out Module>): Category {
+            val packageName = clazz.packageName
+            return when {
+                packageName.contains("dungeon") -> Category.DUNGEON
+                packageName.contains("floor7") -> Category.FLOOR7
+                packageName.contains("nether") -> Category.NETHER
+                packageName.contains("render") -> Category.RENDER
+                packageName.contains("skyblock") -> Category.SKYBLOCK
+                else -> throw IllegalStateException(
+                    "Module ${clazz.name} failed to get category from the package it is in." +
+                            "Either manually assign a category," +
+                            " or put it under any valid package (dungeon, floor7, nether, render, skyblock))"
+                )
+            }
+        }
     }
 }

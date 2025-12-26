@@ -2,13 +2,13 @@ package com.odtheking.odin.clickgui
 
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.clickgui.settings.impl.ColorSetting
-import com.odtheking.odin.config.Config
 import com.odtheking.odin.features.Category
+import com.odtheking.odin.features.ModuleManager
 import com.odtheking.odin.features.impl.render.ClickGUIModule
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.ui.HoverHandler
-import com.odtheking.odin.utils.ui.animations.LinearAnimation
+import com.odtheking.odin.utils.ui.animations.EaseOutAnimation
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
 import com.odtheking.odin.utils.ui.rendering.NVGSpecialRenderer
 import net.minecraft.client.gui.GuiGraphics
@@ -23,29 +23,29 @@ import com.odtheking.odin.utils.ui.mouseY as odinMouseY
 
 /**
  * Renders all the modules.
- *
- * Backend made by Aton, with some changes
- * Design mostly made by Stivais
- *
- * @author Stivais, Aton
- * @see [Panel]
  */
 object ClickGUI : Screen(Component.literal("Click GUI")) {
 
     private val panels: ArrayList<Panel> = arrayListOf<Panel>().apply {
-        if (Category.entries.any { ClickGUIModule.panelSetting[it] == null }) ClickGUIModule.resetPositions()
-        for (category in Category.entries) add(Panel(category))
+        if (Category.categories.any { (category, _) -> ClickGUIModule.panelSetting[category] == null }) ClickGUIModule.resetPositions()
+        for ((_, category) in Category.categories) add(Panel(category))
     }
 
-    private var openAnim = LinearAnimation<Float>(400)
+    private var openAnim = EaseOutAnimation(500)
     val gray38 = Color(38, 38, 38)
     val gray26 = Color(26, 26, 26)
 
     override fun render(context: GuiGraphics, mouseX: Int, mouseY: Int, deltaTicks: Float) {
         NVGSpecialRenderer.draw(context, 0, 0, context.guiWidth(), context.guiHeight()) {
+            SearchBar.draw(mc.window.width / 2f - 175f, mc.window.height - 110f, odinMouseX, odinMouseY)
             if (openAnim.isAnimating()) {
-                NVGRenderer.translate(0f, openAnim.get(-10f, 0f))
-                NVGRenderer.globalAlpha(openAnim.get(0f, 1f))
+                val scale = openAnim.get(0f, 1f)
+
+                val centerX = context.guiWidth().toFloat()
+                val centerY = context.guiHeight().toFloat()
+                NVGRenderer.translate(centerX, centerY)
+                NVGRenderer.scale(scale, scale)
+                NVGRenderer.translate(-centerX, -centerY)
             }
 
             val draggedPanel = panels.firstOrNull { it.dragging }
@@ -55,7 +55,6 @@ object ClickGUI : Screen(Component.literal("Click GUI")) {
 
             draggedPanel?.draw(odinMouseX, odinMouseY)
 
-            SearchBar.draw(mc.window.width / 2f - 175f, mc.window.height - 110f, odinMouseX, odinMouseY)
             desc.render()
         }
         super.render(context, mouseX, mouseY, deltaTicks)
@@ -123,8 +122,8 @@ object ClickGUI : Screen(Component.literal("Click GUI")) {
                 }
             }
         }
-        Config.save()
 
+        ModuleManager.saveConfigurations()
         super.onClose()
     }
 

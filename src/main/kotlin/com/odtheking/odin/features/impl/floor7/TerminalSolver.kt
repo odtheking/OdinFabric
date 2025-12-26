@@ -41,7 +41,7 @@ object TerminalSolver : Module(
     val showNumbers by BooleanSetting("Show Numbers", true, desc = "Shows numbers in the order terminal.").withDependency { solverSettings }
     val hideClicked by BooleanSetting("Hide Clicked", false, desc = "Visually hides your first click before a gui updates instantly to improve perceived response time. Does not affect actual click time.").withDependency { solverSettings }
     private val terminalReloadThreshold by NumberSetting("Solution resolve timeout", 600, 300, 1000, 10, unit = "ms", desc = "The amount of time in seconds before the terminal reloads after a click wasn't registered while using hide clicked.").withDependency { hideClicked && solverSettings }
-    private val debug by BooleanSetting("Debug", false, desc = "Shows debug terminals.")
+    private val debug by BooleanSetting("Debug", false, desc = "Shows debug terminals.").withDependency { solverSettings }
 
     private val showColors by DropdownSetting("Color Settings")
     val backgroundColor by ColorSetting("Background", Colors.gray26, true, desc = "Background color of the terminal solver.").withDependency { showColors }
@@ -103,7 +103,7 @@ object TerminalSolver : Module(
                 lastTermOpened = it
                 if (renderType == 0 && enabled) {
                     previousScale = mc.options.guiScale().get()
-                    mc.options.guiScale().set(normalTermSize)
+                    mc.execute { mc.options.guiScale().set(normalTermSize) }
                 }
             }
         }
@@ -147,14 +147,11 @@ object TerminalSolver : Module(
 
         on<GuiEvent.SlotClick> (EventPriority.HIGH) {
             val term = currentTerm ?: return@on
-            if (!enabled) {
-                term.isClicked = true
-                return@on
-            }
+            term.isClicked = true
+            if (!enabled || (term.type == TerminalTypes.MELODY && cancelMelodySolver)) return@on
 
             if (
                 System.currentTimeMillis() - term.timeOpened < 350 ||
-                (renderType == 1 && !(term.type == TerminalTypes.MELODY && cancelMelodySolver)) ||
                 (blockIncorrectClicks && !term.canClick(slotId, button))
             ) return@on cancel()
 
@@ -165,7 +162,6 @@ object TerminalSolver : Module(
             }
 
             if (hideClicked && term.isClicked) term.simulateClick(slotId, button)
-            term.isClicked = true
         }
 
         on<GuiEvent.DrawBackground> {
@@ -277,7 +273,7 @@ object TerminalSolver : Module(
             devMessage("§cLeft terminal: §6${it.type.name}")
             TerminalEvent.Closed(it).postAndCatch()
             EventBus.unsubscribe(it)
-            if (renderType == 0 && enabled && previousScale != -1) mc.options.guiScale().set(previousScale)
+            if (renderType == 0 && enabled && previousScale != -1) mc.execute { mc.options.guiScale().set(previousScale) }
             currentTerm = null
         }
     }

@@ -5,7 +5,7 @@ import com.github.stivais.commodore.utils.GreedyString
 import com.odtheking.odin.OdinMod
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.ChatPacketEvent
-import com.odtheking.odin.features.ModuleManager.generateFeatureList
+import com.odtheking.odin.features.ModuleManager
 import com.odtheking.odin.features.impl.floor7.MelodyMessage.melodyWebSocket
 import com.odtheking.odin.features.impl.floor7.WitherDragonState
 import com.odtheking.odin.features.impl.floor7.WitherDragons
@@ -27,6 +27,7 @@ import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRelativeCoords
 import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils
 import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils.getRoomCenter
 import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils.getRoomData
+import com.odtheking.odin.utils.ui.rendering.NVGRenderer
 import kotlinx.coroutines.launch
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.chat.Component
@@ -75,6 +76,18 @@ val devCommand = Commodore("oddev") {
     }
 
     literal("generatefeaturelist").runs {
+        fun generateFeatureList(): String {
+            val featureList = StringBuilder()
+
+            for ((category, modulesInCategory) in ModuleManager.modulesByCategory) {
+                featureList.appendLine("Category: ${category.name}")
+                for (module in modulesInCategory.sortedByDescending {
+                    NVGRenderer.textWidth(it.name, 16f, NVGRenderer.defaultFont)
+                }) featureList.appendLine("- ${module.name}: ${module.description}")
+                featureList.appendLine()
+            }
+            return featureList.toString()
+        }
         setClipboardContent(generateFeatureList())
         modMessage("Generated feature list and copied to clipboard.")
     }
@@ -206,5 +219,10 @@ val devCommand = Commodore("oddev") {
                 sendCommand("setblock ${it.blockPos.x} ${it.blockPos.y} ${it.blockPos.z} minecraft:$type")
             }
         }
+    }
+
+    literal("copy").runs { greedyString: GreedyString ->
+        setClipboardContent(greedyString.string)
+        modMessage("§aCopied to clipboard!")
     }
 }

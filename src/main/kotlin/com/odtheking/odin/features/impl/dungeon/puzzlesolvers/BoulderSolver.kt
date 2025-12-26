@@ -45,7 +45,7 @@ object BoulderSolver {
             val render = getRealCoords(BlockPos(sol[0], 65, sol[1]))
             val click = getRealCoords(BlockPos(sol[2], 65, sol[3]))
             BoxPosition(AABB(render), click)
-        }?.toMutableList() ?: return
+        }?.toMutableList() ?: return@with
     }
 
     fun onRenderWorld(event: RenderEvent.Extract, showAllBoulderClicks: Boolean, boulderStyle: Int, boulderColor: Color) {

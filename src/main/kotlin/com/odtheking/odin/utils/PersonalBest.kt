@@ -1,12 +1,12 @@
 package com.odtheking.odin.utils
 
 import com.odtheking.odin.clickgui.settings.impl.MapSetting
-import com.odtheking.odin.config.Config
 import com.odtheking.odin.features.Module
+import com.odtheking.odin.features.ModuleManager
 
 class PersonalBest(module: Module, name: String) {
 
-    private val mapSetting = module.register(MapSetting(name, mutableMapOf<String, Float>()))
+    private val mapSetting = module.registerSetting(MapSetting(name, mutableMapOf<String, Float>()))
     /**
      * Updates the personal best for a specific puzzle
      * 
@@ -28,11 +28,11 @@ class PersonalBest(module: Module, name: String) {
 
     fun set(index: String, time: Float) {
         mapSetting.value[index] = time
-        Config.save()
+        ModuleManager.saveConfigurations()
     }
 
     fun reset() {
         mapSetting.value.clear()
-        Config.save()
+        ModuleManager.saveConfigurations()
     }
 }

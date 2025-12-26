@@ -2,7 +2,7 @@ package com.odtheking.odin.clickgui
 
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.clickgui.settings.impl.HudElement
-import com.odtheking.odin.config.Config
+import com.odtheking.odin.features.ModuleManager
 import com.odtheking.odin.features.ModuleManager.hudSettingsCache
 import com.odtheking.odin.utils.Colors
 import net.minecraft.client.gui.GuiGraphics
@@ -147,7 +147,7 @@ object HudManager : Screen(Component.literal("HUD Manager")) {
     }
 
     override fun onClose() {
-        Config.save()
+        ModuleManager.saveConfigurations()
         super.onClose()
     }
 
