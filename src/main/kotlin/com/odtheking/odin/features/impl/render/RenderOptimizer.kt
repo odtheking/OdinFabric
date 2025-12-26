@@ -60,7 +60,7 @@ object RenderOptimizer : Module(
         }
 
         onReceive<ClientboundLevelParticlesPacket> {
-            if (disableExplosion && particle == ParticleTypes.EXPLOSION) {
+            if (disableExplosion && particle == ParticleTypes.EXPLOSION || particle == ParticleTypes.EXPLOSION_EMITTER) {
                 it.cancel()
             }
         }
