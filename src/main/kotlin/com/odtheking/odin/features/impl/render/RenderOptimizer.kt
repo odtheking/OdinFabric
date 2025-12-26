@@ -1,5 +1,6 @@
 package com.odtheking.odin.features.impl.render
 
+import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
@@ -15,15 +16,19 @@ import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 
+// I would rename to render hider (or something along those lines),
+// since this module doesn't actually optimize rendering, it just hides it.
 object RenderOptimizer : Module(
     name = "Render Optimizer",
     description = "Optimizes rendering by disabling unnecessary features."
 ) {
-    private val disableFallingBlocks by BooleanSetting("Hide Falling Blocks", true, desc = "Hides rendering of falling blocks to improve performance.")
-    private val disableLighting by BooleanSetting("Hide Lighting", true, desc = "Hides lighting updates to improve performance.")
+    private val hideFallingBlocks by BooleanSetting("Hide Falling Blocks", true, desc = "Hides rendering of falling blocks to improve performance.")
+    private val hideLightning by BooleanSetting("Hide Lightning", true, desc = "Hides lightning bolts.")
+    private val hideExperienceOrbs by BooleanSetting("Hide Experience Orbs", true, desc = "Hides experience orbs.")
+    private val hideDeathAnimation by BooleanSetting("Hide Death Animation", true, desc = "Hides mobs that are dying.")
+    private val hideDyingMobsArmorStand by BooleanSetting("Hide Armor Stand", true, desc = "Hides Armor stands from mobs that are dying.").withDependency { hideDeathAnimation }
     private val disableExplosion by BooleanSetting("Hide Explosion Particles", false, desc = "Hides explosion particles to improve performance.")
-    private val hideDyingMobs by BooleanSetting("Hide Dying Mobs", true, desc = "Hides mobs that are dying.")
-    private val hideArcher by BooleanSetting("Hide Archer Passive", false, desc = "Hides the archer passive's floating bone meal.")
+    private val hideArcherBoneMeal by BooleanSetting("Hide Archer Passive", false, desc = "Hides the archer passive's floating bone meal.")
     private val hideFairy by BooleanSetting("Hide Healer Fairy", false, desc = "Hides the healer fairy held by some mobs.")
     private val hideWeaver by BooleanSetting("Hide Soul Weaver", false, desc = "Hides the soul weaver helmet worn by some mobs.")
     private val hideTentacle by BooleanSetting("Hide Tentacle Head", false, desc = "Hides the tentacle head worn by some mobs.")
@@ -36,17 +41,28 @@ object RenderOptimizer : Module(
 
     init {
         onReceive<ClientboundAddEntityPacket> {
-            if (disableFallingBlocks && type == EntityType.FALLING_BLOCK)
-                it.cancel()
-            else if (disableLighting && type == EntityType.LIGHTNING_BOLT)
-                it.cancel()
+            when (type) {
+                EntityType.FALLING_BLOCK if hideFallingBlocks -> it.cancel()
+                EntityType.LIGHTNING_BOLT if hideLightning -> it.cancel()
+                EntityType.EXPERIENCE_ORB if hideExperienceOrbs -> it.cancel()
+            }
         }
 
         onReceive<ClientboundSetEntityDataPacket> {
-            if (
-                (hideDyingMobs && (packedItems.find { it.id == 9 }?.value as? Float ?: 1f) <= 0f) ||
-                (hideArcher && (packedItems.find { it.id == 8 }?.value as? ItemStack)?.let { !it.isEmpty && it.item == Items.BONE_MEAL } == true)
-             ) mc.execute { mc.level?.removeEntity(id, Entity.RemovalReason.DISCARDED) }
+            if (hideArcherBoneMeal) {
+                val item = packedItems.find { it.id == 8 }?.value as? ItemStack ?: return@onReceive
+                if (!item.isEmpty && item.item == Items.BONE_MEAL) {
+                    mc.execute {
+                        mc.level?.removeEntity(id, Entity.RemovalReason.DISCARDED)
+                    }
+                }
+            }
+        }
+
+        onReceive<ClientboundLevelParticlesPacket> {
+            if (disableExplosion && particle == ParticleTypes.EXPLOSION) {
+                it.cancel()
+            }
         }
 
         onReceive<ClientboundSetEquipmentPacket> {
@@ -61,13 +77,30 @@ object RenderOptimizer : Module(
                 ) mc.execute { mc.level?.removeEntity(entity, Entity.RemovalReason.DISCARDED) }
             }
         }
-
-        onReceive<ClientboundLevelParticlesPacket> {
-            if (disableExplosion && particle == ParticleTypes.EXPLOSION)
-                it.cancel()
-        }
     }
 
+    /**
+     * @see com.odtheking.mixin.mixins.ScreenEffectRendererMixin.onRenderFireOverlay
+     */
     @JvmStatic
-    val shouldDisableFire get() = enabled && disableFireOverlay
+    fun shouldDisableFireOverlay(): Boolean {
+        return enabled && disableFireOverlay
+    }
+
+    /**
+     * @see com.odtheking.mixin.mixins.LivingEntityMixin.hideDeathAnimation
+     */
+    @JvmStatic
+    fun hideEntityDeathAnimation(): Boolean {
+        return enabled && hideDeathAnimation
+    }
+
+    /**
+     * @see com.odtheking.mixin.mixins.LivingEntityMixin.hideDeathAnimation
+     */
+    @JvmStatic
+    fun hideDyingEntityArmorStand(): Boolean {
+        // no need for enabled, this cannot be called if hideEntityDeathAnimation returned false
+        return hideDyingMobsArmorStand
+    }
 }
