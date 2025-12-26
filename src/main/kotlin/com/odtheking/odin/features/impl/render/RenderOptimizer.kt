@@ -4,6 +4,7 @@ import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
+import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.texture
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
@@ -31,7 +32,7 @@ object RenderOptimizer : Module(
     private val hideArcherBoneMeal by BooleanSetting("Hide Archer Passive", false, desc = "Hides the archer passive's floating bone meal.")
     private val hideFairy by BooleanSetting("Hide Healer Fairy", false, desc = "Hides the healer fairy held by some mobs.")
     private val hideWeaver by BooleanSetting("Hide Soul Weaver", false, desc = "Hides the soul weaver helmet worn by some mobs.")
-    private val hideTentacle by BooleanSetting("Hide Tentacle Head", false, desc = "Hides the tentacle head worn by some mobs.")
+    private val hideTentacle by BooleanSetting("Hide Tentacle Head", true, desc = "Hides the tentacle head worn by some mobs.")
 
     private val disableFireOverlay by BooleanSetting("Hide Fire Overlay", true, desc = "Hides the fire overlay to improve disability.")
 
@@ -49,23 +50,21 @@ object RenderOptimizer : Module(
         }
 
         onReceive<ClientboundSetEntityDataPacket> {
-            if (hideArcherBoneMeal) {
+            if (hideArcherBoneMeal && DungeonUtils.inDungeons) {
                 val item = packedItems.find { it.id == 8 }?.value as? ItemStack ?: return@onReceive
-                if (!item.isEmpty && item.item == Items.BONE_MEAL) {
-                    mc.execute {
+                if (!item.isEmpty && item.item == Items.BONE_MEAL) mc.execute {
                         mc.level?.removeEntity(id, Entity.RemovalReason.DISCARDED)
                     }
-                }
             }
         }
 
         onReceive<ClientboundLevelParticlesPacket> {
-            if (disableExplosion && particle == ParticleTypes.EXPLOSION || particle == ParticleTypes.EXPLOSION_EMITTER) {
+            if (disableExplosion && particle == ParticleTypes.EXPLOSION || particle == ParticleTypes.EXPLOSION_EMITTER)
                 it.cancel()
-            }
         }
 
         onReceive<ClientboundSetEquipmentPacket> {
+            if (!DungeonUtils.inDungeons) return@onReceive
             slots.forEach { slot ->
                 if (slot.second.isEmpty) return@forEach
                 val texture = slot.second.texture ?: return@forEach

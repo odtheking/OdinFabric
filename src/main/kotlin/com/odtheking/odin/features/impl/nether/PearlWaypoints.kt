@@ -7,7 +7,6 @@ import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.*
-import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.render.drawFilledBox
 import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.skyblock.KuudraUtils
@@ -22,8 +21,8 @@ object PearlWaypoints : Module(
     name = "Pearl Waypoints",
     description = "Renders waypoints for pearls in Kuudra."
 ) {
-    private val dynamicWaypoints by BooleanSetting("Dynamic Waypoints", true, desc = "Renders waypoints dynamically based on your position.")
-    private val dynamicWaypointsColor by ColorSetting("Dynamic Color", Colors.MINECRAFT_DARK_PURPLE.withAlpha(0.5f), true, desc = "Color of the dynamic waypoints.").withDependency { dynamicWaypoints }
+    private val dynamicWaypoints by BooleanSetting("Dynamic Waypoints", false, desc = "Renders waypoints dynamically based on your position.")
+    private val dynamicWaypointsColor by ColorSetting("Dynamic Color", Colors.MINECRAFT_DARK_PURPLE, true, desc = "Color of the dynamic waypoints.").withDependency { dynamicWaypoints }
     private val presetWaypoints by BooleanSetting("Preset Waypoints", true, desc = "Renders preset waypoints for pearls.")
     private val hideFarWaypoints by BooleanSetting("Hide Far Waypoints", true, desc = "Hides the waypoints that are not the closest to you.").withDependency { presetWaypoints }
 
@@ -34,11 +33,7 @@ object PearlWaypoints : Module(
             var closest = true
             getOrderedLineups(mc.player?.blockPosition() ?: return@on).forEach { (lineup, color) ->
                 lineup.startPos.forEach {
-                    if (presetWaypoints) context.drawWireFrameBox(
-                        AABB(it),
-                        color.withAlpha(if (!closest && hideFarWaypoints) 0.25f else 1f),
-                        if (!closest && hideFarWaypoints) 4f else 6f
-                    )
+                    if (presetWaypoints) context.drawWireFrameBox(AABB(it), color)
                 }
 
                 lineup.lineups.forEach lineupLoop@{ blockPos ->
@@ -48,7 +43,7 @@ object PearlWaypoints : Module(
                         if (dynamicWaypoints) {
                             val destinationSupply = if (lineup.supply == Supply.Square) NoPre.missing else lineup.supply
                             calculatePearl(destinationSupply.dropOffSpot)?.let {
-                                context.drawWireFrameBox(AABB.ofSize(it, 0.12, 0.12, 0.12), dynamicWaypointsColor, 2f)
+                                context.drawFilledBox(AABB.ofSize(it, 0.12, 0.12, 0.12), dynamicWaypointsColor)
                             }
                             context.drawWireFrameBox(AABB(BlockPos(lineup.supply.dropOffSpot.above())), dynamicWaypointsColor)
                         }
@@ -60,12 +55,12 @@ object PearlWaypoints : Module(
     }
 
     private val enumToLineup = hashMapOf(
-        Supply.xCannon to BlockPos(-110, 155, -106),
-        Supply.X to BlockPos(-46, 120, -150),
-        Supply.Shop to BlockPos(-46, 135, -139),
-        Supply.Triangle to BlockPos(-37, 139, -125),
-        Supply.Equals to BlockPos(-28, 128, -112),
-        Supply.Slash to BlockPos(-106, 157, -99)
+        Supply.xCannon to BlockPos(-59, 106, -59),
+        Supply.X to BlockPos(-58, 127, -148),
+        Supply.Shop to BlockPos(-146, 107, -60),
+        Supply.Triangle to BlockPos(-149, 104, -70),
+        Supply.Equals to BlockPos(-168, 124, -118),
+        Supply.Slash to BlockPos(-65, 109, -162)
     )
 
     private fun getOrderedLineups(pos: BlockPos): SortedMap<Lineup, Color> {
@@ -124,49 +119,49 @@ object PearlWaypoints : Module(
         Lineup(
             supply = Supply.Shop,
             startPos = setOf(BlockPos(-71, 79, -135), BlockPos(-86, 78, -129)),
-            lineups = setOf(BlockPos(-97, 157, -114))
+            lineups = setOf(BlockPos(-146, 107, -60), BlockPos(-147, 111, -69))
         ) to Colors.MINECRAFT_RED,
         // Triangle
         Lineup(
             supply = Supply.Triangle,
             startPos = setOf(BlockPos(-68, 77, -123)),
-            lineups = setOf(BlockPos(-96, 161, -105))
+            lineups = setOf(BlockPos(-149, 104, -70))
         ) to Colors.MINECRAFT_LIGHT_PURPLE,
         // X
         Lineup(
             supply = Supply.X,
             startPos = setOf(BlockPos(-135, 77, -139)),
-            lineups = setOf(BlockPos(-102, 160, -110))
+            lineups = setOf(BlockPos(-59, 115, -71))
         ) to Colors.MINECRAFT_YELLOW,
         Lineup(
             supply = Supply.xCannon,
             startPos = setOf(BlockPos(-131, 79, -114)),
-            lineups = setOf(BlockPos(-112, 155, -107))
+            lineups = setOf(BlockPos(-59, 106, -59), BlockPos(-51, 108, -67), BlockPos(-39, 93, -76))
         ) to Colors.WHITE,
         // Square
         Lineup(
             supply = Supply.Square,
             startPos = setOf(BlockPos(-141, 78, -91)),
             lineups = setOf(
-                BlockPos(-110, 155, -106), // cannon
-                BlockPos(-46, 120, -150), // X
-                BlockPos(-46, 135, -139), // shop
-                BlockPos(-37, 139, -125), // triangle
-                BlockPos(-28, 128, -112), // equals
-                BlockPos(-106, 157, -99) // slash
+                BlockPos(-59, 106, -59), // cannon
+                BlockPos(-58, 127, -148), // X
+                BlockPos(-146, 107, -60), // shop
+                BlockPos(-149, 104, -70), // triangle
+                BlockPos(-168, 124, -118), // equals
+                BlockPos(-65, 109, -162) // slash
             )
         ) to Colors.MINECRAFT_AQUA,
         // equals
         Lineup(
             supply = Supply.Equals,
             startPos = setOf(BlockPos(-66, 76, -88)),
-            lineups = setOf(BlockPos(-101, 160, -100))
+            lineups = setOf(BlockPos(-168, 124, -118))
         ) to Colors.MINECRAFT_GREEN,
         // slash
         Lineup(
             supply = Supply.Slash,
-            startPos = setOf(BlockPos(-114, 77, -69)),
-            lineups = setOf(BlockPos(-106, 157, -99), BlockPos(-138, 145, -88))
+            startPos = setOf(BlockPos(-115, 77, -69)),
+            lineups = setOf(BlockPos(-65, 109, -162))
         ) to Colors.MINECRAFT_BLUE
     )
 
