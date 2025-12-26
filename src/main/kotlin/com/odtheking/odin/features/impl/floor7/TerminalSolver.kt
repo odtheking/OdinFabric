@@ -147,14 +147,11 @@ object TerminalSolver : Module(
 
         on<GuiEvent.SlotClick> (EventPriority.HIGH) {
             val term = currentTerm ?: return@on
-            if (!enabled) {
-                term.isClicked = true
-                return@on
-            }
+            term.isClicked = true
+            if (!enabled || (term.type == TerminalTypes.MELODY && cancelMelodySolver)) return@on
 
             if (
                 System.currentTimeMillis() - term.timeOpened < 350 ||
-                (renderType == 1 && !(term.type == TerminalTypes.MELODY && cancelMelodySolver)) ||
                 (blockIncorrectClicks && !term.canClick(slotId, button))
             ) return@on cancel()
 
@@ -165,7 +162,6 @@ object TerminalSolver : Module(
             }
 
             if (hideClicked && term.isClicked) term.simulateClick(slotId, button)
-            term.isClicked = true
         }
 
         on<GuiEvent.DrawBackground> {

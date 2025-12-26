@@ -11,7 +11,7 @@ object TerminalSimulator : Module(
     name = "Terminal Simulator",
     description = "Simulates a floor 7 terminal from phase 3."
 ) {
-    private val ping by NumberSetting("Ping", 0, 0, 500, desc = "Ping of the terminal.")
+    private val ping by NumberSetting("Ping", 0, 0, 500, 50, desc = "Ping of the terminal.")
 
     val termSimPBs = PersonalBest(this, "TermsimPBs")
 

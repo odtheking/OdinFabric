@@ -50,8 +50,8 @@ object ModuleManager {
      */
     val configs: ArrayList<ModuleConfig> = arrayListOf()
 
-    val keybindSettingsCache: ArrayList<KeybindSetting> = arrayListOf<KeybindSetting>()
-    val hudSettingsCache: ArrayList<HUDSetting> = arrayListOf<HUDSetting>()
+    val keybindSettingsCache: ArrayList<KeybindSetting> = arrayListOf()
+    val hudSettingsCache: ArrayList<HUDSetting> = arrayListOf()
 
     private val HUD_LAYER: ResourceLocation = fromNamespaceAndPath(OdinMod.MOD_ID, "odin_hud")
 
@@ -97,10 +97,7 @@ object ModuleManager {
      */
     fun registerModules(config: ModuleConfig, vararg modules: Module) {
         for (module in modules) {
-            // dev module shouldn't be registered while not in dev env
-            if (module.isDevModule && !FabricLoader.getInstance().isDevelopmentEnvironment) {
-                continue
-            }
+            if (module.isDevModule && !FabricLoader.getInstance().isDevelopmentEnvironment) continue
 
             val lowercase = module.name.lowercase()
             config.modules[lowercase] = module
