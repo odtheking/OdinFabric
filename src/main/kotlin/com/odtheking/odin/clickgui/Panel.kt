@@ -21,16 +21,9 @@ import kotlin.math.floor
  */
 class Panel(private val category: Category) {
 
-    val moduleButtons: ArrayList<ModuleButton> = ArrayList<ModuleButton>().apply {
-        ModuleManager.modulesByCategory[category]?.forEach {
-            // dev modules shouldn't be included in the module manager
-            add(ModuleButton(it, this@Panel))
-        }
-    }
-
-    private val lastModuleButton by lazy { moduleButtons.lastOrNull() }
-
     val panelSetting = ClickGUIModule.panelSetting[category.name] ?: throw IllegalStateException("Panel setting for category $category is not initialized")
+    val moduleButtons = ModuleManager.modulesByCategory[category]?.map { ModuleButton(it, this@Panel) } ?: listOf()
+    private val lastModuleButton by lazy { moduleButtons.lastOrNull() }
 
     private val textWidth = NVGRenderer.textWidth(category.name, 22f, NVGRenderer.defaultFont)
     private var previousHeight = 0f

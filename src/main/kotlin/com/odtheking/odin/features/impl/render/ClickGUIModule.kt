@@ -52,11 +52,8 @@ object ClickGUIModule : Module(
     data class PanelData(var x: Float = 10f, var y: Float = 10f, var extended: Boolean = true)
 
     fun resetPositions() {
-        // no forEachIndexed for linked hashmap for whatever reason
-        var index = 0
-        Category.categories.forEach { (categoryName, _) ->
+        Category.categories.entries.forEachIndexed { index, (categoryName, _) ->
             panelSetting[categoryName] = PanelData(10f + 260f * index, 10f, true)
-            index++
         }
     }
 

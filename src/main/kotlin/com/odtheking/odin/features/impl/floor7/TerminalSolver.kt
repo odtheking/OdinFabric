@@ -41,7 +41,7 @@ object TerminalSolver : Module(
     val showNumbers by BooleanSetting("Show Numbers", true, desc = "Shows numbers in the order terminal.").withDependency { solverSettings }
     val hideClicked by BooleanSetting("Hide Clicked", false, desc = "Visually hides your first click before a gui updates instantly to improve perceived response time. Does not affect actual click time.").withDependency { solverSettings }
     private val terminalReloadThreshold by NumberSetting("Solution resolve timeout", 600, 300, 1000, 10, unit = "ms", desc = "The amount of time in seconds before the terminal reloads after a click wasn't registered while using hide clicked.").withDependency { hideClicked && solverSettings }
-    private val debug by BooleanSetting("Debug", false, desc = "Shows debug terminals.")
+    private val debug by BooleanSetting("Debug", false, desc = "Shows debug terminals.").withDependency { solverSettings }
 
     private val showColors by DropdownSetting("Color Settings")
     val backgroundColor by ColorSetting("Background", Colors.gray26, true, desc = "Background color of the terminal solver.").withDependency { showColors }

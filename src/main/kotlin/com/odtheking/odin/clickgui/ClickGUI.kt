@@ -24,9 +24,7 @@ import com.odtheking.odin.utils.ui.mouseY as odinMouseY
 object ClickGUI : Screen(Component.literal("Click GUI")) {
 
     private val panels: ArrayList<Panel> = arrayListOf<Panel>().apply {
-        if (Category.categories.any { (category, _) -> ClickGUIModule.panelSetting[category] == null }) {
-            ClickGUIModule.resetPositions()
-        }
+        if (Category.categories.any { (category, _) -> ClickGUIModule.panelSetting[category] == null }) ClickGUIModule.resetPositions()
         for ((_, category) in Category.categories) add(Panel(category))
     }
 
