@@ -4,11 +4,11 @@ import com.odtheking.mixin.accessors.AbstractContainerScreenAccessor
 import com.odtheking.odin.clickgui.settings.impl.ColorSetting
 import com.odtheking.odin.clickgui.settings.impl.KeybindSetting
 import com.odtheking.odin.clickgui.settings.impl.MapSetting
-import com.odtheking.odin.config.Config
 import com.odtheking.odin.events.GuiEvent
 import com.odtheking.odin.events.core.EventPriority
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
+import com.odtheking.odin.features.ModuleManager
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.clickSlot
 import com.odtheking.odin.utils.modMessage
@@ -56,12 +56,12 @@ object SlotBinds : Module(
                 modMessage("§aAdded bind from slot §b$slot §ato §d${clickedSlot}.")
 
                 slotBinds[slot] = clickedSlot
-                Config.save()
+                ModuleManager.saveConfigurations()
                 previousSlot = null
             } ?: run {
                 slotBinds.entries.firstOrNull { it.key == clickedSlot }?.let {
                     slotBinds.remove(it.key)
-                    Config.save()
+                    ModuleManager.saveConfigurations()
                     return@on modMessage("§cRemoved bind from slot §b${it.key} §cto §d${it.value}.")
                 }
                 previousSlot = clickedSlot

@@ -2,8 +2,8 @@ package com.odtheking.odin.clickgui
 
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.clickgui.settings.impl.ColorSetting
-import com.odtheking.odin.config.Config
 import com.odtheking.odin.features.Category
+import com.odtheking.odin.features.ModuleManager
 import com.odtheking.odin.features.impl.render.ClickGUIModule
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Colors
@@ -20,18 +20,14 @@ import com.odtheking.odin.utils.ui.mouseY as odinMouseY
 
 /**
  * Renders all the modules.
- *
- * Backend made by Aton, with some changes
- * Design mostly made by Stivais
- *
- * @author Stivais, Aton
- * @see [Panel]
  */
 object ClickGUI : Screen(Component.literal("Click GUI")) {
 
     private val panels: ArrayList<Panel> = arrayListOf<Panel>().apply {
-        if (Category.entries.any { ClickGUIModule.panelSetting[it] == null }) ClickGUIModule.resetPositions()
-        for (category in Category.entries) add(Panel(category))
+        if (Category.categories.any { (category, _) -> ClickGUIModule.panelSetting[category] == null }) {
+            ClickGUIModule.resetPositions()
+        }
+        for ((_, category) in Category.categories) add(Panel(category))
     }
 
     private var openAnim = EaseOutAnimation(500)
@@ -122,8 +118,8 @@ object ClickGUI : Screen(Component.literal("Click GUI")) {
                 }
             }
         }
-        Config.save()
 
+        ModuleManager.saveConfigurations()
         super.onClose()
     }
 

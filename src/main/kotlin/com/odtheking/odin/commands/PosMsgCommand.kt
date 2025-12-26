@@ -3,7 +3,7 @@ package com.odtheking.odin.commands
 import com.github.stivais.commodore.Commodore
 import com.github.stivais.commodore.utils.GreedyString
 import com.odtheking.odin.OdinMod.mc
-import com.odtheking.odin.config.Config
+import com.odtheking.odin.features.ModuleManager
 import com.odtheking.odin.features.impl.dungeon.PositionalMessages
 import com.odtheking.odin.features.impl.dungeon.PositionalMessages.posMessageStrings
 import com.odtheking.odin.utils.Color
@@ -18,14 +18,14 @@ val posMsgCommand = Commodore("posmsg") {
             posMessageStrings.add(PositionalMessages.PosMessage(x, y, z, null, null, null, delay, distance, color, message.string
                 ).takeUnless { it in posMessageStrings } ?: return@runs modMessage("This message already exists!"))
             modMessage("Message \"${message}\" added at $x, $y, $z, with ${delay}ms delay, triggered up to $distance blocks away.")
-            Config.save()
+            ModuleManager.saveConfigurations()
         }
         literal("in").runs { x: Double, y: Double, z: Double, x2: Double, y2: Double, z2: Double, delay: Long, color: String, message: GreedyString ->
             val color = getColorFromString(color) ?: return@runs modMessage("Unknown color $color")
             posMessageStrings.add(
                 PositionalMessages.PosMessage(x, y, z, x2, y2, z2, delay, null, color, message.string).takeUnless { it in posMessageStrings } ?: return@runs modMessage("This message already exists!"))
             modMessage("Message \"${message}\" added in $x, $y, $z, $x2, $y2, $z2, with ${delay}ms delay.")
-            Config.save()
+            ModuleManager.saveConfigurations()
         }
         literal("atself").runs { delay: Long, distance: Double, color: String, message: GreedyString ->
             val color = getColorFromString(color) ?: return@runs modMessage("Unknown color $color")
@@ -35,7 +35,7 @@ val posMsgCommand = Commodore("posmsg") {
             posMessageStrings.add(PositionalMessages.PosMessage(x, y, z, null, null, null, delay, distance, color, message.string)
                 .takeUnless { it in posMessageStrings } ?: return@runs modMessage("This message already exists!"))
             modMessage("Message \"${message}\" added at ${x}, ${y}, ${z}, with ${delay}ms delay, triggered up to $distance blocks away.")
-            Config.save()
+            ModuleManager.saveConfigurations()
         }
     }
 
@@ -43,13 +43,13 @@ val posMsgCommand = Commodore("posmsg") {
         if (posMessageStrings.size < index) return@runs modMessage("Theres no message in position #$index")
         modMessage("Removed Positional Message #$index")
         posMessageStrings.removeAt(index-1)
-        Config.save()
+        ModuleManager.saveConfigurations()
     }
 
     literal("clear").runs {
         modMessage("Cleared List")
         posMessageStrings.clear()
-        Config.save()
+        ModuleManager.saveConfigurations()
     }
 
     literal("list").runs {

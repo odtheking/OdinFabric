@@ -2,7 +2,7 @@ package com.odtheking.odin.commands
 
 import com.github.stivais.commodore.Commodore
 import com.odtheking.odin.OdinMod.mc
-import com.odtheking.odin.config.Config
+import com.odtheking.odin.features.ModuleManager
 import com.odtheking.odin.features.impl.skyblock.PetKeybinds.petList
 import com.odtheking.odin.utils.itemId
 import com.odtheking.odin.utils.itemUUID
@@ -17,7 +17,7 @@ val petCommand = Commodore("petkeys") {
 
         petList.add(petID)
         modMessage("§aAdded this pet to the pet list in position §6${petList.indexOf(petID) + 1}§a!")
-        Config.save()
+        ModuleManager.saveConfigurations()
     }
 
     literal("petpos").runs {
@@ -38,13 +38,13 @@ val petCommand = Commodore("petkeys") {
 
         petList.remove(petID)
         modMessage("§aRemoved this pet from the pet list!")
-        Config.save()
+        ModuleManager.saveConfigurations()
     }
 
     literal("clear").runs {
         petList.clear()
         modMessage("§aCleared the pet list!")
-        Config.save()
+        ModuleManager.saveConfigurations()
     }
 
     literal("list").runs {

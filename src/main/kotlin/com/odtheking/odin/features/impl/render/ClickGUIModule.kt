@@ -48,12 +48,15 @@ object ClickGUIModule : Module(
         toggle()
     }
 
-    val panelSetting by MapSetting("Panel Settings", mutableMapOf<Category, PanelData>())
+    val panelSetting by MapSetting("Panel Settings", mutableMapOf<String, PanelData>())
     data class PanelData(var x: Float = 10f, var y: Float = 10f, var extended: Boolean = true)
 
     fun resetPositions() {
-        Category.entries.forEach {
-            panelSetting[it] = PanelData(10f + 260f * it.ordinal, 10f, true)
+        // no forEachIndexed for linked hashmap for whatever reason
+        var index = 0
+        Category.categories.forEach { (categoryName, _) ->
+            panelSetting[categoryName] = PanelData(10f + 260f * index, 10f, true)
+            index++
         }
     }
 
@@ -62,8 +65,6 @@ object ClickGUIModule : Module(
     private var hasSentUpdateMessage = false
 
     init {
-        resetPositions()
-
         OdinMod.scope.launch {
             latestVersionNumber = checkNewerVersion(OdinMod.version.toString())
         }
