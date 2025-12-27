@@ -315,6 +315,7 @@ object Croesus : Module(
         "Shadow Warp" to "SHADOW_WARP_SCROLL",
         "Necron Dye" to "DYE_NECRON",
         "Livid Dye" to "DYE_LIVID",
+        "Giant's Sword" to "GIANTS_SWORD",
     )
 
     private val sampleChestData = listOf(

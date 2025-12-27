@@ -42,7 +42,7 @@ object TerminalTimes : Module(
     init {
         on<TerminalEvent.Solved> {
             val pbs = if (mc.screen is TermSimGUI) TerminalSimulator.termSimPBs else terminalPBs
-            pbs.time(terminal.type.name, (System.currentTimeMillis() - terminal.timeOpened) / 1000f, "s§7!", "§a${terminal.type.windowName}${if (mc.screen is TermSimGUI) " §7(termsim)" else ""} §7solved in §6", sendOnlyPB = sendMessage)
+            pbs.time(terminal.type.name, (System.currentTimeMillis() - terminal.timeOpened) / 1000f, "s§7!", "§a${terminal.type.windowName}${if (mc.screen is TermSimGUI) " §7(termsim)" else ""} §7solved in §6", sendOnlyPB = !sendMessage)
         }
 
         on<ChatPacketEvent> {
