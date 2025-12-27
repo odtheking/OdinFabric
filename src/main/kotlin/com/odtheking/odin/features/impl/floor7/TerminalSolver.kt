@@ -14,6 +14,7 @@ import com.odtheking.odin.features.impl.floor7.terminalhandler.*
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.Color.Companion.darker
 import com.odtheking.odin.utils.ui.rendering.NVGSpecialRenderer
+import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.*
@@ -132,6 +133,19 @@ object TerminalSolver : Module(
                 val menu = (mc.screen as? AbstractContainerScreen<*>)?.menu ?: return@let
                 GuiEvent.SlotUpdate(mc.screen ?: return@on, ClientboundContainerSetSlotPacket(menu.containerId, 0, it.type.windowSize - 1, ItemStack.EMPTY), menu).postAndCatch()
                 it.isClicked = false
+            }
+        }
+
+        on<GuiEvent.KeyPress> {
+            if (!enabled || currentTerm == null) return@on
+
+            if (renderType == 1 && !(currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver)) {
+                if (mc.options.keyDrop.matches(keyCode, scanCode)) {
+                    currentTerm?.type?.getGUI()?.mouseClicked(screen, if (Screen.hasControlDown()) GLFW.GLFW_MOUSE_BUTTON_2 else GLFW.GLFW_MOUSE_BUTTON_3)
+
+                    cancel()
+                    return@on
+                }
             }
         }
 
