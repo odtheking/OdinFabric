@@ -169,12 +169,12 @@ object TerminalSolver : Module(
             ) return@on cancel()
 
             if (middleClickGUI) {
-                term.click(slotId, if (button == 0) GLFW.GLFW_MOUSE_BUTTON_3 else button, hideClicked && term.isClicked)
+                term.click(slotId, if (button == 0) GLFW.GLFW_MOUSE_BUTTON_3 else button, hideClicked && !term.isClicked)
                 cancel()
                 return@on
             }
 
-            if (hideClicked && term.isClicked) term.simulateClick(slotId, button)
+            if (hideClicked && !term.isClicked) term.simulateClick(slotId, button)
         }
 
         on<GuiEvent.DrawBackground> {
@@ -199,7 +199,7 @@ object TerminalSolver : Module(
                     "§7Is Clicked: §f${term.isClicked}",
                     "§7Window Count: §f${term.windowCount}",
                     "§7Solution: §f${term.solution.joinToString(", ")}",
-                    "§7Items: §f${menu.items?.filter { !it.isEmpty && it.item != Items.BLACK_STAINED_GLASS_PANE }?.joinToString(" §8| §f") { it.itemName?.string ?: "Unknown" } ?: "N/A"}"
+                    "§7Items: §f${menu.items?.subList(0, term.type.windowSize)?.filter { !it.isEmpty && it.item != Items.BLACK_STAINED_GLASS_PANE }?.joinToString(" §8| §f") { it.itemName?.string ?: "Unknown" } ?: "N/A"}"
                 )
 
                 debugInfo.forEachIndexed { index, line ->
@@ -208,6 +208,7 @@ object TerminalSolver : Module(
 
                 menu.items?.forEachIndexed { index, stack ->
                     guiGraphics.renderItem(stack, 5 + (index % 9) * 18, 250 + (index / 9) * 18)
+                    guiGraphics.renderItemDecorations(mc.font, stack, 5 + (index % 9) * 18, 250 + (index / 9) * 18)
                 }
             }
             if (!enabled || currentTerm == null || (currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver)) return@on
