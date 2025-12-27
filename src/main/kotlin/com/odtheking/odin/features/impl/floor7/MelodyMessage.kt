@@ -48,7 +48,7 @@ object MelodyMessage : Module(
         40 to 15
     }.withDependency { broadcast }
 
-    private val showOwn: Boolean by BooleanSetting("Show Own", true, desc = "Shows your own progress in the melody GUI.").withDependency { broadcast && melodyGui.enabled }
+    private val showOwn: Boolean by BooleanSetting("Show Own", false, desc = "Shows your own progress in the melody GUI.").withDependency { broadcast && melodyGui.enabled }
 
     val melodyWebSocket = webSocket {
         onMessage {
