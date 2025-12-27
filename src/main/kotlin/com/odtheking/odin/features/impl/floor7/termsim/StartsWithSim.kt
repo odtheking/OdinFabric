@@ -9,6 +9,7 @@ import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
 import kotlin.math.floor
 
 class StartsWithSim(private val letter: String = listOf("A", "B", "C", "G", "D", "M", "N", "R", "S", "T", "W").random()) : TermSimGUI(
@@ -39,7 +40,7 @@ class StartsWithSim(private val letter: String = listOf("A", "B", "C", "G", "D",
         val matchingItem = BuiltInRegistries.ITEM
             .filter { item ->
                 val id = item?.name?.string ?: return@filter false
-                id.startsWith(letter, true) != filterNot && !id.contains("pane", true)
+                id.startsWith(letter, true) != filterNot && !id.contains("pane", true) && item != Items.AIR
             }.randomOrNull() ?: return ItemStack.EMPTY
 
         return ItemStack(matchingItem)
