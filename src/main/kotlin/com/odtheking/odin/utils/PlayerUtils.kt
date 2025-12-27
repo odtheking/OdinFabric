@@ -15,7 +15,7 @@ fun playSoundSettings(soundSettings: Triple<String, Float, Float>) {
 }
 
 fun playSoundAtPlayer(event: SoundEvent, volume: Float = 1f, pitch: Float = 1f) {
-    mc.soundManager.playDelayed(SimpleSoundInstance.forUI(event, volume, pitch), 0)
+    mc.soundManager.playDelayed(SimpleSoundInstance.forUI(event, pitch, volume), 0)
 }
 
 fun setTitle(title: String) {
