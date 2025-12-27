@@ -1,13 +1,13 @@
 package com.odtheking.odin.features.impl.dungeon.puzzlesolvers
 
 import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.playSoundAtPlayer
 import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRelativeCoords
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.core.BlockPos
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.entity.decoration.ArmorStand
@@ -31,11 +31,11 @@ object WeirdosSolver {
         } else wrongPositions.add(pos)
     }
 
-    fun onRenderWorld(context: WorldRenderContext, weirdosColor: Color, weirdosWrongColor: Color, weirdosStyle: Int) {
+    fun onRenderWorld(event: RenderEvent.Extract, weirdosColor: Color, weirdosWrongColor: Color, weirdosStyle: Int) {
         if (DungeonUtils.currentRoomName != "Three Weirdos") return
-        correctPos?.let { context.drawStyledBox(AABB(it), weirdosColor, weirdosStyle) }
+        correctPos?.let { event.drawStyledBox(AABB(it), weirdosColor, weirdosStyle) }
         wrongPositions.forEach {
-            context.drawStyledBox(AABB(it), weirdosWrongColor, weirdosStyle)
+            event.drawStyledBox(AABB(it), weirdosWrongColor, weirdosStyle)
         }
     }
 

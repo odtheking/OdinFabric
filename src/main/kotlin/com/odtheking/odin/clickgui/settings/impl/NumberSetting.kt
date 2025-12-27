@@ -12,6 +12,8 @@ import com.odtheking.odin.utils.ui.HoverHandler
 import com.odtheking.odin.utils.ui.animations.LinearAnimation
 import com.odtheking.odin.utils.ui.isAreaHovered
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
+import net.minecraft.client.input.KeyEvent
+import net.minecraft.client.input.MouseButtonEvent
 import org.lwjgl.glfw.GLFW
 import kotlin.math.floor
 import kotlin.math.round
@@ -109,8 +111,8 @@ class NumberSetting<E>(
         return height
     }
 
-    override fun mouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int): Boolean {
-        return if (mouseButton != 0 || !isHovered) false
+    override fun mouseClicked(mouseX: Float, mouseY: Float, click: MouseButtonEvent): Boolean {
+        return if (click.button() != 0 || !isHovered) false
         else {
             listening = true
             isDragging = true
@@ -120,7 +122,7 @@ class NumberSetting<E>(
         }
     }
 
-    override fun mouseReleased(state: Int) {
+    override fun mouseReleased(click: MouseButtonEvent) {
         listening = false
         if (isDragging) {
             isDragging = false
@@ -129,10 +131,10 @@ class NumberSetting<E>(
         }
     }
 
-    override fun keyPressed(keyCode: Int, scanCode: Int): Boolean {
+    override fun keyPressed(input: KeyEvent): Boolean {
         if (!isHovered) return false
 
-        val amount = when (keyCode) {
+        val amount = when (input.key) {
             GLFW.GLFW_KEY_RIGHT, GLFW.GLFW_KEY_EQUAL -> incrementDouble
             GLFW.GLFW_KEY_LEFT, GLFW.GLFW_KEY_MINUS -> -incrementDouble
             else -> return false

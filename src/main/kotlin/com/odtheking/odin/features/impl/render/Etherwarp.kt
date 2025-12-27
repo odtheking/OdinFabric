@@ -63,7 +63,7 @@ object Etherwarp : Module(
             it.cancel()
         }
 
-        on<RenderEvent.Last> (EventPriority.LOW) {
+        on<RenderEvent.Extract> (EventPriority.LOW) {
             if (mc.player?.isShiftKeyDown == false || mc.screen != null || !render) return@on
 
             val mainHandItem = mc.player?.mainHandItem ?: return@on
@@ -85,7 +85,7 @@ object Etherwarp : Module(
             etherPos?.pos?.let { pos ->
                 val box = if (fullBlock) AABB(pos) else pos.getBlockBounds()?.move(pos) ?: AABB(pos)
 
-                context.drawStyledBox(box, color, renderStyle, depth)
+                drawStyledBox(box, color, renderStyle, depth)
             }
         }
 

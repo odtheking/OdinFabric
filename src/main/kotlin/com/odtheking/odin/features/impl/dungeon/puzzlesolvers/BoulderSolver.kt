@@ -3,12 +3,12 @@ package com.odtheking.odin.features.impl.dungeon.puzzlesolvers
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.core.BlockPos
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket
 import net.minecraft.world.phys.AABB
@@ -48,12 +48,12 @@ object BoulderSolver {
         }?.toMutableList() ?: return@with
     }
 
-    fun onRenderWorld(context: WorldRenderContext, showAllBoulderClicks: Boolean, boulderStyle: Int, boulderColor: Color) {
+    fun onRenderWorld(event: RenderEvent.Extract, showAllBoulderClicks: Boolean, boulderStyle: Int, boulderColor: Color) {
         if (DungeonUtils.currentRoomName != "Boulder" || currentPositions.isEmpty()) return
         if (showAllBoulderClicks) currentPositions.forEach {
-            context.drawStyledBox(it.render, boulderColor, boulderStyle, false)
+            event.drawStyledBox(it.render, boulderColor, boulderStyle, false)
         } else currentPositions.firstOrNull()?.let {
-            context.drawStyledBox(it.render, boulderColor, boulderStyle, false)
+            event.drawStyledBox(it.render, boulderColor, boulderStyle, false)
         }
     }
 

@@ -6,6 +6,7 @@ import com.odtheking.odin.features.impl.render.ClickGUIModule
 import com.odtheking.odin.utils.Color.Companion.darker
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
+import net.minecraft.client.input.MouseButtonEvent
 
 class ActionSetting(
     name: String,
@@ -29,8 +30,8 @@ class ActionSetting(
         return height
     }
 
-    override fun mouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int): Boolean {
-        return if (mouseButton != 0 || !isHovered) false
+    override fun mouseClicked(mouseX: Float, mouseY: Float, click: MouseButtonEvent): Boolean {
+        return if (click.button() != 0 || !isHovered) false
         else {
             action()
             true

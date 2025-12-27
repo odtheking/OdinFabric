@@ -123,7 +123,7 @@ object SimonSays : Module(
             }
         }
 
-        on<RenderEvent.Last> {
+        on<RenderEvent.Extract> {
             if (DungeonUtils.getF7Phase() != M7Phases.P3 || clickNeeded >= clickInOrder.size) return@on
 
             for (index in clickNeeded until clickInOrder.size) {
@@ -134,7 +134,7 @@ object SimonSays : Module(
                         else -> thirdColor
                     }
 
-                    context.drawStyledBox(AABB(x + 0.05, y + 0.37, z + 0.3, x - 0.15, y + 0.63, z + 0.7), color, style, true)
+                    drawStyledBox(AABB(x + 0.05, y + 0.37, z + 0.3, x - 0.15, y + 0.63, z + 0.7), color, style, true)
                 }
             }
         }

@@ -39,7 +39,7 @@ object KeyHighlight : Module(
             if (announceKeySpawn) alert("§${currentKey?.colorCode}${entity.name?.string}§7 spawned!")
         }
 
-        on<RenderEvent.Last> {
+        on<RenderEvent.Extract> {
             if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
             if (currentKey == null || currentKey?.entity == null) return@on
             currentKey?.let { keyType ->
@@ -48,7 +48,7 @@ object KeyHighlight : Module(
                     return@on
                 }
                 val position = keyType.entity?.position() ?: return@on
-                context.drawWireFrameBox(AABB.unitCubeFromLowerCorner(position.add(-0.5, 1.0, -0.5)), keyType.color(), 8f, true)
+                drawWireFrameBox(AABB.unitCubeFromLowerCorner(position.add(-0.5, 1.0, -0.5)), keyType.color(), 8f, true)
             }
         }
 

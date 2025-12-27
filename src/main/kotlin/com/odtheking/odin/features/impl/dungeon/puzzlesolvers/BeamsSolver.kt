@@ -5,6 +5,7 @@ import com.google.gson.reflect.TypeToken
 import com.odtheking.odin.OdinMod.logger
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.BlockUpdateEvent
+import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.features.impl.dungeon.puzzlesolvers.PuzzleSolvers.onPuzzleComplete
 import com.odtheking.odin.utils.Color
@@ -16,7 +17,6 @@ import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.Room
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.core.BlockPos
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.phys.AABB
@@ -58,17 +58,17 @@ object BeamsSolver {
         }
     }
 
-    fun onRenderWorld(context: WorldRenderContext, beamStyle: Int, beamsTracer: Boolean, beamsAlpha: Float) {
+    fun onRenderWorld(event: RenderEvent.Extract, beamStyle: Int, beamsTracer: Boolean, beamsAlpha: Float) {
         if (DungeonUtils.currentRoomName != "Creeper Beams" || currentLanternPairs.isEmpty()) return
 
         currentLanternPairs.entries.forEach { positions ->
             val color = positions.value.second.withAlpha(beamsAlpha)
 
-            context.drawStyledBox(AABB(positions.key), color, depth = true, style = beamStyle)
-            context.drawStyledBox(AABB(positions.value.first), color, depth = true, style = beamStyle)
+            event.drawStyledBox(AABB(positions.key), color, depth = true, style = beamStyle)
+            event.drawStyledBox(AABB(positions.value.first), color, depth = true, style = beamStyle)
 
             if (beamsTracer)
-                context.drawLine(listOf(positions.key.center, positions.value.first.center), color = color, depth = false)
+                event.drawLine(listOf(positions.key.center, positions.value.first.center), color = color, depth = false)
         }
     }
 

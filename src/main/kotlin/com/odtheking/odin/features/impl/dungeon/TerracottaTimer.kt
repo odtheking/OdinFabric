@@ -32,10 +32,10 @@ object TerracottaTimer : Module(
             }
         }
 
-        on<RenderEvent.Last> {
+        on<RenderEvent.Extract> {
             if (!DungeonUtils.inBoss || !DungeonUtils.isFloor(6) || terracottaSpawning.isEmpty()) return@on
             terracottaSpawning.forEach {
-                context.drawText("§${getColor(it.time)}${it.time.toFixed()}s", it.pos.center, 2f, false)
+                drawText("§${getColor(it.time)}${it.time.toFixed()}s", it.pos.center, 2f, false)
             }
         }
     }

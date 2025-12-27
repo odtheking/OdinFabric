@@ -32,11 +32,11 @@ object GyroWand : Module(
             if (value.matches(gravityStormRegex)) cooldownTimer = System.currentTimeMillis()
         }
 
-        on<RenderEvent.Last> {
+        on<RenderEvent.Extract> {
             val mainHand = mc.player?.mainHandItem ?: return@on
             if (mainHand.item != Items.BLAZE_ROD || mainHand.itemId != "GYROKINETIC_WAND") return@on
             val position = Etherwarp.getEtherPos(mc.player?.position(), distance = 25.0, etherWarp = false).takeIf { it.state?.isAir == false }?: return@on
-            context.drawCylinder(
+            drawCylinder(
                 position.vec3.add(0.5, 1.0, 0.5), 10f, 0.3f,
                 if (showCooldown && System.currentTimeMillis() - cooldownTimer > getAbilityCooldown(30_000L)) color else cooldownColor, 64, depth = depthCheck
             )

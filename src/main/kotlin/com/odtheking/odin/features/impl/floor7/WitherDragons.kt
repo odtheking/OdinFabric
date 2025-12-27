@@ -109,14 +109,14 @@ object WitherDragons : Module(
             currentTick++
         }
 
-        on<RenderEvent.Last> {
+        on<RenderEvent.Extract> {
             if (DungeonUtils.getF7Phase() != M7Phases.P5) return@on
 
             WitherDragonsEnum.entries.forEach { dragon ->
                 if (dragonHealth) {
                     DragonCheck.dragonHealthMap.forEach { (_, data) ->
                         if (data.second > 0) {
-                            context.drawText(
+                            drawText(
                                 colorHealth(data.second),
                                 data.first, 5f, false
                             )
@@ -125,19 +125,19 @@ object WitherDragons : Module(
                 }
 
                 if (dragonTimer && dragon.timeToSpawn > 0) {
-                    context.drawText(
+                    drawText(
                         "§${dragon.colorCode}${dragon.name.first()}: ${getDragonTimer(dragon.timeToSpawn)}",
                         dragon.spawnPos.center, 5f, false
                     )
                 }
 
                 if (dragonBoxes && dragon.state != WitherDragonState.DEAD)
-                    context.drawWireFrameBox(dragon.aabbDimensions, dragon.color, depth = true)
+                    drawWireFrameBox(dragon.aabbDimensions, dragon.color, depth = true)
             }
 
             priorityDragon?.let { dragon ->
                 if (dragonTracers && dragon.state == WitherDragonState.SPAWNING)
-                    mc.player?.let { context.drawLine(listOf(it.renderPos.add(it.forward).addVec(y = it.eyeHeight), Vec3(dragon.spawnPos)), dragon.color, true) }
+                    mc.player?.let { drawLine(listOf(it.renderPos.add(it.forward).addVec(y = it.eyeHeight), Vec3(dragon.spawnPos)), dragon.color, true) }
             }
         }
 

@@ -37,6 +37,7 @@ object ClickGUIModule : Module(
 
     private val action by ActionSetting("Open HUD Editor", desc = "Opens the HUD editor when clicked.") { mc.setScreen(HudManager) }
     val devMessage by BooleanSetting("Developer Message", false, desc = "Sends development related messages to the chat.")
+    val devModules by BooleanSetting("Show Dev Modules", false, desc = "Shows modules marked as dev modules in the Click GUI. Restart required to take effect.")
 
     override fun onKeybind() {
         toggle()

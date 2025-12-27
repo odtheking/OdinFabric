@@ -63,12 +63,12 @@ object SecretClicked : Module(
             if (value == "That chest is locked!") clickedSecretsList.lastOrNull()?.locked = true
         }
 
-        on<RenderEvent.Last> {
+        on<RenderEvent.Extract> {
             if (!boxes || !DungeonUtils.inDungeons || (DungeonUtils.inBoss && !boxInBoss) || clickedSecretsList.isEmpty()) return@on
 
             clickedSecretsList.forEach { secret ->
                 val currentColor = if (secret.locked) lockedColor else color
-                context.drawStyledBox(secret.aabb, currentColor, style, depthCheck)
+                drawStyledBox(secret.aabb, currentColor, style, depthCheck)
             }
         }
 

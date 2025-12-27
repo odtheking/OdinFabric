@@ -54,15 +54,15 @@ object ArrowsDevice : Module(
             }
         }
 
-        on<RenderEvent.Last> {
+        on<RenderEvent.Extract> {
             if (DungeonUtils.getF7Phase() != M7Phases.P3) return@on
 
             markedPositions.forEach { position ->
-                context.drawFilledBox(position, markedPositionColor, depth = depthCheck)
+                drawFilledBox(position, markedPositionColor, depth = depthCheck)
             }
 
             targetPosition?.let { position ->
-                context.drawFilledBox(position, targetPositionColor, depth = depthCheck)
+                drawFilledBox(position, targetPositionColor, depth = depthCheck)
             }
         }
 
