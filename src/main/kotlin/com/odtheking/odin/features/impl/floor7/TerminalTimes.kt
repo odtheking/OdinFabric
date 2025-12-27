@@ -17,7 +17,7 @@ object TerminalTimes : Module(
     name = "Terminal Times",
     description = "Records the time taken to complete terminals in floor 7."
 ) {
-    private val sendMessage by BooleanSetting("Send Message", false, desc = "Send a message when a terminal is completed.")
+    private val sendMessage by BooleanSetting("Send only PB", true, desc = "Send a message when a terminal is completed only when it is PB.")
     private val reset by ActionSetting("Reset pbs", desc = "Resets the terminal PBs.") {
         terminalPBs.reset()
         modMessage("§6Terminal PBs §fhave been reset.")
@@ -42,7 +42,7 @@ object TerminalTimes : Module(
     init {
         on<TerminalEvent.Solved> {
             val pbs = if (mc.screen is TermSimGUI) TerminalSimulator.termSimPBs else terminalPBs
-            pbs.time(terminal.type.name, (System.currentTimeMillis() - terminal.timeOpened) / 1000f, "s§7!", "§a${terminal.type.windowName}${if (mc.screen is TermSimGUI) " §7(termsim)" else ""} §7solved in §6", sendOnlyPB = !sendMessage)
+            pbs.time(terminal.type.name, (System.currentTimeMillis() - terminal.timeOpened) / 1000f, "s§7!", "§a${terminal.type.windowName}${if (mc.screen is TermSimGUI) " §7(termsim)" else ""} §7solved in §6", sendOnlyPB = sendMessage)
         }
 
         on<ChatPacketEvent> {

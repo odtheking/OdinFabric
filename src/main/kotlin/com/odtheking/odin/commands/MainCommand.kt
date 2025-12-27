@@ -57,28 +57,28 @@ val mainCommand = Commodore("odin", "od") {
                 if (!PartyUtils.members.contains(string)) throw SyntaxException("Player not in your party.")
                 string
             }
-            suggests { PartyUtils.members }
+            suggests { PartyUtils.members.map { it.lowercase() } }
         }
         param("player2") {
             parser { string: String ->
                 if (!PartyUtils.members.contains(string)) throw SyntaxException("Player not in your party.")
                 string
             }
-            suggests { PartyUtils.members }
+            suggests { PartyUtils.members.map { it.lowercase() } }
         }
         param("player3") {
             parser { string: String ->
                 if (!PartyUtils.members.contains(string)) throw SyntaxException("Player not in your party.")
                 string
             }
-            suggests { PartyUtils.members }
+            suggests { PartyUtils.members.map { it.lowercase() } }
         }
         param("player4") {
             parser { string: String ->
                 if (!PartyUtils.members.contains(string)) throw SyntaxException("Player not in your party.")
                 string
             }
-            suggests { PartyUtils.members }
+            suggests { PartyUtils.members.map { it.lowercase() } }
         }
         runs { player1: String?, player2: String?, player3: String?, player4: String? ->
             val players = listOf(player1, player2, player3, player4).mapNotNull { it?.lowercase() }

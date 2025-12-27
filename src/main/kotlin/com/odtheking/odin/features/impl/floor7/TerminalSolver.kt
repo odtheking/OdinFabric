@@ -103,8 +103,10 @@ object TerminalSolver : Module(
                 TerminalEvent.Opened(it).postAndCatch()
                 lastTermOpened = it
                 if (renderType == 0 && enabled && previousScale == -1) {
-                    previousScale = mc.options.guiScale().get()
-                    mc.execute { mc.options.guiScale().set(normalTermSize) }
+                    mc.execute {
+                        previousScale = mc.options.guiScale().get()
+                        mc.options.guiScale().set(normalTermSize)
+                    }
                 }
             }
         }
@@ -153,7 +155,7 @@ object TerminalSolver : Module(
             if (!enabled || currentTerm == null) return@on
 
             if (renderType == 1 && !(currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver)) {
-                currentTerm?.type?.getGUI()?.mouseClicked(screen, if (click.button() == 0) GLFW.GLFW_MOUSE_BUTTON_3 else click.button())
+                currentTerm?.type?.getGUI()?.mouseClicked(screen, if (click.button() == 1) click.button() else GLFW.GLFW_MOUSE_BUTTON_1)
                 cancel()
                 return@on
             }
@@ -170,7 +172,7 @@ object TerminalSolver : Module(
             ) return@on cancel()
 
             if (middleClickGUI) {
-                term.click(slotId, if (button == 0) GLFW.GLFW_MOUSE_BUTTON_3 else button, hideClicked && !term.isClicked)
+                term.click(slotId, if (button == 1) button else GLFW.GLFW_MOUSE_BUTTON_1, hideClicked && !term.isClicked)
                 cancel()
                 return@on
             }
@@ -289,8 +291,10 @@ object TerminalSolver : Module(
             TerminalEvent.Closed(it).postAndCatch()
             EventBus.unsubscribe(it)
             if (renderType == 0 && enabled && previousScale != -1) {
-                mc.execute { mc.options.guiScale().set(previousScale) }
-                previousScale = -1
+                mc.execute {
+                    mc.options.guiScale().set(previousScale)
+                    previousScale = -1
+                }
             }
             currentTerm = null
         }

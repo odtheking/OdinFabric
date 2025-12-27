@@ -19,7 +19,6 @@ import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket
 import net.minecraft.world.inventory.ClickType
 import net.minecraft.world.item.ItemStack
-import org.lwjgl.glfw.GLFW
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.math.min
 
@@ -56,15 +55,14 @@ open class TerminalHandler(val type: TerminalTypes) {
         if (mc.screen is TermSimGUI) {
             PacketEvent.Send(
                 ServerboundContainerClickPacket(
-                    -1, -1,
-                    Shorts.checkedCast(slotIndex.toLong()), SignedBytes.checkedCast(button.toLong()),
-                    if (button == GLFW.GLFW_MOUSE_BUTTON_3) ClickType.CLONE else ClickType.PICKUP,
+                    -1, -1, Shorts.checkedCast(slotIndex.toLong()),
+                    SignedBytes.checkedCast(button.toLong()), ClickType.THROW,
                     Int2ObjectOpenHashMap(), HashedStack.EMPTY
                 )
             ).postAndCatch()
             return
         }
-        mc.player?.clickSlot(screenHandler.containerId, slotIndex, button, if (button == GLFW.GLFW_MOUSE_BUTTON_3) ClickType.CLONE else ClickType.PICKUP)
+        mc.player?.clickSlot(screenHandler.containerId, slotIndex, button, ClickType.THROW)
     }
 
     fun canClick(slotIndex: Int, button: Int, needed: Int = solution.count { it == slotIndex }): Boolean = when {
