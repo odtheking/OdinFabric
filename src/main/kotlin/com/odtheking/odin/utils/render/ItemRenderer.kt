@@ -1,7 +1,9 @@
 package com.odtheking.odin.utils.render
 
 import com.mojang.blaze3d.platform.Lighting
+import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.textures.FilterMode
+import com.mojang.blaze3d.textures.GpuTextureView
 import com.mojang.blaze3d.vertex.PoseStack
 import com.odtheking.mixin.accessors.PictureInPictureRendererAccessor
 import com.odtheking.odin.OdinMod.mc
@@ -26,24 +28,26 @@ import java.util.*
 class ItemStateRenderer(vertexConsumers: MultiBufferSource.BufferSource)
     : PictureInPictureRenderer<ItemStateRenderer.State>(vertexConsumers) {
 
+    private var textureView: GpuTextureView? = null
     private var lastState: State? = null
 
     override fun renderToTexture(state: State, poseStack: PoseStack) {
+        textureView = RenderSystem.outputColorTextureOverride
         lastState = state
         poseStack.scale(1f, -1f, -1f)
 
         if (state.state.itemStackRenderState().usesBlockLight()) mc.gameRenderer.lighting.setupFor(Lighting.Entry.ITEMS_3D)
         else mc.gameRenderer.lighting.setupFor(Lighting.Entry.ITEMS_FLAT)
 
-        state.state.itemStackRenderState().render(poseStack, bufferSource, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY)
+        val dispatcher = mc.gameRenderer.featureRenderDispatcher
+        state.state.itemStackRenderState().submit(poseStack, dispatcher.submitNodeStorage, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0)
+        dispatcher.renderAllFeatures()
     }
-
-    private val textureView by lazy { TextureSetup.singleTexture((this as PictureInPictureRendererAccessor).getTextureView().apply { texture().setTextureFilter(FilterMode.NEAREST, false) }) }
 
     override fun blitTexture(element: State, state: GuiRenderState) {
         state.submitBlitToCurrentLayer(
             BlitRenderState(
-                RenderPipelines.GUI_TEXTURED_PREMULTIPLIED_ALPHA, textureView,
+                RenderPipelines.GUI_TEXTURED_PREMULTIPLIED_ALPHA, TextureSetup.singleTexture(textureView),
                 element.pose(), element.x0(), element.y0(), element.x0() + 16, element.y0() + 16,
                 0.0f, 1.0f, 1.0f, 0.0f, -1, element.scissorArea(), null
             )

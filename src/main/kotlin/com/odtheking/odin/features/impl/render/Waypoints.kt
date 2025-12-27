@@ -57,9 +57,9 @@ object Waypoints : Module(
             addTempWaypoint("§6$name", x.toIntOrNull() ?: return@on, y.toIntOrNull() ?: return@on, z.toIntOrNull() ?: return@on)
         }
 
-        on<RenderEvent.Last> {
+        on<RenderEvent.Extract> {
             temporaryWaypoints.removeAll {
-                context.drawCustomBeacon(it.name, it.blockPos, it.color)
+                drawCustomBeacon(it.name, it.blockPos, it.color)
                 System.currentTimeMillis() > it.timeAdded + it.duration
             }
         }

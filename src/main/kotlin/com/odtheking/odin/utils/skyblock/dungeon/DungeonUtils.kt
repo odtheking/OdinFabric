@@ -10,6 +10,7 @@ import com.odtheking.odin.utils.skyblock.Island
 import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.Room
 import net.minecraft.core.BlockPos
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.SkullBlock
 import net.minecraft.world.level.block.entity.SkullBlockEntity
@@ -198,7 +199,8 @@ object DungeonUtils {
                 ?: previousTeammates.add(
                     DungeonPlayer(
                         name, DungeonClass.entries.find { it.name == clazz } ?: continue,
-                        romanToInt(clazzLevel), mc.connection?.getPlayerInfo(name)?.skin?.texture
+                        romanToInt(clazzLevel), mc.connection?.getPlayerInfo(name)?.skin?.body?.id()
+
                     )
                 )
         }
@@ -222,7 +224,7 @@ object DungeonUtils {
         return when {
             state.block.equalsOneOf(Blocks.CHEST, Blocks.TRAPPED_CHEST, Blocks.LEVER) -> true
             state.block is SkullBlock ->
-                (mc.level?.getBlockEntity(pos) as? SkullBlockEntity)?.ownerProfile?.id?.getOrNull()
+                (mc.level?.getBlockEntity(pos) as? SkullBlockEntity)?.ownerProfile?.partialProfile()?.id
                     ?.toString()?.equalsOneOf(WITHER_ESSENCE_ID, REDSTONE_KEY) ?: false
 
             else -> false

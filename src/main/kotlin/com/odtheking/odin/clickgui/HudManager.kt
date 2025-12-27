@@ -7,6 +7,8 @@ import com.odtheking.odin.features.ModuleManager.hudSettingsCache
 import com.odtheking.odin.utils.Colors
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.screens.Screen
+import net.minecraft.client.input.KeyEvent
+import net.minecraft.client.input.MouseButtonEvent
 import net.minecraft.network.chat.Component
 import org.lwjgl.glfw.GLFW
 import kotlin.math.sign
@@ -64,7 +66,10 @@ object HudManager : Screen(Component.literal("HUD Manager")) {
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)
     }
 
-    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+    override fun mouseClicked(
+        mouseButtonEvent: MouseButtonEvent,
+        bl: Boolean
+    ): Boolean {
         for (hud in hudSettingsCache) {
             if (hud.isEnabled && hud.value.isHovered()) {
                 dragging = hud.value
@@ -74,16 +79,16 @@ object HudManager : Screen(Component.literal("HUD Manager")) {
                 return true
             }
         }
-        return super.mouseClicked(mouseX, mouseY, button)
+        return super.mouseClicked(mouseButtonEvent, bl)
     }
 
-    override fun mouseReleased(mouseX: Double, mouseY: Double, state: Int): Boolean {
+    override fun mouseReleased(mouseButtonEvent: MouseButtonEvent): Boolean {
         dragging = null
-        return super.mouseReleased(mouseX, mouseY, state)
+        return super.mouseReleased(mouseButtonEvent)
     }
 
-    override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
-        when (keyCode) {
+    override fun keyPressed(keyEvent: KeyEvent): Boolean {
+        when (keyEvent.key) {
             GLFW.GLFW_KEY_EQUAL -> {
                 for (hud in hudSettingsCache) {
                     if (hud.isEnabled && hud.value.isHovered()) {
@@ -138,7 +143,7 @@ object HudManager : Screen(Component.literal("HUD Manager")) {
                 }
             }
         }
-        return super.keyPressed(keyCode, scanCode, modifiers)
+        return super.keyPressed(keyEvent)
     }
 
     override fun onClose() {

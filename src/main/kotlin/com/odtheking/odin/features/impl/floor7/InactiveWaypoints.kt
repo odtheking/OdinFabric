@@ -111,18 +111,18 @@ object InactiveWaypoints : Module(
             resetState()
         }
 
-        on<RenderEvent.Last> {
+        on<RenderEvent.Extract> {
             if (inactiveList.isEmpty() || DungeonUtils.getF7Phase() != M7Phases.P3) return@on
             inactiveList.forEach {
                 val name = it.name.string
                 if ((name == "Inactive Terminal" && showTerminals) || (name == "Inactive" && showDevices) || (name == "Not Activated" && showLevers)) {
                     val customName = if (name == "Inactive Terminal") "Terminal" else if (name == "Inactive") "Device" else "Lever"
                     if (renderBox)
-                        context.drawWireFrameBox(AABB.unitCubeFromLowerCorner(it.position().addVec(-0.5, z = -0.5)), color, depth = depthCheck)
+                        drawWireFrameBox(AABB.unitCubeFromLowerCorner(it.position().addVec(-0.5, z = -0.5)), color, depth = depthCheck)
                     if (renderText)
-                        context.drawText(customName, it.position().addVec(y = 2.0), 1.5f, true)
+                        drawText(customName, it.position().addVec(y = 2.0), 1.5f, true)
                     if (renderBeacon)
-                        context.drawBeaconBeam(it.blockPosition(), color)
+                        drawBeaconBeam(it.blockPosition(), color)
                 }
                 it.isCustomNameVisible = !hideDefault
             }

@@ -263,10 +263,10 @@ object MapInfo : Module(
             }
         }
 
-        on<RenderEvent.Last> {
+        on<RenderEvent.Extract> {
             if (!highlightPortal || !DungeonUtils.inDungeons || DungeonUtils.inBoss || DungeonUtils.score < 300) return@on
             portalAABB?.let{ pos ->
-                context.drawFilledBox(pos, Colors.MINECRAFT_GREEN.withAlpha(0.5f), depth = true)
+                drawFilledBox(pos, Colors.MINECRAFT_GREEN.withAlpha(0.5f), depth = true)
             }
         }
 

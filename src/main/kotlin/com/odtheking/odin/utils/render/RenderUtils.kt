@@ -1,22 +1,21 @@
 package com.odtheking.odin.utils.render
 
 import com.mojang.blaze3d.vertex.PoseStack
+import com.mojang.blaze3d.vertex.VertexConsumer
+import com.odtheking.mixin.accessors.BeaconBeamAccessor
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.RenderEvent
-import com.odtheking.odin.events.core.EventPriority
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.impl.dungeon.dungeonwaypoints.DungeonWaypoints
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Color.Companion.multiplyAlpha
 import com.odtheking.odin.utils.addVec
 import com.odtheking.odin.utils.unaryMinus
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.client.gui.Font
 import net.minecraft.client.renderer.LightTexture
 import net.minecraft.client.renderer.MultiBufferSource
-import net.minecraft.client.renderer.ShapeRenderer
-import net.minecraft.client.renderer.blockentity.BeaconRenderer
 import net.minecraft.core.BlockPos
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
 import org.joml.Vector3f
@@ -25,13 +24,23 @@ import kotlin.math.max
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-private class RenderBatch {
-    val lines = listOf(mutableListOf<LineData>(), mutableListOf<LineData>())
-    val filledBoxes = listOf(mutableListOf<BoxData>(), mutableListOf<BoxData>())
-    val wireBoxes = listOf(mutableListOf<BoxData>(), mutableListOf<BoxData>())
+private const val DEPTH = 0
+private const val NO_DEPTH = 1
 
-    val beaconBeams = mutableListOf<BeaconData>()
-    val texts = mutableListOf<TextData>()
+private val BEAM_TEXTURE = ResourceLocation.withDefaultNamespace("textures/entity/beacon_beam.png")
+
+internal data class LineData(val from: Vec3, val to: Vec3, val color1: Int, val color2: Int, val thickness: Float)
+internal data class BoxData(val aabb: AABB, val r: Float, val g: Float, val b: Float, val a: Float, val thickness: Float)
+internal data class BeaconData(val pos: BlockPos, val color: Color, val isScoping: Boolean, val gameTime: Long)
+internal data class TextData(val text: String, val pos: Vec3, val scale: Float, val depth: Boolean, val cameraRotation: org.joml.Quaternionf, val font: Font, val textWidth: Float)
+
+class RenderConsumer {
+    internal val lines = listOf(mutableListOf<LineData>(), mutableListOf())
+    internal val filledBoxes = listOf(mutableListOf<BoxData>(), mutableListOf())
+    internal val wireBoxes = listOf(mutableListOf<BoxData>(), mutableListOf())
+
+    internal val beaconBeams = mutableListOf<BeaconData>()
+    internal val texts = mutableListOf<TextData>()
 
     fun clear() {
         lines.forEach { it.clear() }
@@ -40,120 +49,91 @@ private class RenderBatch {
         beaconBeams.clear()
         texts.clear()
     }
-
-    data class LineData(val from: Vec3, val to: Vec3, val color: Int, val thickness: Float)
-    data class BoxData(val aabb: AABB, val color: Color, val thickness: Float)
-    data class BeaconData(val pos: BlockPos, val color: Color)
-    data class TextData(val text: String, val pos: Vec3, val scale: Float, val depth: Boolean)
 }
 
-private const val DEPTH = 0
-private const val NO_DEPTH = 1
-
-private val currentBatch = RenderBatch()
-private var isRendering = false
-
 object RenderBatchManager {
-    init {
-        on<RenderEvent.Last>(EventPriority.LOWEST) {
-            if (!isRendering && (currentBatch.lines.any { it.isNotEmpty() } ||
-                        currentBatch.filledBoxes.any { it.isNotEmpty() } ||
-                        currentBatch.wireBoxes.any { it.isNotEmpty() } ||
-                        currentBatch.beaconBeams.isNotEmpty() ||
-                        currentBatch.texts.isNotEmpty())) {
+    val renderConsumer = RenderConsumer()
 
-                isRendering = true
-                try {
-                    flushBatch(context)
-                } finally {
-                    isRendering = false
-                }
-            }
+    init {
+        on<RenderEvent.Last> {
+            val matrix = context.matrices() ?: return@on
+            val bufferSource = context.consumers() as? MultiBufferSource.BufferSource ?: return@on
+            val camera = context.gameRenderer().mainCamera?.position ?: return@on
+
+            matrix.pushPose()
+            matrix.translate(-camera.x, -camera.y, -camera.z)
+
+            matrix.renderBatchedLinesAndWireBoxes(renderConsumer.lines, renderConsumer.wireBoxes, bufferSource)
+            matrix.renderBatchedFilledBoxes(renderConsumer.filledBoxes, bufferSource)
+
+            matrix.popPose()
+
+            matrix.renderBatchedBeaconBeams(renderConsumer.beaconBeams, camera)
+            matrix.renderBatchedTexts(renderConsumer.texts, bufferSource, camera)
+            renderConsumer.clear()
         }
     }
 }
 
-private fun flushBatch(ctx: WorldRenderContext) {
-    val matrix = ctx.matrixStack() ?: return
-    val bufferSource = ctx.consumers() as? MultiBufferSource.BufferSource ?: return
-    val camera = ctx.camera()?.position ?: return
-    val frustum = ctx.frustum()
-
-    matrix.pushPose()
-    matrix.translate(-camera.x, -camera.y, -camera.z)
-
+private fun PoseStack.renderBatchedLinesAndWireBoxes(
+    lines: List<List<LineData>>,
+    wireBoxes: List<List<BoxData>>,
+    bufferSource: MultiBufferSource.BufferSource
+) {
     val lineRenderLayers = listOf(CustomRenderLayer.LINE_LIST, CustomRenderLayer.LINE_LIST_ESP)
-    for ((depthState, lines) in currentBatch.lines.withIndex()) {
-        if (lines.isEmpty()) continue
-
+    val last = this.last()
+    for (depthState in 0..1) {
+        if (lines[depthState].isEmpty() && wireBoxes[depthState].isEmpty()) continue
         val buffer = bufferSource.getBuffer(lineRenderLayers[depthState])
 
-        for (line in lines) {
+        for (line in lines[depthState]) {
             val dirX = line.to.x - line.from.x
             val dirY = line.to.y - line.from.y
             val dirZ = line.to.z - line.from.z
 
-            ShapeRenderer.renderVector(
-                matrix, buffer,
+            PrimitiveRenderer.renderVector(
+                last, buffer,
                 Vector3f(line.from.x.toFloat(), line.from.y.toFloat(), line.from.z.toFloat()),
                 Vec3(dirX, dirY, dirZ),
-                line.color
+                line.color1, line.color2
             )
         }
-    }
 
-    for ((depthState, boxes) in currentBatch.wireBoxes.withIndex()) {
-        if (boxes.isEmpty()) continue
-        val buffer = bufferSource.getBuffer(lineRenderLayers[depthState])
-
-        for (box in boxes) {
-           if (frustum?.isVisible(box.aabb) == false) continue
-
-           ShapeRenderer.renderLineBox(
-               matrix, buffer, box.aabb,
-               box.color.redFloat, box.color.greenFloat, box.color.blueFloat, box.color.alphaFloat
-           )
-        }
-    }
-
-    val filledBoxRenderLayers = listOf(CustomRenderLayer.TRIANGLE_STRIP, CustomRenderLayer.TRIANGLE_STRIP_ESP)
-    for ((depthState, boxes) in currentBatch.filledBoxes.withIndex()) {
-        if (boxes.isEmpty()) continue
-
-        val buffer = bufferSource.getBuffer(filledBoxRenderLayers[depthState])
-        for (box in boxes) {
-            if (frustum?.isVisible(box.aabb) == false) continue
-
-            ShapeRenderer.addChainedFilledBoxVertices(
-                matrix, buffer,
-                box.aabb.minX, box.aabb.minY, box.aabb.minZ,
-                box.aabb.maxX, box.aabb.maxY, box.aabb.maxZ,
-                box.color.redFloat, box.color.greenFloat, box.color.blueFloat, box.color.alphaFloat
+        for (box in wireBoxes[depthState]) {
+            PrimitiveRenderer.renderLineBox(
+                last, buffer, box.aabb,
+                box.r, box.g, box.b, box.a
             )
         }
+
+        bufferSource.endBatch(lineRenderLayers[depthState])
     }
-
-    matrix.popPose()
-
-    bufferSource.endBatch(CustomRenderLayer.LINE_LIST)
-    bufferSource.endBatch(CustomRenderLayer.LINE_LIST_ESP)
-    bufferSource.endBatch(CustomRenderLayer.TRIANGLE_STRIP)
-    bufferSource.endBatch(CustomRenderLayer.TRIANGLE_STRIP_ESP)
-
-    renderBeaconBeams(matrix, bufferSource, camera)
-    renderTexts(matrix, bufferSource, camera)
-
-    currentBatch.clear()
 }
 
-private fun renderBeaconBeams(matrix: PoseStack, bufferSource: MultiBufferSource.BufferSource, camera: Vec3) {
-    val gameTime = mc.level?.gameTime ?: 0L
-    val gameTimeFloat = gameTime.toFloat()
-    val isScoping = mc.player?.isScoping == true
+private fun PoseStack.renderBatchedFilledBoxes(consumer: List<List<BoxData>>, bufferSource: MultiBufferSource.BufferSource) {
+    val filledBoxRenderLayers = listOf(CustomRenderLayer.TRIANGLE_STRIP, CustomRenderLayer.TRIANGLE_STRIP_ESP)
+    val last = this.last()
+    for ((depthState, boxes) in consumer.withIndex()) {
+        if (boxes.isEmpty()) continue
+        val buffer = bufferSource.getBuffer(filledBoxRenderLayers[depthState])
 
-    for (beacon in currentBatch.beaconBeams) {
-        matrix.pushPose()
-        matrix.translate(beacon.pos.x - camera.x, beacon.pos.y - camera.y, beacon.pos.z - camera.z)
+        for (box in boxes) {
+            PrimitiveRenderer.addChainedFilledBoxVertices(
+                last, buffer,
+                box.aabb.minX.toFloat(), box.aabb.minY.toFloat(), box.aabb.minZ.toFloat(),
+                box.aabb.maxX.toFloat(), box.aabb.maxY.toFloat(), box.aabb.maxZ.toFloat(),
+                box.r, box.g, box.b, box.a
+            )
+        }
+
+        bufferSource.endBatch(filledBoxRenderLayers[depthState])
+    }
+}
+
+private fun PoseStack.renderBatchedBeaconBeams(consumer: List<BeaconData>, camera: Vec3) {
+    for (beacon in consumer) {
+        pushPose()
+        translate(beacon.pos.x - camera.x, beacon.pos.y - camera.y, beacon.pos.z - camera.z)
 
         val centerX = beacon.pos.x + 0.5
         val centerZ = beacon.pos.z + 0.5
@@ -161,69 +141,81 @@ private fun renderBeaconBeams(matrix: PoseStack, bufferSource: MultiBufferSource
         val dz = camera.z - centerZ
         val length = sqrt(dx * dx + dz * dz).toFloat()
 
-        val scale = if (isScoping) 1.0f else maxOf(1.0f, length * 0.010416667f)
+        val scale = if (beacon.isScoping) 1.0f else maxOf(1.0f, length * 0.010416667f)
 
-        BeaconRenderer.renderBeaconBeam(
-            matrix, bufferSource, BeaconRenderer.BEAM_LOCATION,
-            gameTimeFloat, scale, gameTime, 0, 319,
-            beacon.color.rgba, 0.2f * scale, 0.25f * scale
+        BeaconBeamAccessor.invokeRenderBeam(
+            this,
+            mc.gameRenderer.featureRenderDispatcher.submitNodeStorage,
+            BEAM_TEXTURE,
+            1f,
+            beacon.gameTime.toFloat(),
+            0,
+            319,
+            beacon.color.rgba,
+            0.2f * scale,
+            0.25f * scale
         )
-        matrix.popPose()
+        popPose()
     }
 }
 
-private fun renderTexts(matrix: PoseStack, bufferSource: MultiBufferSource.BufferSource, camera: Vec3) {
-    if (currentBatch.texts.isEmpty()) return
-
-    val cameraRotation = mc.gameRenderer.mainCamera.rotation()
+private fun PoseStack.renderBatchedTexts(consumer: List<TextData>, bufferSource: MultiBufferSource.BufferSource, camera: Vec3) {
     val cameraPos = -camera
-    val font = mc.font ?: return
 
-    for (textData in currentBatch.texts) {
-        matrix.pushPose()
-        val pose = matrix.last().pose()
+    for (textData in consumer) {
+        pushPose()
+        val pose = last().pose()
         val scaleFactor = textData.scale * 0.025f
 
         pose.translate(textData.pos.toVector3f())
             .translate(cameraPos.x.toFloat(), cameraPos.y.toFloat(), cameraPos.z.toFloat())
-            .rotate(cameraRotation)
+            .rotate(textData.cameraRotation)
             .scale(scaleFactor, -scaleFactor, scaleFactor)
 
-        font.drawInBatch(
-            textData.text, -font.width(textData.text) / 2f, 0f, -1, true, pose, bufferSource,
+        textData.font.drawInBatch(
+            textData.text, -textData.textWidth / 2f, 0f, -1, true, pose, bufferSource,
             if (textData.depth) Font.DisplayMode.NORMAL else Font.DisplayMode.SEE_THROUGH,
             0, LightTexture.FULL_BRIGHT
         )
 
-        matrix.popPose()
+        popPose()
     }
 }
 
-fun WorldRenderContext.drawLine(points: Collection<Vec3>, color: Color, depth: Boolean, thickness: Float = 3f) {
+fun RenderEvent.Extract.drawLine(points: Collection<Vec3>, color: Color, depth: Boolean, thickness: Float = 3f) {
+    drawLine(points, color, color, depth, thickness)
+}
+
+fun RenderEvent.Extract.drawLine(points: Collection<Vec3>, color1: Color, color2: Color, depth: Boolean, thickness: Float = 3f) {
     if (points.size < 2) return
 
-    val rgba = color.rgba
-    val batch = currentBatch.lines[if (depth) DEPTH else NO_DEPTH]
+    val rgba1 = color1.rgba
+    val rgba2 = color2.rgba
+    val batch = consumer.lines[if (depth) DEPTH else NO_DEPTH]
 
     val iterator = points.iterator()
     var current = iterator.next()
 
     while (iterator.hasNext()) {
         val next = iterator.next()
-        batch.add(RenderBatch.LineData(current, next, rgba, thickness))
+        batch.add(LineData(current, next, rgba1, rgba2, thickness))
         current = next
     }
 }
 
-fun WorldRenderContext.drawWireFrameBox(aabb: AABB, color: Color, thickness: Float = 3f, depth: Boolean = false) {
-    currentBatch.wireBoxes[if (depth) DEPTH else NO_DEPTH].add(RenderBatch.BoxData(aabb, color, thickness))
+fun RenderEvent.Extract.drawWireFrameBox(aabb: AABB, color: Color, thickness: Float = 3f, depth: Boolean = false) {
+    consumer.wireBoxes[if (depth) DEPTH else NO_DEPTH].add(
+        BoxData(aabb, color.redFloat, color.greenFloat, color.blueFloat, color.alphaFloat, thickness)
+    )
 }
 
-fun WorldRenderContext.drawFilledBox(box: AABB, color: Color, depth: Boolean = false) {
-    currentBatch.filledBoxes[if (depth) DEPTH else NO_DEPTH].add(RenderBatch.BoxData(box, color, 3f))
+fun RenderEvent.Extract.drawFilledBox(aabb: AABB, color: Color, depth: Boolean = false) {
+    consumer.filledBoxes[if (depth) DEPTH else NO_DEPTH].add(
+        BoxData(aabb, color.redFloat, color.greenFloat, color.blueFloat, color.alphaFloat, 3f)
+    )
 }
 
-fun WorldRenderContext.drawStyledBox(
+fun RenderEvent.Extract.drawStyledBox(
     aabb: AABB,
     color: Color,
     style: Int = 0,
@@ -239,15 +231,22 @@ fun WorldRenderContext.drawStyledBox(
     }
 }
 
-fun WorldRenderContext.drawBeaconBeam(position: BlockPos, color: Color) {
-    currentBatch.beaconBeams.add(RenderBatch.BeaconData(position, color))
+fun RenderEvent.Extract.drawBeaconBeam(position: BlockPos, color: Color) {
+    val isScoping = mc.player?.isScoping == true
+    val gameTime = mc.level?.gameTime ?: 0L
+
+    consumer.beaconBeams.add(BeaconData(position, color, isScoping, gameTime))
 }
 
-fun WorldRenderContext.drawText(text: String, pos: Vec3, scale: Float, depth: Boolean) {
-    currentBatch.texts.add(RenderBatch.TextData(text, pos, scale, depth))
+fun RenderEvent.Extract.drawText(text: String, pos: Vec3, scale: Float, depth: Boolean) {
+    val cameraRotation = mc.gameRenderer.mainCamera.rotation()
+    val font = mc.font ?: return
+    val textWidth = font.width(text).toFloat()
+
+    consumer.texts.add(TextData(text, pos, scale, depth, cameraRotation, font, textWidth))
 }
 
-fun WorldRenderContext.drawCustomBeacon(
+fun RenderEvent.Extract.drawCustomBeacon(
     title: String,
     position: BlockPos,
     color: Color,
@@ -266,7 +265,7 @@ fun WorldRenderContext.drawCustomBeacon(
     )
 }
 
-fun WorldRenderContext.drawCylinder(
+fun RenderEvent.Extract.drawCylinder(
     center: Vec3,
     radius: Float,
     height: Float,
@@ -275,7 +274,7 @@ fun WorldRenderContext.drawCylinder(
     thickness: Float = 5f,
     depth: Boolean = false
 ) {
-    val batch = currentBatch.lines[if (depth) DEPTH else NO_DEPTH]
+    val batch = consumer.lines[if (depth) DEPTH else NO_DEPTH]
     val angleStep = 2.0 * Math.PI / segments
     val rgba = color.rgba
 
@@ -293,13 +292,13 @@ fun WorldRenderContext.drawCylinder(
         val p1Bottom = center.add(x1.toDouble(), 0.0, z1.toDouble())
         val p2Bottom = center.add(x2.toDouble(), 0.0, z2.toDouble())
 
-        batch.add(RenderBatch.LineData(p1Top, p2Top, rgba, thickness))
-        batch.add(RenderBatch.LineData(p1Bottom, p2Bottom, rgba, thickness))
-        batch.add(RenderBatch.LineData(p1Bottom, p1Top, rgba, thickness))
+        batch.add(LineData(p1Top, p2Top, rgba, rgba, thickness))
+        batch.add(LineData(p1Bottom, p2Bottom, rgba, rgba, thickness))
+        batch.add(LineData(p1Bottom, p1Top, rgba, rgba, thickness))
     }
 }
 
-fun WorldRenderContext.drawBoxes(waypoints: Collection<DungeonWaypoints.DungeonWaypoint>, disableDepth: Boolean) {
+fun RenderEvent.Extract.drawBoxes(waypoints: Collection<DungeonWaypoints.DungeonWaypoint>, disableDepth: Boolean) {
     if (waypoints.isEmpty()) return
 
     for (waypoint in waypoints) {
@@ -308,9 +307,143 @@ fun WorldRenderContext.drawBoxes(waypoints: Collection<DungeonWaypoints.DungeonW
 
         val aabb = waypoint.aabb.move(waypoint.blockPos)
         val depth = waypoint.depth && !disableDepth
-        val depthState = if (depth) DEPTH else NO_DEPTH
 
-        if (waypoint.filled) currentBatch.filledBoxes[depthState].add(RenderBatch.BoxData(aabb, color, 3f))
-        else currentBatch.wireBoxes[depthState].add(RenderBatch.BoxData(aabb, color, 3f))
+        if (waypoint.filled) drawFilledBox(aabb, color, depth = depth)
+        else drawWireFrameBox(aabb, color, depth = depth)
+    }
+}
+
+object PrimitiveRenderer {
+
+    private val edges = intArrayOf(
+        0, 1,  1, 5,  5, 4,  4, 0,
+        3, 2,  2, 6,  6, 7,  7, 3,
+        0, 3,  1, 2,  5, 6,  4, 7
+    )
+
+    fun renderLineBox(
+        pose: PoseStack.Pose,
+        buffer: VertexConsumer,
+        aabb: AABB,
+        r: Float, g: Float, b: Float, a: Float
+    ) {
+        val x0 = aabb.minX.toFloat()
+        val y0 = aabb.minY.toFloat()
+        val z0 = aabb.minZ.toFloat()
+        val x1 = aabb.maxX.toFloat()
+        val y1 = aabb.maxY.toFloat()
+        val z1 = aabb.maxZ.toFloat()
+
+        val corners = floatArrayOf(
+            x0, y0, z0,
+            x1, y0, z0,
+            x1, y1, z0,
+            x0, y1, z0,
+            x0, y0, z1,
+            x1, y0, z1,
+            x1, y1, z1,
+            x0, y1, z1
+        )
+
+        for (i in edges.indices step 2) {
+            val i0 = edges[i] * 3
+            val i1 = edges[i + 1] * 3
+
+            val x0 = corners[i0]
+            val y0 = corners[i0 + 1]
+            val z0 = corners[i0 + 2]
+            val x1 = corners[i1]
+            val y1 = corners[i1 + 1]
+            val z1 = corners[i1 + 2]
+
+            val dx = x1 - x0
+            val dy = y1 - y0
+            val dz = z1 - z0
+
+            buffer.addVertex(pose, x0, y0, z0).setColor(r, g, b, a).setNormal(pose, dx, dy, dz)
+            buffer.addVertex(pose, x1, y1, z1).setColor(r, g, b, a).setNormal(pose, dx, dy, dz)
+        }
+    }
+
+    fun addChainedFilledBoxVertices(
+        pose: PoseStack.Pose,
+        buffer: VertexConsumer,
+        minX: Float, minY: Float, minZ: Float,
+        maxX: Float, maxY: Float, maxZ: Float,
+        r: Float, g: Float, b: Float, a: Float
+    ) {
+        val matrix = pose.pose()
+
+        fun vertex(x: Float, y: Float, z: Float) {
+            buffer.addVertex(matrix, x, y, z).setColor(r, g, b, a)
+        }
+
+        vertex(minX, minY, minZ)
+        vertex(minX, minY, minZ)
+        vertex(minX, minY, minZ)
+
+        vertex(minX, minY, maxZ)
+        vertex(minX, maxY, minZ)
+        vertex(minX, maxY, maxZ)
+
+        vertex(minX, maxY, maxZ)
+
+        vertex(minX, minY, maxZ)
+        vertex(maxX, maxY, maxZ)
+        vertex(maxX, minY, maxZ)
+
+        vertex(maxX, minY, maxZ)
+
+        vertex(maxX, minY, minZ)
+        vertex(maxX, maxY, maxZ)
+        vertex(maxX, maxY, minZ)
+
+        vertex(maxX, maxY, minZ)
+
+        vertex(maxX, minY, minZ)
+        vertex(minX, maxY, minZ)
+        vertex(minX, minY, minZ)
+
+        vertex(minX, minY, minZ)
+
+        vertex(maxX, minY, minZ)
+        vertex(minX, minY, maxZ)
+        vertex(maxX, minY, maxZ)
+
+        vertex(maxX, minY, maxZ)
+
+        vertex(minX, maxY, minZ)
+        vertex(minX, maxY, minZ)
+        vertex(minX, maxY, maxZ)
+        vertex(maxX, maxY, minZ)
+        vertex(maxX, maxY, maxZ)
+
+        vertex(maxX, maxY, maxZ)
+        vertex(maxX, maxY, maxZ)
+    }
+
+    fun renderVector(
+        pose: PoseStack.Pose,
+        buffer: VertexConsumer,
+        start: Vector3f,
+        direction: Vec3,
+        startColor: Int,
+        endColor: Int
+    ) {
+        val endX = start.x() + direction.x.toFloat()
+        val endY = start.y() + direction.y.toFloat()
+        val endZ = start.z() + direction.z.toFloat()
+
+        val nx = direction.x.toFloat()
+        val ny = direction.y.toFloat()
+        val nz = direction.z.toFloat()
+
+        buffer.addVertex(pose, start.x(), start.y(), start.z())
+            .setColor(startColor)
+            .setNormal(pose, nx, ny, nz)
+
+        buffer.addVertex(pose, endX, endY, endZ)
+            .setColor(endColor)
+            .setNormal(pose, nx, ny, nz)
     }
 }

@@ -16,6 +16,7 @@ import com.odtheking.odin.utils.ui.animations.LinearAnimation
 import com.odtheking.odin.utils.ui.isAreaHovered
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
 import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.input.MouseButtonEvent
 
 class HUDSetting(
     name: String,
@@ -70,8 +71,8 @@ class HUDSetting(
         return height
     }
 
-    override fun mouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int): Boolean {
-        if (mouseButton != 0) return false
+    override fun mouseClicked(mouseX: Float, mouseY: Float, click: MouseButtonEvent): Boolean {
+        if (click.button() != 0) return false
         return if (isHovered) {
             mc.setScreen(HudManager)
             true

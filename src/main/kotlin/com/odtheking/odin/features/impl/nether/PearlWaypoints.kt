@@ -27,25 +27,25 @@ object PearlWaypoints : Module(
     private val hideFarWaypoints by BooleanSetting("Hide Far Waypoints", true, desc = "Hides the waypoints that are not the closest to you.").withDependency { presetWaypoints }
 
     init {
-        on<RenderEvent.Last> {
+        on<RenderEvent.Extract> {
             if (!KuudraUtils.inKuudra || KuudraUtils.phase != 1) return@on
 
             var closest = true
             getOrderedLineups(mc.player?.blockPosition() ?: return@on).forEach { (lineup, color) ->
                 lineup.startPos.forEach {
-                    if (presetWaypoints) context.drawWireFrameBox(AABB(it), color)
+                    if (presetWaypoints) drawWireFrameBox(AABB(it), color)
                 }
 
                 lineup.lineups.forEach lineupLoop@{ blockPos ->
                     if ((NoPre.missing.equalsOneOf(Supply.None, Supply.Square) ||
                                 (lineup.supply != Supply.Square || enumToLineup[NoPre.missing] == blockPos)) && (!hideFarWaypoints || closest)) {
-                        if (presetWaypoints) context.drawFilledBox(AABB(blockPos), color)
+                        if (presetWaypoints) drawFilledBox(AABB(blockPos), color)
                         if (dynamicWaypoints) {
                             val destinationSupply = if (lineup.supply == Supply.Square) NoPre.missing else lineup.supply
                             calculatePearl(destinationSupply.dropOffSpot)?.let {
-                                context.drawFilledBox(AABB.ofSize(it, 0.12, 0.12, 0.12), dynamicWaypointsColor)
+                                drawFilledBox(AABB.ofSize(it, 0.12, 0.12, 0.12), dynamicWaypointsColor)
                             }
-                            context.drawWireFrameBox(AABB(BlockPos(lineup.supply.dropOffSpot.above())), dynamicWaypointsColor)
+                            drawWireFrameBox(AABB(BlockPos(lineup.supply.dropOffSpot.above())), dynamicWaypointsColor)
                         }
                     }
                 }
