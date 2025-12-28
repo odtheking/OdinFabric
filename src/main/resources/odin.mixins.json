@@ -7,12 +7,13 @@
     "defaultRequire": 1
   },
   "client": [
-    "accessors.BeaconBeamAccessor",
     "accessors.AbstractContainerScreenAccessor",
+    "accessors.BeaconBeamAccessor",
     "accessors.CompositeRenderTypeAccessor",
     "accessors.KeyMappingAccessor",
     "accessors.PictureInPictureRendererAccessor",
     "mixins.AbstractContainerScreenMixin",
+    "mixins.AvatarRendererMixin",
     "mixins.BossBarHealthOverlayMixin",
     "mixins.ChatListenerMixin",
     "mixins.ChatScreenMixin",
@@ -23,8 +24,8 @@
     "mixins.KeyBindingMixin",
     "mixins.MinecraftMixin",
     "mixins.MouseHandlerMixin",
-    "mixins.AvatarRendererMixin",
-    "mixins.ScreenEffectRendererMixin"
+    "mixins.ScreenEffectRendererMixin",
+    "mixins.WindowMixin"
   ],
   "mixins": [
     "accessors.ServerboundInteractPacketAccessor",
