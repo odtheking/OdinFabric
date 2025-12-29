@@ -24,8 +24,7 @@
     "mixins.KeyBindingMixin",
     "mixins.MinecraftMixin",
     "mixins.MouseHandlerMixin",
-    "mixins.ScreenEffectRendererMixin",
-    "mixins.WindowMixin"
+    "mixins.ScreenEffectRendererMixin"
   ],
   "mixins": [
     "accessors.ServerboundInteractPacketAccessor",

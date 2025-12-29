@@ -74,7 +74,6 @@ object TerminalSolver : Module(
     private val startsWithRegex = Regex("What starts with: '(\\w+)'?")
     private val selectAllRegex = Regex("Select all the (.+) items!")
     private var lastClickTime = 0L
-    private var shouldResize = false
 
     init {
         onReceive<ClientboundOpenScreenPacket> (EventPriority.HIGHEST) {
@@ -101,10 +100,8 @@ object TerminalSolver : Module(
             currentTerm?.let {
                 devMessage("§aNew terminal: §6${it.type.name}")
                 TerminalEvent.Opened(it).postAndCatch()
+                if (enabled && renderType == 0) mc.execute { mc.resizeDisplay() }
                 lastTermOpened = it
-                if (renderType == 0 && enabled) {
-                    shouldResize = true
-                }
             }
         }
 
@@ -178,16 +175,6 @@ object TerminalSolver : Module(
         }
 
         on<GuiEvent.DrawBackground> {
-            if (shouldResize) {
-                mc.execute {
-                    println("Resizing on thread: ${Thread.currentThread().name}")
-                    mc.screen?.resize(mc, mc.window.guiScaledWidth, mc.window.guiScaledHeight)
-                    mc.gameRenderer.resize(mc.window.width, mc.window.height)
-                    mc.mouseHandler.setIgnoreFirstMove()
-                }
-                shouldResize = false
-            }
-
             if (!enabled || currentTerm == null || (currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver) || renderType != 1) return@on
 
             NVGSpecialRenderer.draw(guiGraphics, 0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight()) {
@@ -297,9 +284,7 @@ object TerminalSolver : Module(
             devMessage("§cLeft terminal: §6${it.type.name}")
             TerminalEvent.Closed(it).postAndCatch()
             EventBus.unsubscribe(it)
-            if (renderType == 0 && enabled) {
-                shouldResize = true
-            }
+            if (enabled && renderType == 0) mc.execute { mc.resizeDisplay() }
             currentTerm = null
         }
     }
