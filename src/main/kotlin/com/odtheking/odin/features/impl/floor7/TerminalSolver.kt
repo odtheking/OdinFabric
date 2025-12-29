@@ -137,7 +137,7 @@ object TerminalSolver : Module(
 
             if (renderType == 1 && !(currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver)) {
                 if (mc.options.keyDrop.matches(input)) {
-                    currentTerm?.type?.getGUI()?.mouseClicked(screen, if (input.hasControlDown()) GLFW.GLFW_MOUSE_BUTTON_2 else GLFW.GLFW_MOUSE_BUTTON_3)
+                    currentTerm?.type?.getGUI()?.mouseClicked(screen, if (input.hasControlDown()) GLFW.GLFW_MOUSE_BUTTON_2 else GLFW.GLFW_MOUSE_BUTTON_1)
 
                     cancel()
                     return@on
@@ -149,7 +149,7 @@ object TerminalSolver : Module(
             if (!enabled || currentTerm == null) return@on
 
             if (renderType == 1 && !(currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver)) {
-                currentTerm?.type?.getGUI()?.mouseClicked(screen, if (click.button() == 1) click.button() else GLFW.GLFW_MOUSE_BUTTON_1)
+                currentTerm?.type?.getGUI()?.mouseClicked(screen, if (click.button() == 0) click.button() else GLFW.GLFW_MOUSE_BUTTON_2)
                 cancel()
                 return@on
             }
@@ -166,7 +166,7 @@ object TerminalSolver : Module(
             ) return@on cancel()
 
             if (middleClickGUI) {
-                term.click(slotId, if (button == 1) button else GLFW.GLFW_MOUSE_BUTTON_1, hideClicked && !term.isClicked)
+                term.click(slotId, if (button == 0) 0 else GLFW.GLFW_MOUSE_BUTTON_2, hideClicked && !term.isClicked)
                 cancel()
                 return@on
             }
