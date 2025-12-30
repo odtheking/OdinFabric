@@ -77,7 +77,7 @@ val dungeonWaypointsCommand = Commodore("dwp", "dungeonwaypoints") {
             DungeonWaypointConfig.saveConfig()
 
             DungeonUtils.currentRoom?.setWaypoints()
-            modMessage("Imported waypoints from clipboard!")
+            modMessage("Imported waypoints from clipboard!${if (!DungeonWaypoints.enabled) "§7(Make sure to enable the DungeonWaypoints module)" else ""}")
         }
     }
 }

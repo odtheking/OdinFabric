@@ -30,7 +30,7 @@ object TerminalSolver : Module(
 ) {
     val renderType by SelectorSetting("Mode", "Normal", arrayListOf("Normal", "Custom GUI"), desc = "How the terminal solver should render.")
     val customTermSize by NumberSetting("Term Size", 1f, 1f, 3f, 0.1f, desc = "The size of the custom terminal GUI.").withDependency { renderType == 1 }
-    val normalTermSize by NumberSetting("Normal Term Size", 3, 1, 5, 1, desc = "The GUI scale increase for normal terminal GUI.").withDependency { renderType != 1 }
+    private val normalTermSize by NumberSetting("Normal Term Size", 3, 1, 5, 1, desc = "The GUI scale increase for normal terminal GUI.").withDependency { renderType != 1 }
     val roundness by NumberSetting("Roundness", 9f, 0f, 15f, 1f, desc = "The roundness of the custom terminal gui.").withDependency { renderType == 1 }
     val gap by NumberSetting("Gap", 5f, 0f, 15f, 1f, desc = "The gap between the slots in the custom terminal gui.").withDependency { renderType == 1 }
 
@@ -75,6 +75,7 @@ object TerminalSolver : Module(
     private val startsWithRegex = Regex("What starts with: '(\\w+)'?")
     private val selectAllRegex = Regex("Select all the (.+) items!")
     private var lastClickTime = 0L
+    @JvmStatic val termSize get() = if (enabled && renderType == 0 && currentTerm != null) normalTermSize else 1
 
     init {
         onReceive<ClientboundOpenScreenPacket> (EventPriority.HIGHEST) {
@@ -150,7 +151,7 @@ object TerminalSolver : Module(
             if (!enabled || currentTerm == null) return@on
 
             if (renderType == 1 && !(currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver)) {
-                currentTerm?.type?.getGUI()?.mouseClicked(screen, if (button == 0) 0 else GLFW.GLFW_MOUSE_BUTTON_2)
+                currentTerm?.type?.getGUI()?.mouseClicked(screen, if (button == 0) GLFW.GLFW_MOUSE_BUTTON_3 else button)
                 cancel()
                 return@on
             }
@@ -167,7 +168,7 @@ object TerminalSolver : Module(
             ) return@on cancel()
 
             if (middleClickGUI) {
-                term.click(slotId, if (button == 0) 0 else GLFW.GLFW_MOUSE_BUTTON_2, hideClicked && !term.isClicked)
+                term.click(slotId, if (button == 0) GLFW.GLFW_MOUSE_BUTTON_3 else button, hideClicked && !term.isClicked)
                 cancel()
                 return@on
             }
