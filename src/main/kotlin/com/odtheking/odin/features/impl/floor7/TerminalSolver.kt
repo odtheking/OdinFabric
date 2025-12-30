@@ -150,7 +150,7 @@ object TerminalSolver : Module(
             if (!enabled || currentTerm == null) return@on
 
             if (renderType == 1 && !(currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver)) {
-                currentTerm?.type?.getGUI()?.mouseClicked(screen, if (click.button() == 1) click.button() else GLFW.GLFW_MOUSE_BUTTON_1)
+                currentTerm?.type?.getGUI()?.mouseClicked(screen, if (click.button() == 0) GLFW.GLFW_MOUSE_BUTTON_3 else click.button())
                 cancel()
                 return@on
             }
@@ -167,7 +167,7 @@ object TerminalSolver : Module(
             ) return@on cancel()
 
             if (middleClickGUI) {
-                term.click(slotId, if (button == 1) button else GLFW.GLFW_MOUSE_BUTTON_1, hideClicked && !term.isClicked)
+                term.click(slotId, if (button == 0) GLFW.GLFW_MOUSE_BUTTON_3 else button, hideClicked && !term.isClicked)
                 cancel()
                 return@on
             }
