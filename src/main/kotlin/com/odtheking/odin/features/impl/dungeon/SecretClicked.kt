@@ -30,7 +30,7 @@ object SecretClicked : Module(
     private val color by ColorSetting("Color", Colors.MINECRAFT_GOLD.withAlpha(.4f), true, desc = "The color of the box.").withDependency { boxesDropdown && boxes }
     private val depthCheck by BooleanSetting("Depth check", false, desc = "Boxes show through walls.").withDependency { boxesDropdown && boxes }
     private val lockedColor by ColorSetting("Locked Color", Colors.MINECRAFT_RED.withAlpha(.4f), true, desc = "The color of the box when the chest is locked.").withDependency { boxesDropdown && boxes }
-    private val timeToStay by NumberSetting("Time To Stay", 7, 1, 20, 0.2, desc = "The time the chests should remain highlighted.", unit = "s").withDependency { boxesDropdown && boxes }
+    private val timeToStay by NumberSetting("Time To Stay", 7, 1, 120, 0.2, desc = "The time the chests should remain highlighted.", unit = "s").withDependency { boxesDropdown && boxes }
     private val boxInBoss by BooleanSetting("Box In Boss", false, desc = "Highlight clicks in boss.").withDependency { boxesDropdown && boxes }
     private val toggleItems by BooleanSetting("Item Boxes", true, desc = "Render boxes for collected items.").withDependency { boxesDropdown && boxes }
 
