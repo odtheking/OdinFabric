@@ -138,7 +138,7 @@ object TerminalSolver : Module(
 
             if (renderType == 1 && !(currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver)) {
                 if (mc.options.keyDrop.matches(input)) {
-                    currentTerm?.type?.getGUI()?.mouseClicked(screen, if (input.hasControlDown()) GLFW.GLFW_MOUSE_BUTTON_2 else GLFW.GLFW_MOUSE_BUTTON_1)
+                    currentTerm?.type?.getGUI()?.mouseClicked(screen, if (input.hasControlDown()) GLFW.GLFW_MOUSE_BUTTON_2 else GLFW.GLFW_MOUSE_BUTTON_3)
 
                     cancel()
                     return@on
