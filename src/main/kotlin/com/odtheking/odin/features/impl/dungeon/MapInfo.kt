@@ -18,6 +18,8 @@ import com.odtheking.odin.utils.render.drawFilledBox
 import com.odtheking.odin.utils.render.getStringWidth
 import com.odtheking.odin.utils.render.text
 import com.odtheking.odin.utils.render.textDim
+import com.odtheking.odin.utils.sendCommand
+import com.odtheking.odin.utils.skyblock.PartyUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.RoomType
@@ -33,6 +35,8 @@ object MapInfo : Module(
     private val disableInBoss by BooleanSetting("Disable in boss", true, desc = "Disables the information display when you're in boss.")
     private val scoreTitle by BooleanSetting("300 Score Title", true, desc = "Displays a title on 300 score.")
     private val printWhenScore by BooleanSetting("Print Score Time", true, desc = "Sends elapsed time in chat when 300 score is reached.")
+    private val partyMessage by BooleanSetting("300 Score Party Message", false, desc = "Sends a message to party chat when 300 score is reached.")
+    private val message by StringSetting("300 Score Message", "300 Score reached", desc = "The message sent when reaching 300 Score. Use {time} to send the time taken.").withDependency { partyMessage }
     val togglePaul by SelectorSetting("Paul Settings", "Automatic", arrayListOf("Automatic", "Force Disable", "Force Enable"), desc = "Toggle Paul's settings.")
 
     private var cachedScore = 0
@@ -245,6 +249,10 @@ object MapInfo : Module(
             if (!enabled || !DungeonUtils.inDungeons || shownTitle || (!scoreTitle && !printWhenScore) || DungeonUtils.score < 300) return@TickTask
             if (scoreTitle) alert("§c300 Score!")
             if (printWhenScore) modMessage("§b${DungeonUtils.score} §ascore reached in §6${DungeonUtils.dungeonTime} || ${DungeonUtils.floor?.name}.")
+            if (partyMessage && PartyUtils.isInParty) {
+                val time = DungeonUtils.dungeonTime
+                sendCommand("pc ${message.replace("{time}", time)}")
+            }
             shownTitle = true
         }
 
