@@ -96,7 +96,7 @@ val devCommand = Commodore("oddev") {
 
         param("type").suggests { setOf("kuudra", "dungeon", "none", "party") }
 
-        runs { type: String ->
+        runs { type: String? ->
             modMessage(
                 """
                 |Version: ${OdinMod.version}
@@ -139,10 +139,8 @@ val devCommand = Commodore("oddev") {
                         "party" -> """
                             |Party > ${PartyUtils.isInParty}, ${PartyUtils.partyLeader}, ${PartyUtils.members}
                         """.trimIndent()
-                        
-                        else -> """
-                            |Current Area: ${LocationUtils.currentArea.displayName}
-                        """.trimIndent()
+
+                        else -> ""
                     }
                 }
             """.trimIndent(), ""

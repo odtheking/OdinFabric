@@ -1,5 +1,6 @@
 package com.odtheking.odin.utils.skyblock
 
+import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.WorldEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
@@ -45,6 +46,7 @@ object LocationUtils {
             currentArea = Island.Unknown
             isInSkyblock = false
             lobbyId = null
+            if (mc.isSingleplayer) currentArea = Island.SinglePlayer
         }
     }
 }
