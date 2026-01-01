@@ -3,7 +3,7 @@ package com.odtheking.odin.features.impl.dungeon
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.SelectorSetting
 import com.odtheking.odin.events.ChatPacketEvent
-import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.WorldEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.*
@@ -127,7 +127,7 @@ object ExtraStats : Module(
             }
         }
 
-        on<WorldLoadEvent> {
+        on<WorldEvent.Load> {
             extraStats.reset()
         }
     }

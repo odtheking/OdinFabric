@@ -30,7 +30,7 @@ object TerminalSimulator : Module(
             TerminalTypes.STARTS_WITH -> StartsWithSim().open(ping)
             TerminalTypes.PANES       -> PanesSim.open(ping)
             TerminalTypes.SELECT      -> SelectAllSim().open(ping)
-            TerminalTypes.NUMBERS       -> NumbersSim.open(ping)
+            TerminalTypes.NUMBERS      -> NumbersSim.open(ping)
             TerminalTypes.MELODY      -> MelodySim.open(ping)
             TerminalTypes.RUBIX       -> RubixSim.open(ping)
         }

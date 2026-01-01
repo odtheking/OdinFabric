@@ -23,13 +23,12 @@ import net.minecraft.world.entity.item.ItemEntity
 object EventDispatcher {
 
     init {
-        ClientPlayConnectionEvents.JOIN.register { handler, _, _ ->
-            WorldLoadEvent().postAndCatch()
-            ServerEvent.Connect(handler.serverData?.ip ?: "SinglePlayer").postAndCatch()
+        ClientPlayConnectionEvents.JOIN.register { _, _, _ ->
+            WorldEvent.Load().postAndCatch()
         }
 
-        ClientPlayConnectionEvents.DISCONNECT.register { handler, _ ->
-            ServerEvent.Disconnect(handler.serverData?.ip ?: "SinglePlayer").postAndCatch()
+        ClientPlayConnectionEvents.DISCONNECT.register { _, _ ->
+            WorldEvent.Unload().postAndCatch()
         }
 
         ClientTickEvents.START_CLIENT_TICK.register { _ ->
@@ -54,14 +53,14 @@ object EventDispatcher {
         }
 
         onReceive<ClientboundTakeItemEntityPacket> {
-            if (mc.player == null || !DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
+            if (mc.player == null || !DungeonUtils.inClear) return@onReceive
             val itemEntity = mc.level?.getEntity(itemId) as? ItemEntity ?: return@onReceive
             if (itemEntity.item?.hoverName?.string?.containsOneOf(dungeonItemDrops, true) == true && itemEntity.distanceTo(mc.player ?: return@onReceive) <= 6)
                 SecretPickupEvent.Item(itemEntity).postAndCatch()
         }
 
         onReceive<ClientboundRemoveEntitiesPacket> {
-            if (mc.player == null || !DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
+            if (mc.player == null || !DungeonUtils.inClear) return@onReceive
             entityIds.forEach { id ->
                 val entity = mc.level?.getEntity(id) as? ItemEntity ?: return@forEach
                 if (entity.item?.hoverName?.string?.containsOneOf(dungeonItemDrops, true) == true && entity.distanceTo(mc.player ?: return@onReceive) <= 6)
@@ -70,7 +69,7 @@ object EventDispatcher {
         }
 
         onReceive<ClientboundSoundPacket> {
-            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
+            if (!DungeonUtils.inClear) return@onReceive
             if (sound.value().equalsOneOf(SoundEvents.BAT_HURT, SoundEvents.BAT_DEATH) && volume == 0.1f)
                 SecretPickupEvent.Bat(this).postAndCatch()
         }

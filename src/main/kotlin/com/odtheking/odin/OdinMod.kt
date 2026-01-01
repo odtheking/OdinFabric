@@ -23,7 +23,6 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.rendering.v1.SpecialGuiElementRegistry
 import net.fabricmc.loader.api.FabricLoader
 import net.fabricmc.loader.api.Version
-import net.fabricmc.loader.api.metadata.ModMetadata
 import net.minecraft.client.Minecraft
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -44,9 +43,7 @@ object OdinMod : ClientModInitializer {
      */
     val configFile: File = File(mc.gameDirectory, "config/odin/").apply {
         try {
-            if (!exists()) {
-                mkdirs()
-            }
+            if (!exists()) mkdirs()
         } catch (e: Exception) {
             println("Error initializing module config\n${e.message}")
             logger.error("Error initializing module config", e)
@@ -55,12 +52,7 @@ object OdinMod : ClientModInitializer {
 
     const val MOD_ID = "odin"
 
-    private val metadata: ModMetadata by lazy {
-        FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow().metadata
-    }
-
-    val version: Version by lazy { metadata.version }
-
+    val version: Version by lazy { FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow().metadata.version }
     val scope = CoroutineScope(SupervisorJob() + EmptyCoroutineContext)
 
     override fun onInitializeClient() {

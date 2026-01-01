@@ -51,7 +51,7 @@ object Mimic : Module(
     }
 
     private fun princeKilled() {
-        if (DungeonUtils.princeKilled || DungeonUtils.inBoss || !DungeonUtils.inDungeons) return
+        if (DungeonUtils.princeKilled || !DungeonUtils.inClear) return
         if (princeMessageToggle) sendCommand("pc $princeMessage")
         DungeonListener.dungeonStats.princeKilled = true
     }

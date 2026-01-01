@@ -56,8 +56,7 @@ object ModuleManager {
     private val HUD_LAYER: ResourceLocation = fromNamespaceAndPath(OdinMod.MOD_ID, "odin_hud")
 
     init {
-        registerModules(
-            config = ModuleConfig(file = File(OdinMod.configFile, "odin-config.json")),
+        registerModules(config = ModuleConfig(file = File(OdinMod.configFile, "odin-config.json")),
             // dungeon
             PuzzleSolvers, BlessingDisplay, LeapMenu, SecretClicked, MapInfo, Mimic, DungeonQueue,
             KeyHighlight, BloodCamp, PositionalMessages, TerracottaTimer, BreakerDisplay, LividSolver,

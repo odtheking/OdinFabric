@@ -100,7 +100,7 @@ val devCommand = Commodore("oddev") {
             modMessage(
                 """
                 |Version: ${OdinMod.version}
-                |Hypixel: ${LocationUtils.isOnHypixel}
+                |Location: ${LocationUtils.currentArea.displayName}
                 ${
                     when (type) {
                         "kuudra" -> """

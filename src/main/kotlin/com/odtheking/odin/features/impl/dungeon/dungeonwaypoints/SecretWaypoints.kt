@@ -26,7 +26,7 @@ object SecretWaypoints {
     }
 
     fun onEtherwarp(packet: ClientboundPlayerPositionPacket) {
-        if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return
+        if (!DungeonUtils.inClear) return
         val room = DungeonUtils.currentRoom ?: return
         val etherPos = lastEtherPos ?: return
         if (System.currentTimeMillis() - lastEtherTime > 1000 || packet.change.position.distanceTo(Vec3(etherPos)) > 3) return
@@ -40,7 +40,7 @@ object SecretWaypoints {
     }
 
     private fun clickSecret(pos: BlockPos, distance: Int) {
-        if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return
+        if (!DungeonUtils.inClear) return
         val room = DungeonUtils.currentRoom ?: return
         val blockPos = room.getRelativeCoords(pos)
 

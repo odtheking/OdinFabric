@@ -40,6 +40,7 @@ object SkyblockPlayer {
     init {
         on<TickEvent.End> {
             currentHealth = (mc.player?.let { player -> (maxHealth * player.health / player.maxHealth).toInt() } ?: 0)
+            currentSpeed = floor((mc.player?.getAttribute(Attributes.MOVEMENT_SPEED)?.baseValue?.toFloat() ?: 0f) * 1000f).toInt()
         }
 
         onReceive<ClientboundSystemChatPacket> {
@@ -64,9 +65,6 @@ object SkyblockPlayer {
             }
 
             effectiveHP = (currentHealth * (1 + currentDefense / 100))
-            currentSpeed = floor(
-                (mc.player?.getAttribute(Attributes.MOVEMENT_SPEED)?.baseValue?.toFloat() ?: 0f) * 1000f
-            ).toInt()
         }
     }
 }

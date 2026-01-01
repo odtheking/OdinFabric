@@ -5,7 +5,7 @@ import com.odtheking.odin.clickgui.settings.impl.ColorSetting
 import com.odtheking.odin.clickgui.settings.impl.SelectorSetting
 import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.TickEvent
-import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.WorldEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.*
@@ -85,7 +85,7 @@ object InvincibilityTimer : Module(
             }
         }
 
-        on<WorldLoadEvent> {
+        on<WorldEvent.Load> {
             InvincibilityType.entries.forEach { it.reset() }
         }
     }

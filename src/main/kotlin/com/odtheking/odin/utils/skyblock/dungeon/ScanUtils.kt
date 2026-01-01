@@ -6,7 +6,7 @@ import com.odtheking.odin.OdinMod.logger
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.events.TickEvent
-import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.WorldEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.utils.Vec2
 import com.odtheking.odin.utils.devMessage
@@ -74,7 +74,7 @@ object ScanUtils {
             } // We want to use cached rooms instead of scanning it again if we have already passed through it and if we are already in it we don't want to trigger the event
 
             scanRoom(roomCenter)?.let { room -> if (room.rotation != Rotations.NONE) RoomEnterEvent(room).postAndCatch() } ?: run {
-                if ((!DungeonUtils.inDungeons || DungeonUtils.inBoss) && !LocationUtils.currentArea.isArea(Island.SinglePlayer)) return@on
+                if ((!DungeonUtils.inClear) && !LocationUtils.currentArea.isArea(Island.SinglePlayer)) return@on
                 devMessage("Unable to determine room at $roomCenter core: ${getCore(roomCenter)}")
             }
         }
@@ -85,7 +85,7 @@ object ScanUtils {
             devMessage("${room?.data?.name} - ${room?.rotation} || clay: ${room?.clayPos}")
         }
 
-        on<WorldLoadEvent> {
+        on<WorldEvent.Load> {
             passedRooms.clear()
             currentRoom = null
             lastRoomPos = Vec2(0, 0)

@@ -4,7 +4,7 @@ import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.*
 import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.RoomEnterEvent
-import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.WorldEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
@@ -200,7 +200,7 @@ object MapInfo : Module(
     private val compactScoreColor by ColorSetting("Score Background Color", Colors.MINECRAFT_DARK_GRAY.withAlpha(0.5f), true, desc = "The color of the background.").withDependency { compactScoreBackground && compactScore.enabled }
 
     private val roomSecrets by HUD("Room Secrets", "Displays the number of secrets in the current room.") {
-        if ((!DungeonUtils.inDungeons ||  DungeonUtils.inBoss) && !it) return@HUD 0 to 0
+        if ((!DungeonUtils.inClear) && !it) return@HUD 0 to 0
 
         val secrets = if (it) 0 to 2 else currentRoomSecrets ?: return@HUD 0 to 0
         val color = when {
@@ -264,13 +264,13 @@ object MapInfo : Module(
         }
 
         on<RenderEvent.Extract> {
-            if (!highlightPortal || !DungeonUtils.inDungeons || DungeonUtils.inBoss || DungeonUtils.score < 300) return@on
+            if (!highlightPortal || !DungeonUtils.inClear || DungeonUtils.score < 300) return@on
             portalAABB?.let{ pos ->
                 drawFilledBox(pos, Colors.MINECRAFT_GREEN.withAlpha(0.5f), depth = true)
             }
         }
 
-        on<WorldLoadEvent> {
+        on<WorldEvent.Load> {
             shownTitle = false
         }
     }

@@ -6,7 +6,7 @@ import com.odtheking.odin.clickgui.ClickGUI
 import com.odtheking.odin.clickgui.HudManager
 import com.odtheking.odin.clickgui.settings.AlwaysActive
 import com.odtheking.odin.clickgui.settings.impl.*
-import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.WorldEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Category
 import com.odtheking.odin.features.Module
@@ -15,7 +15,6 @@ import com.odtheking.odin.utils.alert
 import com.odtheking.odin.utils.getChatBreak
 import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.network.WebUtils.fetchJson
-import com.odtheking.odin.utils.skyblock.LocationUtils
 import kotlinx.coroutines.launch
 import net.minecraft.network.chat.ClickEvent
 import net.minecraft.network.chat.Component
@@ -67,8 +66,8 @@ object ClickGUIModule : Module(
             latestVersionNumber = checkNewerVersion(OdinMod.version.toString())
         }
 
-        on<WorldLoadEvent> {
-           if (!LocationUtils.isOnHypixel || hasSentUpdateMessage || latestVersionNumber == null) return@on
+        on<WorldEvent.Load> {
+           if (hasSentUpdateMessage || latestVersionNumber == null) return@on
             hasSentUpdateMessage = true
 
             modMessage("""

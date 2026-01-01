@@ -2,22 +2,22 @@ package com.odtheking.odin.utils.handlers
 
 import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.core.on
-import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.utils.logError
-import net.minecraft.network.protocol.common.ClientboundPingPacket
-import java.util.concurrent.CopyOnWriteArrayList
 
+/**
+ * Generic tick task.
+ */
 open class TickTask(
     private val ticksPerCycle: Int,
     serverTick: Boolean = false,
     private val task: () -> Unit
 ) {
+    var ticks = 0
+
     init {
         if (serverTick) TickTasks.registerServerTask(this)
         else TickTasks.registerClientTask(this)
     }
-
-    var ticks = 0
 
     open fun run() {
         if (++ticks < ticksPerCycle) return
@@ -26,25 +26,23 @@ open class TickTask(
     }
 }
 
+class OneShotTickTask(ticks: Int, serverTick: Boolean = false, task: () -> Unit) : TickTask(ticks, serverTick, task) {
+    override fun run() {
+        super.run()
+        if (ticks == 0) TickTasks.unregister(this)
+    }
+}
+
 fun schedule(ticks: Int, serverTick: Boolean = false, task: () -> Unit) {
-    lateinit var tickTask: TickTask
-    tickTask = object : TickTask(ticks, serverTick, {
-        task()
-        TickTasks.unregister(tickTask)
-    }) {}
+    OneShotTickTask(ticks, serverTick, task)
 }
 
 object TickTasks {
-    private val clientTickTasks = CopyOnWriteArrayList<TickTask>()
-    private val serverTickTasks = CopyOnWriteArrayList<TickTask>()
+    private val clientTickTasks = mutableListOf<TickTask>()
+    private val serverTickTasks = mutableListOf<TickTask>()
 
-    fun registerClientTask(task: TickTask) {
-        clientTickTasks.add(task)
-    }
-
-    fun registerServerTask(task: TickTask) {
-        serverTickTasks.add(task)
-    }
+    fun registerClientTask(task: TickTask) = clientTickTasks.add(task)
+    fun registerServerTask(task: TickTask) = serverTickTasks.add(task)
 
     fun unregister(task: TickTask) {
         clientTickTasks.remove(task)
@@ -53,11 +51,12 @@ object TickTasks {
 
     init {
         on<TickEvent.End> {
-            for (task in clientTickTasks) task.run()
+            for (i in clientTickTasks.size - 1 downTo 0) clientTickTasks[i].run()
         }
 
-        onReceive<ClientboundPingPacket> {
-            if (id != 0) for (task in serverTickTasks) task.run()
+        on<TickEvent.Server> {
+            for (i in serverTickTasks.size - 1 downTo 0)
+                serverTickTasks[i].run()
         }
     }
 }

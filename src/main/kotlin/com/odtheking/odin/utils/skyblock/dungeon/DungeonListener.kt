@@ -2,17 +2,17 @@ package com.odtheking.odin.utils.skyblock.dungeon
 
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.OdinMod.scope
+import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.events.TickEvent
-import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.WorldEvent
+import com.odtheking.odin.events.core.EventPriority
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.impl.dungeon.LeapMenu
 import com.odtheking.odin.features.impl.dungeon.LeapMenu.odinSorting
 import com.odtheking.odin.features.impl.dungeon.Mimic
-import com.odtheking.odin.utils.equalsOneOf
 import com.odtheking.odin.utils.network.WebUtils.hasBonusPaulScore
-import com.odtheking.odin.utils.noControlCodes
 import com.odtheking.odin.utils.romanToInt
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getDungeonTeammates
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.Room
@@ -20,8 +20,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket
-import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
 import net.minecraft.network.protocol.game.ClientboundTabListPacket
+import kotlin.jvm.optionals.getOrNull
 
 object DungeonListener {
 
@@ -54,7 +54,7 @@ object DungeonListener {
             if (DungeonUtils.inDungeons) inBoss = getBoss()
         }
 
-        on<WorldLoadEvent> {
+        on<WorldEvent.Load> {
             Blessing.entries.forEach { it.reset() }
             dungeonTeammatesNoSelf = emptyList()
             dungeonStats = DungeonStats()
@@ -62,31 +62,25 @@ object DungeonListener {
             leapTeammates = emptyList()
             dungeonTeammates.clear()
             puzzles.clear()
+            inBoss = false
             floor = null
             paul = false
         }
 
-        on<RoomEnterEvent>(priority = 100) {
+        on<RoomEnterEvent> (EventPriority.HIGH) {
             val room = room?.takeUnless { room -> passedRooms.any { it.data.name == room.data.name } } ?: return@on
             dungeonStats.knownSecrets += room.data.secrets
         }
 
         onReceive<ClientboundPlayerInfoUpdatePacket> {
-            if (actions().none {
-                it.equalsOneOf(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME,
-                               ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER)
-            }) return@onReceive
-            val tabListEntries =
-                entries()?.mapNotNull { it.displayName?.string }?.ifEmpty { return@onReceive } ?: return@onReceive
+            val tabListEntries = entries()?.mapNotNull { it.displayName?.string }?.ifEmpty { return@onReceive } ?: return@onReceive
             updateDungeonTeammates(tabListEntries)
             updateDungeonStats(tabListEntries)
             getDungeonPuzzles(tabListEntries)
         }
 
         onReceive<ClientboundSetPlayerTeamPacket> {
-            val team = parameters?.orElse(null) ?: return@onReceive
-
-            val text = team.playerPrefix?.string?.plus(team.playerSuffix?.string) ?: return@onReceive
+            val text = parameters?.getOrNull()?.let { it.playerPrefix?.string?.plus(it.playerSuffix?.string) } ?: return@onReceive
 
             floorRegex.find(text)?.groupValues?.get(1)?.let {
                 scope.launch(Dispatchers.IO) { paul = hasBonusPaulScore() }
@@ -101,22 +95,20 @@ object DungeonListener {
 
         onReceive<ClientboundTabListPacket> {
             Blessing.entries.forEach { blessing ->
-                blessing.regex.find(footer?.string ?: return@forEach)
-                    ?.let { blessing.current = romanToInt(it.groupValues[1]) }
+                blessing.regex.find(footer?.string ?: return@forEach)?.let { blessing.current = romanToInt(it.groupValues[1]) }
             }
         }
 
-        onReceive<ClientboundSystemChatPacket> {
-            val message = content?.string?.noControlCodes ?: return@onReceive
-            if (expectingBloodRegex.matches(message)) expectingBloodUpdate = true
-            doorOpenRegex.find(message)?.let { dungeonStats.doorOpener = it.groupValues[1] }
-            deathRegex.find(message)?.let { match ->
+        on<ChatPacketEvent> {
+            if (expectingBloodRegex.matches(value)) expectingBloodUpdate = true
+            doorOpenRegex.find(value)?.let { dungeonStats.doorOpener = it.groupValues[1] }
+            deathRegex.find(value)?.let { match ->
                 dungeonTeammates.find { teammate ->
                     teammate.name == (match.groupValues[1].takeUnless { it == "You" } ?: mc.player?.name?.string)
                 }?.deaths?.inc()
             }
 
-            when (partyMessageRegex.find(message)?.groupValues?.get(1)?.lowercase() ?: return@onReceive) {
+            when (partyMessageRegex.find(value)?.groupValues?.get(1)?.lowercase() ?: return@on) {
                 "mimic killed", "mimic slain", "mimic killed!", "mimic dead", "mimic dead!", $$"$skytils-dungeon-score-mimic$", Mimic.mimicMessage ->
                     dungeonStats.mimicKilled = true
 

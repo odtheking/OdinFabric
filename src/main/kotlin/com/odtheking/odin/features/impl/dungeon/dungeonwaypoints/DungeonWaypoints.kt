@@ -79,7 +79,7 @@ object DungeonWaypoints : Module(
     init {
         DungeonWaypointConfig.loadConfig()
 
-        on<WorldLoadEvent> {
+        on<WorldEvent.Load> {
             SecretWaypoints.resetSecrets()
         }
 
@@ -104,7 +104,7 @@ object DungeonWaypoints : Module(
         }
 
         on<RenderEvent.Extract> {
-            if (DungeonUtils.inBoss || !DungeonUtils.inDungeons) return@on
+            if (!DungeonUtils.inClear) return@on
             val room = DungeonUtils.currentRoom ?: return@on
 
             drawBoxes(room.waypoints, disableDepth)

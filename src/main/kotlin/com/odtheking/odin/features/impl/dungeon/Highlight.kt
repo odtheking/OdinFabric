@@ -5,7 +5,7 @@ import com.odtheking.odin.clickgui.settings.impl.ColorSetting
 import com.odtheking.odin.clickgui.settings.impl.SelectorSetting
 import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.TickEvent
-import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.WorldEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Colors
@@ -36,7 +36,7 @@ object Highlight : Module(
 
     init {
         on<TickEvent.End> {
-            if (!highlightStar || !DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
+            if (!highlightStar || !DungeonUtils.inClear) return@on
 
             val entitiesToRemove = mutableListOf<Entity>()
             mc.level?.entitiesForRendering()?.forEach { e ->
@@ -63,7 +63,7 @@ object Highlight : Module(
         }
 
         on<RenderEvent.Extract> {
-            if (!highlightStar || !DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
+            if (!highlightStar || !DungeonUtils.inClear) return@on
 
             entities.forEach { entity ->
                 if (!entity.isAlive) return@forEach
@@ -73,7 +73,7 @@ object Highlight : Module(
             }
         }
 
-        on<WorldLoadEvent> {
+        on<WorldEvent.Load> {
             entities.clear()
         }
     }

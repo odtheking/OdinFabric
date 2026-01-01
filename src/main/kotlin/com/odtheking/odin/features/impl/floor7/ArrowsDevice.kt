@@ -6,7 +6,7 @@ import com.odtheking.odin.clickgui.settings.impl.ColorSetting
 import com.odtheking.odin.events.BlockUpdateEvent
 import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.RenderEvent
-import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.WorldEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
@@ -66,7 +66,7 @@ object ArrowsDevice : Module(
             }
         }
 
-        on<WorldLoadEvent> {
+        on<WorldEvent.Load> {
             markedPositions.clear()
             targetPosition = null
             isDeviceComplete = false

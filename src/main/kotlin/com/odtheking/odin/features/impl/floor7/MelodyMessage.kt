@@ -5,7 +5,7 @@ import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.StringSetting
 import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.TerminalEvent
-import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.WorldEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
@@ -81,7 +81,7 @@ object MelodyMessage : Module(
             if (broadcast || melodyProgress) onSlotUpdate(this)
         }
 
-        on<WorldLoadEvent> {
+        on<WorldEvent.Load> {
             melodyWebSocket.shutdown()
             melodies.clear()
         }

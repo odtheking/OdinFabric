@@ -70,7 +70,7 @@ object BloodCamp : Module(
     init {
         onReceive<ClientboundMoveEntityPacket.PosRot> {
             val level = mc.level ?: return@onReceive
-            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
+            if (DungeonUtils.inClear) return@onReceive
 
             val entity = getEntity(level) as? ArmorStand ?: return@onReceive
             if (currentWatcherEntity?.let { it.distanceTo(entity) <= 20 } != true || entity.getItemBySlot(EquipmentSlot.HEAD).item != Items.PLAYER_HEAD || entity.getItemBySlot(EquipmentSlot.HEAD)?.texture !in allowedMobSkulls) return@onReceive
@@ -106,7 +106,7 @@ object BloodCamp : Module(
         }
 
         on<ChatPacketEvent> {
-            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
+            if (DungeonUtils.inClear) return@on
 
             if (regexTwo.matches(value)) startTime = System.currentTimeMillis() to normalTickTime
             else if (regexOne.matches(value)) {
@@ -140,7 +140,7 @@ object BloodCamp : Module(
         }
 
         onReceive<ClientboundSetEquipmentPacket> {
-            if (!bloodAssist || currentWatcherEntity != null || !DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
+            if (!bloodAssist || currentWatcherEntity != null || DungeonUtils.inClear) return@onReceive
 
             slots.forEach { slot ->
                 if (slot.second.isEmpty) return@forEach
@@ -162,7 +162,7 @@ object BloodCamp : Module(
             currentTickTime += 50
         }
 
-        on<WorldLoadEvent> {
+        on<WorldEvent.Load> {
             currentWatcherEntity = null
             entityDataMap.clear()
             renderDataMap.clear()
@@ -173,13 +173,13 @@ object BloodCamp : Module(
         }
 
         on<RenderBossBarEvent> {
-            if (!watcherBar || !DungeonUtils.inDungeons || DungeonUtils.inBoss || bossBar.name == null || bossBar.name?.string != "§c§lThe Watcher") return@on
+            if (!watcherBar || DungeonUtils.inClear || bossBar.name == null || bossBar.name?.string != "§c§lThe Watcher") return@on
             val amount = 12 + (DungeonUtils.floor?.floorNumber ?: 0)
             bossBar.name = Component.literal(bossBar.progress.takeIf { it >= 0.05 }?.let { "${bossBar.name.string} ${(amount * it).roundToInt()}/$amount" } ?: return@on)
         }
 
         on<RenderEvent.Extract> {
-            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss || !bloodAssist) return@on
+            if (DungeonUtils.inClear || !bloodAssist) return@on
 
             renderDataMap.forEach { (entity, renderData) ->
                 val (_, started, firstSpawn) = entityDataMap[entity]?.takeUnless { !entity.isAlive } ?: return@forEach

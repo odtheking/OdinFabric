@@ -48,7 +48,7 @@ object SimonSays : Module(
     }
 
     init {
-        on<WorldLoadEvent> {
+        on<WorldEvent.Load> {
             resetSolution()
             firstPhase = true
             startClickCounter = 0

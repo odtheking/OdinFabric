@@ -10,6 +10,7 @@ import com.odtheking.odin.features.impl.dungeon.dungeonwaypoints.DungeonWaypoint
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Color.Companion.multiplyAlpha
 import com.odtheking.odin.utils.addVec
+import com.odtheking.odin.utils.renderPos
 import com.odtheking.odin.utils.unaryMinus
 import net.minecraft.client.gui.Font
 import net.minecraft.client.renderer.LightTexture
@@ -180,6 +181,13 @@ private fun PoseStack.renderBatchedTexts(consumer: List<TextData>, bufferSource:
 
         popPose()
     }
+}
+
+fun RenderEvent.Extract.drawTracer(to: Vec3, color: Color, depth: Boolean, thickness: Float = 3f) {
+    val from = mc.player?.let { player ->
+        player.renderPos.add(player.forward.add(0.0, player.eyeHeight.toDouble(), 0.0))
+    } ?: return
+    drawLine(listOf(from, to), color, depth, thickness)
 }
 
 fun RenderEvent.Extract.drawLine(points: Collection<Vec3>, color: Color, depth: Boolean, thickness: Float = 3f) {

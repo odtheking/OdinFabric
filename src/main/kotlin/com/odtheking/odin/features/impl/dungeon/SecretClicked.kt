@@ -5,7 +5,7 @@ import com.odtheking.odin.clickgui.settings.impl.*
 import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.SecretPickupEvent
-import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.WorldEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.Color.Companion.withAlpha
@@ -30,7 +30,7 @@ object SecretClicked : Module(
     private val color by ColorSetting("Color", Colors.MINECRAFT_GOLD.withAlpha(.4f), true, desc = "The color of the box.").withDependency { boxesDropdown && boxes }
     private val depthCheck by BooleanSetting("Depth check", false, desc = "Boxes show through walls.").withDependency { boxesDropdown && boxes }
     private val lockedColor by ColorSetting("Locked Color", Colors.MINECRAFT_RED.withAlpha(.4f), true, desc = "The color of the box when the chest is locked.").withDependency { boxesDropdown && boxes }
-    private val timeToStay by NumberSetting("Time To Stay", 7, 1, 120, 0.2, desc = "The time the chests should remain highlighted.", unit = "s").withDependency { boxesDropdown && boxes }
+    private val timeToStay by NumberSetting("Time To Stay", 7, 1, 120, 0.5, desc = "The time the chests should remain highlighted.", unit = "s").withDependency { boxesDropdown && boxes }
     private val boxInBoss by BooleanSetting("Box In Boss", false, desc = "Highlight clicks in boss.").withDependency { boxesDropdown && boxes }
     private val toggleItems by BooleanSetting("Item Boxes", true, desc = "Render boxes for collected items.").withDependency { boxesDropdown && boxes }
 
@@ -67,12 +67,11 @@ object SecretClicked : Module(
             if (!boxes || !DungeonUtils.inDungeons || (DungeonUtils.inBoss && !boxInBoss) || clickedSecretsList.isEmpty()) return@on
 
             clickedSecretsList.forEach { secret ->
-                val currentColor = if (secret.locked) lockedColor else color
-                drawStyledBox(secret.aabb, currentColor, style, depthCheck)
+                drawStyledBox(secret.aabb, if (secret.locked) lockedColor else color, style, depthCheck)
             }
         }
 
-        on<WorldLoadEvent> {
+        on<WorldEvent.Load> {
             clickedSecretsList.clear()
         }
     }

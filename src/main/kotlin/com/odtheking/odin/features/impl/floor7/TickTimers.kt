@@ -5,7 +5,7 @@ import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.HudElement
 import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.TickEvent
-import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.WorldEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
@@ -55,7 +55,14 @@ object TickTimers : Module(
         else 0 to 0
     }
 
+    private val lightningHud by HUD("Storm Lightning Hud", "Displays a timer for Storm's Lightning.") {
+        if (it)                         textDim(formatTimer(560, 560, "§bLightning:"), 0, 0, Colors.MINECRAFT_DARK_RED)
+        else if (lightningTickTime >= 0) textDim(formatTimer(lightningTickTime, 560, "§bLightning:"), 0, 0, Colors.MINECRAFT_DARK_RED)
+        else 0 to 0
+    }
+
     private var padTickTime = -1
+    private var lightningTickTime = -1
 
     private val outboundsHud by HUD("Outbounds Hud", "Displays a timer for out of bounds death ticks.") {
         if (it)                      textDim(formatTimer(15, 20, "§8Outbounds:"), 0, 0, Colors.MINECRAFT_DARK_RED)
@@ -86,7 +93,10 @@ object TickTimers : Module(
                     if (goldorHud.enabled) goldorStartTime = 104
                     if (stormHud.enabled) padTickTime = -1
                 }
-                stormHud.enabled && value.matches(stormPadRegex) -> padTickTime = 20
+                (stormHud.enabled || lightningHud.enabled) && value.matches(stormPadRegex) -> {
+                    if (stormHud.enabled) padTickTime = 20
+                    if (lightningHud.enabled) lightningTickTime = 560
+                }
             }
         }
 
@@ -102,11 +112,12 @@ object TickTimers : Module(
             if (goldorTickTime >= 0 && goldorHud.enabled) goldorTickTime--
             if (padTickTime == 0 && stormHud.enabled) padTickTime = 20
             if (padTickTime >= 0 && stormHud.enabled) padTickTime--
+            if (lightningTickTime == 0 && lightningHud.enabled) lightningTickTime--
             if (necronTime >= 0 && necronHud.enabled) necronTime--
         }
 
         onReceive<ClientboundSetTimePacket> {
-            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
+            if (!DungeonUtils.inClear) return@onReceive
             val gameTime = mc.level?.gameTime ?: -1
             if (DungeonUtils.openRoomCount == 0) {
                 if (outboundsHud.enabled) outboundsTime = 40 - (gameTime % 40).toInt()
@@ -116,7 +127,7 @@ object TickTimers : Module(
             }
         }
 
-        on<WorldLoadEvent> {
+        on<WorldEvent.Load> {
             goldorStartTime = -1
             goldorTickTime = -1
             padTickTime = -1

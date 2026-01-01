@@ -5,42 +5,63 @@ import com.odtheking.odin.features.impl.render.ClickGUIModule.hypixelApiUrl
 import com.odtheking.odin.utils.network.WebUtils.fetchJson
 
 object RequestUtils {
-    private val uuidCache: HashMap<String, UuidData> = HashMap()
-    private val cachedPlayerData: HashMap<String, Pair<HypixelData.PlayerInfo, Long>> = HashMap()
 
-    private fun getServer(endpoint: EndPoint, uuid: String): String = hypixelApiUrl + endpoint.name.lowercase() + "/" + uuid
+    private const val CACHE_TTL_MS = 5 * 60 * 1000L // 5 minutes
+
+    private data class CacheEntry<T>(
+        val value: T,
+        val timestamp: Long
+    )
+
+    private val uuidCache = HashMap<String, CacheEntry<UuidData>>()
+    private val playerCache = HashMap<String, CacheEntry<HypixelData.PlayerInfo>>()
+
+    private fun getServer(endpoint: EndPoint, uuid: String): String =
+        hypixelApiUrl + endpoint.name.lowercase() + "/" + uuid
+
+    private fun <T> MutableMap<String, CacheEntry<T>>.evictExpired() {
+        val now = System.currentTimeMillis()
+        entries.removeIf { now - it.value.timestamp >= CACHE_TTL_MS }
+    }
+
+    private fun getPlayerFromCache(name: String): HypixelData.PlayerInfo? {
+        val key = name.lowercase()
+        playerCache.evictExpired()
+        return playerCache[key]?.value
+    }
+
+    private fun putPlayerInCache(info: HypixelData.PlayerInfo) {
+        if (info.profileData.profiles.isEmpty()) {
+            logger.info("Refusing to cache empty profile!")
+            return
+        }
+
+        playerCache[info.name.lowercase()] = CacheEntry(info, System.currentTimeMillis())
+
+        logger.info("Cached ${info.name}. Cache size: ${playerCache.size}")
+    }
 
     suspend fun getProfile(name: String): Result<HypixelData.PlayerInfo> {
-        getFromCache(name)?.let { return Result.success(it) }
+        getPlayerFromCache(name)?.let { return Result.success(it) }
         val uuidData = getUuid(name).getOrElse { return Result.failure(Exception(it.cause)) }
-        return fetchJson<HypixelData.ProfilesData>(getServer(EndPoint.GET, uuidData.id)).map { it ->
-            it.failed?.let { return Result.failure(Exception("Failed to get hypixel data: $it")) }
-            HypixelData.PlayerInfo(it, uuidData.id, uuidData.name)
+
+        return fetchJson<HypixelData.ProfilesData>(getServer(EndPoint.GET, uuidData.id)).map { data ->
+            data.failed?.let { return Result.failure(Exception("Failed to get hypixel data: $it")) }
+
+            HypixelData.PlayerInfo(data, uuidData.id, uuidData.name).also(::putPlayerInCache)
         }
     }
-
-    private fun addToCache(profiles: HypixelData.PlayerInfo) {
-        val time = System.currentTimeMillis()
-        if (profiles.profileData.profiles.isEmpty()) return logger.info("Refusing to cache empty profile!")
-
-        cachedPlayerData.entries
-            .takeIf { it.size >= 5 }
-            ?.maxByOrNull { time - it.value.second }?.key
-            ?.let { cachedPlayerData.remove(it); logger.info("Removed $it from cache list.") }
-
-        cachedPlayerData[profiles.name.lowercase()] = Pair(profiles, time)
-        logger.info("Added ${profiles.name} to cache list. Cache size is now ${cachedPlayerData.size}/5.")
-    }
-
-    private fun getFromCache(name: String, time: Long = 600000) =
-        cachedPlayerData[name.lowercase()]?.takeUnless { (System.currentTimeMillis() - it.second >= time) }?.first
 
     suspend fun getUuid(name: String): Result<UuidData> {
-        val lowerName = name.lowercase()
-        uuidCache[lowerName]?.let { return Result.success(it) }
-        return fetchJson<UuidData>("https://api.minecraftservices.com/minecraft/profile/lookup/name/$name").onSuccess {
-            uuidCache[lowerName] = it
-        }
+        val key = name.lowercase()
+
+        uuidCache.evictExpired()
+
+        uuidCache[key]?.let { return Result.success(it.value) }
+
+        return fetchJson<UuidData>(
+            "https://api.minecraftservices.com/minecraft/profile/lookup/name/$name"
+        ).onSuccess { uuidCache[key] = CacheEntry(it, System.currentTimeMillis()) }
     }
 
     enum class EndPoint { SECRETS, GET }

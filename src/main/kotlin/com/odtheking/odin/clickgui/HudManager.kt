@@ -36,49 +36,41 @@ object HudManager : Screen(Component.literal("HUD Manager")) {
 
         for (hud in hudSettingsCache) {
             if (hud.isEnabled) hud.value.draw(context, true)
-            if (!hud.value.isHovered()) continue
+        }
+
+        hudSettingsCache.firstOrNull { it.isEnabled && it.value.isHovered() }?.let { hoveredHud ->
             context.pose().pushMatrix()
             context.pose().translate(
-                (hud.value.x + hud.value.width * hud.value.scale + 10f),
-                hud.value.y.toFloat(),
+                (hoveredHud.value.x + hoveredHud.value.width * hoveredHud.value.scale + 10f),
+                hoveredHud.value.y.toFloat(),
             )
             context.pose().scale(2f, 2f)
-            context.drawString(mc.font, Component.literal(hud.name), 0, 0, Colors.WHITE.rgba)
-            context.drawWordWrap(mc.font, Component.literal(hud.description), 0, 10, 150, Colors.WHITE.rgba)
+            context.drawString(mc.font, hoveredHud.name, 0, 0, Colors.WHITE.rgba)
+            context.drawWordWrap(mc.font, Component.literal(hoveredHud.description), 0, 10, 150, Colors.WHITE.rgba)
             context.pose().popMatrix()
         }
+
         context.pose().popMatrix()
     }
 
-    override fun mouseScrolled(
-        mouseX: Double,
-        mouseY: Double,
-        horizontalAmount: Double,
-        verticalAmount: Double
-    ): Boolean {
+    override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {
         val actualAmount = verticalAmount.sign.toFloat() * 0.2f
-        for (hud in hudSettingsCache) {
-            if (hud.isEnabled && hud.value.isHovered()) {
-                hud.value.scale = (hud.value.scale + actualAmount).coerceIn(1f, 10f)
-                return true
-            }
+        hudSettingsCache.firstOrNull { it.isEnabled && it.value.isHovered() }?.let { hovered ->
+            hovered.value.scale = (hovered.value.scale + actualAmount).coerceIn(1f, 10f)
+            return true
         }
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)
     }
 
-    override fun mouseClicked(
-        mouseButtonEvent: MouseButtonEvent,
-        bl: Boolean
-    ): Boolean {
-        for (hud in hudSettingsCache) {
-            if (hud.isEnabled && hud.value.isHovered()) {
-                dragging = hud.value
+    override fun mouseClicked(mouseButtonEvent: MouseButtonEvent, bl: Boolean): Boolean {
+        hudSettingsCache.firstOrNull { it.isEnabled && it.value.isHovered() }?.let { hovered ->
+            dragging = hovered.value
 
-                deltaX = (hud.value.x - odinMouseX)
-                deltaY = (hud.value.y - odinMouseY)
-                return true
-            }
+            deltaX = (hovered.value.x - odinMouseX)
+            deltaY = (hovered.value.y - odinMouseY)
+            return true
         }
+
         return super.mouseClicked(mouseButtonEvent, bl)
     }
 
@@ -88,61 +80,17 @@ object HudManager : Screen(Component.literal("HUD Manager")) {
     }
 
     override fun keyPressed(keyEvent: KeyEvent): Boolean {
-        when (keyEvent.key) {
-            GLFW.GLFW_KEY_EQUAL -> {
-                for (hud in hudSettingsCache) {
-                    if (hud.isEnabled && hud.value.isHovered()) {
-                        hud.value.scale = (hud.value.scale + 0.1f).coerceIn(1f, 10f)
-                        return true
-                    }
-                }
-            }
-
-            GLFW.GLFW_KEY_MINUS -> {
-                for (hud in hudSettingsCache) {
-                    if (hud.isEnabled && hud.value.isHovered()) {
-                        hud.value.scale = (hud.value.scale - 0.1f).coerceIn(1f, 10f)
-                        return true
-                    }
-                }
-            }
-
-            GLFW.GLFW_KEY_RIGHT -> {
-                for (hud in hudSettingsCache) {
-                    if (hud.isEnabled && hud.value.isHovered()) {
-                        hud.value.x += 10
-                        return true
-                    }
-                }
-            }
-
-            GLFW.GLFW_KEY_LEFT -> {
-                for (hud in hudSettingsCache) {
-                    if (hud.isEnabled && hud.value.isHovered()) {
-                        hud.value.x -= 10
-                        return true
-                    }
-                }
-            }
-
-            GLFW.GLFW_KEY_UP -> {
-                for (hud in hudSettingsCache) {
-                    if (hud.isEnabled && hud.value.isHovered()) {
-                        hud.value.y -= 10
-                        return true
-                    }
-                }
-            }
-
-            GLFW.GLFW_KEY_DOWN -> {
-                for (hud in hudSettingsCache) {
-                    if (hud.isEnabled && hud.value.isHovered()) {
-                        hud.value.y += 10
-                        return true
-                    }
-                }
+        hudSettingsCache.firstOrNull { it.isEnabled && it.value.isHovered() }?.let { hovered ->
+            when (keyEvent.key) {
+                GLFW.GLFW_KEY_EQUAL -> hovered.value.scale = (hovered.value.scale + 0.1f).coerceIn(1f, 10f)
+                GLFW.GLFW_KEY_MINUS -> hovered.value.scale = (hovered.value.scale - 0.1f).coerceIn(1f, 10f)
+                GLFW.GLFW_KEY_RIGHT -> hovered.value.x += 10
+                GLFW.GLFW_KEY_LEFT -> hovered.value.x -= 10
+                GLFW.GLFW_KEY_UP -> hovered.value.y -= 10
+                GLFW.GLFW_KEY_DOWN -> hovered.value.y += 10
             }
         }
+
         return super.keyPressed(keyEvent)
     }
 

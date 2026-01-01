@@ -5,7 +5,7 @@ import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.TerminalEvent
 import com.odtheking.odin.events.TickEvent
-import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.WorldEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.features.impl.floor7.termsim.TermSimGUI
@@ -73,7 +73,7 @@ object TerminalTimes : Module(
             if (terminalSplits && !useRealTime) currentTick += 50
         }
 
-        on<WorldLoadEvent> {
+        on<WorldEvent.Load> {
             resetSection(true)
         }
     }

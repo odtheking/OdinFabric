@@ -3,7 +3,7 @@ package com.odtheking.odin.features.impl.dungeon
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.ColorSetting
 import com.odtheking.odin.events.RenderEvent
-import com.odtheking.odin.events.WorldLoadEvent
+import com.odtheking.odin.events.WorldEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
@@ -11,7 +11,7 @@ import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.alert
-import com.odtheking.odin.utils.render.drawWireFrameBox
+import com.odtheking.odin.utils.render.drawStyledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
 import net.minecraft.world.entity.Entity
@@ -30,7 +30,7 @@ object KeyHighlight : Module(
 
     init {
         onReceive<ClientboundSetEntityDataPacket> {
-            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@onReceive
+            if (!DungeonUtils.inClear) return@onReceive
             val entity = mc.level?.getEntity(id) as? ArmorStand ?: return@onReceive
             if (currentKey?.entity == entity) return@onReceive
             currentKey = KeyType.entries.find { it.displayName == entity.name?.string } ?: return@onReceive
@@ -40,7 +40,7 @@ object KeyHighlight : Module(
         }
 
         on<RenderEvent.Extract> {
-            if (!DungeonUtils.inDungeons || DungeonUtils.inBoss) return@on
+            if (!DungeonUtils.inClear) return@on
             if (currentKey == null || currentKey?.entity == null) return@on
             currentKey?.let { keyType ->
                 if (keyType.entity?.isAlive == false) {
@@ -48,11 +48,11 @@ object KeyHighlight : Module(
                     return@on
                 }
                 val position = keyType.entity?.position() ?: return@on
-                drawWireFrameBox(AABB.unitCubeFromLowerCorner(position.add(-0.5, 1.0, -0.5)), keyType.color(), 8f, true)
+                drawStyledBox(AABB.unitCubeFromLowerCorner(position.add(-0.5, 1.0, -0.5)), keyType.color(), 2, true)
             }
         }
 
-        on<WorldLoadEvent> {
+        on<WorldEvent.Load> {
             currentKey = null
         }
     }

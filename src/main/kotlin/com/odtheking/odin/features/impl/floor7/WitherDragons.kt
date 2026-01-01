@@ -9,18 +9,20 @@ import com.odtheking.odin.events.*
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
-import com.odtheking.odin.utils.*
-import com.odtheking.odin.utils.render.drawLine
+import com.odtheking.odin.utils.Colors
+import com.odtheking.odin.utils.PersonalBest
+import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.render.drawText
+import com.odtheking.odin.utils.render.drawTracer
 import com.odtheking.odin.utils.render.drawWireFrameBox
 import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
+import com.odtheking.odin.utils.toFixed
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket
-import net.minecraft.world.phys.Vec3
 
 object WitherDragons : Module(
     name = "Wither Dragons",
@@ -110,17 +112,10 @@ object WitherDragons : Module(
         }
 
         on<RenderEvent.Extract> {
-            if (DungeonUtils.getF7Phase() != M7Phases.P5) return@on
-
             WitherDragonsEnum.entries.forEach { dragon ->
                 if (dragonHealth) {
                     DragonCheck.dragonHealthMap.forEach { (_, data) ->
-                        if (data.second > 0) {
-                            drawText(
-                                colorHealth(data.second),
-                                data.first, 5f, false
-                            )
-                        }
+                        if (data.second > 0) drawText(colorHealth(data.second), data.first, 5f, false)
                     }
                 }
 
@@ -137,11 +132,11 @@ object WitherDragons : Module(
 
             priorityDragon?.let { dragon ->
                 if (dragonTracers && dragon.state == WitherDragonState.SPAWNING)
-                    mc.player?.let { drawLine(listOf(it.renderPos.add(it.forward).addVec(y = it.eyeHeight), Vec3(dragon.spawnPos)), dragon.color, true) }
+                    mc.player?.let { drawTracer(dragon.spawnPos.center, dragon.color, true) }
             }
         }
 
-        on<WorldLoadEvent> {
+        on<WorldEvent.Load> {
             DragonCheck.dragonHealthMap.clear()
             WitherDragonsEnum.reset()
         }
