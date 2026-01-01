@@ -4,6 +4,7 @@ import com.odtheking.mixin.accessors.AbstractContainerScreenAccessor
 import com.odtheking.odin.clickgui.settings.impl.ColorSetting
 import com.odtheking.odin.clickgui.settings.impl.KeybindSetting
 import com.odtheking.odin.clickgui.settings.impl.MapSetting
+import com.odtheking.odin.clickgui.settings.impl.SelectorSetting
 import com.odtheking.odin.events.GuiEvent
 import com.odtheking.odin.events.core.EventPriority
 import com.odtheking.odin.events.core.on
@@ -24,7 +25,15 @@ object SlotBinds : Module(
 ) {
     private val setNewSlotbind by KeybindSetting("Bind set key", GLFW.GLFW_KEY_UNKNOWN, desc = "Key to set new bindings.")
     private val lineColor by ColorSetting("Line Color", Colors.MINECRAFT_GOLD, desc = "Color of the line drawn between slots.")
-    private val slotBinds by MapSetting("SlotBinds", mutableMapOf<Int, Int>())
+    private val profileOptions = listOf("Profile 1", "Profile 2", "Profile 3", "Profile 4", "Profile 5", "Profile 6")
+    private val currentProfile by SelectorSetting("Profile", "Profile 1", profileOptions, desc = "Select which profile to use.")
+    private val profileData by MapSetting("ProfileData", mutableMapOf<String, MutableMap<Int, Int>>())
+
+    private val currentProfileName: String
+        get() = profileOptions[currentProfile]
+
+    private val slotBinds: MutableMap<Int, Int>
+        get() = profileData.getOrPut(currentProfileName) { mutableMapOf() }
 
     private var previousSlot: Int? = null
 
@@ -52,7 +61,7 @@ object SlotBinds : Module(
             previousSlot?.let { slot ->
                 if (slot == clickedSlot) return@on modMessage("§cYou can't bind a slot to itself.")
                 if (slot !in 36..44 && clickedSlot !in 36..44) return@on modMessage("§cOne of the slots must be in the hotbar (36–44).")
-                modMessage("§aAdded bind from slot §b$slot §ato §d${clickedSlot}.")
+                modMessage("§aAdded bind from slot §b$slot §ato §d${clickedSlot} §7(${profileOptions[currentProfile]}).")
 
                 slotBinds[slot] = clickedSlot
                 ModuleManager.saveConfigurations()
@@ -61,7 +70,7 @@ object SlotBinds : Module(
                 slotBinds.entries.firstOrNull { it.key == clickedSlot }?.let {
                     slotBinds.remove(it.key)
                     ModuleManager.saveConfigurations()
-                    return@on modMessage("§cRemoved bind from slot §b${it.key} §cto §d${it.value}.")
+                    return@on modMessage("§cRemoved bind from slot §b${it.key} §cto §d${it.value} §7(${profileOptions[currentProfile]}).")
                 }
                 previousSlot = clickedSlot
             }
