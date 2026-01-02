@@ -18,6 +18,6 @@ fun isAreaHovered(x: Float, y: Float, w: Float): Boolean =
 
 fun getQuadrant(): Int =
     when {
-        mouseX >= mc.window.width / 2 -> if (mouseY >= mc.window.height / 2) 4 else 2
-        else -> if (mouseY >= mc.window.height / 2) 3 else 1
+        mouseX >= 1920f / 2 -> if (mouseY >= 1080f / 2) 4 else 2
+        else -> if (mouseY >= 1080f / 2) 3 else 1
     }
