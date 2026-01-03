@@ -128,7 +128,14 @@ object LeapMenu : Module(
 
         on<ChatPacketEvent> {
             if (!leapAnnounce || !DungeonUtils.inDungeons) return@on
-            leapedRegex.find(value)?.groupValues?.get(1)?.let { sendCommand("pc Leaped to ${it}!") }
+            leapedRegex.find(value)?.groupValues?.get(1)?.let { username ->
+                val clazz = DungeonUtils.leapTeammates
+                    .firstOrNull { it.name.equals(username.noControlCodes, ignoreCase = true) }
+                    ?.clazz ?: DungeonClass.Unknown
+        
+                val classSuffix = if (clazz != DungeonClass.Unknown) " (${clazz.name})" else ""
+                sendCommand("pc Leaped to ${username}${classSuffix}!")
+            }
         }
     }
 
