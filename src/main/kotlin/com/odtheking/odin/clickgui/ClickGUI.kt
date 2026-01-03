@@ -1,5 +1,6 @@
 package com.odtheking.odin.clickgui
 
+import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.clickgui.settings.impl.ColorSetting
 import com.odtheking.odin.features.Category
 import com.odtheking.odin.features.ModuleManager
@@ -36,7 +37,7 @@ object ClickGUI : Screen(Component.literal("Click GUI")) {
 
     override fun render(context: GuiGraphics, mouseX: Int, mouseY: Int, deltaTicks: Float) {
         NVGSpecialRenderer.draw(context, 0, 0, context.guiWidth(), context.guiHeight()) {
-            SearchBar.draw(1920 / 2f - 175f, 1080 - 110f, odinMouseX, odinMouseY)
+            SearchBar.draw(mc.window.width / 2f - 175f, mc.window.height - 110f, odinMouseX, odinMouseY)
             if (openAnim.isAnimating()) {
                 val scale = openAnim.get(0f, 1f)
 

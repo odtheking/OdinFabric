@@ -27,7 +27,6 @@ class NVGSpecialRenderer(vertexConsumers: MultiBufferSource.BufferSource) : Pict
         }
 
         NVGRenderer.beginFrame(width.toFloat(), height.toFloat())
-        NVGRenderer.scale(width / 1920f, height / 1080f)
         state.renderContent()
         NVGRenderer.endFrame()
         GlStateManager._disableDepthTest()

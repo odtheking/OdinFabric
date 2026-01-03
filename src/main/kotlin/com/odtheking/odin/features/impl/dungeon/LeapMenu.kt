@@ -51,8 +51,8 @@ object LeapMenu : Module(
             val chest = (screen as? AbstractContainerScreen<*>) ?: return@on
             if (chest.title?.string?.equalsOneOf("Spirit Leap", "Teleport to Player") == false || leapTeammates.isEmpty() || leapTeammates.all { it == EMPTY }) return@on
 
-            val halfWidth = 1920f / 2f
-            val halfHeight = 1080f / 2f
+            val halfWidth = mc.window.width / 2f
+            val halfHeight = mc.window.height / 2f
 
             hoverHandler[0].handle(0f, 0f, halfWidth, halfHeight)
             hoverHandler[1].handle(halfWidth, 0f, halfWidth, halfHeight)
@@ -66,12 +66,12 @@ object LeapMenu : Module(
                     if (player == EMPTY) return@forEachIndexed
 
                     val x = when (index) {
-                        0, 2 -> -((1920f - (BOX_WIDTH * 2f)) / 6f + BOX_WIDTH)
-                        else -> ((1920f - (BOX_WIDTH * 2f)) / 6f)
+                        0, 2 -> -((mc.window.width - (BOX_WIDTH * 2f)) / 6f + BOX_WIDTH)
+                        else -> ((mc.window.width - (BOX_WIDTH * 2f)) / 6f)
                     }
                     val y = when (index) {
-                        0, 1 -> -((1080f - (BOX_HEIGHT * 2f)) / 8f + BOX_HEIGHT)
-                        else -> ((1080f - (BOX_HEIGHT * 2f)) / 8f)
+                        0, 1 -> -((mc.window.height - (BOX_HEIGHT * 2f)) / 8f + BOX_HEIGHT)
+                        else -> ((mc.window.height - (BOX_HEIGHT * 2f)) / 8f)
                     }
 
                     val expandValue = hoverHandler[index].anim.get(0f, 15f, !hoverHandler[index].isHovered)
