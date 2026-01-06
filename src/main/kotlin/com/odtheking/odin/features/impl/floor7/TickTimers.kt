@@ -70,6 +70,7 @@ object TickTimers : Module(
 
     private var padTickTime = -1
     private var lightningTickTime = -1
+    private var pyTriggered = false
     private var pyTickTime = -1
 
     private val outboundsHud by HUD("Outbounds Hud", "Displays a timer for out of bounds death ticks.") {
@@ -105,7 +106,8 @@ object TickTimers : Module(
                     if (stormHud.enabled) padTickTime = 20
                     if (lightningHud.enabled) lightningTickTime = 560
                 }
-                pyHud.enabled && value.matches(stormPyRegex) -> {
+                pyHud.enabled && !pyTriggered && value.matches(stormPyRegex) -> {
+                    pyTriggered = true
                     pyTickTime = 95
                 }
             }
@@ -145,6 +147,7 @@ object TickTimers : Module(
             padTickTime = -1
             lightningTickTime = -1
             pyTickTime = -1
+            pyTriggered = false
             necronTime = -1
             secretsTime = -1
             outboundsTime = -1
