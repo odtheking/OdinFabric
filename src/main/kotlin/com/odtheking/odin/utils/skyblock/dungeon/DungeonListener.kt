@@ -111,7 +111,7 @@ object DungeonListener {
                 dungeonTeammates.find { teammate ->
                     teammate.name == (match.groupValues[1].takeUnless { it == "You" } ?: mc.player?.name?.string)
                 }?.let { teammate ->
-                    teammate.deaths.inc()
+                    teammate.deaths++
                     if (firstDeath == null) {
                         firstDeath = teammate
                         scope.launch {
