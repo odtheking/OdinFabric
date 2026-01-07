@@ -78,43 +78,37 @@ object BloodCamp : Module(
 
             val packetVector = Vec3(entity.x + (xa / 4096), entity.y + (ya / 4096), entity.z + (za / 4096))
 
-            if (!entityDataMap.containsKey(entity)) entityDataMap[entity] = EntityData(packetVector, currentTickTime, firstSpawns)
-            val data = entityDataMap[entity] ?: return@onReceive
+            val data = entityDataMap.getOrPut(entity) { EntityData(packetVector, currentTickTime, firstSpawns, lastPosition = packetVector) }
+            val delta = packetVector.subtract(data.lastPosition)
+            data.lastPosition = packetVector
 
+            if (delta.lengthSqr() > 0) data.deltaHistory.addLast(delta)
+
+            val totalDelta = data.deltaHistory.fold(Vec3.ZERO) { acc, d -> acc.add(d) }
+            val endpoint = data.startVector.add((if (totalDelta.lengthSqr() > 0) totalDelta.normalize() else Vec3.ZERO).scale(if (data.firstSpawns) 16.1 else 11.9))
             val timeTook = currentTickTime - data.started
-            val time = getTime(data.firstSpawns, timeTook)
-
             val speedVectors = Vec3(
                 (packetVector.x - data.startVector.x) / timeTook,
                 (packetVector.y - data.startVector.y) / timeTook,
-                (packetVector.z - data.startVector.z) / timeTook,
+                (packetVector.z - data.startVector.z) / timeTook
             )
 
-            val endpoint = Vec3(
-                packetVector.x + speedVectors.x * time,
-                packetVector.y + speedVectors.y * time,
-                packetVector.z + speedVectors.z * time,
-            )
-
-            if (!renderDataMap.containsKey(entity)) renderDataMap[entity] = RenderEData(packetVector, endpoint, currentTickTime, speedVectors)
-            else renderDataMap[entity]?.let {
-                it.lastEndVector = it.endVector
-                it.endVecUpdated = currentTickTime
-                it.speedVectors = speedVectors
-                it.currVector = packetVector
-                it.endVector = endpoint
+            renderDataMap.getOrPut(entity) { RenderEData(packetVector, endpoint, currentTickTime, speedVectors) }.apply {
+                lastEndVector = endVector
+                endVecUpdated = currentTickTime
+                this.speedVectors = speedVectors
+                currVector = packetVector
+                endVector = endpoint
             }
         }
 
         on<ChatPacketEvent> {
             if (!DungeonUtils.inClear) return@on
-
             if (regexTwo.matches(value)) startTime = System.currentTimeMillis() to normalTickTime
             else if (regexOne.matches(value)) {
                 firstSpawns = false
                 val (startTime, startTick) = startTime ?: return@on
                 val moveTicks = ((normalTickTime - startTick) * 0.05f + 0.1f)
-
                 val predictionTicks = when (moveTicks) {
                     in 31f..<34f -> 36
                     in 28f..<31f -> 33
@@ -124,12 +118,8 @@ object BloodCamp : Module(
                     else -> return@on
                 } + (ceil((System.currentTimeMillis() - startTime) / 1000f) - moveTicks) / 2f - 0.6f
                 if (predictionTicks !in 20f..40f) return@on
-
-                if (partyMoveTime)
-                    sendCommand("pc Watcher will move in ${(predictionTicks * 0.05f).toFixed()}s.")
-                if (moveTime)
-                    modMessage("Watcher will move in ${(predictionTicks * 0.05f).toFixed()}s.")
-
+                if (partyMoveTime) sendCommand("pc Watcher will move in ${(predictionTicks * 0.05f).toFixed()}s.")
+                if (moveTime) modMessage("Watcher will move in ${(predictionTicks * 0.05f).toFixed()}s.")
                 val moveTime = ((predictionTicks - moveTicks) * 20 - 3).toInt()
                 finalTime = normalTickTime + moveTime
 
@@ -142,11 +132,9 @@ object BloodCamp : Module(
 
         onReceive<ClientboundSetEquipmentPacket> {
             if (!bloodAssist || currentWatcherEntity != null || !DungeonUtils.inClear) return@onReceive
-
             slots.forEach { slot ->
                 if (slot.second.isEmpty) return@forEach
                 val texture = slot.second.texture ?: return@forEach
-
                 if ((slot.first == EquipmentSlot.HEAD && texture in watcherSkulls)) mc.execute {
                     currentWatcherEntity = (mc.level?.getEntity(entity) as? Zombie)
                     devMessage("Watcher found at ${currentWatcherEntity?.position()}")
@@ -159,9 +147,7 @@ object BloodCamp : Module(
             if (entityIds.any { it == currentWatcherEntity?.id }) currentWatcherEntity = null
         }
 
-        on<TickEvent.Server> {
-            currentTickTime += 50
-        }
+        on<TickEvent.Server> { currentTickTime += 50 }
 
         on<WorldEvent.Load> {
             currentWatcherEntity = null
@@ -181,28 +167,26 @@ object BloodCamp : Module(
 
         on<RenderEvent.Extract> {
             if (!DungeonUtils.inClear || !bloodAssist) return@on
+            val boxOffset = Vec3(boxSize / -2.0, 1.5, boxSize / -2.0)
+            val partialTick = context.gameRenderer().mainCamera.partialTickTime
 
             renderDataMap.forEach { (entity, renderData) ->
-                val (_, started, firstSpawn) = entityDataMap[entity]?.takeUnless { !entity.isAlive } ?: return@forEach
-
+                if (!entity.isAlive) return@forEach
+                val data = entityDataMap[entity] ?: return@forEach
                 val (currVector, endVector, endVecUpdated, speedVectors) = renderData
-                val endPoint = calcEndVector(endVector, renderData.lastEndVector, min(currentTickTime - endVecUpdated, 100) / 100f)
-                val mobOffset = if (pingOffset) ServerUtils.averagePing.toFloat() else manualOffset
 
-                val pingPoint = Vec3(
-                    entity.x + speedVectors.x * mobOffset,
-                    entity.y + speedVectors.y * mobOffset,
-                    entity.z + speedVectors.z * mobOffset
-                )
+                val endPoint = calcEndVector(endVector, renderData.lastEndVector, min(currentTickTime - endVecUpdated, 100) / 100f)
+                val timeTook = currentTickTime - data.started
+                val time = getTime(data.firstSpawns, timeTook)
+
+                val mobOffset = if (pingOffset) ServerUtils.averagePing.toFloat() else manualOffset
+                val pingPoint = Vec3(entity.x + speedVectors.x * mobOffset, entity.y + speedVectors.y * mobOffset, entity.z + speedVectors.z * mobOffset)
 
                 renderData.lastEndPoint = endPoint
                 renderData.lastPingPoint = pingPoint
 
-                val boxOffset = Vec3(boxSize / -2.0, 1.5, boxSize / -2.0)
-                val pingAABB = AABB(boxSize, boxSize, boxSize, 0.0, 0.0, 0.0).move(boxOffset.add(calcEndVector(pingPoint, renderData.lastPingPoint, context.gameRenderer().mainCamera.partialTickTime, !interpolation)))
-                val endAABB = AABB(boxSize, boxSize, boxSize, 0.0, 0.0, 0.0).move(boxOffset.add(calcEndVector(endPoint, renderData.lastEndPoint, context.gameRenderer().mainCamera.partialTickTime, !interpolation)))
-
-                val time = getTime(firstSpawn,  currentTickTime - started)
+                val pingAABB = AABB(boxSize, boxSize, boxSize, 0.0, 0.0, 0.0).move(boxOffset.add(calcEndVector(pingPoint, renderData.lastPingPoint, partialTick, !interpolation)))
+                val endAABB = AABB(boxSize, boxSize, boxSize, 0.0, 0.0, 0.0).move(boxOffset.add(calcEndVector(endPoint, renderData.lastEndPoint, partialTick, !interpolation)))
 
                 if (mobOffset < time) {
                     drawWireFrameBox(pingAABB, mboxColor, depth = true)
@@ -237,7 +221,13 @@ object BloodCamp : Module(
     )
 
     private val entityDataMap = ConcurrentHashMap<ArmorStand, EntityData>()
-    private data class EntityData(var startVector: Vec3, val started: Long, var firstSpawns: Boolean = true)
+    private data class EntityData(
+        var startVector: Vec3,
+        val started: Long,
+        var firstSpawns: Boolean = true,
+        val deltaHistory: ArrayDeque<Vec3> = ArrayDeque(),
+        var lastPosition: Vec3 = startVector
+    )
 
     private var firstSpawns = true
 
@@ -245,13 +235,7 @@ object BloodCamp : Module(
 
     private fun calcEndVector(currVector: Vec3, lastVector: Vec3?, multiplier: Float, skip: Boolean = false): Vec3 {
         return if (lastVector == null || skip) currVector
-        else {
-            Vec3(
-                lastVector.x + (currVector.x - lastVector.x) * multiplier,
-                lastVector.y + (currVector.y - lastVector.y) * multiplier,
-                lastVector.z + (currVector.z - lastVector.z) * multiplier
-            )
-        }
+        else Vec3(lastVector.x + (currVector.x - lastVector.x) * multiplier, lastVector.y + (currVector.y - lastVector.y) * multiplier, lastVector.z + (currVector.z - lastVector.z) * multiplier)
     }
 
     private val watcherSkulls = setOf(
@@ -262,11 +246,9 @@ object BloodCamp : Module(
         "ewogICJ0aW1lc3RhbXAiIDogMTcxOTYwNjAwOTg2NywKICAicHJvZmlsZUlkIiA6ICJiMGQ0YjI4YmMxZDc0ODg5YWYwZTg2NjFjZWU5NmFhYiIsCiAgInByb2ZpbGVOYW1lIiA6ICJNaW5lU2tpbl9vcmciLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjM3ZGQxOGI1OTgzYTc2N2U1NTZkYzY0NDI0YWY0YjlhYmRiNzVkNGM5ZThiMDk3ODE4YWZiYzQzMWJmMGUwOSIsCiAgICAgICJtZXRhZGF0YSIgOiB7CiAgICAgICAgIm1vZGVsIiA6ICJzbGltIgogICAgICB9CiAgICB9CiAgfQp9",
         "ewogICJ0aW1lc3RhbXAiIDogMTcxOTYwNTkyNDIwNSwKICAicHJvZmlsZUlkIiA6ICIzZDIxZTYyMTk2NzQ0Y2QwYjM3NjNkNTU3MWNlNGJlZSIsCiAgInByb2ZpbGVOYW1lIiA6ICJTcl83MUJsYWNrYmlyZCIsCiAgInNpZ25hdHVyZVJlcXVpcmVkIiA6IHRydWUsCiAgInRleHR1cmVzIiA6IHsKICAgICJTS0lOIiA6IHsKICAgICAgInVybCIgOiAiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS9mNWYwZDc4ZmUzOGQxZDdmNzVmMDhjZGNmMmExODU1ZDZkYTAzMzdlMTE0YTNjNjNlM2JmM2M2MThiYzczMmIwIiwKICAgICAgIm1ldGFkYXRhIiA6IHsKICAgICAgICAibW9kZWwiIDogInNsaW0iCiAgICAgIH0KICAgIH0KICB9Cn0=",
         "ewogICJ0aW1lc3RhbXAiIDogMTU4OTU1MDkyNjM2MSwKICAicHJvZmlsZUlkIiA6ICI0ZDcwNDg2ZjUwOTI0ZDMzODZiYmZjOWMxMmJhYjRhZSIsCiAgInByb2ZpbGVOYW1lIiA6ICJzaXJGYWJpb3pzY2hlIiwKICAic2lnbmF0dXJlUmVxdWlyZWQiIDogdHJ1ZSwKICAidGV4dHVyZXMiIDogewogICAgIlNLSU4iIDogewogICAgICAidXJsIiA6ICJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlLzUxOTY3ZGI1ZTMxOTk5MTYyNTIwMjE5MDNjZjRlOTk1MmVmN2NlYzIyMGZhYWNhMWJhNzliYWZlNTkzOGJkODAiCiAgICB9CiAgfQp9",
-        "ewogICJ0aW1lc3RhbXAiIDogMTcxOTYwNjIxMjc1NSwKICAicHJvZmlsZUlkIiA6ICI2NGRiNmMwNTliOTk0OTM2YTY0M2QwODEwODE0ZmJkMyIsCiAgInByb2ZpbGVOYW1lIiA6ICJUaGVTaWx2ZXJEcmVhbXMiLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWZkNjFlODA1NWY2ZWU5N2FiNWI2MTk2YThkN2VjOTgwNzhhYzM3ZTAwMzc2MTU3YjZiNTIwZWFhYTJmOTNhZiIsCiAgICAgICJtZXRhZGF0YSIgOiB7CiAgICAgICAgIm1vZGVsIiA6ICJzbGltIgogICAgICB9CiAgICB9CiAgfQp9", //i hate hypixel
-        "ewogICJ0aW1lc3RhbXAiIDogMTcxOTYwNjIzOTU4NiwKICAicHJvZmlsZUlkIiA6ICJhYWZmMDUwYTExOTk0NzM1YjEyNDVlNDk0MGFlZjY4NCIsCiAgInByb2ZpbGVOYW1lIiA6ICJMYXN0SW1tb3J0YWwiLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTVjMWRjNDdhMDRjZTU3MDAxYThiNzI2ZjAxOGNkZWY0MGI3ZWE5ZDdiZDZkODM1Y2E0OTVhMGVmMTY5Zjg5MyIsCiAgICAgICJtZXRhZGF0YSIgOiB7CiAgICAgICAgIm1vZGVsIiA6ICJzbGltIgogICAgICB9CiAgICB9CiAgfQp9" //I really hate hypixel
+        "ewogICJ0aW1lc3RhbXAiIDogMTcxOTYwNjIxMjc1NSwKICAicHJvZmlsZUlkIiA6ICI2NGRiNmMwNTliOTk0OTM2YTY0M2QwODEwODE0ZmJkMyIsCiAgInByb2ZpbGVOYW1lIiA6ICJUaGVTaWx2ZXJEcmVhbXMiLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWZkNjFlODA1NWY2ZWU5N2FiNWI2MTk2YThkN2VjOTgwNzhhYzM3ZTAwMzc2MTU3YjZiNTIwZWFhYTJmOTNhZiIsCiAgICAgICJtZXRhZGF0YSIgOiB7CiAgICAgICAgIm1vZGVsIiA6ICJzbGltIgogICAgICB9CiAgICB9CiAgfQp9",
+        "ewogICJ0aW1lc3RhbXAiIDogMTcxOTYwNjIzOTU4NiwKICAicHJvZmlsZUlkIiA6ICJhYWZmMDUwYTExOTk0NzM1YjEyNDVlNDk0MGFlZjY4NCIsCiAgInByb2ZpbGVOYW1lIiA6ICJMYXN0SW1tb3J0YWwiLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTVjMWRjNDdhMDRjZTU3MDAxYThiNzI2ZjAxOGNkZWY0MGI3ZWE5ZDdiZDZkODM1Y2E0OTVhMGVmMTY5Zjg5MyIsCiAgICAgICJtZXRhZGF0YSIgOiB7CiAgICAgICAgIm1vZGVsIiA6ICJzbGltIgogICAgICB9CiAgICB9CiAgfQp9"
     )
-
-    //mob skull data gotten by DocilElm
 
     private val allowedMobSkulls = setOf(
         "eyJ0aW1lc3RhbXAiOjE1ODYwNDEwNjQwNTAsInByb2ZpbGVJZCI6ImRhNDk4YWM0ZTkzNzRlNWNiNjEyN2IzODA4NTU3OTgzIiwicHJvZmlsZU5hbWUiOiJOaXRyb2hvbGljXzIiLCJzaWduYXR1cmVSZXF1aXJlZCI6dHJ1ZSwidGV4dHVyZXMiOnsiU0tJTiI6eyJ1cmwiOiJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlLzVhNzk4NjBhY2E3OTk0MDdjMGZhYTEwYjFiYmNmNDI5OThmYWQ0ZWJjZjMxZDdhMjE0MTgwODI2YjRhYzk0ZTEifX19",

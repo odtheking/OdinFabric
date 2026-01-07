@@ -87,7 +87,7 @@ object RenderOptimizer : Module(
     }
 
     /**
-     * @see com.odtheking.mixin.mixins.LivingEntityMixin.hideDeathAnimation
+     * @see com.odtheking.mixin.mixins.EntityRendererMixin.onRender
      */
     @JvmStatic
     fun hideEntityDeathAnimation(): Boolean {
@@ -95,11 +95,11 @@ object RenderOptimizer : Module(
     }
 
     /**
-     * @see com.odtheking.mixin.mixins.LivingEntityMixin.hideDeathAnimation
+     * @see com.odtheking.mixin.mixins.EntityRendererMixin.onRender
      */
     @JvmStatic
     fun hideDyingEntityArmorStand(): Boolean {
         // no need for enabled, this cannot be called if hideEntityDeathAnimation returned false
-        return hideDyingMobsArmorStand
+        return enabled && hideDyingMobsArmorStand
     }
 }

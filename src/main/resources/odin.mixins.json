@@ -32,7 +32,6 @@
     "mixins.ConnectionMixin",
     "mixins.EntityMixin",
     "mixins.LevelChunkMixin",
-    "mixins.LivingEntityMixin",
     "mixins.YggdrasilSignatureIgnoreMixin"
   ]
 }

@@ -10,7 +10,7 @@ import net.minecraft.sounds.SoundEvents
 
 fun playSoundSettings(soundSettings: Triple<String, Float, Float>) {
     val (soundName, volume, pitch) = soundSettings
-    val soundEvent = SoundEvent.createVariableRangeEvent(ResourceLocation.withDefaultNamespace(soundName) ?: return)
+    val soundEvent = SoundEvent.createVariableRangeEvent(ResourceLocation.parse(soundName)) ?: return
     playSoundAtPlayer(soundEvent, volume, pitch)
 }
 

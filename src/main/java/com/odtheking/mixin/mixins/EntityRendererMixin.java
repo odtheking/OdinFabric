@@ -1,9 +1,12 @@
 package com.odtheking.mixin.mixins;
 
 import com.odtheking.odin.features.impl.render.HidePlayers;
+import com.odtheking.odin.features.impl.render.RenderOptimizer;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -17,8 +20,14 @@ public abstract class EntityRendererMixin<T extends Entity> {
         if (!HidePlayers.shouldRenderPlayer(entity)) {
             cir.setReturnValue(false); // only return false if shouldRenderPlayer returns false - future reference: if any more things that hide entitiess are added in future, modify the condition to be true if any of them returns false
         }
-        // return value not overridden for other cases (see https://github.com/odtheking/OdinFabric/issues/43 - overriding the value to true can create performance regressions)
-    }
 
+        if (RenderOptimizer.hideEntityDeathAnimation() && entity instanceof LivingEntity livingEntity && livingEntity.isDeadOrDying())
+            cir.setReturnValue(false);
+
+        if (RenderOptimizer.hideDyingEntityArmorStand() && entity instanceof ArmorStand armorStand) {
+            Entity self = armorStand.level().getEntity(armorStand.getId() - 1);
+            if (self instanceof LivingEntity livingEntity && livingEntity.isDeadOrDying()) cir.setReturnValue(false);
+        }
+    }
 }
 
