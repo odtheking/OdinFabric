@@ -1,7 +1,9 @@
 package com.odtheking.odin.features.impl.floor7
 
-import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
-import com.odtheking.odin.clickgui.settings.impl.*
+import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
+import com.odtheking.odin.clickgui.settings.impl.ColorSetting
+import com.odtheking.odin.clickgui.settings.impl.DropdownSetting
+import com.odtheking.odin.clickgui.settings.impl.SelectorSetting
 import com.odtheking.odin.events.*
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
@@ -27,8 +29,6 @@ object SimonSays : Module(
     private val thirdColor by ColorSetting("Third Color", Colors.MINECRAFT_RED.withAlpha(0.5f), true, desc = "The color of the buttons after the second.")
     private val style by SelectorSetting("Style", "Filled Outline", arrayListOf("Filled", "Outline", "Filled Outline"), desc = "The style of the box rendering.")
     private val blockWrong by BooleanSetting("Block Wrong Clicks", false, desc = "Blocks wrong clicks, shift will override this.")
-    private val blockWrongStart by BooleanSetting("Block Wrong on Start", false, desc = "Blocks wrong clicks on the start button during first phase.")
-    private val maxStartClicks by NumberSetting("Max Start Clicks", 4, 1, 10, 1, desc = "Maximum number of start button clicks allowed during first phase.").withDependency { blockWrongStart }
     private val customClickSounds by BooleanSetting("Custom Click Sounds", false, desc = "Custom Click Sounds for blocked and unblocked clicks.")
     private val soundsDropdown by DropdownSetting("Custom Sounds Dropdown")
     private val correctClick = createSoundSettings("Correct Sound", "entity.experience_orb.pickup") { soundsDropdown && customClickSounds }
@@ -106,14 +106,6 @@ object SimonSays : Module(
 
         on<BlockInteractEvent> {
             if (DungeonUtils.getF7Phase() != M7Phases.P3) return@on
-
-            if (pos == startButton && firstPhase && blockWrongStart) {
-                if (startClickCounter++ >= maxStartClicks && mc.player?.isShiftKeyDown == false) {
-                    if (customClickSounds) playSoundSettings(blockedClick())
-                    cancel()
-                    return@on
-                } else if (customClickSounds) playSoundSettings(correctClick())
-            }
 
             if (pos.x == 110 && pos.y in 120..123 && pos.z in 92..95) {
                 if (blockWrong && mc.player?.isShiftKeyDown == false && pos.east() != clickInOrder.getOrNull(clickNeeded)) {

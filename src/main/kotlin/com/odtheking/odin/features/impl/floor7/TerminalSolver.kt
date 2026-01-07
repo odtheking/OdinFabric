@@ -285,8 +285,8 @@ object TerminalSolver : Module(
             devMessage("§cLeft terminal: §6${it.type.name}")
             TerminalEvent.Closed(it).postAndCatch()
             EventBus.unsubscribe(it)
-            if (enabled && renderType == 0) mc.execute { mc.resizeDisplay() }
             currentTerm = null
+            if (enabled && renderType == 0) mc.execute { mc.resizeDisplay() }
         }
     }
 }
