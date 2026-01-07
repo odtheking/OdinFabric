@@ -4,9 +4,6 @@ import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.utils.logError
 
-/**
- * Generic tick task.
- */
 open class TickTask(
     private val ticksPerCycle: Int,
     serverTick: Boolean = false,

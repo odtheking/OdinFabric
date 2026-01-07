@@ -34,9 +34,9 @@ object ArrowsDevice : Module(
     private val depthCheck by BooleanSetting("Depth check", true, desc = "Marked positions show through walls.")
     private val alertOnDeviceComplete by BooleanSetting("Device complete alert", true, desc = "Send an alert when device is complete.")
     private val showAimPositions by BooleanSetting("Show Aim Positions", false, desc = "Shows optimal aim positions for hitting marked blocks.")
-    private val firstAimPositionColor by ColorSetting("First Aim Position", Colors.MINECRAFT_GREEN.withAlpha(0.5f), true, desc = "Color of the first (green) aim position.").withDependency { showAimPositions }
-    private val secondAimPositionColor by ColorSetting("Second Aim Position", Colors.MINECRAFT_GOLD.withAlpha(0.5f), true, desc = "Color of the second (gold) aim position.").withDependency { showAimPositions }
-    private val thirdAimPositionColor by ColorSetting("Third Aim Position", Colors.MINECRAFT_RED.withAlpha(0.5f), true, desc = "Color of the third (red) aim position.").withDependency { showAimPositions }
+    private val firstAimPositionColor by ColorSetting("First Aim Position", Colors.MINECRAFT_GREEN.withAlpha(0.5f), true, desc = "Color of the first aim position.").withDependency { showAimPositions }
+    private val secondAimPositionColor by ColorSetting("Second Aim Position", Colors.MINECRAFT_GOLD.withAlpha(0.5f), true, desc = "Color of the second aim position.").withDependency { showAimPositions }
+    private val thirdAimPositionColor by ColorSetting("Third Aim Position", Colors.MINECRAFT_RED.withAlpha(0.5f), true, desc = "Color of the third aim position.").withDependency { showAimPositions }
     private val reset by ActionSetting("Reset", desc = "Resets the solver.") {
         markedPositions.clear()
         targetPosition = null
@@ -63,7 +63,7 @@ object ArrowsDevice : Module(
 
     init {
         on<BlockUpdateEvent> {
-            if (DungeonUtils.getF7Phase() != M7Phases.P3 || !devicePositions.contains(pos)) return@on
+        //    if (DungeonUtils.getF7Phase() != M7Phases.P3 || !devicePositions.contains(pos)) return@on
 
             if (old.block == Blocks.EMERALD_BLOCK && updated.block == Blocks.BLUE_TERRACOTTA) {
                 markedPositions.add(pos)
@@ -90,11 +90,7 @@ object ArrowsDevice : Module(
             if (showAimPositions) {
                 val colors = listOf(firstAimPositionColor, secondAimPositionColor, thirdAimPositionColor)
                 optimalAimPositions.take(3).forEachIndexed { index, aimPos ->
-                    val aabb = AABB(
-                        aimPos.position.x - 0.1, aimPos.position.y - 0.1, aimPos.position.z - 0.1,
-                        aimPos.position.x + 0.1, aimPos.position.y + 0.1, aimPos.position.z + 0.1
-                    )
-                    drawFilledBox(aabb, colors[index], depth = true)
+                    drawFilledBox(AABB.unitCubeFromLowerCorner(aimPos.position.add(-0.5, -0.5, -0.1)), colors[index], true)
                 }
             }
         }
