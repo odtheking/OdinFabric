@@ -11,10 +11,8 @@ import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.core.*
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.features.impl.floor7.terminalhandler.*
-import com.odtheking.odin.features.impl.render.ClickGUIModule
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.Color.Companion.darker
-import com.odtheking.odin.utils.ui.rendering.NVGRenderer
 import com.odtheking.odin.utils.ui.rendering.NVGSpecialRenderer
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.network.chat.Component
@@ -181,7 +179,6 @@ object TerminalSolver : Module(
             if (!enabled || currentTerm == null || (currentTerm?.type == TerminalTypes.MELODY && cancelMelodySolver) || renderType != 1) return@on
 
             NVGSpecialRenderer.draw(guiGraphics, 0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight()) {
-                NVGRenderer.scale(1f / ClickGUIModule.guiScale, 1f / ClickGUIModule.guiScale)
                 currentTerm?.type?.getGUI()?.render()
             }
 

@@ -7,7 +7,6 @@ import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.GuiEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
-import com.odtheking.odin.features.impl.render.ClickGUIModule
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonClass
@@ -61,9 +60,8 @@ object LeapMenu : Module(
             hoverHandler[3].handle(halfWidth, halfHeight, halfWidth, halfHeight)
 
             NVGSpecialRenderer.draw(guiGraphics, 0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight()) {
-                val actualScale = scale / ClickGUIModule.guiScale
-                NVGRenderer.scale(actualScale, actualScale)
-                NVGRenderer.translate(halfWidth / actualScale, halfHeight / actualScale)
+                NVGRenderer.scale(scale, scale)
+                NVGRenderer.translate(halfWidth / scale, halfHeight / scale)
                 leapTeammates.forEachIndexed { index, player ->
                     if (player == EMPTY) return@forEachIndexed
 

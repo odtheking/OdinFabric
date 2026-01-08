@@ -146,9 +146,9 @@ class ColorSetting(
         textInputHandler.mouseClicked(mouseX, mouseY, click)
 
         section = when {
-            isAreaHovered(lastX + 6f, lastY + 36f, width - 12f, 170f) -> 0 // sat & brightness
-            isAreaHovered(lastX + 6f, lastY + 212f, width - 12f, 15f) -> 1 // hue
-            isAreaHovered(lastX + 6f, lastY + 232, width - 12f, 15f) && allowAlpha -> 2 // alpha
+            isAreaHovered(lastX + 6f, lastY + 36f, width - 12f, 170f, true) -> 0 // sat & brightness
+            isAreaHovered(lastX + 6f, lastY + 212f, width - 12f, 15f, true) -> 1 // hue
+            isAreaHovered(lastX + 6f, lastY + 232, width - 12f, 15f, true) && allowAlpha -> 2 // alpha
             else -> null
         }
 
@@ -178,7 +178,8 @@ class ColorSetting(
             lastX + width - 40f,
             lastY + defaultHeight / 2f - 10f,
             34f,
-            20f
+            20f,
+            true
         )
 
     override fun write(): JsonElement = gson.toJsonTree(value, Color::class.java)

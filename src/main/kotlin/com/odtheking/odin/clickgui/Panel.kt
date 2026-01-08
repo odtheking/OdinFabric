@@ -99,7 +99,7 @@ class Panel(private val category: Category) {
     }
 
     fun mouseClicked(mouseX: Float, mouseY: Float, click: MouseButtonEvent): Boolean {
-        if (isAreaHovered(panelSetting.x, panelSetting.y, WIDTH, HEIGHT)) {
+        if (isAreaHovered(panelSetting.x, panelSetting.y, WIDTH, HEIGHT, true)) {
             if (click.button() == 0) {
                 deltaX = (panelSetting.x - mouseX)
                 deltaY = (panelSetting.y - mouseY)
@@ -151,7 +151,8 @@ class Panel(private val category: Category) {
             panelSetting.x,
             panelSetting.y,
             WIDTH,
-            previousHeight.coerceAtLeast(HEIGHT)
+            previousHeight.coerceAtLeast(HEIGHT),
+            true
         )
 
     companion object {

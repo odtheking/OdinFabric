@@ -67,7 +67,7 @@ abstract class TermGui {
         }
 
         fun getHoveredItem(): Int? =
-            currentGui?.itemIndexMap?.entries?.find { isAreaHovered(it.value.x, it.value.y, it.value.w, it.value.h, false) }?.key
+            currentGui?.itemIndexMap?.entries?.find { isAreaHovered(it.value.x, it.value.y, it.value.w, it.value.h) }?.key
     }
 
     data class Box(val x: Float, val y: Float, val w: Float, val h: Float)

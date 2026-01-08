@@ -43,8 +43,8 @@ class ModuleButton(val module: Module, val panel: Panel) {
     var extended = false
 
     fun draw(x: Float, y: Float): Float {
-        hoverHandler.handle(x, y, Panel.WIDTH, Panel.HEIGHT - 1)
-        hover.handle(x, y, Panel.WIDTH, Panel.HEIGHT - 1)
+        hoverHandler.handle(x, y, Panel.WIDTH, Panel.HEIGHT - 1, true)
+        hover.handle(x, y, Panel.WIDTH, Panel.HEIGHT - 1, true)
 
         if (hoverHandler.percent() >= 100 && y >= panel.panelSetting.y + Panel.HEIGHT)
             ClickGUI.setDescription(module.description, x + Panel.WIDTH + 10f, y, hoverHandler)
@@ -61,7 +61,7 @@ class ModuleButton(val module: Module, val panel: Panel) {
 
         if (extendAnim.isAnimating() || extended) {
             for (setting in representableSettings) {
-                if (setting.isVisible) drawY += setting.render(x, y + drawY, mouseX, mouseY)
+                if (setting.isVisible) drawY += setting.render(x, y + drawY, mouseX / ClickGUIModule.guiScale, mouseY / ClickGUIModule.guiScale)
             }
         }
 

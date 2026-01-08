@@ -1,7 +1,6 @@
 package com.odtheking.odin.utils.ui.rendering
 
 import com.odtheking.odin.OdinMod.mc
-import com.odtheking.odin.features.impl.render.ClickGUIModule
 import com.odtheking.odin.utils.Color.Companion.alpha
 import com.odtheking.odin.utils.Color.Companion.blue
 import com.odtheking.odin.utils.Color.Companion.green
@@ -43,7 +42,7 @@ object NVGRenderer {
     }
 
     fun devicePixelRatio(): Float {
-        return ClickGUIModule.guiScale * try {
+        return try {
             val window = mc.window
             val fbw = window.width
             val ww = window.screenWidth
