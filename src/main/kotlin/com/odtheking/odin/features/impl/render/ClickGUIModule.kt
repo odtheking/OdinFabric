@@ -33,7 +33,7 @@ object ClickGUIModule : Module(
 
     val guiScaleSetting by StringSetting("GUI Scale", "1",   desc = "The scale of the Click GUI.")
     val guiScale: Float
-        get() = guiScaleSetting.toFloatOrNull()?.coerceIn(0.5f, 3f) ?: 1f
+        get() = guiScaleSetting.toFloatOrNull()?.coerceIn(1f, 3f) ?: 1f
 
     val hypixelApiUrl by StringSetting("API URL", "https://api.odtheking.com/hypixel/", 128, "The Hypixel API server to connect to.").hide()
     val webSocketUrl by StringSetting("WebSocket URL", "wss://api.odtheking.com/ws/", 128, "The Websocket server to connect to.").hide()

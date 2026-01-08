@@ -11,14 +11,24 @@ inline val mouseY: Float
     get() =
         mc.mouseHandler.ypos().toFloat() / ClickGUIModule.guiScale
 
-fun isAreaHovered(x: Float, y: Float, w: Float, h: Float): Boolean =
-    mouseX in x..(x + w) && mouseY in y..(y + h)
+inline val unscaledMouseX: Float
+    get() =
+        mc.mouseHandler.xpos().toFloat()
 
-fun isAreaHovered(x: Float, y: Float, w: Float): Boolean =
-    mouseX in x..(x + w) && mouseY >= y
+inline val unscaledMouseY: Float
+    get() =
+        mc.mouseHandler.ypos().toFloat()
+
+fun isAreaHovered(x: Float, y: Float, w: Float, h: Float, scaled: Boolean = true): Boolean =
+    if (scaled) mouseX in x..(x + w) && mouseY in y..(y + h)
+    else unscaledMouseX in x..(x + w) && unscaledMouseY in y..(y + h)
+
+fun isAreaHovered(x: Float, y: Float, w: Float, scaled: Boolean = true): Boolean =
+    if (scaled) mouseX in x..(x + w) && mouseY >= y
+    else unscaledMouseX in x..(x + w) && unscaledMouseY >= y
 
 fun getQuadrant(): Int =
     when {
-        mouseX >= mc.window.width / 2 -> if (mouseY >= mc.window.height / 2) 4 else 2
-        else -> if (mouseY >= mc.window.height / 2) 3 else 1
+        unscaledMouseX >= mc.window.width / 2 -> if (unscaledMouseY >= mc.window.height / 2) 4 else 2
+        else -> if (unscaledMouseY >= mc.window.height / 2) 3 else 1
     }
