@@ -28,6 +28,7 @@ object TickTimers : Module(
     private val coreOpeningRegex = Regex("^The Core entrance is opening!$")
     private val stormStartRegex = Regex("^\\[BOSS] Storm: I should have known that I stood no chance\\.$")
     private val stormPadRegex = Regex("^\\[BOSS] Storm: Pathetic Maxor, just like expected\\.$")
+    private val stormPyRegex = Regex("^\\[BOSS] Storm: (ENERGY HEED MY CALL|THUNDER LET ME BE YOUR CATALYST)!$")
 
     private val necronHud by HUD("Necron Hud", "Displays a timer for Necron's drop.") {
         if (it)                   textDim(formatTimer(35, 60, "§4Necron dropping in"), 0, 0, Colors.MINECRAFT_DARK_RED)
@@ -56,13 +57,21 @@ object TickTimers : Module(
     }
 
     private val lightningHud by HUD("Storm Lightning Hud", "Displays a timer for Storm's Lightning.") {
-        if (it)                         textDim(formatTimer(560, 560, "§bLightning:"), 0, 0, Colors.MINECRAFT_DARK_RED)
+        if (it)                          textDim(formatTimer(560, 560, "§bLightning:"), 0, 0, Colors.MINECRAFT_DARK_RED)
         else if (lightningTickTime >= 0) textDim(formatTimer(lightningTickTime, 560, "§bLightning:"), 0, 0, Colors.MINECRAFT_DARK_RED)
+        else 0 to 0
+    }
+
+    private val pyHud by HUD("Storm PY Hud", "Displays a timer for when to crush storm under the purple pillar.") {
+        if (it)                   textDim(formatTimer(95, 95, "§bPY:"), 0, 0, Colors.MINECRAFT_DARK_RED)
+        else if (pyTickTime >= 0) textDim(formatTimer(pyTickTime, 95, "§bPY:"), 0, 0, Colors.MINECRAFT_DARK_RED)
         else 0 to 0
     }
 
     private var padTickTime = -1
     private var lightningTickTime = -1
+    private var pyTriggered = false
+    private var pyTickTime = -1
 
     private val outboundsHud by HUD("Outbounds Hud", "Displays a timer for out of bounds death ticks.") {
         if (it)                      textDim(formatTimer(15, 20, "§8Outbounds:"), 0, 0, Colors.MINECRAFT_DARK_RED)
@@ -97,6 +106,10 @@ object TickTimers : Module(
                     if (stormHud.enabled) padTickTime = 20
                     if (lightningHud.enabled) lightningTickTime = 560
                 }
+                pyHud.enabled && !pyTriggered && value.matches(stormPyRegex) -> {
+                    pyTriggered = true
+                    pyTickTime = 95
+                }
             }
         }
 
@@ -112,7 +125,8 @@ object TickTimers : Module(
             if (goldorTickTime >= 0 && goldorHud.enabled) goldorTickTime--
             if (padTickTime == 0 && stormHud.enabled) padTickTime = 20
             if (padTickTime >= 0 && stormHud.enabled) padTickTime--
-            if (lightningTickTime == 0 && lightningHud.enabled) lightningTickTime--
+            if (lightningTickTime >= 0 && lightningHud.enabled) lightningTickTime--
+            if (pyTickTime >= 0 && pyHud.enabled) pyTickTime--
             if (necronTime >= 0 && necronHud.enabled) necronTime--
         }
 
@@ -131,6 +145,9 @@ object TickTimers : Module(
             goldorStartTime = -1
             goldorTickTime = -1
             padTickTime = -1
+            lightningTickTime = -1
+            pyTickTime = -1
+            pyTriggered = false
             necronTime = -1
             secretsTime = -1
             outboundsTime = -1
