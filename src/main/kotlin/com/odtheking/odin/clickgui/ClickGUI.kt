@@ -37,7 +37,7 @@ object ClickGUI : Screen(Component.literal("Click GUI")) {
 
     override fun render(context: GuiGraphics, mouseX: Int, mouseY: Int, deltaTicks: Float) {
         NVGSpecialRenderer.draw(context, 0, 0, context.guiWidth(), context.guiHeight()) {
-            SearchBar.draw(mc.window.width / 2f - 175f, mc.window.height - 110f, odinMouseX, odinMouseY)
+            SearchBar.draw(mc.window.width / (2f * ClickGUIModule.guiScale) - 175f, (mc.window.height - 110f) / ClickGUIModule.guiScale, odinMouseX, odinMouseY)
             if (openAnim.isAnimating()) {
                 val scale = openAnim.get(0f, 1f)
 

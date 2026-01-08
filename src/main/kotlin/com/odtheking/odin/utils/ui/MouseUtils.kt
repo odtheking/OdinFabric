@@ -1,14 +1,15 @@
 package com.odtheking.odin.utils.ui
 
 import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.features.impl.render.ClickGUIModule
 
 inline val mouseX: Float
     get() =
-        mc.mouseHandler.xpos().toFloat()
+        mc.mouseHandler.xpos().toFloat() / ClickGUIModule.guiScale
 
 inline val mouseY: Float
     get() =
-        mc.mouseHandler.ypos().toFloat()
+        mc.mouseHandler.ypos().toFloat() / ClickGUIModule.guiScale
 
 fun isAreaHovered(x: Float, y: Float, w: Float, h: Float): Boolean =
     mouseX in x..(x + w) && mouseY in y..(y + h)

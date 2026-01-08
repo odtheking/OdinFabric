@@ -31,6 +31,10 @@ object ClickGUIModule : Module(
     val enableNotification by BooleanSetting("Chat notifications", true, desc = "Sends a message when you toggle a module with a keybind")
     val clickGUIColor by ColorSetting("Color", Color(50, 150, 220), desc = "The color of the Click GUI.")
 
+    val guiScaleSetting by StringSetting("GUI Scale", "1",   desc = "The scale of the Click GUI.")
+    val guiScale: Float
+        get() = guiScaleSetting.toFloatOrNull()?.coerceIn(0.5f, 3f) ?: 1f
+
     val hypixelApiUrl by StringSetting("API URL", "https://api.odtheking.com/hypixel/", 128, "The Hypixel API server to connect to.").hide()
     val webSocketUrl by StringSetting("WebSocket URL", "wss://api.odtheking.com/ws/", 128, "The Websocket server to connect to.").hide()
 
