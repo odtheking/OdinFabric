@@ -1,33 +1,22 @@
 package com.odtheking.odin.features.impl.dungeon.puzzlesolvers
 
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.RenderEvent
-import com.odtheking.odin.utils.Color
-import com.odtheking.odin.utils.modMessage
+import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.render.drawLine
 import com.odtheking.odin.utils.render.drawText
-import com.odtheking.odin.utils.renderPos
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
-import com.odtheking.odin.utils.toFixed
 import net.minecraft.core.BlockPos
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.phys.Vec3
-import java.io.InputStreamReader
-import java.nio.charset.StandardCharsets
 
 object WaterSolver {
 
-    private var waterSolutions: JsonObject
-
-    init {
-        val isr = WaterSolver::class.java.getResourceAsStream("/assets/odin/puzzles/waterSolutions.json")?.let { InputStreamReader(it, StandardCharsets.UTF_8) } ?: throw IllegalStateException("Water solutions file not found")
-        waterSolutions = JsonParser.parseString(isr.readText()).asJsonObject
-        isr.close()
-    }
+    private var waterSolutions: Map<String, Map<String, Map<String, Map<String, List<Double>>>>> = JsonResourceLoader.loadJson(
+        "/assets/odin/puzzles/waterSolutions.json", emptyMap()
+    )
 
     private var solutions = HashMap<LeverBlock, Array<Double>>()
     private var patternIdentifier = -1
@@ -49,9 +38,9 @@ object WaterSolver {
         modMessage("$patternIdentifier || ${WoolColor.entries.filter { it.isExtended }.joinToString(", ") { it.name.lowercase() }}")
 
         solutions.clear()
-        waterSolutions[optimized.toString()].asJsonObject[patternIdentifier.toString()].asJsonObject[extendedSlots].asJsonObject.entrySet().forEach { entry ->
+        waterSolutions[optimized.toString()]?.get(patternIdentifier.toString())?.get(extendedSlots)?.forEach { (key, times) ->
             solutions[
-                when (entry.key) {
+                when (key) {
                     "diamond_block" -> LeverBlock.DIAMOND
                     "emerald_block" -> LeverBlock.EMERALD
                     "hardened_clay" -> LeverBlock.CLAY
@@ -61,7 +50,7 @@ object WaterSolver {
                     "water"         -> LeverBlock.WATER
                     else -> LeverBlock.NONE
                 }
-            ] = entry.value.asJsonArray.map { it.asDouble }.toTypedArray()
+            ] = times.toTypedArray()
         }
     }
 

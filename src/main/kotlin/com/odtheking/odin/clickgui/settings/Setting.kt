@@ -1,7 +1,5 @@
 package com.odtheking.odin.clickgui.settings
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import com.odtheking.odin.features.Module
 import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadWriteProperty
@@ -61,8 +59,6 @@ abstract class Setting<T>(
     }
 
     companion object {
-
-        val gson: Gson = GsonBuilder().setPrettyPrinting().create()
 
         fun <K : Setting<T>, T> K.withDependency(dependency: () -> Boolean): K {
             visibilityDependency = dependency

@@ -48,7 +48,7 @@ class ModuleConfig internal constructor(file: File) {
                     if (moduleObj.get("enabled").asBoolean != module.enabled) module.toggle()
                     val settingObj = moduleObj.get("settings")?.takeIf { it.isJsonObject }?.asJsonObject?.entrySet() ?: continue
                     for ((key, value) in settingObj) {
-                        (module.settings[key] as? Saving)?.apply { read(value ?: continue) }
+                        (module.settings[key] as? Saving)?.apply { read(value ?: continue, gson) }
                     }
                 }
             }
@@ -72,7 +72,7 @@ class ModuleConfig internal constructor(file: File) {
                         add("enabled", JsonPrimitive(module.enabled))
                         add("settings", JsonObject().apply {
                             for ((name, setting) in module.settings) {
-                                if (setting is Saving) add(name, setting.write())
+                                if (setting is Saving) add(name, setting.write(gson))
                             }
                         })
                     })

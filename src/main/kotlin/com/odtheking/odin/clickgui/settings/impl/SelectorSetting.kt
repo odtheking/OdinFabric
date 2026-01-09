@@ -1,5 +1,6 @@
 package com.odtheking.odin.clickgui.settings.impl
 
+import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
 import com.odtheking.odin.clickgui.ClickGUI.gray38
@@ -118,9 +119,9 @@ class SelectorSetting(
     override fun getHeight(): Float =
         settingAnim.get(defaultHeight, options.size * 32f + 44, !extended)
 
-    override fun write(): JsonElement = JsonPrimitive(selected)
+    override fun write(gson: Gson): JsonElement = JsonPrimitive(selected)
 
-    override fun read(element: JsonElement) {
+    override fun read(element: JsonElement, gson: Gson) {
         element.asString?.let { selected = it }
     }
 }

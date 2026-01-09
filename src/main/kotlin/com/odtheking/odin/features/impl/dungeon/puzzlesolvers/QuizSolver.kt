@@ -1,40 +1,26 @@
 package com.odtheking.odin.features.impl.dungeon.puzzlesolvers
 
-import com.google.gson.GsonBuilder
-import com.google.gson.reflect.TypeToken
-import com.odtheking.odin.OdinMod.logger
 import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.features.impl.dungeon.puzzlesolvers.PuzzleSolvers.onPuzzleComplete
 import com.odtheking.odin.utils.Color
+import com.odtheking.odin.utils.JsonResourceLoader
 import com.odtheking.odin.utils.render.drawBeaconBeam
 import com.odtheking.odin.utils.render.drawFilledBox
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import com.odtheking.odin.utils.startsWithOneOf
 import net.minecraft.core.BlockPos
 import net.minecraft.world.phys.AABB
-import java.io.InputStreamReader
-import java.nio.charset.StandardCharsets
 
 object QuizSolver {
-    private var answers: MutableMap<String, List<String>>
-    private val gson = GsonBuilder().setPrettyPrinting().create()
-    private val isr = this::class.java.getResourceAsStream("/assets/odin/puzzles/quizAnswers.json")?.let { InputStreamReader(it, StandardCharsets.UTF_8) }
+    private var answers: MutableMap<String, List<String>> = JsonResourceLoader.loadJson(
+        "/assets/odin/puzzles/quizAnswers.json", mutableMapOf()
+    )
     private var triviaAnswers: List<String>? = null
 
     private var triviaOptions: MutableList<TriviaAnswer> = MutableList(3) { TriviaAnswer(null, false) }
     private data class TriviaAnswer(var blockPos: BlockPos?, var isCorrect: Boolean)
 
-    init {
-        try {
-            val text = isr?.readText()
-            answers = gson.fromJson(text, object : TypeToken<MutableMap<String, List<String>>>() {}.type)
-            isr?.close()
-        } catch (e: Exception) {
-            logger.error("Error loading quiz answers", e)
-            answers = mutableMapOf()
-        }
-    }
 
     fun onMessage(msg: String) {
         if (msg.startsWith("[STATUE] Oruo the Omniscient: ") && msg.endsWith("correctly!")) {

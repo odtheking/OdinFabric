@@ -1,5 +1,6 @@
 package com.odtheking.odin.clickgui.settings.impl
 
+import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.reflect.TypeToken
 import com.odtheking.odin.clickgui.settings.Saving
@@ -19,9 +20,9 @@ class ListSetting<E, T : MutableCollection<E>>(
 
     override var value: T = default
 
-    override fun write(): JsonElement = gson.toJsonTree(value)
+    override fun write(gson: Gson): JsonElement = gson.toJsonTree(value)
 
-    override fun read(element: JsonElement) {
+    override fun read(element: JsonElement, gson: Gson) {
         element.asJsonArray?.let {
             val temp = gson.fromJson<T>(it, type)
             value.clear()

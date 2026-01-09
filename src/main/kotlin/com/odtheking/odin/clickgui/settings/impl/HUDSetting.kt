@@ -1,5 +1,6 @@
 package com.odtheking.odin.clickgui.settings.impl
 
+import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.odtheking.odin.OdinMod.mc
@@ -86,15 +87,14 @@ class HUDSetting(
 
     override val isHovered: Boolean get() = isAreaHovered(lastX + width - 30F, lastY + getHeight() / 2f - 12f, 24f, 24f)
 
-    override fun write(): JsonElement = with(JsonObject()) {
+    override fun write(gson: Gson): JsonElement = JsonObject().apply {
         addProperty("x", value.x)
         addProperty("y", value.y)
         addProperty("scale", value.scale)
         addProperty("enabled", value.enabled)
-        return this
     }
 
-    override fun read(element: JsonElement) {
+    override fun read(element: JsonElement, gson: Gson) {
         if (element !is JsonObject) return
         value.x = element.get("x")?.asInt ?: value.x
         value.y = element.get("y")?.asInt ?: value.y

@@ -1,5 +1,6 @@
 package com.odtheking.odin.clickgui.settings.impl
 
+import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.odtheking.odin.clickgui.ClickGUI
 import com.odtheking.odin.clickgui.ClickGUI.gray38
@@ -181,9 +182,9 @@ class ColorSetting(
             20f
         )
 
-    override fun write(): JsonElement = gson.toJsonTree(value, Color::class.java)
+    override fun write(gson: Gson): JsonElement = gson.toJsonTree(value, Color::class.java)
 
-    override fun read(element: JsonElement) {
+    override fun read(element: JsonElement, gson: Gson) {
         value = gson.fromJson(element, Color::class.java) ?: default.copy()
     }
 

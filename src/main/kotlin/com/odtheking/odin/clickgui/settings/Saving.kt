@@ -1,5 +1,6 @@
 package com.odtheking.odin.clickgui.settings
 
+import com.google.gson.Gson
 import com.google.gson.JsonElement
 
 /**
@@ -9,10 +10,10 @@ internal interface Saving {
     /**
      * Used to update the setting from the json.
      */
-    fun read(element: JsonElement)
+    fun read(element: JsonElement, gson: Gson)
 
     /**
      * Used to create the json.
      */
-    fun write(): JsonElement
+    fun write(gson: Gson): JsonElement
 }

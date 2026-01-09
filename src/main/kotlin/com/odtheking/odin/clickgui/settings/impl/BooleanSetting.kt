@@ -1,5 +1,6 @@
 package com.odtheking.odin.clickgui.settings.impl
 
+import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
 import com.odtheking.odin.clickgui.ClickGUI.gray38
@@ -66,9 +67,9 @@ class BooleanSetting(
 
     override val isHovered: Boolean get() = isAreaHovered(lastX + width - 43f, lastY + getHeight() / 2f - 10f, 34f, 20f)
 
-    override fun write(): JsonElement = JsonPrimitive(enabled)
+    override fun write(gson: Gson): JsonElement = JsonPrimitive(enabled)
 
-    override fun read(element: JsonElement) {
+    override fun read(element: JsonElement, gson: Gson) {
         enabled = element.asBoolean
     }
 }

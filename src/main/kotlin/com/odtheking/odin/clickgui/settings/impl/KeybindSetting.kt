@@ -1,5 +1,6 @@
 package com.odtheking.odin.clickgui.settings.impl
 
+import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
 import com.mojang.blaze3d.platform.InputConstants
@@ -91,9 +92,9 @@ class KeybindSetting(
         get() =
             isAreaHovered(lastX + width - 20 - keyNameWidth, lastY + getHeight() / 2f - 10f, keyNameWidth + 12f, 22f)
 
-    override fun write(): JsonElement = JsonPrimitive(value.name)
+    override fun write(gson: Gson): JsonElement = JsonPrimitive(value.name)
 
-    override fun read(element: JsonElement) {
+    override fun read(element: JsonElement, gson: Gson) {
         element.asString?.let { value = InputConstants.getKey(it) }
     }
 
