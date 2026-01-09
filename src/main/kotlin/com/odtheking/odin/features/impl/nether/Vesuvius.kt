@@ -12,7 +12,7 @@ import com.odtheking.odin.utils.render.text
 import net.minecraft.ChatFormatting
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.network.chat.Component
-import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
@@ -33,6 +33,8 @@ object Vesuvius : Module(
     private val shardRegex = Regex("^([A-Za-z' ]+) Shard(?: x(\\d+))?$")
     private val teethRegex = Regex("^Kuudra Teeth x(\\d+)$")
     private val pearlRegex = Regex("^Heavy Pearl x(\\d+)$")
+    private val chestRegex = Regex("^(Free|Paid) Chest Chest$")
+    private val uselessLinesRegex = Regex("^Contents|Cost|Click to open!|FREE|Already opened!|Can't open another chest!|Paid Chest|")
 
     private val ultimateEnchants = setOf(
         "Fatal Tempo", "Inferno"
@@ -47,7 +49,7 @@ object Vesuvius : Module(
     init {
         on<GuiEvent.DrawTooltip> {
             val title = screen.title?.string ?: return@on
-            if (vesuviusHud.enabled && title.equalsOneOf("Free Chest Chest", "Paid Chest Chest")) {
+            if (vesuviusHud.enabled && title.matches(chestRegex)) {
                 guiGraphics.pose().pushMatrix()
                 val sf = mc.window.guiScale
                 guiGraphics.pose().scale(1f / sf, 1f / sf)
@@ -68,13 +70,9 @@ object Vesuvius : Module(
             }
         }
 
-        onReceive<ClientboundContainerSetContentPacket> {
-            val screenTitle = mc.screen?.title?.string ?: return@onReceive
-
-            when {
-                screenTitle.equalsOneOf("Free Chest Chest", "Paid Chest Chest") -> handleKuudraChest(items)
-
-            }
+        onReceive<ClientboundContainerSetSlotPacket> {
+            val title = mc.screen?.title?.string ?:return@onReceive
+            if (slot == 31 && item.item == Items.CHEST && title.matches(chestRegex)) handleKuudraChest(item)
         }
 
         onReceive<ClientboundOpenScreenPacket> {
@@ -125,32 +123,27 @@ object Vesuvius : Module(
         return 0.0
     }
 
-    private fun handleKuudraChest(items: List<ItemStack>) {
+    private fun handleKuudraChest(item: ItemStack) {
         val chestItems = mutableListOf<ChestItem>()
         var profit = 0.0
         var chestCost = 0.0
 
-        items.forEachIndexed { index, stack ->
-            if (stack.item != Items.CHEST || index != 31) return@forEachIndexed
+        val lore = item.lore
 
-            val lore = stack.lore
+        lore.forEach { component ->
+            val string = component.string
 
-            lore.forEach { component ->
-                val item = component.string
+            if (string.contains("Kuudra Key")) {
+                chestCost = getPriceOfKey(string)
+                return@forEach
+            }
 
-                if (item.contains("Kuudra Key")) {
-                    chestCost = getPriceOfKey(item)
-                    return@forEachIndexed
-                }
+            if (string.matches(uselessLinesRegex)) return@forEach
 
-                if (item.equalsOneOf("Contents", "", "Cost", "Click to open!", "FREE", "Already opened!", "Can't open another chest!")) return@forEach
-
-                val price = parseItemValue(item.replace("✪", "").trim()) ?: 0.0
+            val price = parseItemValue(string.replace("✪", "").trim()) ?: 0.0
                 profit += price
-
                 chestItems.add(ChestItem(component, price))
             }
-        }
         currentChest = ChestData(chestItems, chestCost, (profit - chestCost))
     }
 
@@ -160,8 +153,8 @@ object Vesuvius : Module(
         var yOffset = 0
         val maxWidth = mc.font.width("Enchanted Book (Ferocious Mana V)") + mc.font.width("1 000 000 000")
 
-        val cost: String = "%,.0f".format(dataToDisplay?.cost)
-        val profit: String = "%,.0f".format(dataToDisplay?.profit)
+        val cost = "%,.0f".format(dataToDisplay?.cost)
+        val profit = "%,.0f".format(dataToDisplay?.profit)
 
         dataToDisplay?.items?.forEach { item ->
             val price: String = "%,.0f".format(item.price)
