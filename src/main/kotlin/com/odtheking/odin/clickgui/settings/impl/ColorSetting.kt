@@ -13,6 +13,7 @@ import com.odtheking.odin.utils.Color.Companion.darker
 import com.odtheking.odin.utils.Color.Companion.hsbMax
 import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.Colors
+import com.odtheking.odin.utils.ui.HoverHandler
 import com.odtheking.odin.utils.ui.TextInputHandler
 import com.odtheking.odin.utils.ui.animations.EaseInOutAnimation
 import com.odtheking.odin.utils.ui.animations.LinearAnimation
@@ -49,6 +50,8 @@ class ColorSetting(
 
     private var chroma: Boolean = false
     private val toggleAnimation = LinearAnimation<Float>(200)
+
+    private val hoverHandler = HoverHandler(150)
 
     var section: Int? = null
 
@@ -87,6 +90,16 @@ class ColorSetting(
         NVGRenderer.text(name, x + 6f, y + defaultHeight / 2f - 8f, 16f, Colors.WHITE.rgba, NVGRenderer.defaultFont)
         NVGRenderer.rect(x + width - 40f, y + defaultHeight / 2f - 10f, 34f, 20f, value.rgba, 5f)
         NVGRenderer.hollowRect(x + width - 40f, y + defaultHeight / 2f - 10f, 34f, 20f, 2f, value.withAlpha(1f).darker().rgba, 5f)
+
+        val iconX = x + width - 70f
+        val iconY = y + defaultHeight / 2f - 12f
+
+        hoverHandler.handle(iconX, iconY, 24f, 24f, true)
+
+        val imageSize = 24f + (6f * hoverHandler.percent() / 100f)
+        val offset = (imageSize - 24f) / 2f
+
+        NVGRenderer.image(ClickGUI.resetImage, iconX - offset, iconY - offset, imageSize, imageSize)
 
         if (!extended && !expandAnim.isAnimating()) return defaultHeight
 
@@ -189,6 +202,11 @@ class ColorSetting(
             return true
         }
 
+        if (isResetHovered && click.button() == 0) {
+            defaultOptions()
+            return true
+        }
+
         section = when {
             isAreaHovered(lastX + 6f, lastY + 36f, width - 12f, 170f, true) -> 0 // sat & brightness
             isAreaHovered(lastX + 6f, lastY + 212f, width - 12f, 15f, true) -> 1 // hue
@@ -240,6 +258,24 @@ class ColorSetting(
             20f,
             true
         )
+
+    private val isResetHovered: Boolean
+        get() = isAreaHovered(
+            lastX + width - 70f,
+            lastY + defaultHeight / 2f - 12f,
+            24f,
+            24f,
+            true
+        )
+
+    private fun defaultOptions() {
+        value = default.copy()
+        mainSliderPrevSat = 0f
+        mainSliderPrevBright = 0f
+        hueSliderPrev = 0f
+        alphaSliderPrev = 0f
+        chroma = false
+    }
 
     private fun handleColorDrag(mouseX: Float, mouseY: Float, x: Float, y: Float, width: Float) {
         when (section) {
