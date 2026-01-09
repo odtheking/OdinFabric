@@ -35,6 +35,8 @@ object ClickGUIModule : Module(
     val guiScale: Float
         get() = guiScaleSetting.toFloatOrNull()?.coerceIn(1f, 3f) ?: 1f
 
+    val roundedPanelBottom by BooleanSetting("Rounded Panel Bottoms", true, desc = "Whether to extend panels to make them rounded at the bottom.")
+
     val hypixelApiUrl by StringSetting("API URL", "https://api.odtheking.com/hypixel/", 128, "The Hypixel API server to connect to.").hide()
     val webSocketUrl by StringSetting("WebSocket URL", "wss://api.odtheking.com/ws/", 128, "The Websocket server to connect to.").hide()
 
