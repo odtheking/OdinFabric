@@ -21,6 +21,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.HoverEvent
 import org.lwjgl.glfw.GLFW
 import java.net.URI
+import kotlin.math.max
 
 @AlwaysActive
 object ClickGUIModule : Module(
@@ -31,9 +32,9 @@ object ClickGUIModule : Module(
     val enableNotification by BooleanSetting("Chat notifications", true, desc = "Sends a message when you toggle a module with a keybind")
     val clickGUIColor by ColorSetting("Color", Color(50, 150, 220), desc = "The color of the Click GUI.")
 
-    val guiScaleSetting by StringSetting("GUI Scale", "1",   desc = "The scale of the Click GUI.")
+    var guiScaleSetting by StringSetting("GUI Scale", "",   desc = "The scale of the Click GUI.")
     val guiScale: Float
-        get() = guiScaleSetting.toFloatOrNull()?.coerceIn(1f, 3f) ?: 1f
+        get() = guiScaleSetting.toFloatOrNull()?.coerceIn(1f, 3f) ?: getStandardGuiScale()
 
     val roundedPanelBottom by BooleanSetting("Rounded Panel Bottoms", true, desc = "Whether to extend panels to make them rounded at the bottom.")
 
@@ -93,6 +94,12 @@ object ClickGUIModule : Module(
             """.trimIndent(), "")
             alert("Odin Update Available")
         }
+    }
+
+    fun getStandardGuiScale(): Float {
+        val verticalScale = mc.window.height.toFloat() / 1080f
+        val horizontalScale = mc.window.width.toFloat() / 1920f
+        return max(verticalScale, horizontalScale).coerceIn(1f, 3f)
     }
 
     private suspend fun checkNewerVersion(currentVersion: String): String? {
