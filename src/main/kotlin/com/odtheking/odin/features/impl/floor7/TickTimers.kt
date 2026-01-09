@@ -41,7 +41,7 @@ object TickTimers : Module(
     private val goldorHud: HudElement by HUD("Goldor Hud", "Displays a timer for Goldor's Core entrance opening.") {
         if (it) textDim(formatTimer(35, 60, "§7Tick:"), 0, 0, Colors.MINECRAFT_DARK_RED)
         else if ((goldorStartTime >= 0 && startTimer) || goldorTickTime >= 0) {
-            val (prefix: String, time: Int, max: Int) = if (goldorStartTime >= 0 && startTimer) Triple("§aStart:", goldorStartTime, 104) else Triple("§7Tick:", goldorTickTime, 60)
+            val (prefix, time, max) = if (goldorStartTime >= 0 && startTimer) Triple("§aStart:", goldorStartTime, 100) else Triple("§7Tick:", goldorTickTime, 60)
             textDim(formatTimer(time, max, prefix), 0, 0, Colors.MINECRAFT_DARK_RED)
         } else 0 to 0
     }

@@ -5,7 +5,10 @@ import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.WorldEvent
 import com.odtheking.odin.events.core.on
-import com.odtheking.odin.utils.*
+import com.odtheking.odin.utils.JsonResourceLoader
+import com.odtheking.odin.utils.Vec2
+import com.odtheking.odin.utils.devMessage
+import com.odtheking.odin.utils.equalsOneOf
 import com.odtheking.odin.utils.skyblock.Island
 import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.Room
@@ -20,18 +23,18 @@ object ScanUtils {
     private const val ROOM_SIZE_SHIFT = 5  // Since ROOM_SIZE = 32 (2^5) so we can perform bitwise operations
     private const val START = -185
 
-    private var lastRoomPos: Vec2 = Vec2(0, 0)
     private val roomList: Set<RoomData> = JsonResourceLoader.loadJson("/assets/odin/rooms.json", setOf())
     private val coreToRoomData: Map<Int, RoomData> =
         roomList.flatMap { room -> room.cores.map { core -> core to room } }.toMap()
+
+    private val horizontals = Direction.entries.filter { it.axis.isHorizontal }
+    private val mutableBlockPos = BlockPos.MutableBlockPos()
+    private var lastRoomPos: Vec2 = Vec2(0, 0)
+
     var currentRoom: Room? = null
         private set
     var passedRooms: MutableSet<Room> = mutableSetOf()
         private set
-
-    private val mutableBlockPos = BlockPos.MutableBlockPos()
-
-    private val horizontals = Direction.entries.filter { it.axis.isHorizontal }
 
     init {
         on<TickEvent.End> {
@@ -58,7 +61,6 @@ object ScanUtils {
         }
 
         on<RoomEnterEvent> {
-            modMessage(roomList)
             currentRoom = room
             if (passedRooms.none { it.data.name == currentRoom?.data?.name }) passedRooms.add(currentRoom ?: return@on)
             devMessage("${room?.data?.name} - ${room?.rotation} || clay: ${room?.clayPos}")
