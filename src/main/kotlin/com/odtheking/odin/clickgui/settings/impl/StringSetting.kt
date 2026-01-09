@@ -1,5 +1,6 @@
 package com.odtheking.odin.clickgui.settings.impl
 
+import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
 import com.odtheking.odin.clickgui.ClickGUI.gray38
@@ -68,9 +69,9 @@ class StringSetting(
 
     override fun getHeight(): Float = Panel.HEIGHT + 28f
 
-    override fun write(): JsonElement = JsonPrimitive(value)
+    override fun write(gson: Gson): JsonElement = JsonPrimitive(value)
 
-    override fun read(element: JsonElement) {
+    override fun read(element: JsonElement, gson: Gson) {
         element.asString?.let { value = it }
     }
 }

@@ -4,11 +4,11 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
-import com.odtheking.odin.OdinMod.logger
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.utils.Color
+import com.odtheking.odin.utils.JsonResourceLoader
 import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.render.drawLine
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
@@ -16,30 +16,19 @@ import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.Room
 import net.minecraft.core.BlockPos
 import net.minecraft.world.phys.Vec3
-import java.io.InputStreamReader
 import java.lang.reflect.Type
-import java.nio.charset.StandardCharsets
 
 object IceFillSolver {
 
-    private val gson = GsonBuilder()
-        .setPrettyPrinting()
-        .registerTypeAdapter(BlockPos::class.java, BlockPosDeserializer())
-        .create()
-    private val isr = this::class.java.getResourceAsStream("/assets/odin/puzzles/iceFillFloors.json")
-        ?.let { InputStreamReader(it, StandardCharsets.UTF_8) }
-    private var iceFillFloors = IceFillData(emptyList(), emptyList(), emptyList())
+    private var iceFillFloors = JsonResourceLoader.loadJson(
+        "/assets/odin/puzzles/iceFillFloors.json",
+        IceFillData(emptyList(), emptyList(), emptyList()),
+        GsonBuilder()
+            .setPrettyPrinting()
+            .registerTypeAdapter(BlockPos::class.java, BlockPosDeserializer())
+    )
     private var currentPatterns: ArrayList<Vec3> = ArrayList()
 
-    init {
-        try {
-            val text = isr?.readText()
-            iceFillFloors = gson.fromJson(text, IceFillData::class.java)
-            isr?.close()
-        } catch (e: Exception) {
-            logger.error("Error loading ice fill floors", e)
-        }
-    }
 
     fun onRenderWorld(event: RenderEvent.Extract, color: Color) {
         if (!currentPatterns.isEmpty() && DungeonUtils.currentRoomName == "Ice Fill")

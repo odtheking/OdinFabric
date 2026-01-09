@@ -1,5 +1,6 @@
 package com.odtheking.odin.clickgui.settings.impl
 
+import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.reflect.TypeToken
 import com.odtheking.odin.clickgui.settings.Saving
@@ -21,9 +22,9 @@ class MapSetting<K : Any, V : Any, T : MutableMap<K, V>>(
 
     override var value: T = default
 
-    override fun write(): JsonElement = gson.toJsonTree(value)
+    override fun write(gson: Gson): JsonElement = gson.toJsonTree(value)
 
-    override fun read(element: JsonElement) {
+    override fun read(element: JsonElement, gson: Gson) {
         val temp = gson.fromJson<Map<K, V>>(element, type)
         value.clear()
         value.putAll(temp)

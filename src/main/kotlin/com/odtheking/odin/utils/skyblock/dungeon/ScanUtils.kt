@@ -1,30 +1,27 @@
 package com.odtheking.odin.utils.skyblock.dungeon
 
-import com.google.gson.GsonBuilder
-import com.google.gson.reflect.TypeToken
-import com.odtheking.odin.OdinMod.logger
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.WorldEvent
 import com.odtheking.odin.events.core.on
-import com.odtheking.odin.utils.Vec2
-import com.odtheking.odin.utils.devMessage
-import com.odtheking.odin.utils.equalsOneOf
+import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.skyblock.Island
 import com.odtheking.odin.utils.skyblock.LocationUtils
-import com.odtheking.odin.utils.skyblock.dungeon.tiles.*
+import com.odtheking.odin.utils.skyblock.dungeon.tiles.Room
+import com.odtheking.odin.utils.skyblock.dungeon.tiles.RoomComponent
+import com.odtheking.odin.utils.skyblock.dungeon.tiles.RoomData
+import com.odtheking.odin.utils.skyblock.dungeon.tiles.Rotations
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.world.level.block.Blocks
-import java.io.FileNotFoundException
 
 object ScanUtils {
     private const val ROOM_SIZE_SHIFT = 5  // Since ROOM_SIZE = 32 (2^5) so we can perform bitwise operations
     private const val START = -185
 
     private var lastRoomPos: Vec2 = Vec2(0, 0)
-    private val roomList: Set<RoomData> = loadRoomData()
+    private val roomList: Set<RoomData> = JsonResourceLoader.loadJson("/assets/odin/rooms.json", setOf())
     private val coreToRoomData: Map<Int, RoomData> =
         roomList.flatMap { room -> room.cores.map { core -> core to room } }.toMap()
     var currentRoom: Room? = null
@@ -33,25 +30,6 @@ object ScanUtils {
         private set
 
     private val mutableBlockPos = BlockPos.MutableBlockPos()
-
-    private fun loadRoomData(): Set<RoomData> {
-        return try {
-            GsonBuilder()
-                .registerTypeAdapter(
-                    RoomData::class.java,
-                    RoomDataDeserializer()
-                )
-                .create().fromJson(
-                    (ScanUtils::class.java.getResourceAsStream("/assets/odin/rooms.json")
-                        ?: throw FileNotFoundException()).bufferedReader(),
-                    object : TypeToken<Set<RoomData>>() {}.type
-                )
-        } catch (e: Exception) {
-            logger.error("Error reading room data", e)
-            println(e.message)
-            setOf()
-        }
-    }
 
     private val horizontals = Direction.entries.filter { it.axis.isHorizontal }
 
@@ -71,7 +49,7 @@ object ScanUtils {
             passedRooms.find { previousRoom -> previousRoom.roomComponents.any { it.vec2 == roomCenter } }?.let { room ->
                 if (currentRoom?.roomComponents?.none { it.vec2 == roomCenter } == true) RoomEnterEvent(room).postAndCatch()
                 return@on
-            } // We want to use cached rooms instead of scanning it again if we have already passed through it and if we are already in it we don't want to trigger the event
+            } // We want to use cached rooms instead of scanning it again if we have already passed through it and if we are already in it, we don't want to trigger the event
 
             scanRoom(roomCenter)?.let { room -> if (room.rotation != Rotations.NONE) RoomEnterEvent(room).postAndCatch() } ?: run {
                 if ((!DungeonUtils.inClear) && !LocationUtils.currentArea.isArea(Island.SinglePlayer)) return@on
@@ -80,6 +58,7 @@ object ScanUtils {
         }
 
         on<RoomEnterEvent> {
+            modMessage(roomList)
             currentRoom = room
             if (passedRooms.none { it.data.name == currentRoom?.data?.name }) passedRooms.add(currentRoom ?: return@on)
             devMessage("${room?.data?.name} - ${room?.rotation} || clay: ${room?.clayPos}")

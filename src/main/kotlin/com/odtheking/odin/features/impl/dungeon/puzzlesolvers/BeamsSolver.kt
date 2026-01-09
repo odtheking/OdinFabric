@@ -1,8 +1,5 @@
 package com.odtheking.odin.features.impl.dungeon.puzzlesolvers
 
-import com.google.gson.GsonBuilder
-import com.google.gson.reflect.TypeToken
-import com.odtheking.odin.OdinMod.logger
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.BlockUpdateEvent
 import com.odtheking.odin.events.RenderEvent
@@ -11,6 +8,7 @@ import com.odtheking.odin.features.impl.dungeon.puzzlesolvers.PuzzleSolvers.onPu
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.Colors
+import com.odtheking.odin.utils.JsonResourceLoader
 import com.odtheking.odin.utils.equalsOneOf
 import com.odtheking.odin.utils.render.drawLine
 import com.odtheking.odin.utils.render.drawStyledBox
@@ -20,26 +18,13 @@ import com.odtheking.odin.utils.skyblock.dungeon.tiles.Room
 import net.minecraft.core.BlockPos
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.phys.AABB
-import java.io.InputStreamReader
-import java.nio.charset.StandardCharsets
 import java.util.concurrent.ConcurrentHashMap
 
 object BeamsSolver {
     private var scanned = false
-    private var lanternPairs: List<List<Int>>
-    private val gson = GsonBuilder().setPrettyPrinting().create()
-    private val isr = this::class.java.getResourceAsStream("/assets/odin/puzzles/creeperBeamsSolutions.json")?.let { InputStreamReader(it, StandardCharsets.UTF_8) }
-
-    init {
-        try {
-            val text = isr?.readText()
-            lanternPairs = gson.fromJson(text, object : TypeToken<List<List<Int>>>() {}.type)
-            isr?.close()
-        } catch (e: Exception) {
-            logger.error("Error loading creeper beams solutions", e)
-            lanternPairs = emptyList()
-        }
-    }
+    private var lanternPairs: List<List<Int>> = JsonResourceLoader.loadJson(
+        "/assets/odin/puzzles/creeperBeamsSolutions.json", emptyList()
+    )
 
     private var currentLanternPairs = ConcurrentHashMap<BlockPos, Pair<BlockPos, Color>>()
 
