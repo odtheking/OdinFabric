@@ -137,7 +137,7 @@ class ColorSetting(
         // Chroma toggle
         if (allowChroma) {
             val chromaX = x + width - 34f
-            val chromaY = y + actualHeight - 26f
+            val chromaY = y + actualHeight - 28f
 
             hoverHandler.handle(chromaX, chromaY, 24f, 24f, true)
 
