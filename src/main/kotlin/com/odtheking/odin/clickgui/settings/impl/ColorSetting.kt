@@ -29,7 +29,8 @@ class ColorSetting(
     name: String,
     override val default: Color,
     private var allowAlpha: Boolean = false,
-    desc: String
+    desc: String,
+    private var allowChroma: Boolean = true,
 ) : RenderableSetting<Color>(name, desc), Saving {
 
     override var value: Color = default.copy()
@@ -50,8 +51,6 @@ class ColorSetting(
     private var alphaSliderPrev = 0f
 
     private var chroma: Boolean = false
-    private val toggleAnimation = LinearAnimation<Float>(200)
-
     private val hoverHandler = HoverHandler(150)
 
     var section: Int? = null
@@ -92,16 +91,6 @@ class ColorSetting(
         NVGRenderer.rect(x + width - 40f, y + defaultHeight / 2f - 10f, 34f, 20f, value.rgba, 5f)
         NVGRenderer.hollowRect(x + width - 40f, y + defaultHeight / 2f - 10f, 34f, 20f, 2f, value.withAlpha(1f).darker().rgba, 5f)
 
-        val iconX = x + width - 70f
-        val iconY = y + defaultHeight / 2f - 12f
-
-        hoverHandler.handle(iconX, iconY, 24f, 24f, true)
-
-        val imageSize = 24f + (6f * hoverHandler.percent() / 100f)
-        val offset = (imageSize - 24f) / 2f
-
-        NVGRenderer.image(ClickGUI.resetImage, iconX - offset, iconY - offset, imageSize, imageSize)
-
         if (!extended && !expandAnim.isAnimating()) return defaultHeight
 
         if (expandAnim.isAnimating()) NVGRenderer.pushScissor(x, y + defaultHeight, width, getHeight() - defaultHeight)
@@ -139,40 +128,34 @@ class ColorSetting(
 
         if (section != null) hexString = value.hex(allowAlpha)
 
-        // main width - text input - chroma toggle - 12 padding
-        val sidePadding = (width - width / 2 - 34f - 12f) / 2f
+        // main width - text input
+        val sidePadding = (width - width / 2) / 2f
 
         val rectX = x + sidePadding
         val actualHeight = defaultHeight + if (allowAlpha) 250f else 230f
 
         // Chroma toggle
-        val chromaX = x + sidePadding + width / 2f + 12f
-        val chromaY = y + actualHeight - 26f
+        if (allowChroma) {
+            val chromaX = x + width - 34f
+            val chromaY = y + actualHeight - 26f
 
-        NVGRenderer.rect(chromaX, chromaY, 34f, 20f, if (chromaHovered) gray38.brighter().rgba else gray38.rgba, 9f)
+            hoverHandler.handle(chromaX, chromaY, 24f, 24f, true)
 
-        if (chroma || toggleAnimation.isAnimating()) {
-            val color = value
-            NVGRenderer.rect(
-                chromaX,
-                chromaY,
-                toggleAnimation.get(34f, 9f, chroma),
-                20f,
-                if (chromaHovered) color.brighter().rgba else color.rgba,
-                9f
-            )
+            NVGRenderer.rect(chromaX, chromaY, 24f, 24f, gray38.brighter(1f + (hoverHandler.percent() / 200f)).rgba, 5f)
+
+            if (chroma) {
+                val color = value
+                NVGRenderer.rect(
+                    chromaX,
+                    chromaY,
+                    24f,
+                    24f,
+                    color.brighter(1f + (hoverHandler.percent() / 200f)).rgba,
+                    5f
+                )
+            }
+            NVGRenderer.hollowRect(chromaX, chromaY, 24f, 24f, 1f, Colors.chroma.rgba, 5f)
         }
-
-        NVGRenderer.hollowRect(
-            chromaX,
-            chromaY,
-            34f,
-            20f,
-            2f,
-            value.rgba,
-            9f
-        )
-        NVGRenderer.circle(chromaX + toggleAnimation.get(10f, 26f, !chroma), chromaY + 10f, 6f, Colors.WHITE.rgba)
         // end chroma toggle
 
         NVGRenderer.rect(rectX, y + actualHeight - 28f, width / 2, 24f, gray38.rgba, 4f)
@@ -197,14 +180,8 @@ class ColorSetting(
         if (!extended) return false
         textInputHandler.mouseClicked(mouseX, mouseY, click)
 
-        if (chromaHovered && click.button() == 0) {
-            toggleAnimation.start()
+        if (chromaHovered && click.button() == 0 && allowChroma) {
             chroma = !chroma
-            return true
-        }
-
-        if (isResetHovered && click.button() == 0) {
-            defaultOptions()
             return true
         }
 
@@ -253,30 +230,12 @@ class ColorSetting(
 
     private val chromaHovered: Boolean
         get() = isAreaHovered(
-            lastX + ((width - width / 2 - 34f - 12f) / 2f) + width / 2f + 12f,
+            lastX + width - 34f,
             lastY + getHeight() - 26f,
-            34f,
-            20f,
-            true
-        )
-
-    private val isResetHovered: Boolean
-        get() = isAreaHovered(
-            lastX + width - 70f,
-            lastY + defaultHeight / 2f - 12f,
             24f,
             24f,
             true
         )
-
-    private fun defaultOptions() {
-        value = default.copy()
-        mainSliderPrevSat = 0f
-        mainSliderPrevBright = 0f
-        hueSliderPrev = 0f
-        alphaSliderPrev = 0f
-        chroma = false
-    }
 
     private fun handleColorDrag(mouseX: Float, mouseY: Float, x: Float, y: Float, width: Float) {
         when (section) {
