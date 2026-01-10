@@ -32,9 +32,8 @@ object ClickGUIModule : Module(
     val enableNotification by BooleanSetting("Chat notifications", true, desc = "Sends a message when you toggle a module with a keybind")
     val clickGUIColor by ColorSetting("Color", Color(50, 150, 220), desc = "The color of the Click GUI.")
 
-    var guiScaleSetting by StringSetting("GUI Scale", "",   desc = "The scale of the Click GUI. Leave empty to use standard scaling.")
     val guiScale: Float
-        get() = guiScaleSetting.toFloatOrNull()?.coerceIn(1f, 3f) ?: getStandardGuiScale()
+        get() = getStandardGuiScale()
 
     val roundedPanelBottom by BooleanSetting("Rounded Panel Bottoms", true, desc = "Whether to extend panels to make them rounded at the bottom.")
 
