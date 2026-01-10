@@ -16,7 +16,7 @@ import kotlin.jvm.optionals.getOrNull
 
 object KuudraUtils {
 
-    inline val inKuudra get() = LocationUtils.currentArea.isArea(Island.Kuudra)
+    inline val inKuudra get() = LocationUtils.isCurrentArea(Island.Kuudra)
 
     val freshers: MutableMap<String, Long?> = mutableMapOf()
     val giantZombies: ArrayList<Giant> = arrayListOf()

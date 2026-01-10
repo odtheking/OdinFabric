@@ -40,13 +40,13 @@ object ScanUtils {
         on<TickEvent.End> {
             if (mc.level == null || mc.player == null) return@on
 
-            if ((!DungeonUtils.inDungeons && !LocationUtils.currentArea.isArea(Island.SinglePlayer)) || DungeonUtils.inBoss) {
+            if ((!DungeonUtils.inDungeons && !LocationUtils.isCurrentArea(Island.SinglePlayer)) || DungeonUtils.inBoss) {
                 currentRoom?.let { RoomEnterEvent(null).postAndCatch() }
                 return@on
             } // We want the current room to register as null if we are not in a dungeon
 
             val roomCenter = getRoomCenter(mc.player?.x?.toInt() ?: return@on, mc.player?.z?.toInt() ?: return@on)
-            if (roomCenter == lastRoomPos && LocationUtils.currentArea.isArea(Island.SinglePlayer)) return@on // extra SinglePlayer caching for invalid placed rooms
+            if (roomCenter == lastRoomPos && LocationUtils.isCurrentArea(Island.SinglePlayer)) return@on // extra SinglePlayer caching for invalid placed rooms
             lastRoomPos = roomCenter
 
             passedRooms.find { previousRoom -> previousRoom.roomComponents.any { it.vec2 == roomCenter } }?.let { room ->
@@ -55,7 +55,7 @@ object ScanUtils {
             } // We want to use cached rooms instead of scanning it again if we have already passed through it and if we are already in it, we don't want to trigger the event
 
             scanRoom(roomCenter)?.let { room -> if (room.rotation != Rotations.NONE) RoomEnterEvent(room).postAndCatch() } ?: run {
-                if ((!DungeonUtils.inClear) && !LocationUtils.currentArea.isArea(Island.SinglePlayer)) return@on
+                if ((!DungeonUtils.inClear) && !LocationUtils.isCurrentArea(Island.SinglePlayer)) return@on
                 devMessage("Unable to determine room at $roomCenter core: ${getCore(roomCenter)}")
             }
         }

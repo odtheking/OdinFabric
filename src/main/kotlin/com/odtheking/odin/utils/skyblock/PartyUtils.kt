@@ -151,6 +151,7 @@ object PartyUtils {
         members.clear()
         partyLeader = null
         isInParty = false
+        PartyEvent.Leave(members).postAndCatch()
     }
 
     fun isLeader(): Boolean = partyLeader == mc.player?.gameProfile?.name
