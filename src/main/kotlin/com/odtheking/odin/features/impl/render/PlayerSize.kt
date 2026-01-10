@@ -100,5 +100,6 @@ object PlayerSize : Module(
         ))
     }
 
+    @JvmStatic
     val GAME_PROFILE_KEY: RenderStateDataKey<GameProfile> = RenderStateDataKey.create { "odin:game_profile" }
 }

@@ -10,8 +10,6 @@
     "accessors.AbstractContainerScreenAccessor",
     "accessors.BeaconBeamAccessor",
     "accessors.CompositeRenderTypeAccessor",
-    "accessors.KeyMappingAccessor",
-    "accessors.PictureInPictureRendererAccessor",
     "mixins.AbstractContainerScreenMixin",
     "mixins.AvatarRendererMixin",
     "mixins.BossBarHealthOverlayMixin",

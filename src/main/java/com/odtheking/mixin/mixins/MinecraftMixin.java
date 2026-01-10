@@ -2,9 +2,11 @@ package com.odtheking.mixin.mixins;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.odtheking.odin.events.BlockInteractEvent;
+import com.odtheking.odin.events.EntityInteractEvent;
 import com.odtheking.odin.features.impl.floor7.TerminalSolver;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -22,9 +24,14 @@ public abstract class MinecraftMixin {
 
     @Inject(method = "startUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;useItemOn(Lnet/minecraft/client/player/LocalPlayer;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult;"), cancellable = true)
     private void cancelBlockUse(CallbackInfo ci) {
-        BlockHitResult blockHitResult = (BlockHitResult) this.hitResult;
-        if (blockHitResult != null && (new BlockInteractEvent(blockHitResult.getBlockPos()).postAndCatch()))
-            ci.cancel();
+        if (!(this.hitResult instanceof BlockHitResult blockHitResult)) return;
+        if ((new BlockInteractEvent(blockHitResult.getBlockPos()).postAndCatch())) ci.cancel();
+    }
+
+    @Inject(method = "startUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;interactAt(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/EntityHitResult;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"), cancellable = true)
+    private void cancelEntityUse(CallbackInfo ci) {
+        if (!(this.hitResult instanceof EntityHitResult entityHitResult)) return;
+        if (new EntityInteractEvent(entityHitResult.getLocation(), entityHitResult.getEntity()).postAndCatch()) ci.cancel();
     }
 
     @ModifyExpressionValue(

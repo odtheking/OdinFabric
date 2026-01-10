@@ -25,6 +25,6 @@ public class AvatarRendererMixin {
     )
     private void extractRenderState(Avatar avatar, AvatarRenderState avatarRenderState, float f, CallbackInfo ci) {
         if (!(avatar instanceof AbstractClientPlayer clientAvatarEntity)) return;
-        avatarRenderState.setData(PlayerSize.INSTANCE.getGAME_PROFILE_KEY(), clientAvatarEntity.getGameProfile());
+        avatarRenderState.setData(PlayerSize.getGAME_PROFILE_KEY(), clientAvatarEntity.getGameProfile());
     }
 }

@@ -17,7 +17,10 @@ open class TickTask(
     }
 
     fun run() {
-        if (++ticks == tickDelay) runCatching(task).onFailure { logError(it, this) }
+        if (++ticks == tickDelay) {
+            runCatching(task).onFailure { logError(it, this) }
+            ticks = 0
+        }
     }
 }
 
