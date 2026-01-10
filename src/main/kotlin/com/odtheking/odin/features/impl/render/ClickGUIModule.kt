@@ -15,6 +15,7 @@ import com.odtheking.odin.utils.alert
 import com.odtheking.odin.utils.getChatBreak
 import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.network.WebUtils.fetchJson
+import com.odtheking.odin.utils.ui.rendering.NVGRenderer
 import kotlinx.coroutines.launch
 import net.minecraft.network.chat.ClickEvent
 import net.minecraft.network.chat.Component
@@ -93,8 +94,8 @@ object ClickGUIModule : Module(
     }
 
     fun getStandardGuiScale(): Float {
-        val verticalScale = mc.window.height.toFloat() / 1080f
-        val horizontalScale = mc.window.width.toFloat() / 1920f
+        val verticalScale = (mc.window.height.toFloat() / 1080f) / NVGRenderer.devicePixelRatio()
+        val horizontalScale = (mc.window.width.toFloat() / 1920f) / NVGRenderer.devicePixelRatio()
         return max(verticalScale, horizontalScale).coerceIn(1f, 3f)
     }
 
