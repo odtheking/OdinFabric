@@ -12,11 +12,11 @@ inline val mouseY: Float
         mc.mouseHandler.ypos().toFloat()
 
 fun isAreaHovered(x: Float, y: Float, w: Float, h: Float, scaled: Boolean = false): Boolean =
-    if (scaled) mouseX / ClickGUIModule.guiScale in x..(x + w) && mouseY / ClickGUIModule.guiScale in y..(y + h)
+    if (scaled) mouseX / ClickGUIModule.getStandardGuiScale() in x..(x + w) && mouseY / ClickGUIModule.getStandardGuiScale() in y..(y + h)
     else mouseX in x..(x + w) && mouseY in y..(y + h)
 
 fun isAreaHovered(x: Float, y: Float, w: Float, scaled: Boolean = false): Boolean =
-    if (scaled) mouseX / ClickGUIModule.guiScale in x..(x + w) && mouseY / ClickGUIModule.guiScale >= y
+    if (scaled) mouseX / ClickGUIModule.getStandardGuiScale() in x..(x + w) && mouseY / ClickGUIModule.getStandardGuiScale() >= y
     else mouseX in x..(x + w) && mouseY >= y
 
 fun getQuadrant(): Int =

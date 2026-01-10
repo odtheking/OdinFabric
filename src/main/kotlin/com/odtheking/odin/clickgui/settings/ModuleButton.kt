@@ -66,7 +66,7 @@ class ModuleButton(val module: Module, val panel: Panel) {
 
         if (extendAnim.isAnimating() || extended) {
             for (setting in representableSettings) {
-                if (setting.isVisible) drawY += setting.render(x, y + drawY, mouseX / ClickGUIModule.guiScale, mouseY / ClickGUIModule.guiScale)
+                if (setting.isVisible) drawY += setting.render(x, y + drawY, mouseX / ClickGUIModule.getStandardGuiScale(), mouseY / ClickGUIModule.getStandardGuiScale())
             }
         }
 
