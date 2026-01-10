@@ -3,6 +3,7 @@ package com.odtheking.odin.utils.handlers
 import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.utils.logError
+import com.odtheking.odin.utils.modMessage
 
 open class TickTask(
     private val tickDelay: Int,
@@ -17,10 +18,10 @@ open class TickTask(
     }
 
     fun run() {
-        if (++ticks == tickDelay) {
+        if (ticks == tickDelay) {
             runCatching(task).onFailure { logError(it, this) }
             ticks = 0
-        }
+        } else ticks++
     }
 }
 
