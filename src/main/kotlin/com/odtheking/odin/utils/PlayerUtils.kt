@@ -14,7 +14,7 @@ fun playSoundSettings(soundSettings: Triple<String, Float, Float>) {
     playSoundAtPlayer(soundEvent, volume, pitch)
 }
 
-fun playSoundAtPlayer(event: SoundEvent, volume: Float = 1f, pitch: Float = 1f) {
+fun playSoundAtPlayer(event: SoundEvent, volume: Float = 1f, pitch: Float = 1f) = mc.execute {
     mc.soundManager.playDelayed(SimpleSoundInstance.forUI(event, pitch, volume), 0)
 }
 

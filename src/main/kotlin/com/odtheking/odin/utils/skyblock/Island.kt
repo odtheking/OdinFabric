@@ -24,14 +24,4 @@ enum class Island(val displayName: String) {
     BackwaterBayou("Backwater Bayou"),
     Galatea("Galatea"),
     Unknown("(Unknown)");
-
-    fun isArea(area: Island): Boolean {
-        if (this == SinglePlayer) return true
-        return this == area
-    }
-
-    fun isArea(vararg areas: Island): Boolean {
-        if (this == SinglePlayer) return true
-        return this in areas
-    }
 }

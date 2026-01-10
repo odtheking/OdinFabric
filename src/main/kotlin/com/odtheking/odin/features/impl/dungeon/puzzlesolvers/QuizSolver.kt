@@ -21,7 +21,6 @@ object QuizSolver {
     private var triviaOptions: MutableList<TriviaAnswer> = MutableList(3) { TriviaAnswer(null, false) }
     private data class TriviaAnswer(var blockPos: BlockPos?, var isCorrect: Boolean)
 
-
     fun onMessage(msg: String) {
         if (msg.startsWith("[STATUE] Oruo the Omniscient: ") && msg.endsWith("correctly!")) {
             if (msg.contains("answered the final question")) {

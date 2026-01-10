@@ -90,7 +90,7 @@ object Etherwarp : Module(
         }
 
         onSend<ServerboundUseItemPacket> {
-            if (!LocationUtils.currentArea.isArea(Island.SinglePlayer) || mc.player?.isShiftKeyDown == false || cachedEtherData == null) return@onSend
+            if (!LocationUtils.isCurrentArea(Island.SinglePlayer) || mc.player?.isShiftKeyDown == false || cachedEtherData == null) return@onSend
 
             etherPos?.pos?.let {
                 if (etherPos?.succeeded == false) return@onSend
@@ -125,7 +125,7 @@ object Etherwarp : Module(
         val player = mc.player ?: return EtherPos.NONE
         if (position == null) return EtherPos.NONE
         val eyeHeight = if (player.isCrouching) {
-            if (LocationUtils.currentArea.isArea(Island.Galatea)) 1.27 else 1.54 // Use modern sneak height in Galatea
+            if (LocationUtils.isCurrentArea(Island.Galatea, Island.ThePark)) 1.27 else 1.54 // Use modern sneak height in Galatea
         } else 1.62
 
         val startPos = position.addVec(y = eyeHeight)

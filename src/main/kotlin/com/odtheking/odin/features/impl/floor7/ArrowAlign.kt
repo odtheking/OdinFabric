@@ -1,11 +1,10 @@
 package com.odtheking.odin.features.impl.floor7
 
-import com.odtheking.mixin.accessors.ServerboundInteractPacketAccessor
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
+import com.odtheking.odin.events.EntityInteractEvent
 import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.events.core.on
-import com.odtheking.odin.events.core.onSend
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.addVec
 import com.odtheking.odin.utils.component1
@@ -16,11 +15,8 @@ import com.odtheking.odin.utils.render.drawText
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.M7Phases
 import net.minecraft.core.BlockPos
-import net.minecraft.network.protocol.game.ServerboundInteractPacket
-import net.minecraft.world.InteractionHand
 import net.minecraft.world.entity.decoration.ItemFrame
 import net.minecraft.world.item.Items
-import net.minecraft.world.phys.Vec3
 
 object ArrowAlign : Module(
     name = "Arrow Align",
@@ -61,31 +57,23 @@ object ArrowAlign : Module(
             }
         }
 
-        onSend<ServerboundInteractPacket> {
-            if (DungeonUtils.getF7Phase() != M7Phases.P3) return@onSend
+        on<EntityInteractEvent> {
+            if (DungeonUtils.getF7Phase() != M7Phases.P3) return@on
+            if (entity !is ItemFrame || entity.item?.item != Items.ARROW) return@on
+            val (x, y, z) = entity.blockPosition()
 
-            dispatch(object : ServerboundInteractPacket.Handler {
-                override fun onInteraction(hand: InteractionHand) {
-                    val entity = mc.level?.getEntity((this@onSend as ServerboundInteractPacketAccessor).entityId) as? ItemFrame ?: return
-                    if (entity.item?.item != Items.ARROW) return
-                    val (x, y, z) = entity.blockPosition()
+            val frameIndex = ((y - frameGridCorner.y) + (z - frameGridCorner.z) * 5)
+            if (x != frameGridCorner.x || currentFrameRotations?.get(frameIndex) == -1 || frameIndex !in 0..24) return@on
 
-                    val frameIndex = ((y - frameGridCorner.y) + (z - frameGridCorner.z) * 5)
-                    if (x != frameGridCorner.x || currentFrameRotations?.get(frameIndex) == -1 || frameIndex !in 0..24) return
+            if (!clicksRemaining.containsKey(frameIndex) && mc.player?.isCrouching == invertSneak && blockWrong) {
+                cancel()
+                return@on
+            }
 
-                    if (!clicksRemaining.containsKey(frameIndex) && mc.player?.isCrouching == invertSneak && blockWrong) {
-                        it.cancel()
-                        return
-                    }
+            recentClickTimestamps[frameIndex] = System.currentTimeMillis()
+            currentFrameRotations = currentFrameRotations?.toMutableList()?.apply { this[frameIndex] = (this[frameIndex] + 1) % 8 }
 
-                    recentClickTimestamps[frameIndex] = System.currentTimeMillis()
-                    currentFrameRotations = currentFrameRotations?.toMutableList()?.apply { this[frameIndex] = (this[frameIndex] + 1) % 8 }
-
-                    if (calculateClicksNeeded(currentFrameRotations?.get(frameIndex) ?: return, targetSolution?.get(frameIndex) ?: return) == 0) clicksRemaining.remove(frameIndex)
-                }
-                override fun onInteraction(hand: InteractionHand, pos: Vec3) {}
-                override fun onAttack() {}
-            })
+            if (calculateClicksNeeded(currentFrameRotations?.get(frameIndex) ?: return@on, targetSolution?.get(frameIndex) ?: return@on) == 0) clicksRemaining.remove(frameIndex)
         }
 
         on<RenderEvent.Extract> {
