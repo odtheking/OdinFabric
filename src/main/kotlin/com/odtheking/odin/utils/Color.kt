@@ -177,13 +177,4 @@ object Colors {
 
     @JvmField val gray38 = Color(38, 38, 38)
     @JvmField val gray26 = Color(26, 26, 26)
-
-    private val chromaColor = Color(0f, 0.6f, 0.8f)
-
-    @JvmStatic
-    val chroma: Color
-        get() {
-            chromaColor.hue = (System.currentTimeMillis() % 10000) / 10000f
-            return chromaColor
-        }
 }

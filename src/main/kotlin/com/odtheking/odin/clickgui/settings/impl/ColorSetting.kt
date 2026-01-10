@@ -9,12 +9,10 @@ import com.odtheking.odin.clickgui.settings.RenderableSetting
 import com.odtheking.odin.clickgui.settings.Saving
 import com.odtheking.odin.features.impl.render.ClickGUIModule
 import com.odtheking.odin.utils.Color
-import com.odtheking.odin.utils.Color.Companion.brighter
 import com.odtheking.odin.utils.Color.Companion.darker
 import com.odtheking.odin.utils.Color.Companion.hsbMax
 import com.odtheking.odin.utils.Color.Companion.withAlpha
 import com.odtheking.odin.utils.Colors
-import com.odtheking.odin.utils.ui.HoverHandler
 import com.odtheking.odin.utils.ui.TextInputHandler
 import com.odtheking.odin.utils.ui.animations.EaseInOutAnimation
 import com.odtheking.odin.utils.ui.animations.LinearAnimation
@@ -29,12 +27,10 @@ class ColorSetting(
     name: String,
     override val default: Color,
     private var allowAlpha: Boolean = false,
-    desc: String,
-    private var allowChroma: Boolean = true,
+    desc: String
 ) : RenderableSetting<Color>(name, desc), Saving {
 
     override var value: Color = default.copy()
-        get() = if (chroma) Colors.chroma else field
 
     private val expandAnim = EaseInOutAnimation(200)
     private val defaultHeight = Panel.HEIGHT
@@ -49,9 +45,6 @@ class ColorSetting(
 
     private val alphaSliderAnim = LinearAnimation<Float>(100)
     private var alphaSliderPrev = 0f
-
-    private var chroma: Boolean = false
-    private val hoverHandler = HoverHandler(150)
 
     var section: Int? = null
 
@@ -134,30 +127,6 @@ class ColorSetting(
         val rectX = x + sidePadding
         val actualHeight = defaultHeight + if (allowAlpha) 250f else 230f
 
-        // Chroma toggle
-        if (allowChroma) {
-            val chromaX = x + width - 34f
-            val chromaY = y + actualHeight - 28f
-
-            hoverHandler.handle(chromaX, chromaY, 24f, 24f, true)
-
-            NVGRenderer.rect(chromaX, chromaY, 24f, 24f, gray38.brighter(1f + (hoverHandler.percent() / 200f)).rgba, 5f)
-
-            if (chroma) {
-                val color = value
-                NVGRenderer.rect(
-                    chromaX,
-                    chromaY,
-                    24f,
-                    24f,
-                    color.brighter(1f + (hoverHandler.percent() / 200f)).rgba,
-                    5f
-                )
-            }
-            NVGRenderer.hollowRect(chromaX, chromaY, 24f, 24f, 1f, Colors.chroma.rgba, 5f)
-        }
-        // end chroma toggle
-
         NVGRenderer.rect(rectX, y + actualHeight - 28f, width / 2, 24f, gray38.rgba, 4f)
         NVGRenderer.hollowRect(rectX, y + actualHeight - 28f, width / 2, 24f, 2f, ClickGUIModule.clickGUIColor.rgba, 4f)
 
@@ -179,11 +148,6 @@ class ColorSetting(
 
         if (!extended) return false
         textInputHandler.mouseClicked(mouseX, mouseY, click)
-
-        if (chromaHovered && click.button() == 0 && allowChroma) {
-            chroma = !chroma
-            return true
-        }
 
         section = when {
             isAreaHovered(lastX + 6f, lastY + 36f, width - 12f, 170f, true) -> 0 // sat & brightness
@@ -227,15 +191,6 @@ class ColorSetting(
     override fun read(element: JsonElement, gson: Gson) {
         value = gson.fromJson(element, Color::class.java) ?: default.copy()
     }
-
-    private val chromaHovered: Boolean
-        get() = isAreaHovered(
-            lastX + width - 34f,
-            lastY + getHeight() - 26f,
-            24f,
-            24f,
-            true
-        )
 
     private fun handleColorDrag(mouseX: Float, mouseY: Float, x: Float, y: Float, width: Float) {
         when (section) {
