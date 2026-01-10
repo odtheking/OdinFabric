@@ -19,11 +19,10 @@ object JsonResourceLoader {
             val stream = JsonResourceLoader::class.java.getResourceAsStream(resourcePath) ?: throw IllegalStateException("Resource not found: $resourcePath")
 
             val gson = gsonBuilder?.create() ?: defaultGson
-            InputStreamReader(stream, StandardCharsets.UTF_8).use { reader ->
-                val text = reader.readText()
-                if (gsonBuilder != null) gson.fromJson(text, T::class.java)
-                else gson.fromJson(text, object : TypeToken<T>() {}.type)
-            }
+            val type = if (gsonBuilder != null) T::class.java
+            else object : TypeToken<T>() {}.type
+
+            InputStreamReader(stream, StandardCharsets.UTF_8).use { reader -> gson.fromJson(reader, type) }
         } catch (e: Exception) {
             logger.error("Error loading $resourcePath", e)
             defaultValue

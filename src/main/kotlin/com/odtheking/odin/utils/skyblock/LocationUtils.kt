@@ -26,7 +26,7 @@ object LocationUtils {
 
     init {
         onReceive<ClientboundPlayerInfoUpdatePacket> {
-            if (!currentArea.isArea(Island.Unknown) || actions().none { it.equalsOneOf(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME) }) return@onReceive
+            if (!isCurrentArea(Island.Unknown) || actions().none { it.equalsOneOf(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME) }) return@onReceive
             val area = entries()?.find { it?.displayName?.string?.startsWithOneOf("Area: ", "Dungeon: ") == true }?.displayName?.string ?: return@onReceive
             currentArea = Island.entries.firstOrNull { area.contains(it.displayName, true) } ?: Island.Unknown
         }
@@ -36,17 +36,20 @@ object LocationUtils {
         }
 
         onReceive<ClientboundSetPlayerTeamPacket> {
-            if (!currentArea.isArea(Island.Unknown)) return@onReceive
+            if (!isCurrentArea(Island.Unknown)) return@onReceive
             val text = parameters?.getOrNull()?.let { it.playerPrefix?.string?.plus(it.playerSuffix?.string) } ?: return@onReceive
 
             lobbyRegex.find(text)?.groupValues?.get(1)?.let { lobbyId = it }
         }
 
         on<WorldEvent.Load> {
-            currentArea = Island.Unknown
+            currentArea = if (mc.isSingleplayer) Island.SinglePlayer else Island.Unknown
             isInSkyblock = false
             lobbyId = null
-            if (mc.isSingleplayer) currentArea = Island.SinglePlayer
         }
     }
+
+    fun isCurrentArea(vararg areas: Island): Boolean =
+        if (currentArea == Island.SinglePlayer) true
+        else areas.any { currentArea == it }
 }
