@@ -12,7 +12,9 @@ import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.impl.dungeon.LeapMenu
 import com.odtheking.odin.features.impl.dungeon.LeapMenu.odinSorting
 import com.odtheking.odin.features.impl.dungeon.Mimic
+import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.network.WebUtils.hasBonusPaulScore
+import com.odtheking.odin.utils.network.hypixelapi.RequestUtils
 import com.odtheking.odin.utils.romanToInt
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getDungeonTeammates
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.Room
@@ -37,6 +39,9 @@ object DungeonListener {
     var floor: Floor? = null
     var inBoss = false
     var paul = false
+
+    private var firstDeath: DungeonPlayer? = null
+    var firstDeathHasSpirit = false
 
     private fun getBoss(): Boolean = with(mc.player) {
         if (this == null || floor?.floorNumber == null) return false
@@ -105,7 +110,20 @@ object DungeonListener {
             deathRegex.find(value)?.let { match ->
                 dungeonTeammates.find { teammate ->
                     teammate.name == (match.groupValues[1].takeUnless { it == "You" } ?: mc.player?.name?.string)
-                }?.deaths?.inc()
+                }?.let { teammate ->
+                    teammate.deaths++
+                    if (firstDeath == null) {
+                        firstDeath = teammate
+                        scope.launch {
+                            val profile = RequestUtils.getProfile(teammate.name)
+                            val memberData = profile.getOrElse { return@launch modMessage(it.message) }.memberData
+                                ?: return@launch modMessage("Could not find member data for ${teammate.name}")
+                            firstDeathHasSpirit = memberData.pets.pets.any {
+                                it.type.equals("SPIRIT", true) && it.tier == "LEGENDARY"
+                            }
+                        }
+                    }
+                }
             }
 
             when (partyMessageRegex.find(value)?.groupValues?.get(1)?.lowercase() ?: return@on) {
