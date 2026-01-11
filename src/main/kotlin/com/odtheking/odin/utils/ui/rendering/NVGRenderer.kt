@@ -41,10 +41,23 @@ object NVGRenderer {
         require(vg != -1L) { "Failed to initialize NanoVG" }
     }
 
+    fun devicePixelRatio(): Float {
+        return try {
+            val window = mc.window
+            val fbw = window.width
+            val ww = window.screenWidth
+            if (ww == 0) 1f else fbw.toFloat() / ww.toFloat()
+        } catch (_: Throwable) {
+            1f
+        }
+    }
+
     fun beginFrame(width: Float, height: Float) {
         if (drawing) throw IllegalStateException("[NVGRenderer] Already drawing, but called beginFrame")
 
-        nvgBeginFrame(vg, width, height, 1f)
+        val dpr = devicePixelRatio()
+
+        nvgBeginFrame(vg, width / dpr, height / dpr, dpr)
         nvgTextAlign(vg, NVG_ALIGN_LEFT or NVG_ALIGN_TOP)
         drawing = true
     }

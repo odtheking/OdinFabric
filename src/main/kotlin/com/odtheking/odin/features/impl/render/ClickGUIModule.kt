@@ -15,12 +15,14 @@ import com.odtheking.odin.utils.alert
 import com.odtheking.odin.utils.getChatBreak
 import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.network.WebUtils.fetchJson
+import com.odtheking.odin.utils.ui.rendering.NVGRenderer
 import kotlinx.coroutines.launch
 import net.minecraft.network.chat.ClickEvent
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.HoverEvent
 import org.lwjgl.glfw.GLFW
 import java.net.URI
+import kotlin.math.max
 
 @AlwaysActive
 object ClickGUIModule : Module(
@@ -30,6 +32,8 @@ object ClickGUIModule : Module(
 ) {
     val enableNotification by BooleanSetting("Chat notifications", true, desc = "Sends a message when you toggle a module with a keybind")
     val clickGUIColor by ColorSetting("Color", Color(50, 150, 220), desc = "The color of the Click GUI.")
+
+    val roundedPanelBottom by BooleanSetting("Rounded Panel Bottoms", true, desc = "Whether to extend panels to make them rounded at the bottom.")
 
     val hypixelApiUrl by StringSetting("API URL", "https://api.odtheking.com/hypixel/", 128, "The Hypixel API server to connect to.").hide()
     val webSocketUrl by StringSetting("WebSocket URL", "wss://api.odtheking.com/ws/", 128, "The Websocket server to connect to.").hide()
@@ -87,6 +91,12 @@ object ClickGUIModule : Module(
             """.trimIndent(), "")
             alert("Odin Update Available")
         }
+    }
+
+    fun getStandardGuiScale(): Float {
+        val verticalScale = (mc.window.height.toFloat() / 1080f) / NVGRenderer.devicePixelRatio()
+        val horizontalScale = (mc.window.width.toFloat() / 1920f) / NVGRenderer.devicePixelRatio()
+        return max(verticalScale, horizontalScale).coerceIn(1f, 3f)
     }
 
     private suspend fun checkNewerVersion(currentVersion: String): String? {

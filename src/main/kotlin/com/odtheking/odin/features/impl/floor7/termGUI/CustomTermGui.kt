@@ -22,7 +22,7 @@ abstract class TermGui {
         val gap = TerminalSolver.gap * TerminalSolver.customTermSize
         val totalSlotSpace = slotSize + gap
 
-        val backgroundStartX = mc.window.width / 2f + -(slotWidth / 2f) * totalSlotSpace - 7.5f * TerminalSolver.customTermSize
+        val backgroundStartX = mc.window.width / 2f + - (slotWidth / 2f) * totalSlotSpace - 7.5f * TerminalSolver.customTermSize
         val backgroundStartY = mc.window.height / 2f + ((-rowOffset + 0.5f) * totalSlotSpace) - 7.5f * TerminalSolver.customTermSize
         val backgroundWidth = slotWidth * totalSlotSpace + 15f * TerminalSolver.customTermSize
         val backgroundHeight = ((slotCount) / 9) * totalSlotSpace + 15f * TerminalSolver.customTermSize

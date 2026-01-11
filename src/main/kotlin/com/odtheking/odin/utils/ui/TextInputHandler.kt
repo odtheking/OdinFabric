@@ -3,7 +3,6 @@ package com.odtheking.odin.utils.ui
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
-import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.input.CharacterEvent
 import net.minecraft.client.input.KeyEvent
 import net.minecraft.client.input.MouseButtonEvent
@@ -88,7 +87,7 @@ class TextInputHandler(
     }
 
     fun mouseClicked(mouseX: Float, mouseY: Float, click: MouseButtonEvent): Boolean {
-        if (!isAreaHovered(x, y, width, height)) {
+        if (!isAreaHovered(x, y, width, height, true)) {
             resetState()
             return false
         }
