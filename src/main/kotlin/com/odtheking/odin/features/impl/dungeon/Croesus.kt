@@ -16,6 +16,7 @@ import com.odtheking.odin.utils.network.WebUtils.fetchJson
 import com.odtheking.odin.utils.render.getStringWidth
 import com.odtheking.odin.utils.render.text
 import com.odtheking.odin.utils.render.textDim
+import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import kotlinx.coroutines.launch
 import net.minecraft.client.gui.GuiGraphics
@@ -55,7 +56,7 @@ object Croesus : Module(
         }
     }
 
-    private var cachedPrices = emptyMap<String, Double>()
+    var cachedPrices = emptyMap<String, Double>()
     private var currentChestCount = 0
 
     private val chestNameRegex = Regex("^(Wood|Iron|Gold|Diamond|Emerald|Obsidian|Bedrock) Chest$")
