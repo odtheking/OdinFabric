@@ -12,6 +12,7 @@ import com.odtheking.odin.utils.Color.Companion.multiplyAlpha
 import com.odtheking.odin.utils.addVec
 import com.odtheking.odin.utils.renderPos
 import com.odtheking.odin.utils.unaryMinus
+import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import net.minecraft.client.gui.Font
 import net.minecraft.client.renderer.LightTexture
 import net.minecraft.client.renderer.MultiBufferSource
@@ -36,12 +37,12 @@ internal data class BeaconData(val pos: BlockPos, val color: Color, val isScopin
 internal data class TextData(val text: String, val pos: Vec3, val scale: Float, val depth: Boolean, val cameraRotation: org.joml.Quaternionf, val font: Font, val textWidth: Float)
 
 class RenderConsumer {
-    internal val lines = listOf(mutableListOf<LineData>(), mutableListOf())
-    internal val filledBoxes = listOf(mutableListOf<BoxData>(), mutableListOf())
-    internal val wireBoxes = listOf(mutableListOf<BoxData>(), mutableListOf())
+    internal val lines = listOf(ObjectArrayList<LineData>(), ObjectArrayList())
+    internal val filledBoxes = listOf(ObjectArrayList<BoxData>(), ObjectArrayList())
+    internal val wireBoxes = listOf(ObjectArrayList<BoxData>(), ObjectArrayList())
 
-    internal val beaconBeams = mutableListOf<BeaconData>()
-    internal val texts = mutableListOf<TextData>()
+    internal val beaconBeams = ObjectArrayList<BeaconData>()
+    internal val texts = ObjectArrayList<TextData>()
 
     fun clear() {
         lines.forEach { it.clear() }

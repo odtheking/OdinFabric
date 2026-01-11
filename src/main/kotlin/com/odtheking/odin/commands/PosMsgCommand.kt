@@ -28,7 +28,7 @@ val posMsgCommand = Commodore("posmsg") {
                 suggests {
                     listOf("darkblue", "darkgreen", "darkaqua", "darkred", "darkpurple",
                         "gold", "gray", "darkgray", "blue", "green", "aqua", "red",
-                        "lightpurple", "yellow", "white", "black", "#FF0000", "#00FF00", "#0000FF")
+                        "lightpurple", "yellow", "white", "black")
                 }
             }
 
