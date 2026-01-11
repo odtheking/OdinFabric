@@ -3,6 +3,7 @@ package com.odtheking.odin.utils.handlers
 import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.utils.logError
+import it.unimi.dsi.fastutil.objects.ObjectArrayList
 
 open class TickTask(
     private val tickDelay: Int,
@@ -17,10 +18,9 @@ open class TickTask(
     }
 
     fun run() {
-        if (++ticks == tickDelay) {
-            runCatching(task).onFailure { logError(it, this) }
-            ticks = 0
-        }
+        if (++ticks < tickDelay) return
+        runCatching(task).onFailure { logError(it, this) }
+        ticks = 0
     }
 }
 
@@ -31,16 +31,17 @@ fun schedule(ticks: Int, serverTick: Boolean = false, task: () -> Unit) {
 }
 
 object TickTasks {
-    private val clientTickTasks = mutableListOf<TickTask>()
-    private val serverTickTasks = mutableListOf<TickTask>()
+    private val clientTickTasks = ObjectArrayList<TickTask>()
+    private val serverTickTasks = ObjectArrayList<TickTask>()
 
     fun registerClientTask(task: TickTask) = clientTickTasks.add(task)
     fun registerServerTask(task: TickTask) = serverTickTasks.add(task)
 
-    private fun MutableList<TickTask>.runTasks() {
-        forEach { task ->
+    private fun ObjectArrayList<TickTask>.runTasks() {
+        for (i in indices.reversed()) {
+            val task = this[i]
             task.run()
-            removeIf { task is OneShotTickTask && task.ticks == 0 }
+            if (task is OneShotTickTask && task.ticks == 0) removeAt(i)
         }
     }
 
