@@ -148,10 +148,10 @@ object PartyUtils {
     }
 
     private fun disband() {
+        PartyEvent.Leave(members).postAndCatch()
         members.clear()
         partyLeader = null
         isInParty = false
-        PartyEvent.Leave(members).postAndCatch()
     }
 
     fun isLeader(): Boolean = partyLeader == mc.player?.gameProfile?.name

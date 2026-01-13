@@ -87,15 +87,14 @@ object DungeonWaypointConfig {
         }
     }
 
-    fun decodeWaypoints(base64Data: String): MutableMap<String, MutableList<DungeonWaypoint>>? {
+    fun decodeWaypoints(input: String, isJson: Boolean): MutableMap<String, MutableList<DungeonWaypoint>>? {
         return try {
             gson.fromJson(
-                decompress(Base64.decode(base64Data)),
+                if (isJson) input else decompress(Base64.decode(input)),
                 object : TypeToken<MutableMap<String, MutableList<DungeonWaypoint>>>() {}.type
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            modMessage("§eError decoding Base64 or parsing json. §r${e.message}")
             null
         }
     }
