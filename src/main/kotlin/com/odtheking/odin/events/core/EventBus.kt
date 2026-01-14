@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
 import net.minecraft.network.protocol.Packet
 import net.minecraft.util.profiling.Profiler
 import net.minecraft.util.profiling.ProfilerFiller
+import java.util.concurrent.ConcurrentHashMap
 
 object EventBus {
 
@@ -18,7 +19,7 @@ object EventBus {
     @JvmField
     internal val invokers = Object2ObjectOpenHashMap<Class<out Event>, Invoker>()
 
-    private val profilerNameCache = Object2ObjectOpenHashMap<Class<out Event>, String>()
+    private val profilerNameCache = ConcurrentHashMap<Class<out Event>, String>()
 
     fun subscribe(subscriber: Any) {
         if (activeSubscribers.add(subscriber)) {
@@ -41,7 +42,7 @@ object EventBus {
         val invoker = invokers[eventClass] ?: return
 
         val profiler = Profiler.get()
-        val profilerName = profilerNameCache.getOrPut(eventClass) { "Odin: ${eventClass.simpleName}" }
+        val profilerName = profilerNameCache.computeIfAbsent(eventClass) { "Odin: ${it.simpleName}" }
         profiler.push(profilerName)
         try {
             invoker.invoke(event, profiler)

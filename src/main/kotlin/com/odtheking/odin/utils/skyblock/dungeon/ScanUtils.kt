@@ -23,8 +23,8 @@ object ScanUtils {
     private const val ROOM_SIZE_SHIFT = 5  // Since ROOM_SIZE = 32 (2^5) so we can perform bitwise operations
     private const val START = -185
 
-    private val roomList: Set<RoomData> = JsonResourceLoader.loadJson("/assets/odin/rooms.json", setOf())
-    private val coreToRoomData: Map<Int, RoomData> =
+    val roomList: Set<RoomData> = JsonResourceLoader.loadJson("/assets/odin/rooms.json", setOf())
+    val coreToRoomData: Map<Int, RoomData> =
         roomList.flatMap { room -> room.cores.map { core -> core to room } }.toMap()
 
     private val horizontals = Direction.entries.filter { it.axis.isHorizontal }
@@ -73,7 +73,7 @@ object ScanUtils {
         }
     }
 
-    private fun updateRotation(room: Room, roomHeight: Int) {
+    fun updateRotation(room: Room, roomHeight: Int) {
         room.roomHeight = roomHeight
         if (room.data.name == "Fairy") { // Fairy room doesn't have a clay block so we need to set it manually
             room.clayPos = room.roomComponents.firstOrNull()?.let { BlockPos(it.x - 15, roomHeight, it.z - 15) } ?: return

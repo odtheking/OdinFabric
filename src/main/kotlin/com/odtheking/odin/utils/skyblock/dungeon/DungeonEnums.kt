@@ -1,8 +1,12 @@
 package com.odtheking.odin.utils.skyblock.dungeon
 
+import com.odtheking.odin.features.impl.dungeon.map.DungMap.mapCenter
+import com.odtheking.odin.features.impl.dungeon.map.DungMap.roomSize
+import com.odtheking.odin.features.impl.dungeon.map.Vec2i
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Colors
 import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.entity.player.Player
 
 /**
  * Data class representing a player in a dungeon, including their name, class, skin location, and associated player entity.
@@ -17,9 +21,25 @@ data class DungeonPlayer(
     val clazz: DungeonClass,
     val clazzLvl: Int,
     val locationSkin: ResourceLocation?,
+    var entity: Player? = null,
     var isDead: Boolean = false,
-    var deaths: Int = 0
-)
+    var deaths: Int = 0,
+    var mapPos: Vec2i = Vec2i(0, 0),
+    var yaw: Float = 0f,
+) {
+    fun mapRenderPosition(): Pair<Float, Float> =
+        entity?.let {
+            ((it.x + 201f) / (32f / 20f)).toFloat() to ((it.z + 201f) / (32f / 20f)).toFloat()
+        } ?: run {
+            roomSize?.let {
+                val offset = this.mapPos.multiply(32.0 / (((it + 4.0) * 2)))
+                val pos = mapCenter?.add(offset)?.add(Vec2i(201, 201))?.divide(32.0 / 20.0) ?: Vec2i(0, 0)
+                Pair(pos.x.toFloat(), pos.z.toFloat())
+            } ?: Pair(0f, 0f)
+        }
+
+    fun mapRenderYaw(): Float = entity?.yRot ?: yaw
+}
 
 /**
  * Enumeration representing puzzles in a dungeon.

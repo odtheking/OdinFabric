@@ -9,6 +9,7 @@ import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.render.drawFilledBox
 import com.odtheking.odin.utils.render.drawWireFrameBox
+import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.skyblock.Supply
 import net.minecraft.core.BlockPos
 import net.minecraft.world.phys.AABB
@@ -27,7 +28,7 @@ object PearlWaypoints : Module(
 
     init {
         on<RenderEvent.Extract> {
-         //   if (!KuudraUtils.inKuudra || KuudraUtils.phase != 1) return@on
+            if (!KuudraUtils.inKuudra || KuudraUtils.phase != 1) return@on
 
             var closest = true
             getOrderedLineups(mc.player?.blockPosition() ?: return@on).forEach { (lineup, color) ->

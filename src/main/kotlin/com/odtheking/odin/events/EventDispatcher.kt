@@ -31,12 +31,12 @@ object EventDispatcher {
             WorldEvent.Unload().postAndCatch()
         }
 
-        ClientTickEvents.START_CLIENT_TICK.register { _ ->
-            mc.level?.let { TickEvent.Start().postAndCatch() }
+        ClientTickEvents.START_WORLD_TICK.register { world ->
+            mc.level?.let { TickEvent.Start(world).postAndCatch() }
         }
 
-        ClientTickEvents.END_CLIENT_TICK.register { _ ->
-            mc.level?.let { TickEvent.End().postAndCatch() }
+        ClientTickEvents.END_WORLD_TICK.register { world ->
+            mc.level?.let { TickEvent.End(world).postAndCatch() }
         }
 
         WorldRenderEvents.END_EXTRACTION.register { handler ->

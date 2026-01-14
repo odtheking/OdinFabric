@@ -20,5 +20,5 @@ data class RoomComponent(val x: Int, val z: Int, val core: Int = 0) {
 
 data class RoomData(
     val name: String, val type: RoomType, val cores: List<Int>,
-    val crypts: Int, val secrets: Int, val trappedChests: Int,
+    val crypts: Int, val secrets: Int, val trappedChests: Int, val shape: RoomShape
 )

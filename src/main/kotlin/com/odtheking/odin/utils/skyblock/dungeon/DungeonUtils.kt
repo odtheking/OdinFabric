@@ -197,12 +197,16 @@ object DungeonUtils {
             val (_, name, clazz, clazzLevel) = tablistRegex.find(line)?.destructured ?: continue
 
             previousTeammates.find { it.name == name }?.let { player -> player.isDead = clazz == "DEAD" }
-                ?: previousTeammates.add(
-                    DungeonPlayer(
-                        name, DungeonClass.entries.find { it.name == clazz } ?: continue,
-                        romanToInt(clazzLevel), mc.connection?.getPlayerInfo(name)?.skin?.body?.id()
+                ?: run {
+                    val player = mc.connection?.getPlayerInfo(name) ?: continue
+                    previousTeammates.add(
+                        DungeonPlayer(
+                            name, DungeonClass.entries.find { it.name == clazz } ?: continue,
+                            romanToInt(clazzLevel), player.skin?.body?.id(),
+                            entity = mc.level?.getPlayerByUUID(player.profile?.id)
+                        )
                     )
-                )
+                }
         }
         return previousTeammates
     }
