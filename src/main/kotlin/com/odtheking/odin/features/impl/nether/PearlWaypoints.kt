@@ -9,7 +9,6 @@ import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.render.drawFilledBox
 import com.odtheking.odin.utils.render.drawWireFrameBox
-import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.skyblock.Supply
 import net.minecraft.core.BlockPos
 import net.minecraft.world.phys.AABB
@@ -28,7 +27,7 @@ object PearlWaypoints : Module(
 
     init {
         on<RenderEvent.Extract> {
-            if (!KuudraUtils.inKuudra || KuudraUtils.phase != 1) return@on
+         //   if (!KuudraUtils.inKuudra || KuudraUtils.phase != 1) return@on
 
             var closest = true
             getOrderedLineups(mc.player?.blockPosition() ?: return@on).forEach { (lineup, color) ->
@@ -42,8 +41,9 @@ object PearlWaypoints : Module(
                         if (presetWaypoints) drawFilledBox(AABB(blockPos), color)
                         if (dynamicWaypoints) {
                             val destinationSupply = if (lineup.supply == Supply.Square) NoPre.missing else lineup.supply
-                            calculatePearl(destinationSupply.dropOffSpot)?.let {
-                                drawFilledBox(AABB.ofSize(it, 0.12, 0.12, 0.12), dynamicWaypointsColor)
+                            calculatePearl(destinationSupply.dropOffSpot)?.let { result ->
+                                drawFilledBox(AABB.ofSize(result.upAngle, 0.12, 0.12, 0.12), dynamicWaypointsColor)
+                                drawFilledBox(AABB.ofSize(result.flatAngle, 0.12, 0.12, 0.12), dynamicWaypointsColor)
                             }
                             drawWireFrameBox(AABB(BlockPos(lineup.supply.dropOffSpot.above())), dynamicWaypointsColor)
                         }
@@ -71,47 +71,94 @@ object PearlWaypoints : Module(
         )
     }
 
-    private const val DEG_TO_RAD = PI / 180
-    private const val RAD_TO_DEG = 180 / PI
-    private const val E_VEL = 1.67
-    private const val E_VEL_SQ = E_VEL * E_VEL
     private const val GRAV = 0.05
+    private const val E_VEL = 1.67
+
+    private data class PearlResult(
+        val upAngle: Vec3,
+        val flatAngle: Vec3,
+        val upTiming: Int,
+        val flatTiming: Int
+    )
 
     // Made by Aidanmao
-    private fun calculatePearl(targetPos: BlockPos): Vec3? {
+    private fun calculatePearl(targetPos: BlockPos): PearlResult? {
         val (posX, posY, posZ) = mc.player?.renderPos ?: return null
 
         val offX = targetPos.x - posX
+        val offY = targetPos.y - (posY + 1.62)
         val offZ = targetPos.z - posZ
         val offHor = hypot(offX, offZ)
 
-        val discrim = E_VEL_SQ - GRAV * (((GRAV * offHor * offHor) / (2 * E_VEL_SQ)) - (targetPos.y - posY + 1.62))
-        if (discrim < 0) return null
+        val v2 = E_VEL * E_VEL
+        val v4 = v2 * v2
+        val g = GRAV * (1.0 + (offHor * 0.0012)) // drag
 
-        val sqrtDiscrim = sqrt(discrim)
-        val atanFactor = GRAV * offHor
-        val angle1 = (atan((E_VEL_SQ + sqrtDiscrim) / atanFactor)) * RAD_TO_DEG
-        val angle2 = (atan((E_VEL_SQ - sqrtDiscrim) / atanFactor)) * RAD_TO_DEG
+        val discriminant = v4 - g * (g * (offHor * offHor) + 2 * offY * v2)
 
-        val angle = when {
-            angle1 >= 45.0 -> angle1
-            angle2 >= 45.0 -> angle2
-            else -> return null
+        if (discriminant < 0) return PearlResult(Vec3(0.0, 9.0, 0.0), Vec3(0.0, 9.0, 0.0), 0, 0)
+
+        val root = sqrt(discriminant)
+
+        val angle1 = Math.toDegrees(atan((v2 + root) / (g * offHor)))
+        val angle2 = Math.toDegrees(atan((v2 - root) / (g * offHor)))
+
+        val uAngle = max(angle1, angle2)
+        val fAngle = min(angle1, angle2)
+
+        var uRes = Vec3(0.0, 10.0, 0.0)
+        var fRes = Vec3(0.0, 10.0, 0.0)
+
+        var uTiming = 0
+        var fTiming = 0
+
+        if (uAngle > 0.0) {
+            val pitch = -uAngle
+            val radP = Math.toRadians(pitch)
+            val radY = -atan2(offX, offZ)
+
+            val vY = E_VEL * sin(Math.toRadians(uAngle))
+            val flightTimeFactor = (1.0012).pow(max(offHor / 15, 1.0)) * 0.8
+            val fT = (vY + sqrt(vY * vY + 2 * GRAV * (posY + 1.62 - targetPos.y))) / GRAV
+            uTiming = floor((fT / (0.992).pow(fT)) * flightTimeFactor).toInt() - 2
+
+            val cosRadP = cos(radP)
+            val fX = cosRadP * sin(radY)
+            val fY = -sin(radP)
+            val fZ = cosRadP * cos(radY)
+
+            val targetX = posX - fX * 10
+            val targetY = posY + fY * 10
+            val targetZ = posZ + fZ * 10
+
+            uRes = Vec3(targetX, targetY, targetZ)
         }
 
-        val dragAng = when {
-            offHor < 10 -> 1.0
-            offHor in 28.0..<40.0 -> 1.033 + ((offHor - 28) / 12.0) * (-0.033)
-            offHor < 28 -> 1.026 + ((offHor - 10) / 18.0) * (-0.017)
-            offHor in 36.0..45.0 -> 0.982
-            else -> 1.0 + ((offHor - 40) / 15.0) * (-0.12)
+        if (fAngle > 0.0) {
+            val pitch = -fAngle
+            val radP = Math.toRadians(pitch)
+            val radY = -atan2(offX, offZ)
+
+            val vX = E_VEL * cos(Math.toRadians(fAngle))
+
+            val drag = 0.978
+            val ticks = ln(1 - (offHor * (1 - drag) / vX)) / ln(drag)
+
+            fTiming = if (ticks.isNaN()) (offHor / vX).toInt() else ceil(ticks).toInt()
+
+            val cosRadP = cos(radP)
+            val fX = cosRadP * sin(radY)
+            val fY = -sin(radP)
+            val fZ = cosRadP * cos(radY)
+
+            val targetX = posX - fX * 10
+            val targetY = posY + 1.2 + fY * 10
+            val targetZ = posZ + fZ * 10
+
+            fRes = Vec3(targetX, targetY, targetZ)
         }
 
-        val radP = -(angle * dragAng) * DEG_TO_RAD
-        val radY = -atan2(offX, offZ)
-        val cosRadP = cos(radP)
-
-        return Vec3(posX - (cosRadP * sin(radY)) * 10, posY + (-sin(radP)) * 10, posZ + (cosRadP * cos(radY)) * 10)
+        return PearlResult(uRes, fRes, uTiming, fTiming)
     }
 
     private val pearlLineups: Map<Lineup, Color> = mapOf(
