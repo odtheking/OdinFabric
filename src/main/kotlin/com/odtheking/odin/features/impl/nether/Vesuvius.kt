@@ -9,6 +9,7 @@ import com.odtheking.odin.features.Module
 import com.odtheking.odin.features.impl.dungeon.Croesus.cachedPrices
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.render.text
+import com.odtheking.odin.utils.render.textDim
 import net.minecraft.ChatFormatting
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.network.chat.Component
@@ -64,9 +65,7 @@ object Vesuvius : Module(
 
         on<GuiEvent.DrawSlot> {
             if (screen.title?.string.equalsOneOf("Vesuvius", "Croesus") && slot.item?.hoverName?.string == "Kuudra's Hollow") {
-                val loreString = slot.item?.loreString ?: return@on
-
-                if (hideClaimed && loreString.any { it == "No more chests to open!"}) cancel()
+                if (hideClaimed && slot.item?.loreString?.any { it == "No more chests to open!"} == true) cancel()
             }
         }
 
@@ -92,10 +91,8 @@ object Vesuvius : Module(
         }
 
         shardRegex.find(item)?.let { shard ->
-            val shardName = shard.groupValues[1]
-            val quantity = shard.groupValues.getOrNull(2)?.toIntOrNull() ?: 1
-            val price = cachedPrices["SHARD_${shardName.uppercase().replace(" ", "_")}"] ?: 0.0
-            return price * quantity.toDouble()
+            val price = cachedPrices["SHARD_${shard.groupValues[1].uppercase().replace(" ", "_")}"] ?: 0.0
+            return price * (shard.groupValues.getOrNull(2)?.toDoubleOrNull() ?: 1.0)
         }
 
         teethRegex.find(item)?.destructured?.let { (quantity) ->
@@ -149,9 +146,8 @@ object Vesuvius : Module(
 
     private fun GuiGraphics.drawOverlay(isEditing: Boolean): Pair<Int, Int> {
         val dataToDisplay = if (isEditing) sampleChestData else currentChest
-
         var yOffset = 0
-        val maxWidth = mc.font.width("Enchanted Book (Ferocious Mana V)") + mc.font.width("1 000 000 000")
+        val maxWidth = 251
 
         val cost = "%,.0f".format(dataToDisplay?.cost)
         val profit = "%,.0f".format(dataToDisplay?.profit)
