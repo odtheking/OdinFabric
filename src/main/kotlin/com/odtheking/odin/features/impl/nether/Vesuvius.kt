@@ -9,7 +9,6 @@ import com.odtheking.odin.features.Module
 import com.odtheking.odin.features.impl.dungeon.Croesus.cachedPrices
 import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.render.text
-import com.odtheking.odin.utils.render.textDim
 import net.minecraft.ChatFormatting
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.network.chat.Component
