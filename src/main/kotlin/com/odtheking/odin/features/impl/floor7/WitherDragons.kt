@@ -112,6 +112,8 @@ object WitherDragons : Module(
         }
 
         on<RenderEvent.Extract> {
+            if (DungeonUtils.getF7Phase() != M7Phases.P5) return@on
+
             WitherDragonsEnum.entries.forEach { dragon ->
                 if (dragonHealth) {
                     DragonCheck.dragonHealthMap.forEach { (_, data) ->

@@ -63,7 +63,7 @@ object ArrowsDevice : Module(
 
     init {
         on<BlockUpdateEvent> {
-        //    if (DungeonUtils.getF7Phase() != M7Phases.P3 || !devicePositions.contains(pos)) return@on
+            if (DungeonUtils.getF7Phase() != M7Phases.P3 || !devicePositions.contains(pos)) return@on
 
             if (old.block == Blocks.EMERALD_BLOCK && updated.block == Blocks.BLUE_TERRACOTTA) {
                 markedPositions.add(pos)
