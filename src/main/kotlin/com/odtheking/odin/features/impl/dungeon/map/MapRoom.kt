@@ -4,13 +4,11 @@ import com.odtheking.odin.features.impl.dungeon.DungeonMap
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Color.Companion.darker
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.*
-import net.minecraft.core.BlockPos
 
 class MapRoom(val data: RoomData, val height: Int) {
     val tiles = mutableListOf<Tile>()
     val places = mutableListOf<Vec2i>()
     var state = RoomState.UNDISCOVERED
-    var clayPos: BlockPos? = null
     var rotation: Rotations = Rotations.NONE
 
     var entryTile: Vec2i? = null
@@ -63,12 +61,8 @@ class MapRoom(val data: RoomData, val height: Int) {
         }
 
         override fun color(): Array<Color> {
-            val color = DungeonMap.normalRoomColor
-            return if (owner.state in setOf(RoomState.UNDISCOVERED, RoomState.UNOPENED)) {
-                arrayOf(color.darker(DungeonMap.darkenMultiplier))
-            } else {
-                arrayOf(color)
-            }
+            return if (owner.state in setOf(RoomState.UNDISCOVERED, RoomState.UNOPENED)) arrayOf(DungeonMap.normalRoomColor.darker(DungeonMap.darkenMultiplier))
+            else arrayOf(DungeonMap.normalRoomColor)
         }
     }
 
@@ -116,41 +110,15 @@ class MapRoom(val data: RoomData, val height: Int) {
     }
 
     fun textPlacement(): Vec2i {
-        val topLeft = tiles.minWith { a, b -> a.pos.x * 1000 + a.pos.z - b.pos.x * 1000 - b.pos.z }.placement()
-        if (rotation == Rotations.NONE) return topLeft
+        if (rotation == Rotations.NONE) return tiles.minBy { it.pos.x * 1000 + it.pos.z }.placement()
+        val placements = tiles.map { it.placement() }
 
         return when (data.shape) {
-            RoomShape.L -> if (tiles.size == 5) {
-                when (rotation) {
-                    Rotations.EAST, Rotations.SOUTH -> topLeft.add(10, 20)
-                    else -> topLeft.add(10, 0)
-                }
-            } else topLeft
+            RoomShape.L ->
+                Vec2i(placements.sumOf { it.x } / placements.size, placements.sumOf { it.z } / placements.size)
 
-            RoomShape.S2x1 -> if (tiles.size == 3) {
-                when (rotation) {
-                    Rotations.WEST -> topLeft.add(0, 10)
-                    else -> topLeft.add(10, 0)
-                }
-            } else topLeft
-
-            RoomShape.S3x1 -> if (tiles.size == 5) {
-                when (rotation) {
-                    Rotations.WEST -> topLeft.add(0, 20)
-                    else -> topLeft.add(20, 0)
-                }
-            } else topLeft
-
-            RoomShape.S4x1 -> if (tiles.size == 7) {
-                when (rotation) {
-                    Rotations.WEST -> topLeft.add(0, 30)
-                    else -> topLeft.add(30, 0)
-                }
-            } else topLeft
-
-            RoomShape.S2x2 -> if (tiles.size == 9) topLeft.add(10, 10) else topLeft
-
-            else -> topLeft
+            else ->
+                Vec2i((placements.minOf { it.x } + placements.maxOf { it.x }) / 2, (placements.minOf { it.z } + placements.maxOf { it.z }) / 2)
         }
     }
 }

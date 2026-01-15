@@ -3,13 +3,14 @@ package com.odtheking.odin.features.impl.dungeon.map
 import com.odtheking.odin.features.impl.dungeon.DungeonMap
 import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Color.Companion.darker
+import com.odtheking.odin.utils.equalsOneOf
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.RoomState
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.RoomType
 
 class Door(pos: Vec2i, var type: Type, val rooms: List<MapRoom.RoomTile>): Tile(pos) {
     enum class Type { BLOOD, NORMAL, WITHER }
 
-    var locked = type == Type.WITHER || type == Type.BLOOD
+    var locked = type.equalsOneOf(Type.WITHER, Type.BLOOD)
     val seen get() = rooms.any { it.owner.state !in setOf(RoomState.UNDISCOVERED, RoomState.UNOPENED) }
 
     override fun size(): Vec2i {

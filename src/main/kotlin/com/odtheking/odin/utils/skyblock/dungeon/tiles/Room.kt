@@ -8,7 +8,6 @@ data class Room(
     var rotation: Rotations = Rotations.NONE,
     var data: RoomData,
     var clayPos: BlockPos = BlockPos(0, 0, 0),
-    var roomHeight: Int = 0,
     val roomComponents: MutableSet<RoomComponent>,
     var waypoints: MutableSet<DungeonWaypoints.DungeonWaypoint> = mutableSetOf(),
 )

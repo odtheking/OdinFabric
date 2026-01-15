@@ -15,6 +15,7 @@ import com.odtheking.odin.utils.Color
 import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.equalsOneOf
 import com.odtheking.odin.utils.itemId
+import com.odtheking.odin.utils.render.hollowFill
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.RoomState
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.RoomType
@@ -67,7 +68,7 @@ object DungeonMap : Module(
 
     private val mapHud by HUD("Dungeon Map", "Displays the dungeon map with customizable colors.") { example ->
         when {
-            !DungeonUtils.inDungeons && !example -> 0 to 0
+            DungeonUtils.openRoomCount == 0 && !example -> 0 to 0
             example -> renderExampleMap()
             else -> renderDungeonMap()
         }
@@ -94,9 +95,10 @@ object DungeonMap : Module(
         matrices.pushMatrix()
 
         fill(0, 0, roomsX + offset, roomsZ + offset, backgroundColor.rgba)
+        hollowFill(0, 0, roomsX + offset, roomsZ + offset, 1, Colors.gray26)
         matrices.translate(backgroundSize, backgroundSize)
 
-        for (room in MapScanner.rooms.values) {
+        for (room in MapScanner.allRooms.values) {
             if (room.state == RoomState.UNDISCOVERED || room.state == RoomState.UNOPENED) continue
             for (tile in room.tiles) renderTile(tile)
         }
@@ -112,9 +114,9 @@ object DungeonMap : Module(
         val fontHeight = mc.font.lineHeight
         val textFactor = 1 / textScaling
 
-        for ((name, room) in MapScanner.rooms) {
-            if (room.data.type == RoomType.FAIRY || room.data.type == RoomType.ENTRANCE || room.data.type == RoomType.BLOOD) continue
-            if (room.state == RoomState.UNDISCOVERED || room.state == RoomState.UNOPENED) continue
+        for ((name, room) in MapScanner.allRooms) {
+            if (room.data.type.equalsOneOf(RoomType.FAIRY, RoomType.ENTRANCE, RoomType.BLOOD)) continue
+            if (room.state.equalsOneOf(RoomState.UNDISCOVERED, RoomState.UNOPENED)) continue
 
             val splitName = name.split(" ")
             val defaultHeight = 8 - fontHeight / (2 * textFactor) - ((splitName.size - 1) / 2f * (fontHeight / textFactor)).toInt()

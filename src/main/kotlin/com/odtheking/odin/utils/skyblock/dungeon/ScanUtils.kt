@@ -15,9 +15,11 @@ import com.odtheking.odin.utils.skyblock.dungeon.tiles.Room
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.RoomComponent
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.RoomData
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.Rotations
+import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.level.chunk.LevelChunk
 
 object ScanUtils {
     private const val ROOM_SIZE_SHIFT = 5  // Since ROOM_SIZE = 32 (2^5) so we can perform bitwise operations
@@ -74,17 +76,18 @@ object ScanUtils {
     }
 
     fun updateRotation(room: Room, roomHeight: Int) {
-        room.roomHeight = roomHeight
         if (room.data.name == "Fairy") { // Fairy room doesn't have a clay block so we need to set it manually
             room.clayPos = room.roomComponents.firstOrNull()?.let { BlockPos(it.x - 15, roomHeight, it.z - 15) } ?: return
             room.rotation = Rotations.SOUTH
             return
         }
+
+        val level = mc.level ?: return
         room.rotation = Rotations.entries.dropLast(1).find { rotation ->
             room.roomComponents.any { component ->
                 BlockPos(component.x + rotation.x, roomHeight, component.z + rotation.z).let { blockPos ->
-                    mc.level?.getBlockState(blockPos)?.block == Blocks.BLUE_TERRACOTTA && (room.roomComponents.size == 1 || horizontals.all { facing ->
-                        mc.level?.getBlockState(
+                    level.getBlockState(blockPos)?.block == Blocks.BLUE_TERRACOTTA && (room.roomComponents.size == 1 || horizontals.all { facing ->
+                        level.getBlockState(
                             blockPos.offset((if (facing.axis == Direction.Axis.X) facing.stepX else 0), 0, (if (facing.axis == Direction.Axis.Z) facing.stepZ else 0))
                         )?.block?.equalsOneOf(Blocks.AIR, Blocks.BLUE_TERRACOTTA) == true
                     }).also { isCorrectClay -> if (isCorrectClay) room.clayPos = blockPos }
@@ -94,18 +97,21 @@ object ScanUtils {
     }
 
     fun scanRoom(vec2: Vec2): Room? {
-        val roomHeight = getTopLayerOfRoom(vec2)
-        return getCore(vec2, roomHeight).let { core ->
-            getRoomData(core)?.let { roomData ->
-                Room(data = roomData, roomComponents = findRoomComponentsRecursively(vec2, roomData.cores, roomHeight))
+        val level = mc.level ?: return null
+        val chunk = level.getChunk(vec2.x shr 4, vec2.z shr 4)
+        val roomHeight = getTopLayerOfRoom(vec2, chunk)
+        return getCoreAtHeight(vec2, roomHeight, chunk).let { core ->
+            coreToRoomData[core]?.let { roomData ->
+                Room(data = roomData, roomComponents = findRoomComponentsRecursively(vec2, roomData.cores, roomHeight, level))
             }?.apply { updateRotation(this, roomHeight) }
         }
     }
 
-    private fun findRoomComponentsRecursively(vec2: Vec2, cores: List<Int>, roomHeight: Int, visited: MutableSet<Vec2> = mutableSetOf(), tiles: MutableSet<RoomComponent> = mutableSetOf()): MutableSet<RoomComponent> {
+    private fun findRoomComponentsRecursively(vec2: Vec2, cores: List<Int>, roomHeight: Int, level: ClientLevel, visited: MutableSet<Vec2> = mutableSetOf(), tiles: MutableSet<RoomComponent> = mutableSetOf()): MutableSet<RoomComponent> {
         if (vec2 in visited) return tiles else visited.add(vec2)
 
-        val core = getCore(vec2, roomHeight)
+        val chunk = level.getChunk(vec2.x shr 4, vec2.z shr 4)
+        val core = getCoreAtHeight(vec2, roomHeight, chunk)
         if (core !in cores) return tiles
 
         tiles.add(RoomComponent(vec2.x, vec2.z, core))
@@ -114,13 +120,11 @@ object ScanUtils {
                 Vec2(
                     vec2.x + ((if (facing.axis == Direction.Axis.X) facing.stepX else 0) shl ROOM_SIZE_SHIFT),
                     vec2.z + ((if (facing.axis == Direction.Axis.Z) facing.stepZ else 0) shl ROOM_SIZE_SHIFT)
-                ), cores, roomHeight, visited, tiles
+                ), cores, roomHeight, level, visited, tiles
             )
         }
         return tiles
     }
-
-    fun getRoomData(hash: Int): RoomData? = coreToRoomData[hash]
 
     fun getRoomCenter(posX: Int, posZ: Int): Vec2 {
         val roomX = (posX - START + (1 shl (ROOM_SIZE_SHIFT - 1))) shr ROOM_SIZE_SHIFT
@@ -128,14 +132,21 @@ object ScanUtils {
         return Vec2(((roomX shl ROOM_SIZE_SHIFT) + START), ((roomZ shl ROOM_SIZE_SHIFT) + START))
     }
 
-    fun getCore(vec2: Vec2, height: Int? = null): Int {
+    fun getCore(vec2: Vec2): Int {
+        val level = mc.level ?: return 0
+        val chunk = level.getChunk(vec2.x shr 4, vec2.z shr 4)
+        return getCoreAtHeight(vec2, getTopLayerOfRoom(vec2, chunk), chunk)
+    }
+
+    private fun getCoreAtHeight(vec2: Vec2, roomHeight: Int, chunk: LevelChunk): Int {
         val sb = StringBuilder(150)
-        val roomHeight = (height ?: getTopLayerOfRoom(vec2)).coerceIn(11..140)
-        sb.append(CharArray(140 - roomHeight) { '0' })
+        val clampedHeight = roomHeight.coerceIn(11..140)
+        sb.append(CharArray(140 - clampedHeight) { '0' })
         var bedrock = 0
-        for (y in roomHeight downTo 12) {
+
+        for (y in clampedHeight downTo 12) {
             mutableBlockPos.set(vec2.x, y, vec2.z)
-            val block = mc.level?.getBlockState(mutableBlockPos)?.block
+            val block = chunk.getBlockState(mutableBlockPos)?.block
             if (block == Blocks.AIR && bedrock >= 2 && y < 69) {
                 sb.append(CharArray(y - 11) { '0' })
                 break
@@ -151,10 +162,10 @@ object ScanUtils {
         return sb.toString().hashCode()
     }
 
-    fun getTopLayerOfRoom(vec2: Vec2): Int {
+    fun getTopLayerOfRoom(vec2: Vec2, chunk: LevelChunk): Int {
         for (y in 160 downTo 12) {
             mutableBlockPos.set(vec2.x, y, vec2.z)
-            val blockState = mc.level?.getBlockState(mutableBlockPos)
+            val blockState = chunk.getBlockState(mutableBlockPos)
             if (blockState?.isAir == false) return if (blockState.block == Blocks.GOLD_BLOCK) y - 1 else y
         }
         return 0

@@ -4,8 +4,12 @@ import com.github.stivais.commodore.Commodore
 import com.github.stivais.commodore.utils.GreedyString
 import com.odtheking.odin.OdinMod
 import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.clickgui.ClickGUI
+import com.odtheking.odin.config.ModuleConfig
 import com.odtheking.odin.events.ChatPacketEvent
+import com.odtheking.odin.features.Category
 import com.odtheking.odin.features.ModuleManager
+import com.odtheking.odin.features.impl.dungeon.DungeonMap
 import com.odtheking.odin.features.impl.floor7.MelodyMessage.melodyWebSocket
 import com.odtheking.odin.features.impl.floor7.WitherDragonState
 import com.odtheking.odin.features.impl.floor7.WitherDragons
@@ -26,12 +30,13 @@ import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRelativeCoords
 import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils
 import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils.getRoomCenter
-import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils.getRoomData
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
 import kotlinx.coroutines.launch
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.chat.Component
 import net.minecraft.world.phys.BlockHitResult
+import java.io.File
+import java.security.MessageDigest
 
 val devCommand = Commodore("oddev") {
 
@@ -183,17 +188,19 @@ val devCommand = Commodore("oddev") {
 
     literal("roomdata").runs {
         val player = mc.player ?: return@runs
-        val room = ScanUtils.scanRoom(getRoomCenter(player.x.toInt(), player.z.toInt()))
-        val roomCenter = getRoomCenter(player.x.toInt(), player.z.toInt())
+        val vec2 = Vec2(player.x.toInt(), player.z.toInt())
+        val chunk = mc.level?.getChunk(vec2.x shr 4, vec2.z shr 4) ?: return@runs
+        val roomCenter = getRoomCenter(vec2.x, vec2.z)
+        val room = ScanUtils.scanRoom(roomCenter)
         val core = ScanUtils.getCore(roomCenter)
         modMessage(
             """
             Middle: ${roomCenter.x}, ${roomCenter.z}
-            Room: ${getRoomData(core)?.name}
+            Room: ${ScanUtils.coreToRoomData[core]?.name}
             Core: $core
             Rotation: ${room?.rotation ?: "NONE"}
             Positions: ${room?.roomComponents?.joinToString { "(${it.x}, ${it.z})" } ?: "None"}
-            Height: ${ScanUtils.getTopLayerOfRoom(roomCenter)}
+            Height: ${ScanUtils.getTopLayerOfRoom(vec2, chunk)}
             """.trimIndent(), "")
         setClipboardContent(core.toString())
         modMessage("§aCopied $core to clipboard!")
@@ -223,4 +230,21 @@ val devCommand = Commodore("oddev") {
         setClipboardContent(greedyString.string)
         modMessage("§aCopied to clipboard!")
     }
+
+    literal("secretstuff").runs { greedyString: GreedyString ->
+        val hash = MessageDigest
+            .getInstance("SHA-256")
+            .digest(greedyString.string.toByteArray())
+            .joinToString("") { "%02x".format(it) }
+
+        if (hash == "5eececec57ae5575a80af645578e98d541a1391fdfbf1935242efc3666d8e79f") {
+            modMessage("§a:)")
+            ModuleManager.registerModules(
+                ModuleConfig(File(OdinMod.configFile, "odin-config.json")),
+                DungeonMap
+            )
+            ClickGUI.refreshPanels(setOf(Category.DUNGEON))
+        }
+    }
+
 }

@@ -4,17 +4,18 @@ import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.utils.equalsOneOf
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket
+import net.minecraft.world.level.saveddata.maps.MapDecorationTypes
 import kotlin.jvm.optionals.getOrNull
 
 object DungMap {
-    var mapCenter: Vec2i? = null
+    var mapCenter: Vec2i = Vec2i(0, 0)
     var startCoords: Vec2i? = null
     var mapSize: Vec2i? = null
     var roomSize: Int? = null
     var shouldScan = false
 
     fun unload() {
-        mapCenter = null
+        mapCenter = Vec2i(0, 0)
         shouldScan = false
         startCoords = null
         mapSize = null
@@ -36,8 +37,6 @@ object DungMap {
     fun rescanMapItem(packet: ClientboundMapItemDataPacket) {
         if (!DungeonUtils.inClear || packet.mapId().id and 1000 != 0) return
         val state = mc.level?.getMapData(packet.mapId) ?: return
-
-        if (mapCenter == null) mapCenter = Vec2i(0, 0)
 
         if (startCoords == null) {
             if (!initializeMapCoordinates(state.colors)) return
@@ -66,27 +65,18 @@ object DungMap {
         mapCenter = center
         mapSize = size
 
-        if ((DungeonUtils.isFloor(6, 5) && size.x == 6 && size.z == 6) ||
-            (DungeonUtils.isFloor(4) && size.x == 6 && size.z == 5)) {
+        if ((DungeonUtils.isFloor(6, 5) && size.x == 6 && size.z == 6) || (DungeonUtils.isFloor(4) && size.x == 6 && size.z == 5))
             SpecialColumn.column = 5
-        }
 
         return true
     }
 
     private fun calculateDynamicMapSize(greenStart: Int, greenLength: Int): Triple<Vec2i, Vec2i, Vec2i> {
         val start = Vec2i((greenStart and 127) % (greenLength + 4), (greenStart shr 7) % (greenLength + 4))
-        var size = Vec2i(5, 5)
-        var center = Vec2i(-121, -121)
 
-        if (start.x == 5) {
-            size = size.add(Vec2i(1, 0))
-            center = center.add(Vec2i(16, 0))
-        }
-        if (start.z == 5) {
-            size = size.add(Vec2i(0, 1))
-            center = center.add(Vec2i(0, 16))
-        }
+        val extra = Vec2i(if (start.x == 5) 1 else 0, if (start.z == 5) 1 else 0)
+        val size = Vec2i(5, 5).add(extra)
+        val center = Vec2i(-121, -121).add(Vec2i(extra.x * 16, extra.z * 16))
 
         return Triple(start, center, size)
     }
@@ -96,7 +86,7 @@ object DungMap {
             val playerIterator = DungeonUtils.dungeonTeammatesNoSelf.iterator()
 
             decorations.forEach { decoration ->
-                if (decoration.type.value() == net.minecraft.world.level.saveddata.maps.MapDecorationTypes.FRAME.value()) return@forEach
+                if (decoration.type.value() == MapDecorationTypes.FRAME.value()) return@forEach
 
                 val player = playerIterator.asSequence().firstOrNull { !it.isDead } ?: return@forEach
                 player.mapPos = Vec2i(decoration.x.toInt(), decoration.y.toInt())
@@ -111,25 +101,25 @@ object DungMap {
         val startCenter = startCoords?.add(Vec2i(halfRoomSize, halfRoomSize)) ?: return
         val tileSize = rs + 4
 
-        MapScanner.rooms.forEach { (_, room) ->
+        MapScanner.allRooms.forEach { (_, room) ->
             val topLeftPlacement = room.places.minWith { a, b ->
                 a.x * 1000 + a.z - b.x * 1000 - b.z
             }
 
-            var color = getColorAtPlacement(topLeftPlacement, startCenter, tileSize, colors)
+            var color = getColorAtPlacement(topLeftPlacement, startCenter, tileSize, colors).toInt()
             var placement = topLeftPlacement
 
-            if (color == 0.toByte()) {
+            if (color == 0) {
                 room.places.firstNotNullOfOrNull { testPlacement ->
                     val testColor = getColorAtPlacement(testPlacement, startCenter, tileSize, colors)
                     if (testColor != 0.toByte()) Pair(testPlacement, testColor) else null
                 }?.let { (visiblePlacement, visibleColor) ->
                     placement = visiblePlacement
-                    color = visibleColor
+                    color = visibleColor.toInt()
                 }
             }
 
-            room.updateState(placement, color.toInt())
+            room.updateState(placement, color)
         }
     }
 

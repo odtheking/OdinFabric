@@ -31,10 +31,8 @@ data class DungeonPlayer(
         entity?.let {
             ((it.x + 201f) / (32f / 20f)).toFloat() to ((it.z + 201f) / (32f / 20f)).toFloat()
         } ?: run {
-            roomSize?.let {
-                val offset = this.mapPos.multiply(32.0 / (((it + 4.0) * 2)))
-                val pos = mapCenter?.add(offset)?.add(Vec2i(201, 201))?.divide(32.0 / 20.0) ?: Vec2i(0, 0)
-                Pair(pos.x.toFloat(), pos.z.toFloat())
+            roomSize?.let { size ->
+               mapCenter.add(mapPos.multiply(32.0 / (((size + 4.0) * 2)))).add(Vec2i(201, 201)).divide(32.0 / 20.0).let { it.x.toFloat() to it.z.toFloat() }
             } ?: Pair(0f, 0f)
         }
 
