@@ -4,12 +4,8 @@ import com.github.stivais.commodore.Commodore
 import com.github.stivais.commodore.utils.GreedyString
 import com.odtheking.odin.OdinMod
 import com.odtheking.odin.OdinMod.mc
-import com.odtheking.odin.clickgui.ClickGUI
-import com.odtheking.odin.config.ModuleConfig
 import com.odtheking.odin.events.ChatPacketEvent
-import com.odtheking.odin.features.Category
 import com.odtheking.odin.features.ModuleManager
-import com.odtheking.odin.features.impl.dungeon.DungeonMap
 import com.odtheking.odin.features.impl.floor7.MelodyMessage.melodyWebSocket
 import com.odtheking.odin.features.impl.floor7.WitherDragonState
 import com.odtheking.odin.features.impl.floor7.WitherDragons
@@ -35,8 +31,6 @@ import kotlinx.coroutines.launch
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.chat.Component
 import net.minecraft.world.phys.BlockHitResult
-import java.io.File
-import java.security.MessageDigest
 
 val devCommand = Commodore("oddev") {
 
@@ -230,21 +224,4 @@ val devCommand = Commodore("oddev") {
         setClipboardContent(greedyString.string)
         modMessage("§aCopied to clipboard!")
     }
-
-    literal("secretstuff").runs { greedyString: GreedyString ->
-        val hash = MessageDigest
-            .getInstance("SHA-256")
-            .digest(greedyString.string.toByteArray())
-            .joinToString("") { "%02x".format(it) }
-
-        if (hash == "5eececec57ae5575a80af645578e98d541a1391fdfbf1935242efc3666d8e79f") {
-            modMessage("§a:)")
-            ModuleManager.registerModules(
-                ModuleConfig(File(OdinMod.configFile, "odin-config.json")),
-                DungeonMap
-            )
-            ClickGUI.refreshPanels(setOf(Category.DUNGEON))
-        }
-    }
-
 }

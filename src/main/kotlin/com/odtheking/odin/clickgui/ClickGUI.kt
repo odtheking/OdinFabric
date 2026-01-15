@@ -31,15 +31,6 @@ object ClickGUI : Screen(Component.literal("Click GUI")) {
         for ((_, category) in Category.categories) add(Panel(category))
     }
 
-    fun refreshPanels(categories: Set<Category>) {
-        categories.forEach { category ->
-            val index = panels.indexOfFirst { it.category == category }
-            if (index != -1) {
-                panels[index] = Panel(category)
-            }
-        }
-    }
-
     private var openAnim = EaseOutAnimation(500)
     val gray38 = Color(38, 38, 38)
     val gray26 = Color(26, 26, 26)

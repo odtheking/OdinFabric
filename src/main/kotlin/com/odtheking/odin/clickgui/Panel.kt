@@ -22,7 +22,7 @@ import kotlin.math.floor
  * @author Stivais, Aton
  * @see [ModuleButton]
  */
-class Panel(val category: Category) {
+class Panel(private val category: Category) {
 
     val panelSetting = ClickGUIModule.panelSetting[category.name] ?: throw IllegalStateException("Panel setting for category $category is not initialized")
     val moduleButtons = ModuleManager.modulesByCategory[category]
