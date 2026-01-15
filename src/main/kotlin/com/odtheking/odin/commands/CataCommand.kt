@@ -4,13 +4,10 @@ import com.github.stivais.commodore.Commodore
 import com.github.stivais.commodore.utils.GreedyString
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.OdinMod.scope
-import com.odtheking.odin.utils.formatNumber
-import com.odtheking.odin.utils.formatTime
-import com.odtheking.odin.utils.modMessage
+import com.odtheking.odin.utils.*
 import com.odtheking.odin.utils.network.hypixelapi.HypixelData
 import com.odtheking.odin.utils.network.hypixelapi.RequestUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonClass
-import com.odtheking.odin.utils.toFixed
 import kotlinx.coroutines.launch
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.HoverEvent
@@ -42,13 +39,9 @@ private fun displayCataStats(name: String, member: HypixelData.MemberData) {
         val cataLevel = calculateDungeonLevel(cata.experience)
         val classLevels = DungeonClass.entries
             .mapNotNull { if (it != DungeonClass.Unknown) calculateDungeonLevel(classes[it.name.lowercase()]?.experience ?: 0.0) else null }
-        val totalRuns = (1..7).sumOf { tier ->
-            (cata.tierComps["$tier"]?.toInt() ?: 0) + (mm.tierComps["$tier"]?.toInt() ?: 0)
-        }
-        val secretAvg = if (totalRuns > 0) secrets.toDouble() / totalRuns else 0.0
 
         Component.literal("§d§m${" ".repeat(11)}§r §b$name §d§m${" ".repeat(11)}§r\n")
-            .append(buildCataSecretsWatcherLine(cataLevel, cata.experience, secrets, secretAvg, totalRuns,
+            .append(buildCataSecretsWatcherLine(cataLevel, cata.experience, secrets, avrSecrets, totalRuns,
                 member.playerStats.bloodMobKills, cata.watcherKills.values.sum().toInt()))
             .append(buildClassLevelsLine(classes, classLevels.average()))
             .append(buildFloorTimesLine(cata, mm, member.assumedMagicalPower, member.tunings))
@@ -154,7 +147,7 @@ private fun buildArmorLine(armorPieces: List<ArmorPiece>) = Component.literal("�
         append(Component.literal(slot).withStyle { style ->
             itemStack?.let {
                 val hover = Component.empty().append(Component.literal("$displayName\n"))
-                it.lore.take(20).forEach { loreLine -> hover.append(loreLine).append(Component.literal("\n")) }
+                it.lore.forEach { loreLine -> hover.append(loreLine).append(Component.literal("\n")) }
                 style.withHoverEvent(HoverEvent.ShowText(hover))
             } ?: style.withHoverEvent(HoverEvent.ShowText(Component.literal("§8Empty Slot")))
         })
@@ -165,7 +158,7 @@ private fun buildArmorLine(armorPieces: List<ArmorPiece>) = Component.literal("�
 }
 
 private fun hasItem(member: HypixelData.MemberData, vararg itemId: String) =
-    member.inventory?.invContents?.itemStacks?.any { item -> itemId.any { item?.id?.contains(it) == true } } == true
+    member.allItems.any { item -> itemId.any { item?.id?.contains(it) == true } }
 
 private fun checkMissingItems(member: HypixelData.MemberData) = buildList {
     if (!hasItem(member, "HYPERION", "ASTRAEA", "SCYLLA", "VALKYRIE")) add(MissingItem("Blade", "§5Wither Blade"))
@@ -184,27 +177,3 @@ private fun buildMissingItemsLine(missing: List<MissingItem>) = Component.litera
     }
     append(Component.literal("\n"))
 }
-
-private val xpTable = arrayOf(
-    50, 75, 110, 160, 230, 330, 470, 670, 950, 1340,
-    1890, 2665, 3760, 5260, 7380, 10300, 14400, 20000,
-    27600, 38000, 52500, 71500, 97000, 132000, 180000,
-    243000, 328000, 445000, 600000, 800000, 1065000,
-    1410000, 1900000, 2500000, 3300000, 4300000, 5600000,
-    7200000, 9200000, 12000000, 15000000, 19000000,
-    24000000, 30000000, 38000000, 48000000, 60000000,
-    75000000, 93000000, 116250000, 200000000
-)
-
-private fun calculateDungeonLevel(xp: Double): Double {
-    if (xp <= 0) return 0.0
-
-    var totalXp = 0.0
-    xpTable.forEachIndexed { level, requiredXp ->
-        if (xp < totalXp + requiredXp) return level + (xp - totalXp) / requiredXp
-        totalXp += requiredXp
-    }
-
-    return (xpTable.size + ((xp - totalXp) / 200000000).coerceAtMost(50.0))
-}
-
