@@ -223,7 +223,7 @@ object DungeonMap : Module(
         }
 
         onReceive<ClientboundMapItemDataPacket> {
-            DungMap.rescanMapItem(this)
+            mc.execute { DungMap.rescanMapItem(this) }
         }
     }
 }
