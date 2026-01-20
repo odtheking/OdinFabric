@@ -66,7 +66,7 @@ object ArrowsDevice : Module(
             if (DungeonUtils.getF7Phase() != M7Phases.P3 || !devicePositions.contains(pos)) return@on
 
             if (old.block == Blocks.EMERALD_BLOCK && updated.block == Blocks.BLUE_TERRACOTTA) {
-                markedPositions.add(pos)
+                markedPositions.add(pos.immutable())
                 if (targetPosition == pos) targetPosition = null
                 if (showAimPositions) optimalAimPositions = calculateOptimalAimPositions(pos)
             } else if (old.block == Blocks.BLUE_TERRACOTTA && updated.block == Blocks.EMERALD_BLOCK) {
