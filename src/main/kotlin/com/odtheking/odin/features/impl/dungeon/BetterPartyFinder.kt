@@ -96,7 +96,7 @@ object BetterPartyFinder : Module(
 
                     if (kickedReasons.isNotEmpty()) {
                         if (informKicked) {
-                            schedule(5) { sendCommand("party kick $name") }
+                            schedule(6) { sendCommand("party kick $name") }
                             sendCommand("pc Kicked $name for: ${kickedReasons.joinToString(", ")}")
                         } else sendCommand("party kick $name")
 
