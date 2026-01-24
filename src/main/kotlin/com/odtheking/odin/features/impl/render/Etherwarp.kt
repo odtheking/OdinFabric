@@ -109,7 +109,7 @@ object Etherwarp : Module(
     }
 
     data class EtherPos(val succeeded: Boolean, val pos: BlockPos?, val state: BlockState?) {
-        val vec3: Vec3 by lazy { Vec3(pos) }
+        val vec3: Vec3 by lazy { Vec3(pos ?: BlockPos.ZERO)  }
 
         companion object {
             val NONE = EtherPos(false, null, null)

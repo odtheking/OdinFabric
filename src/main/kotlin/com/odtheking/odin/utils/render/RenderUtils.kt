@@ -16,8 +16,9 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import net.minecraft.client.gui.Font
 import net.minecraft.client.renderer.LightTexture
 import net.minecraft.client.renderer.MultiBufferSource
+import net.minecraft.client.renderer.rendertype.RenderTypes
 import net.minecraft.core.BlockPos
-import net.minecraft.resources.ResourceLocation
+import net.minecraft.resources.Identifier
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
 import org.joml.Vector3f
@@ -29,7 +30,7 @@ import kotlin.math.sqrt
 private const val DEPTH = 0
 private const val NO_DEPTH = 1
 
-private val BEAM_TEXTURE = ResourceLocation.withDefaultNamespace("textures/entity/beacon_beam.png")
+private val BEAM_TEXTURE = Identifier.withDefaultNamespace("textures/entity/beacon_beam.png")
 
 internal data class LineData(val from: Vec3, val to: Vec3, val color1: Int, val color2: Int, val thickness: Float)
 internal data class BoxData(val aabb: AABB, val r: Float, val g: Float, val b: Float, val a: Float, val thickness: Float)
@@ -60,14 +61,13 @@ object RenderBatchManager {
         on<RenderEvent.Last> {
             val matrix = context.matrices() ?: return@on
             val bufferSource = context.consumers() as? MultiBufferSource.BufferSource ?: return@on
-            val camera = context.gameRenderer().mainCamera?.position ?: return@on
+            val camera = mc.gameRenderer.mainCamera.position()
 
             matrix.pushPose()
             matrix.translate(-camera.x, -camera.y, -camera.z)
 
             matrix.renderBatchedLinesAndWireBoxes(renderConsumer.lines, renderConsumer.wireBoxes, bufferSource)
             matrix.renderBatchedFilledBoxes(renderConsumer.filledBoxes, bufferSource)
-
             matrix.popPose()
 
             matrix.renderBatchedBeaconBeams(renderConsumer.beaconBeams, camera)
@@ -82,7 +82,7 @@ private fun PoseStack.renderBatchedLinesAndWireBoxes(
     wireBoxes: List<List<BoxData>>,
     bufferSource: MultiBufferSource.BufferSource
 ) {
-    val lineRenderLayers = listOf(CustomRenderLayer.LINE_LIST, CustomRenderLayer.LINE_LIST_ESP)
+    val lineRenderLayers = listOf(RenderTypes.lines(), RenderTypes.linesTranslucent())
     val last = this.last()
     for (depthState in 0..1) {
         if (lines[depthState].isEmpty() && wireBoxes[depthState].isEmpty()) continue
@@ -97,14 +97,14 @@ private fun PoseStack.renderBatchedLinesAndWireBoxes(
                 last, buffer,
                 Vector3f(line.from.x.toFloat(), line.from.y.toFloat(), line.from.z.toFloat()),
                 Vec3(dirX, dirY, dirZ),
-                line.color1, line.color2
+                line.color1, line.color2, line.thickness
             )
         }
 
         for (box in wireBoxes[depthState]) {
             PrimitiveRenderer.renderLineBox(
                 last, buffer, box.aabb,
-                box.r, box.g, box.b, box.a
+                box.r, box.g, box.b, box.a, box.thickness
             )
         }
 
@@ -113,7 +113,7 @@ private fun PoseStack.renderBatchedLinesAndWireBoxes(
 }
 
 private fun PoseStack.renderBatchedFilledBoxes(consumer: List<List<BoxData>>, bufferSource: MultiBufferSource.BufferSource) {
-    val filledBoxRenderLayers = listOf(CustomRenderLayer.TRIANGLE_STRIP, CustomRenderLayer.TRIANGLE_STRIP_ESP)
+    val filledBoxRenderLayers = listOf(CustomRenderLayer.DEBUG_FILLED_BOX_DEPTH, CustomRenderLayer.DEBUG_FILLED_BOX_NO_DEPTH)
     val last = this.last()
     for ((depthState, boxes) in consumer.withIndex()) {
         if (boxes.isEmpty()) continue
@@ -334,7 +334,8 @@ object PrimitiveRenderer {
         pose: PoseStack.Pose,
         buffer: VertexConsumer,
         aabb: AABB,
-        r: Float, g: Float, b: Float, a: Float
+        r: Float, g: Float, b: Float, a: Float,
+        thickness: Float
     ) {
         val x0 = aabb.minX.toFloat()
         val y0 = aabb.minY.toFloat()
@@ -369,8 +370,8 @@ object PrimitiveRenderer {
             val dy = y1 - y0
             val dz = z1 - z0
 
-            buffer.addVertex(pose, x0, y0, z0).setColor(r, g, b, a).setNormal(pose, dx, dy, dz)
-            buffer.addVertex(pose, x1, y1, z1).setColor(r, g, b, a).setNormal(pose, dx, dy, dz)
+            buffer.addVertex(pose, x0, y0, z0).setColor(r, g, b, a).setNormal(pose, dx, dy, dz).setLineWidth(thickness)
+            buffer.addVertex(pose, x1, y1, z1).setColor(r, g, b, a).setNormal(pose, dx, dy, dz).setLineWidth(thickness)
         }
     }
 
@@ -437,7 +438,8 @@ object PrimitiveRenderer {
         start: Vector3f,
         direction: Vec3,
         startColor: Int,
-        endColor: Int
+        endColor: Int,
+        thickness: Float
     ) {
         val endX = start.x() + direction.x.toFloat()
         val endY = start.y() + direction.y.toFloat()
@@ -450,9 +452,11 @@ object PrimitiveRenderer {
         buffer.addVertex(pose, start.x(), start.y(), start.z())
             .setColor(startColor)
             .setNormal(pose, nx, ny, nz)
+            .setLineWidth(thickness)
 
         buffer.addVertex(pose, endX, endY, endZ)
             .setColor(endColor)
             .setNormal(pose, nx, ny, nz)
+            .setLineWidth(thickness)
     }
 }
