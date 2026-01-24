@@ -85,7 +85,7 @@ open class TermSimGUI(
     }
 
     init {
-        on<TerminalEvent.Solved> {
+        on<TerminalEvent.Solve> {
             if (mc.screen !== this@TermSimGUI) return@on
             PacketEvent.Receive(ClientboundContainerClosePacket(-2)).postAndCatch()
             StartGUI.open(ping)
