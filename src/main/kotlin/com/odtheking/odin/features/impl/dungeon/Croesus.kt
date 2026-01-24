@@ -16,7 +16,6 @@ import com.odtheking.odin.utils.network.WebUtils.fetchJson
 import com.odtheking.odin.utils.render.getStringWidth
 import com.odtheking.odin.utils.render.text
 import com.odtheking.odin.utils.render.textDim
-import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import kotlinx.coroutines.launch
 import net.minecraft.client.gui.GuiGraphics
@@ -68,7 +67,7 @@ object Croesus : Module(
     private val unclaimedChestsRegex = Regex("^ Unclaimed chests: (\\d+)$")
     private val chestEnchantsRegex = Regex("^\\{([a-zA-Z0-9_]+):(\\d+)}$")
     private val previewEssenceRegex = Regex("^(\\w+) Essence x(\\d+)$")
-    private val previewShardRegex = Regex("^(\\w+) Shard x1$")
+    private val previewShardRegex = Regex("^([A-Za-z ]+) Shard x1$")
     private val extraStatsRegex = Regex(" {29}> EXTRA STATS <")
     private val chestCostRegex = Regex("^([\\d,]+) Coins$")
     private val shardRegex = Regex("^([A-Za-z ]+) Shard$")
