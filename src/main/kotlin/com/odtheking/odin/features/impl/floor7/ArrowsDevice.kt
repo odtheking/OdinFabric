@@ -71,7 +71,7 @@ object ArrowsDevice : Module(
                 if (showAimPositions) optimalAimPositions = calculateOptimalAimPositions(pos)
             } else if (old.block == Blocks.BLUE_TERRACOTTA && updated.block == Blocks.EMERALD_BLOCK) {
                 markedPositions.remove(pos)
-                targetPosition = pos
+                targetPosition = pos.immutable()
                 if (showAimPositions) optimalAimPositions = calculateOptimalAimPositions(pos)
             }
         }
