@@ -63,8 +63,7 @@ object WaterSolver {
 
         val solutionList = solutions
             .flatMap { (lever, times) -> times.drop(lever.i).map { Pair(lever, it) } }
-            .sortedBy { (lever, time) -> (if (time == 0.0) 0 else 1000) + lever.ordinal }
-
+            .sortedBy { (lever, time) -> (if (time == 0.0) 0 else 1000) + lever.ordinal + time }
 
         if (showTracer) {
             val firstSolution = solutionList.firstOrNull()?.first ?: return
