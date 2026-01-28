@@ -47,6 +47,9 @@ object DungeonUtils {
     inline val deathCount: Int
         get() = DungeonListener.dungeonStats.deaths
 
+    inline val deathPenalty: Int
+        get() = ((deathCount * 2) - (if (DungeonListener.firstDeathHasSpirit) 1 else 0)).coerceAtLeast(0)
+
     inline val cryptCount: Int
         get() = DungeonListener.dungeonStats.crypts
 
@@ -130,7 +133,7 @@ object DungeonUtils {
             val skillRooms = floor(completed.toFloat() / total * 80f).coerceIn(0f, 80f).toInt()
             val puzzlePenalty = (puzzleCount - puzzles.count { it.status == PuzzleStatus.Completed }) * 10
 
-            return exploration + (20 + skillRooms - puzzlePenalty - (deathCount * 2 - 1).coerceAtLeast(0)).coerceIn(
+            return exploration + (20 + skillRooms - puzzlePenalty - deathPenalty).coerceIn(
                 20,
                 100
             ) + getBonusScore + 100
@@ -138,11 +141,9 @@ object DungeonUtils {
 
     inline val neededSecretsAmount: Int
         get() =
-            DungeonListener.floor?.let {
+            DungeonListener.floor?.let { floor ->
                 ceil(
-                    (totalSecrets * it.secretPercentage) * (40 - getBonusScore + (deathCount * 2 - 1).coerceAtLeast(
-                        0
-                    )) / 40f
+                    (totalSecrets * floor.secretPercentage) * (40 - getBonusScore + deathPenalty) / 40f
                 ).toInt()
             } ?: 0
 
