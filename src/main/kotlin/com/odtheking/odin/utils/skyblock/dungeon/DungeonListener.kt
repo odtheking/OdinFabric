@@ -3,6 +3,7 @@ package com.odtheking.odin.utils.skyblock.dungeon
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.OdinMod.scope
 import com.odtheking.odin.events.ChatPacketEvent
+import com.odtheking.odin.events.EntityEvent
 import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.WorldEvent
@@ -127,10 +128,10 @@ object DungeonListener {
             }
         }
 
-        onReceive<ClientboundAddEntityPacket> {
-            if (type == EntityType.PLAYER)
-                DungeonUtils.dungeonTeammates.find { it.entity == null && it.name == mc.level?.getEntity(id)?.name?.string }?.entity =
-                    mc.level?.getEntity(id) as? Player
+        on<EntityEvent.Add> {
+            if (entity.type == EntityType.PLAYER)
+                DungeonUtils.dungeonTeammates.find { it.entity == null && it.name == mc.level?.getEntity(entity.id)?.name?.string }?.entity =
+                    mc.level?.getEntity(entity.id) as? Player
         }
     }
 
