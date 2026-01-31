@@ -84,7 +84,7 @@ object DungeonListener {
             val text = parameters?.getOrNull()?.let { it.playerPrefix?.string?.plus(it.playerSuffix?.string).noControlCodes } ?: return@onReceive
 
             floorRegex.find(text)?.groupValues?.get(1)?.let {
-                scope.launch(Dispatchers.IO) { paul = hasBonusPaulScore() }
+                if (floor == null) scope.launch(Dispatchers.IO) { paul = hasBonusPaulScore() }
                 floor = Floor.valueOf(it)
             }
 
