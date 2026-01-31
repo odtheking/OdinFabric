@@ -21,12 +21,11 @@ public class SynchedEntityDataMixin {
 
     @Inject(
             method = "assignValues",
-            at = @At("HEAD"),
-            cancellable = true
+            at = @At("TAIL")
     )
     private void onAssignValues(List<SynchedEntityData.DataValue<?>> list, CallbackInfo ci) {
         Entity self = (Entity) this.entity;
         if (self == null) return;
-        if (new EntityEvent.SetData(self, list).postAndCatch()) ci.cancel();
+        new EntityEvent.SetData(self, list).postAndCatch();
     }
 }
