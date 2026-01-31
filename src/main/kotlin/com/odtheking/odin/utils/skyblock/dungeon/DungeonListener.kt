@@ -14,6 +14,7 @@ import com.odtheking.odin.features.impl.dungeon.LeapMenu
 import com.odtheking.odin.features.impl.dungeon.LeapMenu.odinSorting
 import com.odtheking.odin.features.impl.dungeon.Mimic
 import com.odtheking.odin.utils.network.WebUtils.hasBonusPaulScore
+import com.odtheking.odin.utils.noControlCodes
 import com.odtheking.odin.utils.romanToInt
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getDungeonTeammates
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.Room
@@ -81,10 +82,10 @@ object DungeonListener {
         }
 
         onReceive<ClientboundSetPlayerTeamPacket> {
-            val text = parameters?.getOrNull()?.let { it.playerPrefix?.string?.plus(it.playerSuffix?.string) } ?: return@onReceive
+            val text = parameters?.getOrNull()?.let { it.playerPrefix?.string?.plus(it.playerSuffix?.string).noControlCodes } ?: return@onReceive
 
             floorRegex.find(text)?.groupValues?.get(1)?.let {
-                scope.launch(Dispatchers.IO) { paul = hasBonusPaulScore() }
+                if (floor == null) scope.launch(Dispatchers.IO) { paul = hasBonusPaulScore() }
                 floor = Floor.valueOf(it)
             }
 
