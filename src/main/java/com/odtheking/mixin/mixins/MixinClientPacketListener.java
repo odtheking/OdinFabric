@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(ClientPacketListener.class)
 public class MixinClientPacketListener {
+
     @WrapOperation(
         method = "handleBundlePacket",
         at = @At(
@@ -18,7 +19,7 @@ public class MixinClientPacketListener {
             target = "Lnet/minecraft/network/protocol/Packet;handle(Lnet/minecraft/network/PacketListener;)V"
         )
     )
-    private void wrapPacketHandle(Packet packet, PacketListener listener, Operation<Void> original) {
+    private void wrapPacketHandle(Packet<?> packet, PacketListener listener, Operation<Void> original) {
         if (new PacketEvent.Receive(packet).postAndCatch()) return;
         original.call(packet, listener);
     }
