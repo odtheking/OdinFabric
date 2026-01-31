@@ -5,7 +5,6 @@ import com.odtheking.odin.events.WorldEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.utils.equalsOneOf
-import com.odtheking.odin.utils.noControlCodes
 import com.odtheking.odin.utils.startsWithOneOf
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket
 import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket
