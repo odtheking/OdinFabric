@@ -16,6 +16,7 @@
     "mixins.ChatListenerMixin",
     "mixins.ChatScreenMixin",
     "mixins.ClientCommonPacketListenerImplMixin",
+    "mixins.ClientLevelMixin",
     "mixins.ClientPacketListenerMixin",
     "mixins.EntityRendererMixin",
     "mixins.ExperienceBarRendererMixin",
@@ -32,6 +33,8 @@
     "mixins.ConnectionMixin",
     "mixins.EntityMixin",
     "mixins.LevelChunkMixin",
+    "mixins.LivingEntityMixin",
+    "mixins.SynchedEntityDataMixin",
     "mixins.YggdrasilSignatureIgnoreMixin"
   ]
 }
