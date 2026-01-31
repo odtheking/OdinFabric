@@ -15,6 +15,7 @@
     "mixins.BossBarHealthOverlayMixin",
     "mixins.ChatListenerMixin",
     "mixins.ChatScreenMixin",
+    "mixins.ClientCommonPacketListenerImplMixin",
     "mixins.ClientPacketListenerMixin",
     "mixins.EntityRendererMixin",
     "mixins.ExperienceBarRendererMixin",
