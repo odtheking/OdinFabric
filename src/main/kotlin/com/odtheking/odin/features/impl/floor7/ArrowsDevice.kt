@@ -104,7 +104,7 @@ object ArrowsDevice : Module(
 
         on<EntityEvent.SetData> {
             if (DungeonUtils.getF7Phase() != M7Phases.P3 || !isPlayerInRoom || isDeviceComplete) return@on
-            if (mc.level?.getEntity(entity.id)?.name?.string == "Active") onComplete("Entity")
+            if (entity.name?.string == "Active") onComplete("Entity")
         }
     }
 

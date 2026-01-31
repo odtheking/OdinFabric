@@ -54,7 +54,7 @@ object LividSolver : Module(
         on<EntityEvent.SetData> {
             if (!DungeonUtils.inBoss || !DungeonUtils.isFloor(5)) return@on
             schedule((mc.player?.getEffect(MobEffects.BLINDNESS)?.duration ?: 0) - 20) {
-                currentLivid.entity = (mc.level?.getEntity(entity.id) as? Player)?.takeIf { it.name.string == "${currentLivid.entityName} Livid" } ?: return@schedule
+                currentLivid.entity = (entity as? Player)?.takeIf { it.name.string == "${currentLivid.entityName} Livid" } ?: return@schedule
             }
         }
 

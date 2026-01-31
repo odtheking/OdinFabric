@@ -17,7 +17,7 @@ object DragonCheck {
     var lastDragonDeath: WitherDragonsEnum? = null
 
     fun dragonUpdate(event: EntityEvent.SetData) {
-        val entity = mc.level?.getEntity(event.entity.id) as? EnderDragon ?: return
+        val entity = event.entity as? EnderDragon ?: return
         val dragonHealth = (event.synchedDataValues.find { it.id == 9 }?.value as? Float) ?: return
         dragonHealthMap[entity.uuid] = Pair(entity.renderPos, dragonHealth)
 

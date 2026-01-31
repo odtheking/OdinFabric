@@ -122,17 +122,17 @@ object DungeonListener {
             }
         }
 
-        onReceive<ClientboundRemoveEntitiesPacket> {
+        on<EntityEvent.Remove> {
             DungeonUtils.dungeonTeammates.forEach {
                 val id = it.entity?.id ?: return@forEach
-                if (entityIds.contains(id)) it.entity = null
+                if (entity.id == id) it.entity = null
             }
         }
 
         on<EntityEvent.Add> {
             if (entity.type == EntityType.PLAYER)
-                DungeonUtils.dungeonTeammates.find { it.entity == null && it.name == mc.level?.getEntity(entity.id)?.name?.string }?.entity =
-                    mc.level?.getEntity(entity.id) as? Player
+                DungeonUtils.dungeonTeammates.find { it.entity == null && it.name == entity.name?.string }?.entity =
+                    entity as? Player
         }
     }
 

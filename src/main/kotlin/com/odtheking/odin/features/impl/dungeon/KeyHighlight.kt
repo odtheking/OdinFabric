@@ -30,7 +30,7 @@ object KeyHighlight : Module(
     init {
         on<EntityEvent.SetData> {
             if (!DungeonUtils.inClear) return@on
-            val entity = mc.level?.getEntity(entity.id) as? ArmorStand ?: return@on
+            val entity = entity as? ArmorStand ?: return@on
             if (currentKey?.entity == entity) return@on
             currentKey = KeyType.entries.find { it.displayName == entity.name?.string } ?: return@on
             currentKey?.entity = entity

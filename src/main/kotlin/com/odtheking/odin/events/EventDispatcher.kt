@@ -1,6 +1,7 @@
 package com.odtheking.odin.events
 
 import com.odtheking.odin.OdinMod.mc
+import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.events.core.onSend
 import com.odtheking.odin.utils.ChatManager
@@ -58,13 +59,13 @@ object EventDispatcher {
                 SecretPickupEvent.Item(itemEntity).postAndCatch()
         }
 
-        onReceive<ClientboundRemoveEntitiesPacket> {
-            if (mc.player == null || !DungeonUtils.inClear) return@onReceive
-            entityIds.forEach { id ->
-                val entity = mc.level?.getEntity(id) as? ItemEntity ?: return@forEach
-                if (entity.item?.hoverName?.string?.containsOneOf(dungeonItemDrops, true) == true && entity.distanceTo(mc.player ?: return@onReceive) <= 6)
-                    SecretPickupEvent.Item(entity).postAndCatch()
-            }
+        on<EntityEvent.Remove> {
+            if (mc.player == null || !DungeonUtils.inClear) return@on
+            val entity = entity as? ItemEntity ?: return@on
+            if (
+                entity.item?.hoverName?.string?.containsOneOf(dungeonItemDrops, true) == true &&
+                entity.distanceTo(mc.player ?: return@on) <= 6
+            ) SecretPickupEvent.Item(entity).postAndCatch()
         }
 
         onReceive<ClientboundSoundPacket> {
