@@ -13,7 +13,6 @@ public abstract class ClientCommonPacketListenerImplMixin {
 
     @Inject(method = "handlePing", at = @At("TAIL"))
     private void handlePing(ClientboundPingPacket clientboundPingPacket, CallbackInfo ci) {
-        System.out.println("Ping packet received with id: " + clientboundPingPacket.getId());
-        if (clientboundPingPacket.getId() != 0) new TickEvent.Server().postAndCatch();
+        if (clientboundPingPacket.getId() != 0) TickEvent.Server.INSTANCE.postAndCatch();
     }
 }

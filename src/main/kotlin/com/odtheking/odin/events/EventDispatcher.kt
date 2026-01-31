@@ -23,11 +23,11 @@ object EventDispatcher {
 
     init {
         ClientPlayConnectionEvents.JOIN.register { _, _, _ ->
-            WorldEvent.Load().postAndCatch()
+            WorldEvent.Load.postAndCatch()
         }
 
         ClientPlayConnectionEvents.DISCONNECT.register { _, _ ->
-            WorldEvent.Unload().postAndCatch()
+            WorldEvent.Unload.postAndCatch()
         }
 
         ClientTickEvents.START_WORLD_TICK.register { world ->
