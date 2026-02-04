@@ -54,14 +54,15 @@ object TerminalUtils {
         }
 
         on<TickEvent.End> {
-            if (System.currentTimeMillis() - lastClickTime >= TerminalSolver.terminalReloadThreshold && currentTerm?.isClicked == true) currentTerm?.let {
-                val screen = (mc.screen as? AbstractContainerScreen<*>) ?: return@let
+            val term = currentTerm ?: return@on
+            if (System.currentTimeMillis() - lastClickTime >= TerminalSolver.terminalReloadThreshold && term.isClicked) {
+                val screen = (mc.screen as? AbstractContainerScreen<*>) ?: return@on
                 GuiEvent.SlotUpdate(
                     screen,
-                    ClientboundContainerSetSlotPacket(screen.menu.containerId, 0, 0, ItemStack.EMPTY),
+                    ClientboundContainerSetSlotPacket(screen.menu.containerId, 0, term.type.windowSize - 1, ItemStack.EMPTY),
                     screen.menu
                 ).postAndCatch()
-                it.isClicked = false
+                term.isClicked = false
             }
         }
 
