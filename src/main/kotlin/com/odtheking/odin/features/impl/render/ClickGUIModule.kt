@@ -22,6 +22,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.HoverEvent
 import org.lwjgl.glfw.GLFW
 import java.net.URI
+import kotlin.math.floor
 import kotlin.math.max
 
 @AlwaysActive
@@ -94,8 +95,8 @@ object ClickGUIModule : Module(
     }
 
     fun getStandardGuiScale(): Float {
-        val verticalScale = (mc.window.height.toFloat() / 1080f) / NVGRenderer.devicePixelRatio()
-        val horizontalScale = (mc.window.width.toFloat() / 1920f) / NVGRenderer.devicePixelRatio()
+        val verticalScale = floor((mc.window.screenHeight.toFloat() / 1080f) / NVGRenderer.devicePixelRatio())
+        val horizontalScale = floor((mc.window.screenWidth.toFloat() / 1920f) / NVGRenderer.devicePixelRatio())
         return max(verticalScale, horizontalScale).coerceIn(1f, 3f)
     }
 

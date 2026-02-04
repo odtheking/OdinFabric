@@ -14,7 +14,7 @@ import com.odtheking.odin.utils.devMessage
 import com.odtheking.odin.utils.equalsOneOf
 import com.odtheking.odin.utils.skyblock.dungeon.terminals.TerminalTypes
 import com.odtheking.odin.utils.skyblock.dungeon.terminals.TerminalUtils
-import com.odtheking.odin.utils.ui.rendering.NVGSpecialRenderer
+import com.odtheking.odin.utils.ui.rendering.NVGPIPRenderer
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.network.chat.Component
 import org.lwjgl.glfw.GLFW
@@ -181,7 +181,7 @@ object TerminalSolver : Module(
         on<GuiEvent.DrawBackground> {
             if (TerminalUtils.currentTerm == null || renderType != 1 || !renderMelody) return@on
 
-            NVGSpecialRenderer.draw(guiGraphics, 0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight()) {
+            NVGPIPRenderer.draw(guiGraphics, 0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight()) {
                 TerminalUtils.currentTerm?.type?.getGUI()?.render()
             }
 

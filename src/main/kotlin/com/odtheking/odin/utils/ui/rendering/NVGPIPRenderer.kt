@@ -13,7 +13,7 @@ import net.minecraft.client.gui.render.state.pip.PictureInPictureRenderState
 import net.minecraft.client.renderer.MultiBufferSource
 import org.joml.Matrix3x2f
 
-class NVGSpecialRenderer(vertexConsumers: MultiBufferSource.BufferSource) : PictureInPictureRenderer<NVGSpecialRenderer.NVGRenderState>(vertexConsumers) {
+class NVGPIPRenderer(vertexConsumers: MultiBufferSource.BufferSource) : PictureInPictureRenderer<NVGPIPRenderer.NVGRenderState>(vertexConsumers) {
 
     override fun renderToTexture(state: NVGRenderState, poseStack: PoseStack) {
         val colorTex = RenderSystem.outputColorTextureOverride ?: return

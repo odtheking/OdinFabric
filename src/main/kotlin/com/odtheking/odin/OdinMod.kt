@@ -15,7 +15,7 @@ import com.odtheking.odin.utils.skyblock.dungeon.DungeonListener
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils
 import com.odtheking.odin.utils.skyblock.dungeon.terminals.TerminalUtils
-import com.odtheking.odin.utils.ui.rendering.NVGSpecialRenderer
+import com.odtheking.odin.utils.ui.rendering.NVGPIPRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
@@ -75,7 +75,7 @@ object OdinMod : ClientModInitializer {
         ).forEach { EventBus.subscribe(it) }
 
         SpecialGuiElementRegistry.register { context ->
-            NVGSpecialRenderer(context.vertexConsumers())
+            NVGPIPRenderer(context.vertexConsumers())
         }
 
         SpecialGuiElementRegistry.register { context ->

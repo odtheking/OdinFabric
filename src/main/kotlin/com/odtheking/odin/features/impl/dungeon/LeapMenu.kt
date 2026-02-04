@@ -15,8 +15,8 @@ import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.leapTeammates
 import com.odtheking.odin.utils.ui.HoverHandler
 import com.odtheking.odin.utils.ui.getQuadrant
+import com.odtheking.odin.utils.ui.rendering.NVGPIPRenderer
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
-import com.odtheking.odin.utils.ui.rendering.NVGSpecialRenderer
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.resources.ResourceLocation
 import org.lwjgl.glfw.GLFW
@@ -58,27 +58,27 @@ object LeapMenu : Module(
             val chest = (screen as? AbstractContainerScreen<*>) ?: return@on
             if (chest.title?.string?.equalsOneOf("Spirit Leap", "Teleport to Player") == false || leapTeammates.isEmpty() || leapTeammates.all { it == EMPTY }) return@on
 
-            val halfWidth = mc.window.width / 2f
-            val halfHeight = mc.window.height / 2f
+            val halfWidth = mc.window.screenWidth / 2f
+            val halfHeight = mc.window.screenHeight / 2f
 
             hoverHandler[0].handle(0f, 0f, halfWidth, halfHeight)
             hoverHandler[1].handle(halfWidth, 0f, halfWidth, halfHeight)
             hoverHandler[2].handle(0f, halfHeight, halfWidth, halfHeight)
             hoverHandler[3].handle(halfWidth, halfHeight, halfWidth, halfHeight)
 
-            NVGSpecialRenderer.draw(guiGraphics, 0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight()) {
+            NVGPIPRenderer.draw(guiGraphics, 0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight()) {
                 NVGRenderer.scale(scale, scale)
                 NVGRenderer.translate(halfWidth / scale, halfHeight / scale)
                 leapTeammates.forEachIndexed { index, player ->
                     if (player == EMPTY) return@forEachIndexed
 
                     val x = when (index) {
-                        0, 2 -> -((mc.window.width - (BOX_WIDTH * 2f)) / 6f + BOX_WIDTH)
-                        else -> ((mc.window.width - (BOX_WIDTH * 2f)) / 6f)
+                        0, 2 -> -((mc.window.screenWidth - (BOX_WIDTH * 2f)) / 6f + BOX_WIDTH)
+                        else -> ((mc.window.screenWidth - (BOX_WIDTH * 2f)) / 6f)
                     }
                     val y = when (index) {
-                        0, 1 -> -((mc.window.height - (BOX_HEIGHT * 2f)) / 8f + BOX_HEIGHT)
-                        else -> ((mc.window.height - (BOX_HEIGHT * 2f)) / 8f)
+                        0, 1 -> -((mc.window.screenHeight - (BOX_HEIGHT * 2f)) / 8f + BOX_HEIGHT)
+                        else -> ((mc.window.screenHeight - (BOX_HEIGHT * 2f)) / 8f)
                     }
 
                     val expandValue = hoverHandler[index].anim.get(0f, 15f, !hoverHandler[index].isHovered)

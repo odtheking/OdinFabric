@@ -238,7 +238,7 @@ object Etherwarp : Module(
         AirBlock::class, TorchBlock::class, FlowerPotBlock::class,
         TallFlowerBlock::class, TallGrassBlock::class, BushBlock::class,
         SeagrassBlock::class, TallSeagrassBlock::class, SugarCaneBlock::class,
-        LiquidBlock::class, VineBlock::class, MushroomBlock::class,
+        LiquidBlock::class, VineBlock::class, MushroomBlock::class, GrassBlock::class,
         PistonHeadBlock::class, WoolCarpetBlock::class, WebBlock::class,
         DryVegetationBlock::class, SmallDripleafBlock::class, LeverBlock::class,
         NetherWartBlock::class, NetherPortalBlock::class, RedStoneWireBlock::class,

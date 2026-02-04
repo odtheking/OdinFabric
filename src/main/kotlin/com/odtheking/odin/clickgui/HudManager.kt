@@ -26,8 +26,8 @@ object HudManager : Screen(Component.literal("HUD Manager")) {
         super.render(context, mouseX, mouseY, deltaTicks)
 
         dragging?.let {
-            it.x = (odinMouseX + deltaX).coerceIn(0f, (mc.window.width - (it.width * it.scale))).toInt()
-            it.y = (odinMouseY + deltaY).coerceIn(0f, (mc.window.height - (it.height * it.scale))).toInt()
+            it.x = (odinMouseX + deltaX).coerceIn(0f, (mc.window.screenWidth - (it.width * it.scale))).toInt()
+            it.y = (odinMouseY + deltaY).coerceIn(0f, (mc.window.screenHeight - (it.height * it.scale))).toInt()
         }
 
         context.pose()?.pushMatrix()
