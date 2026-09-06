@@ -1,13 +1,14 @@
 package com.odtheking.odin.features.impl.render
 
 import com.google.gson.annotations.SerializedName
+import com.mojang.blaze3d.platform.InputConstants
 import com.odtheking.odin.OdinMod
 import com.odtheking.odin.clickgui.ClickGUI
 import com.odtheking.odin.clickgui.HudManager
 import com.odtheking.odin.clickgui.settings.AlwaysActive
 import com.odtheking.odin.clickgui.settings.impl.*
-import com.odtheking.odin.events.ChatMessageEvent
 import com.odtheking.odin.events.FloorEnterEvent
+import com.odtheking.odin.events.MessageEvent
 import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.events.SecretsUpdateEvent
 import com.odtheking.odin.events.core.on
@@ -25,7 +26,6 @@ import kotlinx.coroutines.launch
 import net.minecraft.network.chat.ClickEvent
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.HoverEvent
-import org.lwjgl.glfw.GLFW
 import java.net.URI
 import kotlin.math.max
 import kotlin.math.round
@@ -34,7 +34,7 @@ import kotlin.math.round
 object ClickGUIModule : Module(
     name = "Click GUI",
     description = "Allows you to customize the UI.",
-    key = GLFW.GLFW_KEY_RIGHT_SHIFT
+    key = InputConstants.KEY_RSHIFT
 ) {
     val enableNotification by BooleanSetting("Chat notifications", true, desc = "Sends a message when you toggle a module with a keybind")
     val clickGUIColor by ColorSetting("Color", Color(50, 150, 220), desc = "The color of the Click GUI.")
@@ -96,8 +96,8 @@ object ClickGUIModule : Module(
             postData("https://api.odtheking.com/tele/", """{"username": "$name", "version": "Fabric ${OdinMod.version}"}""")
         }
 
-        on<ChatMessageEvent> {
-            if (!profileRegex.matches(value)) return@on
+        on<MessageEvent.Chat> {
+            if (!profileRegex.matches(message)) return@on
 
             if (firstJoin) {
                 firstJoin = false

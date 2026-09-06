@@ -67,9 +67,9 @@ object MapInfo : Module(
         }
 
         val mimicText = buildString {
-            append("${if (DungeonUtils.mimicKilled) "§a" else "§c"}\uD83D\uDCE6")
-            append(" §8| ${if (DungeonUtils.princeKilled) "§a" else "§c"}\uD83E\uDD34")
-            append(" §8| ${if (DungeonUtils.batKilled) "§a" else "§c"}\uD83E\uDD87")
+            append("${if (DungeonUtils.mimicKilled) "§a" else "§c"}M")
+            append(" §8| ${if (DungeonUtils.princeKilled) "§a" else "§c"}P")
+            append(" §8| ${if (DungeonUtils.batKilled) "§a" else "§c"}B")
         }
 
         val cryptText = buildString {

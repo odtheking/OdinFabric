@@ -1,8 +1,8 @@
 package com.odtheking.odin.features.impl.dungeon.map
 
 import com.odtheking.odin.OdinMod.mc
-import com.odtheking.odin.events.FloorEnterEvent
 import com.odtheking.odin.events.LevelEvent
+import com.odtheking.odin.events.LocationChangeEvent
 import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.core.on
@@ -70,7 +70,7 @@ object WorldScan {
         }
 
         ClientChunkEvents.CHUNK_LOAD.register { _, chunk ->
-            if (DungeonUtils.floor == null) chunksToScan.add(IVec2(chunk.pos.x, chunk.pos.z))
+            if (!DungeonUtils.inDungeons) chunksToScan.add(IVec2(chunk.pos.x, chunk.pos.z))
             else scanChunk(chunk)
         }
 
@@ -78,12 +78,12 @@ object WorldScan {
             if (!DungeonUtils.inDungeons) chunksToScan.remove(IVec2(chunk.pos.x, chunk.pos.z))
         }
 
-        on<FloorEnterEvent> {
-            mc.execute {
-                val level = mc.level ?: return@execute
+        on<LocationChangeEvent> {
+            if (DungeonUtils.inDungeons) {
+                val level = mc.level ?: return@on
                 for (position in chunksToScan) scanChunk(level.getChunk(position.x, position.z))
-                chunksToScan.clear()
             }
+            chunksToScan.clear()
         }
     }
 
@@ -108,7 +108,7 @@ object WorldScan {
             else return devMessage("Unknown room data for core: $core $chunkPosition")
         }
 
-        if (ClickGUIModule.dungeonCoresLogging) DungeonScan.recordRoomCore(data.name, core, getRoomCoreBlocks(chunk, (chunkPosition * 16) + 7))
+        if (ClickGUIModule.dungeonCoresLogging) mc.execute { DungeonScan.recordRoomCore(data.name, core, getRoomCoreBlocks(chunk, (chunkPosition * 16) + 7)) }
 
         val tilePosition = (chunkPosition / 2) + 6
         val tile = DungeonScan.tiles.getOrNull(tilePosition.x + (tilePosition.z * 6)) ?: return

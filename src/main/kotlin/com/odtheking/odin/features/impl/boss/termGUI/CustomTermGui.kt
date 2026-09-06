@@ -1,5 +1,6 @@
 package com.odtheking.odin.features.impl.boss.termGUI
 
+import com.mojang.blaze3d.platform.InputConstants
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.ScreenEvent
 import com.odtheking.odin.features.impl.boss.TerminalSolver
@@ -13,7 +14,6 @@ import com.odtheking.odin.utils.ui.widget.CustomGUIImpl
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.client.input.KeyEvent
-import org.lwjgl.glfw.GLFW
 
 // Not really pixel perfect but good enough
 abstract class TermGui {
@@ -56,7 +56,7 @@ abstract class TermGui {
             key = fun ScreenEvent.KeyPress.(): Any {
                 if (!isTerminalOverrideKey(input)) return false
                 hoveredSlotIndex?.let {
-                    TerminalUtils.currentTerm?.click(it, if (!input.hasControlDown()) GLFW.GLFW_MOUSE_BUTTON_1 else GLFW.GLFW_MOUSE_BUTTON_2, TerminalSolver.hideClicked)
+                    TerminalUtils.currentTerm?.click(it, if (!input.hasControlDown()) InputConstants.MOUSE_BUTTON_LEFT else InputConstants.MOUSE_BUTTON_RIGHT, TerminalSolver.hideClicked)
                 }; return true
             })
         )

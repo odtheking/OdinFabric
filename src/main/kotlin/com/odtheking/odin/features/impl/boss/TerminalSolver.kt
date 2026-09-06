@@ -99,11 +99,11 @@ object TerminalSolver : Module(
         }
 
         on<TerminalEvent.Open> {
-            if (renderType == 0 || renderType == 1) mc.execute { mc.resizeGui() }
+            if (renderType == 0 || renderType == 1) mc.resizeGui()
         }
 
         on<TerminalEvent.Close> {
-            if (renderType == 0 || renderType == 1) mc.execute { mc.resizeGui() }
+            if (renderType == 0 || renderType == 1) mc.resizeGui()
         }
 
         on<TickEvent.Server> {

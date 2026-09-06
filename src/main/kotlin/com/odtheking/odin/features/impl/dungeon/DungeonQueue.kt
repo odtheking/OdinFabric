@@ -3,8 +3,8 @@ package com.odtheking.odin.features.impl.dungeon
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.NumberSetting
-import com.odtheking.odin.events.ChatMessageEvent
 import com.odtheking.odin.events.LevelEvent
+import com.odtheking.odin.events.MessageEvent
 import com.odtheking.odin.events.PartyEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
@@ -37,11 +37,11 @@ object DungeonQueue : Module(
     var disableRequeue = false
 
     init {
-        on<ChatMessageEvent> {
+        on<MessageEvent.Chat> {
             when {
-                announceKick && (value.matches(kickedJoiningRegex) || value.matches(kickedInstanceRegex)) -> sendCommand("pc I was kicked!")
-                value.matches(enterRegex) -> warpTimer = System.currentTimeMillis() + 30_000L
-                autoRequeue && value.matches(extraStatsRegex) -> {
+                announceKick && (message.matches(kickedJoiningRegex) || message.matches(kickedInstanceRegex)) -> sendCommand("pc I was kicked!")
+                message.matches(enterRegex) -> warpTimer = System.currentTimeMillis() + 30_000L
+                autoRequeue && message.matches(extraStatsRegex) -> {
                     if (disableRequeue.also { disableRequeue = false }) return@on
 
                     schedule(requeueDelay * 20) {

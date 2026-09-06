@@ -1,5 +1,6 @@
 package com.odtheking.odin.utils.skyblock.dungeon.terminals.terminalhandler
 
+import com.mojang.blaze3d.platform.InputConstants
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.SetSlotEvent
 import com.odtheking.odin.events.TerminalEvent
@@ -17,7 +18,6 @@ import com.odtheking.odin.utils.skyblock.dungeon.terminals.TerminalTypes
 import net.minecraft.world.inventory.ContainerInput
 import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.Items
-import org.lwjgl.glfw.GLFW
 
 abstract class TerminalHandler(val type: TerminalTypes) {
     val clickedSlots = ArrayList<Pair<Int, Int>>()
@@ -51,7 +51,7 @@ abstract class TerminalHandler(val type: TerminalTypes) {
     open fun click(slotIndex: Int, button: Int, simulateClick: Boolean) {
         if (!canClick(slotIndex, button) || shouldProtect()) return
 
-        val button = if (button == 1 && type == TerminalTypes.RUBIX) GLFW.GLFW_MOUSE_BUTTON_2 else GLFW.GLFW_MOUSE_BUTTON_3
+        val button = if (button == 1 && type == TerminalTypes.RUBIX) InputConstants.MOUSE_BUTTON_RIGHT else InputConstants.MOUSE_BUTTON_MIDDLE
         clickedSlots.add(slotIndex to button)
         lastClickTime = System.currentTimeMillis()
 
@@ -63,7 +63,7 @@ abstract class TerminalHandler(val type: TerminalTypes) {
                 return
             }
         }
-        mc.player?.clickSlot(slotIndex, button, if (button == GLFW.GLFW_MOUSE_BUTTON_3) ContainerInput.CLONE else ContainerInput.PICKUP)
+        mc.player?.clickSlot(slotIndex, button, if (button == InputConstants.MOUSE_BUTTON_MIDDLE) ContainerInput.CLONE else ContainerInput.PICKUP)
         TerminalEvent.Click(this, slotIndex, button).postAndCatch()
     }
 

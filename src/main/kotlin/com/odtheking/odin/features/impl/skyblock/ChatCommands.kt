@@ -3,7 +3,7 @@ package com.odtheking.odin.features.impl.skyblock
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.DropdownSetting
-import com.odtheking.odin.events.ChatMessageEvent
+import com.odtheking.odin.events.MessageEvent
 import com.odtheking.odin.events.MessageSentEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
@@ -63,8 +63,8 @@ object ChatCommands : Module(
     private val dtReason = mutableListOf<Pair<String, String>>()
 
     init {
-        on<ChatMessageEvent> {
-            if (value.matches(endRunRegex)) {
+        on<MessageEvent.Chat> {
+            if (message.matches(endRunRegex)) {
                 if (!dt || dtReason.isEmpty()) return@on
                 schedule(30) {
                     dtReason.find { it.first == mc.player?.name?.string }?.let { sendCommand("pc Downtime needed: ${it.second}") }
@@ -74,7 +74,7 @@ object ChatCommands : Module(
                 }
             }
 
-            val result = messageRegex.find(value) ?: return@on
+            val result = messageRegex.find(message) ?: return@on
 
             val channelStr = result.value.split(" ")[0]
             val channel = when(channelStr) {
