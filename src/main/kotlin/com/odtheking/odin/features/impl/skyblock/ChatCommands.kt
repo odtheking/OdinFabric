@@ -214,7 +214,7 @@ object ChatCommands : Module(
     }
 
     private fun findPartyMember(partialName: String): String =
-        PartyUtils.members.find { it.contains(partialName, true) } ?: partialName
+        PartyUtils.members.find { it.startsWith(partialName, true) } ?: partialName
 
     private fun channelMessage(message: Any, name: String, channel: ChatChannel) {
         when (channel) {
