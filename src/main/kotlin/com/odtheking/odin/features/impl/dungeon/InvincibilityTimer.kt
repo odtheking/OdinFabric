@@ -32,7 +32,7 @@ object InvincibilityTimer : Module(
     
     private val hudCat by DropdownSetting("Invincibility Hud")
     private val hud by HUD(name, "Shows the invincibility time in the HUD.") { example ->
-        if(!example&&(onlyInDungeons&&!DungeonUtils.inDungeons)||(showOnlyInBoss&&!DungeonUtils.inBoss)) return@HUD 0 to 0
+        if(!example && (onlyInDungeons && !DungeonUtils.inDungeons) || (showOnlyInBoss && !DungeonUtils.inBoss)) return@HUD 0 to 0
 
         val visibleTypes = InvincibilityType.entries.filter { type ->
             (when (type) {
@@ -106,19 +106,19 @@ object InvincibilityTimer : Module(
         on<GuiEvent.RenderSlot> {
             if (!showOnItem) return@on
             val percent = when(slot.item.itemId) {
-                "BONZO_MASK","STARRED_BONZO_MASK" -> InvincibilityType.BONZO.currentCooldown.toDouble() / (InvincibilityType.BONZO.maxCooldownTime*20)
-                "SPIRIT_MASK","STARRED_SPIRIT_MASK" -> InvincibilityType.SPIRIT.currentCooldown.toDouble() / (InvincibilityType.SPIRIT.maxCooldownTime*20)
-                else->return@on
+                "BONZO_MASK","STARRED_BONZO_MASK" -> InvincibilityType.BONZO.currentCooldown.toDouble() / (InvincibilityType.BONZO.maxCooldownTime * 20)
+                "SPIRIT_MASK","STARRED_SPIRIT_MASK" -> InvincibilityType.SPIRIT.currentCooldown.toDouble() / (InvincibilityType.SPIRIT.maxCooldownTime * 20)
+                else -> return@on
             }
             if(percent <= 0) return@on
             if(durability) {
                 guiGraphics.fakeItem(slot.item, slot.x, slot.y)
                 guiGraphics.fill(slot.x + 2, slot.y + 13, slot.x + 14, slot.y + 15, Colors.BLACK.rgba)
-                guiGraphics.fill(slot.x+2,slot.y+13,slot.x+14-((1-percent)*12).toInt(),slot.y+14,cdColor.rgba)
+                guiGraphics.fill(slot.x + 2, slot.y + 13, slot.x + 14 - ((1 - percent) * 12).toInt(), slot.y + 14,cdColor.rgba)
                 cancel()
             } else {
                 guiGraphics.fakeItem(slot.item, slot.x, slot.y)
-                guiGraphics.fill(slot.x,slot.y+((1-percent)*16).toInt(),slot.x+16,slot.y+16,cdColor.rgba)
+                guiGraphics.fill(slot.x, slot.y + ((1 - percent) * 16).toInt(), slot.x + 16, slot.y + 16, cdColor.rgba)
                 cancel()
             }
         }
