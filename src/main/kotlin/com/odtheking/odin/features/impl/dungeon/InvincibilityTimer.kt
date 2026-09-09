@@ -4,9 +4,9 @@ import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.ColorSetting
 import com.odtheking.odin.clickgui.settings.impl.SelectorSetting
-import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.events.GuiEvent
 import com.odtheking.odin.events.LevelEvent
+import com.odtheking.odin.events.MessageEvent
 import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
@@ -15,7 +15,6 @@ import com.odtheking.odin.utils.render.ItemStateRenderer.Companion.drawItemStack
 import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import net.minecraft.world.entity.EquipmentSlot
-import net.minecraft.world.item.ItemStack
 
 object InvincibilityTimer : Module(
     name = "Invincibility Timer",
@@ -78,16 +77,21 @@ object InvincibilityTimer : Module(
         width + 20 to visibleTypes.size * 14
     }
     private val showOnlyInBoss by BooleanSetting("Show In Boss", false, desc = "Only shows invincibility timers during dungeon boss fights.")
+    private val cooldownRegex = Regex("^Cooldown: (\\d+)s$")
 
     init {
         on<TickEvent.Server> {
             InvincibilityType.entries.forEach { it.tick() }
         }
 
-        on<ChatPacketEvent> {
+        on<MessageEvent.Chat> {
             if (onlyInDungeons && !DungeonUtils.inDungeons) return@on
-            InvincibilityType.entries.firstOrNull { type -> value.matches(type.regex) }?.let { type ->
-                type.proc()
+            InvincibilityType.entries.firstOrNull { type -> message.matches(type.regex) }?.let { type ->
+                val seconds = if (type == InvincibilityType.BONZO) {
+                    mc.player?.getItemBySlot(EquipmentSlot.HEAD)?.loreString?.reversed()
+                        ?.firstNotNullOfOrNull { cooldownRegex.matchEntire(it)?.groupValues?.get(1)?.toIntOrNull() }
+                } else null
+                type.proc(seconds)
                 val usedMasks = InvincibilityType.entries.count { it.currentCooldown > 0 }
                 if (invincibilityAnnounce) sendCommand("pc ${type.name.lowercase().capitalizeFirst()} Procced! ($usedMasks/${InvincibilityType.entries.size})")
                 if (invincibilityAlert) alert(type.name.lowercase().capitalizeFirst())
@@ -126,32 +130,34 @@ object InvincibilityTimer : Module(
         val regex: Regex,
         private val maxInvincibilityTime: Int,
         val maxCooldownTime: Int,
-        val itemStack: ItemStack
+        private val textureHash: String
     ) {
         SPIRIT(
             Regex("^Second Wind Activated! Your Spirit Mask saved your life!$"),
-            60, 600,
-            createSkullStack("9bbe721d7ad8ab965f08cbec0b834f779b5197f79da4aea3d13d253ece9dec2")
+            60, 30,
+            "9bbe721d7ad8ab965f08cbec0b834f779b5197f79da4aea3d13d253ece9dec2"
         ),
         BONZO(
             Regex("^Your (?:. )?Bonzo's Mask saved your life!$"),
-            60, 3600,
-            createSkullStack("12716ecbf5b8da00b05f316ec6af61e8bd02805b21eb8e440151468dc656549c")
+            60, 180,
+            "12716ecbf5b8da00b05f316ec6af61e8bd02805b21eb8e440151468dc656549c"
         ),
         PHOENIX(
             Regex("^Your Phoenix Pet saved you from certain death!$"),
-            80, 1200,
-            createSkullStack("66b1b59bc890c9c97527787dde20600c8b86f6b9912d51a6bfcdb0e4c2aa3c97")
+            80, 60,
+            "66b1b59bc890c9c97527787dde20600c8b86f6b9912d51a6bfcdb0e4c2aa3c97"
         );
+
+        val itemStack by lazy { createSkullStack(textureHash) }
 
         var activeTime: Int = 0
             private set
         var currentCooldown: Int = 0
             private set
 
-        fun proc() {
+        fun proc(cooldownTime: Int?) {
             activeTime = maxInvincibilityTime
-            currentCooldown = maxCooldownTime
+            currentCooldown = (cooldownTime ?: maxCooldownTime) * 20
         }
 
         fun tick() {

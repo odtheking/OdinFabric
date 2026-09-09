@@ -3,8 +3,9 @@ package com.odtheking.odin.features.impl.nether
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.NumberSetting
 import com.odtheking.odin.events.GuiEvent
+import com.odtheking.odin.events.ScreenEvent
+import com.odtheking.odin.events.SetSlotEvent
 import com.odtheking.odin.events.core.on
-import com.odtheking.odin.events.core.onReceive
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.features.impl.dungeon.Croesus.cachedPrices
 import com.odtheking.odin.utils.*
@@ -14,7 +15,6 @@ import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
 import net.minecraft.network.chat.TextColor
-import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import java.util.*
@@ -84,7 +84,7 @@ object Vesuvius : Module(
             if (packet.slot.equalsOneOf(13, 14) && item.item == Items.PLAYER_HEAD) handleKuudraChest(item)
         }
 
-        onReceive<ClientboundOpenScreenPacket> {
+        on<ScreenEvent.Open> {
             currentChest = null
         }
     }
@@ -102,10 +102,10 @@ object Vesuvius : Module(
                 when (style.color) {
                     TextColor.fromLegacyFormat(ChatFormatting.GOLD) -> starCount += count
                     TextColor.fromLegacyFormat(ChatFormatting.LIGHT_PURPLE) -> starCount += count * 2
-                    }
                 }
+            }
             Optional.empty<Unit>()
-            }, Style.EMPTY)
+        }, Style.EMPTY)
 
         val item = component.string.replace("✪", "").trim()
 
@@ -180,9 +180,9 @@ object Vesuvius : Module(
             if (string.matches(uselessLinesRegex)) return@forEach
 
             val price = parseItemValue(component) ?: 0.0
-                profit += price
-                chestItems.add(ChestItem(component, price))
-            }
+            profit += price
+            chestItems.add(ChestItem(component, price))
+        }
         currentChest = ChestData(chestItems, chestCost, (profit - chestCost))
     }
 
@@ -195,7 +195,7 @@ object Vesuvius : Module(
         val profit = "%,.0f".format(dataToDisplay?.profit)
 
         dataToDisplay?.items?.forEach { item ->
-            val price: String = "%,.0f".format(item.price)
+            val price = "%,.0f".format(item.price)
 
             text(mc.font,item.name, 0, yOffset, -1)
             text(price, maxWidth - mc.font.width(price), yOffset, Colors.MINECRAFT_GRAY)
@@ -260,7 +260,7 @@ object Vesuvius : Module(
             ),
             ChestItem(
                 Component.literal("Crimson Essence").withStyle(ChatFormatting.LIGHT_PURPLE)
-                        .append(Component.literal(" x2000").withStyle(ChatFormatting.DARK_GRAY)),
+                    .append(Component.literal(" x2000").withStyle(ChatFormatting.DARK_GRAY)),
                 2420000.0
             ),
             ChestItem(
