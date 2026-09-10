@@ -3,8 +3,8 @@ package com.odtheking.odin.features.impl.boss
 import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.HudElement
-import com.odtheking.odin.events.ChatMessageEvent
 import com.odtheking.odin.events.LevelEvent
+import com.odtheking.odin.events.MessageEvent
 import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
@@ -101,26 +101,26 @@ object TickTimers : Module(
     }
 
     init {
-        on<ChatMessageEvent> {
+        on<MessageEvent.Chat> {
             when {
-                value.matches(MORT_REGEX) -> secretsCounter = 0
-                value.matches(necronRegex) -> necronTime = 60
-                value.matches(goldorRegex) -> goldorTickTime = 60
-                value.matches(coreOpeningRegex) -> {
+                message.matches(MORT_REGEX) -> secretsCounter = 0
+                message.matches(necronRegex) -> necronTime = 60
+                message.matches(goldorRegex) -> goldorTickTime = 60
+                message.matches(coreOpeningRegex) -> {
                     goldorStartTime = -1
                     goldorTickTime = -1
                 }
-                value.matches(stormEndRegex) -> {
+                message.matches(stormEndRegex) -> {
                     goldorStartTime = 104
                     padTickTime = -1
                     stormTick = -1
                 }
-                value.matches(stormStartRegex) -> {
+                message.matches(stormStartRegex) -> {
                     padTickTime = 20
                     lightningTickTime = 560
                     stormTick = 0
                 }
-                !pyTriggered && value.matches(stormPyRegex) -> {
+                !pyTriggered && message.matches(stormPyRegex) -> {
                     pyTriggered = true
                     pyTickTime = 95
                 }

@@ -5,9 +5,9 @@ import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.ColorSetting
 import com.odtheking.odin.clickgui.settings.impl.DropdownSetting
 import com.odtheking.odin.clickgui.settings.impl.SelectorSetting
-import com.odtheking.odin.events.ChatMessageEvent
 import com.odtheking.odin.events.GuiEvent
 import com.odtheking.odin.events.LevelEvent
+import com.odtheking.odin.events.MessageEvent
 import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.core.on
 import com.odtheking.odin.features.Module
@@ -87,11 +87,13 @@ object InvincibilityTimer : Module(
             InvincibilityType.entries.forEach { it.tick() }
         }
 
-        on<ChatMessageEvent> {
+        on<MessageEvent.Chat> {
             if (onlyInDungeons && !DungeonUtils.inDungeons) return@on
-            InvincibilityType.entries.firstOrNull { type -> value.matches(type.regex) }?.let { type ->
-                val seconds = mc.player?.getItemBySlot(EquipmentSlot.HEAD)?.loreString?.reversed()
-                    ?.firstNotNullOfOrNull { cooldownRegex.matchEntire(it)?.groupValues?.get(1)?.toIntOrNull() }
+            InvincibilityType.entries.firstOrNull { type -> message.matches(type.regex) }?.let { type ->
+                val seconds = if (type == InvincibilityType.BONZO) {
+                    mc.player?.getItemBySlot(EquipmentSlot.HEAD)?.loreString?.reversed()
+                        ?.firstNotNullOfOrNull { cooldownRegex.matchEntire(it)?.groupValues?.get(1)?.toIntOrNull() }
+                } else null
                 type.proc(seconds)
                 val usedMasks = InvincibilityType.entries.count { it.currentCooldown > 0 }
                 if (invincibilityAnnounce) sendCommand("pc ${type.name.lowercase().capitalizeFirst()} Procced! ($usedMasks/${InvincibilityType.entries.size})")

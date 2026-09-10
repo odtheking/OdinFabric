@@ -4,8 +4,8 @@ import com.odtheking.odin.clickgui.settings.Setting.Companion.withDependency
 import com.odtheking.odin.clickgui.settings.impl.BooleanSetting
 import com.odtheking.odin.clickgui.settings.impl.SelectorSetting
 import com.odtheking.odin.clickgui.settings.impl.StringSetting
-import com.odtheking.odin.events.ChatMessageEvent
 import com.odtheking.odin.events.LevelEvent
+import com.odtheking.odin.events.MessageEvent
 import com.odtheking.odin.events.SetSlotEvent
 import com.odtheking.odin.events.TerminalEvent
 import com.odtheking.odin.events.core.on
@@ -92,8 +92,8 @@ object MelodyMessage : Module(
             if (melodySendCoords) sendCommand("od sendcoords")
         }
 
-        on<ChatMessageEvent> {
-            if (broadcast || melodyProgress) onChatMessage(value)
+        on<MessageEvent.Chat> {
+            if (broadcast || melodyProgress) onChatMessage(message)
         }
 
         on<SetSlotEvent> {
